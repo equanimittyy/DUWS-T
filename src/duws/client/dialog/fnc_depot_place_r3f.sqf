@@ -18,18 +18,6 @@ _veh allowDamage false;
 _veh setVariable ["DUWS_depot_placing", true, true];
 [_vehNet, netId player] remoteExec ["fnc_depot_carry_shield", 0];
 
-// R3F's carry returns only after a 5s settle; announce each drop once so the wait doesn't read as a failed retrieve.
-[_veh] spawn {
-    params ["_veh"];
-    private _wasCarried = false;
-    while { alive player && !isNull _veh && (_veh getVariable ["DUWS_depot_placing", false]) } do {
-        private _carried = !isNull R3F_LOG_joueur_deplace_objet;
-        if (_wasCarried && !_carried) then { hint localize "STR_DUWS_T_DEPOT_PLACING"; };
-        _wasCarried = _carried;
-        sleep 0.25;
-    };
-};
-
 // A death mid-carry still finalizes below, so the vehicle is never left invulnerable on a dead client.
 private _placed = false;
 while { !_placed && alive player } do {

@@ -2027,6 +2027,14 @@
                 <Original>Populating towns...&lt;br/&gt;Town %1 of %2</Original>
                 <English>Populating towns...&lt;br/&gt;Town %1 of %2</English>
             </Key>
+            <Key ID="STR_DUWS_T_CARRY_PLACING">
+                <Original>Placing %1...</Original>
+                <English>Placing %1...</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CARRY_PLACED">
+                <Original>%1 placed.</Original>
+                <English>%1 placed.</English>
+            </Key>
             <Key ID="STR_DUWS_T_flag_placement_failed">
                 <Original>Flagpole placement failed. It must be within 50 meters of the zone center.</Original>
                 <English>Flagpole placement failed. It must be within 50 meters of the zone center.</English>
@@ -5791,10 +5799,6 @@
             <Key ID="STR_DUWS_T_DEPOT_MAP_OUTSIDE">
                 <Original>Outside the base area.</Original>
                 <English>Outside the base area.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_DEPOT_PLACING">
-                <Original>Placing vehicle...</Original>
-                <English>Placing vehicle...</English>
             </Key>
             <Key ID="STR_DUWS_T_GARAGE_STORE_TIP">
                 <Original>Stores the selected landing-pad vehicle.</Original>

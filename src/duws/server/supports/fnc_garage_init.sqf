@@ -75,16 +75,7 @@ fnc_depot_place_finish = {
     private _veh = objectFromNetId _vehNet;
     if (isNull _veh) exitWith {};
 
-    _veh setOwner 2;
-    // R3F's carry-end handler has already restored damage on every machine, so the guard over the thaw's
-    // settle is set again here.
-    _veh allowDamage false;
-    _veh enableSimulationGlobal true;
     _veh lock false;
     _veh setVariable ["R3F_LOG_disabled", true, true];
-    [_veh] spawn {
-        params ["_veh"];
-        sleep 2;
-        if (!isNull _veh) then { _veh allowDamage true };
-    };
+    [_veh] spawn DUWS_fnc_carryThaw;
 };

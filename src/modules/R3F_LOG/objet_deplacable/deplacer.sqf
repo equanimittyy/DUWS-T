@@ -11,10 +11,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Modified 2026-09-27 for DUWS_T: each object that settles after a drop is reported to the server,
- * which holds a factory build within reach of its site and a builder-vehicle build out of every
- * base ring. A build whose only crew is friendly AI outside every player's group can be moved,
- * and the server deletes that crew first. (GPLv3 section 5a modification notice.)
+ * Modified 2026-09-28 for DUWS_T: a carried object stays frozen from pickup until the server has
+ * checked its drop, and hints tell the carrier that it is being placed and then that it is placed.
+ * The server holds a factory build within reach of its site and a builder-vehicle build out of
+ * every base ring. A build whose only crew is friendly AI outside every player's group can be
+ * moved, and the server deletes that crew first. (GPLv3 section 5a modification notice.)
  */
 
 if (R3F_LOG_mutex_local_verrou) then
@@ -219,6 +220,8 @@ else
 					_dernier_vec_dir_up = [[0,0,0] vectorDiff (_vec_dir_up select 0), _vec_dir_up select 1];
 					_avant_dernier_vec_dir_up = [_dernier_vec_dir_up select 0, [0,0,0] vectorDiff (_dernier_vec_dir_up select 1)];
 					
+					// DUWS: frozen until the server has checked the drop, so the object stays where the carry set it down (fnc_site_build.sqf).
+					[_objet, false] remoteExec ["enableSimulationGlobal", 2];
 					_objet attachTo [_joueur, _pos_rel_objet_initial];
 					
 					// Si �chec transfert local, mode d�grad� : on conserve la direction de l'objet par rapport au joueur
@@ -432,6 +435,8 @@ else
 						// L'objet n'est plus port�, on le repose. Le l�ger setVelocity vers le haut sert � defreezer les objets qui pourraient flotter.
 						// TODO gestion collision, en particulier si le joueur meurt
 						[_objet, "detachSetVelocity", [0, 0, 0.1]] call R3F_LOG_FNCT_exec_commande_MP;
+						// DUWS: the server reports the placement once it has checked the drop (fnc_site_build.sqf).
+						hint format [localize "STR_DUWS_T_CARRY_PLACING", getText (configFile >> "CfgVehicles" >> (typeOf _objet) >> "displayName")];
 					};
 					
 					_joueur removeEventHandler ["Fired", _idx_eh_fired];
@@ -478,8 +483,8 @@ else
 						R3F_LOG_PV_fin_deplacement_objet = _objet;
 						publicVariable "R3F_LOG_PV_fin_deplacement_objet";
 						["R3F_LOG_PV_fin_deplacement_objet", R3F_LOG_PV_fin_deplacement_objet] call R3F_LOG_FNCT_PVEH_fin_deplacement_objet;
-						// DUWS: a factory's fortification must settle within reach of its site, and a builder-vehicle build outside every base (fnc_site_build.sqf).
-						[_objet] remoteExec ["DUWS_fnc_buildDropped", 2];
+						// DUWS: thaws what the pickup froze, once the drop is checked (fnc_site_build.sqf).
+						[_objet] remoteExec ["DUWS_fnc_carryDropped", 2];
 					};
 				};
 			}

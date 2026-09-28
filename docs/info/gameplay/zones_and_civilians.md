@@ -394,16 +394,22 @@ builds and leaves the site's composition. A zone's wake and sleep hooks deploy a
 because a stow deletes the object from R3F's hands. A base never streams, so its builds always stand. A FOB's
 builds go to the sweep when the FOB is dismantled or destroyed (`fnc_fob_deregister.sqf`).
 
-**A build must stay within 100 m of its site's centre.** R3F reports each carried object when it settles after a
-drop (`deplacer.sqf`). If a site's build settles more than 100 m from the centre, the server moves it back to its
-last good position and tells the carrier. A new build and a build unloaded from a vehicle both start as a carry,
-so the one check covers creation, unloading and moving. A new build that never settled in reach has no good
-position, because R3F creates it high in the sky before the carry. So the server deletes it and refunds its full
-cost to the factory that made it (`DUWS_buildFactory`).
+**A carried object stays frozen until the server checks its drop.** Every R3F carry freezes the object at pickup
+(`deplacer.sqf`), as the depot freezes a vehicle. After a drop, the carrier sees "Placing ..." for R3F's 5 s wait.
+Then the server checks the position where the carrier set the object down, not a position where it fell
+(`DUWS_fnc_carryDropped`). The server thaws the object under a 2 s damage guard and tells the carrier that the object
+is placed. It mans a built gun only after the guard ends.
+
+**A build must stay within 100 m of its site's centre, and a zone's flag within 50 m.** If a drop is out of reach,
+the server moves the object back to its last good position and tells the carrier. A new build and a build unloaded
+from a vehicle both start as a carry, so the one check covers creation, unloading and moving. A new build that is
+dropped out of reach has no good position, because R3F creates it high in the sky before the carry. So the server
+deletes it and refunds its full cost to the factory that made it (`DUWS_buildFactory`). A flag always has a good
+position, because `fnc_zone_flag_logistics` records its spawn position.
 
 **The builder vehicle cannot fortify a base.** R3F's client-side factory condition (`config.sqf`) refuses the
 builder vehicle's factory while the vehicle stands inside the ring of the HQ or a FOB (`DUWS_base_keep_radius`,
-250 m, the ring on the map). The drop check also moves a builder-vehicle build that settles inside a ring back to
+250 m, the ring on the map). The drop check also moves a builder-vehicle build that is dropped inside a ring back to
 its last good position. It deletes a new one without a refund, because the builder vehicle builds for free. So only a
 base's own budget fortifies it. The ring is wider than the 100 m reach of a
 base's builds, so no factory can build between 100 m and 250 m from a base.

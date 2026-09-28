@@ -8,6 +8,7 @@
 #include "..\..\shared\includes\action_style.hpp"
 
 #define BUILD_REACH 100
+#define FLAG_TETHER 50
 
 // R3F compiles its cost formula on clients only, and a dedicated server has none.
 DUWS_fnc_buildCost = compile preprocessFile "modules\R3F_LOG\usine_creation\determiner_cout_creation.sqf";
@@ -168,27 +169,42 @@ DUWS_fnc_canSellTo = {
     _factory getVariable ["DUWS_buildSite", ""] == _site
 };
 
-// R3F reports every carried object once it has settled after a drop (deplacer.sqf). A site's build must stay within
-// reach of its site, and the builder vehicle's builds out of every base ring, so only a base's own budget fortifies it.
-DUWS_fnc_buildDropped = {
+// Thaws a dropped carry under a damage guard for its fall. R3F's carry-end handler has already restored damage on every
+// machine, and allowDamage does not follow ownership, so the server reclaims the object before it guards it.
+DUWS_fnc_carryThaw = {
     params ["_obj"];
-    if (isNull _obj || {!isNull attachedTo _obj}) exitWith {};
+    _obj setOwner 2;
+    _obj allowDamage false;
+    _obj enableSimulationGlobal true;
+    sleep 2;
+    if (!isNull _obj) then { _obj allowDamage true };
+};
+
+// R3F reports every carried object after its drop (deplacer.sqf), still frozen where the carry set it down, so the check
+// reads the pose the carrier chose. A site's build must stay within reach of its site and a zone's flag within its
+// tether, and the builder vehicle's builds stay out of every base ring, so only a base's own budget fortifies it.
+DUWS_fnc_carryDropped = {
+    params ["_obj"];
+    // A depot vehicle is thawed by its own placement (fnc_depot_place_finish).
+    if (isNull _obj || {_obj getVariable ["DUWS_depot_placing", false]}) exitWith {};
+    if (!isNull attachedTo _obj) exitWith { _obj enableSimulationGlobal true };
     private _site = _obj getVariable ["DUWS_buildSite", ""];
     private _bldv = _obj in DUWS_builds;
-    if (_site == "" && !_bldv) exitWith {};
-    private _bad = if (_bldv) then {
-        [getPosATL _obj] call DUWS_fnc_inBaseRing
-    } else {
-        (_obj distance2D (([_site] call fnc_site_at) get "pos")) > BUILD_REACH
+    private _flag = _obj isKindOf "FlagCarrierCore";
+    private _bad = switch (true) do {
+        case _bldv: { [getPosATL _obj] call DUWS_fnc_inBaseRing };
+        case (_site != ""): { (_obj distance2D (([_site] call fnc_site_at) get "pos")) > ([BUILD_REACH, FLAG_TETHER] select _flag) };
+        default { false };
     };
-    if (!_bad) exitWith {
-        _obj setVariable ["DUWS_buildLastGood", getPosATL _obj];
-        [[_obj], _site] spawn DUWS_fnc_buildCrewSite;
+    private _msg = switch (true) do {
+        case !_bad: { "STR_DUWS_T_CARRY_PLACED" };
+        case _bldv: { "STR_DUWS_T_bldv_base_refused" };
+        case _flag: { "STR_DUWS_T_flag_placement_failed" };
+        default { "STR_DUWS_T_zonebuild_placement_failed" };
     };
     private _lastGood = _obj getVariable "DUWS_buildLastGood";
-    private _msg = ["STR_DUWS_T_zonebuild_placement_failed", "STR_DUWS_T_bldv_base_refused"] select _bldv;
     // A new build has no good spot to go back to: R3F makes it far up in the sky before the carry.
-    if (isNil "_lastGood") then {
+    if (_bad && {isNil "_lastGood"}) exitWith {
         private _factory = _obj getVariable ["DUWS_buildFactory", objNull];
         // -1 is R3F's unlimited balance, which the builder vehicle's factory has on the clients only.
         private _credits = _factory getVariable ["R3F_LOG_CF_credits", -1];
@@ -197,9 +213,14 @@ DUWS_fnc_buildDropped = {
             _msg = "STR_DUWS_T_zonebuild_placement_refunded";
         };
         deleteVehicle _obj;
-    } else {
-        _obj setPosATL _lastGood;
-        [[_obj], _site] spawn DUWS_fnc_buildCrewSite;
+        (localize _msg) remoteExec ["hint", remoteExecutedOwner];
     };
-    (localize _msg) remoteExec ["hint", remoteExecutedOwner];
+    if (_bad) then { _obj setPosATL _lastGood } else { _obj setVariable ["DUWS_buildLastGood", getPosATL _obj] };
+    (format [localize _msg, getText (configFile >> "CfgVehicles" >> typeOf _obj >> "displayName")]) remoteExec ["hint", remoteExecutedOwner];
+    // Manned only once the thaw's guard is over, which would otherwise cut short the guard DUWS_fnc_manStatics holds.
+    [_obj, _site] spawn {
+        params ["_obj", "_site"];
+        [_obj] call DUWS_fnc_carryThaw;
+        [[_obj], _site] call DUWS_fnc_buildCrewSite;
+    };
 };
