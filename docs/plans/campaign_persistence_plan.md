@@ -147,9 +147,10 @@ handler was handed.
 `Ended` trigger above; the load screen's timeout reloads the newest snapshot on the next unattended
 start, and that campaign's win condition is true on its first evaluation — so the server ends and
 restarts into it again, indefinitely, with nobody able to play. Both endings go in the snapshot
-header: the win, and the `campaign_lost` that is otherwise stored nowhere and would restore a lost
-campaign as a live one on a flattened map. The index labels a terminal campaign and the timeout
-passes over it; a player can still pick it deliberately.
+header. The index labels a won campaign and the timeout passes over it; a player can still pick it
+deliberately. A lost campaign is refused on the load screen and on import, because a loss is final.
+The header reads `lost` from the moment `campaign_lost` is set, not from the later end write, so a
+player who quits on the loss card does not leave a live save behind.
 
 ### The autosave loop
 
