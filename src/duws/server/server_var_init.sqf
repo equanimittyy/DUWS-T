@@ -891,6 +891,9 @@ OPCOM_MUSTER_EXPIRY = 360;       // ticks; 30 min @ 5s tick
 OPCOM_QRF_EXPIRY = 6;            // ticks; 30 s @ 5s tick
 // A QRF's delay half-life, in place of OPCOM_VALUE_HALFLIFE: its sighting goes stale in OPCOM_BELIEF_FRESH. Tune.
 OPCOM_QRF_HALFLIFE = 60;         // ticks; 5 min @ 5s tick
+// Cells short of its sighting a QRF's land-taxi sets a rider down: the hull stays out of the fight's 3x3 block, and the
+// walk in follows the sighting as it moves. Tune.
+OPCOM_QRF_DROP_K = 2;
 // Below this ratio of force to believed BLUFOR force an offensive holds rather than musters.
 OPCOM_MUSTER_HOLD = 0.5;
 // An attack under way fails below this ratio, on the muster bars' scale. Tune.

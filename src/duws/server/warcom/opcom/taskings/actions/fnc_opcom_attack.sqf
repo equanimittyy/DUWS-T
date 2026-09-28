@@ -177,9 +177,25 @@ DUWS_fnc_opcom_qrfRekey = {
     {
         private _role = _x;
         {
-            if ((_x get "interceptKey") isNotEqualTo _key) then {
+            if ((_x get "interceptKey") isNotEqualTo _key && {(_x getOrDefault ["ridingOn", -1]) < 0}) then {
                 _x set ["hold", 0];
                 if !([_x, "intercept", _key, "", [], _role get "lambda"] call fnc_opcom_task) then { _x set ["boundTo", -1] };
+            };
+        } forEach ([_attack, _role] call DUWS_fnc_opcom_roleUnits);
+    } forEach (_attack get "roles");
+};
+
+// A QRF rider takes no order while its lift holds it: a live one refuses, and the refusal unbinds it from the attack,
+// and a virtual one would be steered off its carry. So the launch, a rekey and the break-off pass it by, and it joins
+// the hunt here once set down. After the launch no QRF unit but a dropped rider is on `move`.
+DUWS_fnc_opcom_qrfLand = {
+    params ["_attack"];
+    {
+        private _role = _x;
+        {
+            if ((_x get "order") isEqualTo "move" && {(_x getOrDefault ["ridingOn", -1]) < 0}) then {
+                _x set ["hold", 0];
+                if !([_x, "intercept", _attack get "target", "", [], _role get "lambda"] call fnc_opcom_task) then { _x set ["boundTo", -1] };
             };
         } forEach ([_attack, _role] call DUWS_fnc_opcom_roleUnits);
     } forEach (_attack get "roles");
@@ -279,8 +295,10 @@ DUWS_fnc_opcom_releaseRole = {
         };
     };
     {
-        _x set ["hold", 0];
-        if !(([_x] + _order + ["", [], _role get "lambda", _avoid]) call fnc_opcom_task) then { _x set ["boundTo", -1] };
+        if ((_x getOrDefault ["ridingOn", -1]) < 0) then {
+            _x set ["hold", 0];
+            if !(([_x] + _order + ["", [], _role get "lambda", _avoid]) call fnc_opcom_task) then { _x set ["boundTo", -1] };
+        };
     } forEach ([_attack, _role] call DUWS_fnc_opcom_roleUnits);
 };
 
@@ -344,7 +362,7 @@ DUWS_fnc_opcom_buildupStep = {
     if (_lost) exitWith { [_attack, "aborted: a staging unit was lost"] call DUWS_fnc_opcom_attackClose };
     private _r = [_attack] call DUWS_fnc_opcom_musterRatio;
     private _ready = ((_attack get "roles") findIf { (_x get "required") && {(_x get "units") isEqualTo []} }) < 0
-        && {(_units findIf { [_x] call DUWS_fnc_opcom_marching }) < 0};
+        && {(_units findIf { ([_x] call DUWS_fnc_opcom_marching) && {(_x getOrDefault ["ridingOn", -1]) < 0} }) < 0};
     if (_ready && {_r >= ([OPCOM_MUSTER_MIN, OPCOM_MUSTER_IDEAL] select _qrf)}) exitWith { [_attack, _r] call DUWS_fnc_opcom_launch };
     // A unit sent to join restarts the wait, since it is what a muster short of the minimum waits for.
     private _staged = -1;
@@ -375,6 +393,7 @@ DUWS_fnc_opcom_executionStep = {
         [_attack] call DUWS_fnc_opcom_qrfRekey;
         // Following the lead keeps the next QRF off the same cluster.
         [_attack] call DUWS_fnc_opcom_qrfFollow;
+        [_attack] call DUWS_fnc_opcom_qrfLand;
     };
     private _r = [_attack] call DUWS_fnc_opcom_musterRatio;
     if (_r < OPCOM_ATTACK_BREAK) exitWith {
@@ -382,8 +401,10 @@ DUWS_fnc_opcom_executionStep = {
         // move order (arma_engine_gotchas.md).
         {
             {
-                _x set ["hold", 0];
-                [_x, "guard"] call fnc_opcom_task;
+                if ((_x getOrDefault ["ridingOn", -1]) < 0) then {
+                    _x set ["hold", 0];
+                    [_x, "guard"] call fnc_opcom_task;
+                };
             } forEach ([_attack, _x] call DUWS_fnc_opcom_roleUnits);
         } forEach _roles;
         [_attack, format ["failed at %1:1, below the break-off bar", _r toFixed 2]] call DUWS_fnc_opcom_attackClose;

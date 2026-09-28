@@ -1,6 +1,6 @@
 // Locality: server, [] call'd at load. The commit actions, which stake a unit rather than AP (opcom_plan.md §Sourcing).
 // A target is [source ref, task, expValue, lift]: task the fnc_opcom_task arguments after the tasking, [] for a hire that
-// needs no order, and lift [] or [lift ref, the rider's destination].
+// needs no order, and lift [] or [lift ref, where it sets the rider down].
 if (!isServer) exitWith {};
 
 // -> the unit _target names, raised and given its order; nil when either is refused. A refused hire is dismissed, so
@@ -193,7 +193,7 @@ DUWS_fnc_opcom_qrfSweep = {
         private _offers = (_free + ([DUWS_fnc_opcom_isCombatant, _at, _zones] call DUWS_fnc_opcom_hireSources)) select {
             ((DUWS_opcom_moveWater get (_x select 3)) isNotEqualTo "land") || {!([_x, _mass] call DUWS_fnc_opcom_acrossWater)}
         };
-        ([_offers, _at, _at, [_at] call _fnc_value, _floor, _buckets, _base, _label, -1, OPCOM_QRF_HALFLIFE]
+        ([_offers, _at, _at, [_at] call _fnc_value, _floor, _buckets, _base, _label, -1, OPCOM_QRF_HALFLIFE, true]
             call DUWS_fnc_opcom_attackPackage)
             params [["_members", []], "_price", "_v", "_pw", "_c", "_names"];
         if (_members isNotEqualTo []) then {

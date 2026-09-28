@@ -2109,6 +2109,30 @@ DUWS_fnc_opcom_moveDelay = { params ["", "", ["_h", 0]]; [1, 0.5] select (_h == 
     ([[[1, 0, 4] call _fnc_unit], [0, 0, 0], [0, 0, 0], 20, 0, _stand, 0, "QRF X", -1, 60] call DUWS_fnc_opcom_attackPackage) select 2,
     10] call fnc_assertClose;
 DUWS_fnc_opcom_moveDelay = { 1 };
+OPCOM_QRF_DROP_K = 2;
+DUWS_fnc_opcom_isWaterPt = { false };
+["qrfDrop: the rider is set down OPCOM_QRF_DROP_K cells short of the sighting, on its side",
+    [[5000, 0, 0], [0, 0, 0]] call DUWS_fnc_opcom_qrfDrop, [1000, 0, 0]] call fnc_assertEq;
+["qrfDrop: the drop lies on the line from the sighting to the rider",
+    [[3000, 4000, 0], [0, 0, 0]] call DUWS_fnc_opcom_qrfDrop, [600, 800, 0]] call fnc_assertEq;
+DUWS_fnc_opcom_isWaterPt = { true };
+["qrfDrop: no hull lands a rider on water", [[5000, 0, 0], [0, 0, 0]] call DUWS_fnc_opcom_qrfDrop, []] call fnc_assertEq;
+DUWS_fnc_opcom_isWaterPt = { false };
+private _fnc_ride = {
+    params ["_offers"];
+    ([_offers, [0, 0, 0], [0, 0, 0], 20, 0, _stand, 0, "QRF X", -1, 360, true] call DUWS_fnc_opcom_attackPackage) select 0
+};
+private _fnc_carry = { _this apply { [(_x select 0) select 1, (_x select 0) select 3] } };
+DUWS_fnc_opcom_liftFor = { [["free", 9], 4, 0, 0] };
+["attackPackage: a QRF rider a lift pays for moves on the sighting and is set down short of it",
+    [[[1, 5000, 4] call _fnc_unit]] call _fnc_ride call _fnc_carry,
+    [[["move", [0, 0, 0], "", [], 0], [["free", 9], [1000, 0, 0]]]]] call fnc_assertEq;
+["attackPackage: a free hull carries one QRF rider, and the next holds rather than walks",
+    [[[1, 5000, 4] call _fnc_unit, [2, 5000, 4] call _fnc_unit]] call _fnc_ride call _fnc_carry,
+    [[["move", [0, 0, 0], "", [], 0], [["free", 9], [1000, 0, 0]]], [[], []]]] call fnc_assertEq;
+DUWS_fnc_opcom_liftFor = { [] };
+["attackPackage: a QRF rider no lift pays for holds where it stands",
+    [[[1, 5000, 4] call _fnc_unit]] call _fnc_ride call _fnc_carry, [[[], []]]] call fnc_assertEq;
 
 // --- DUWS_fnc_saveStamp: minutes since 2020-01-01 from a systemTimeUTC array ---
 // Differences, not absolute stamps: the harness compares str, and str of a seven-digit float drops digits.

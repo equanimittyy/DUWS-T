@@ -120,4 +120,5 @@ duws/server/warcom/opcom/appraisal/value/fnc_opcom_patrol.sqf::DUWS_fnc_opcom_pa
 duws/server/warcom/opcom/appraisal/fnc_opcom_lift.sqf::DUWS_fnc_opcom_lineDry
 duws/server/warcom/opcom/appraisal/fnc_opcom_lift.sqf::DUWS_fnc_opcom_liftFor
 duws/server/warcom/opcom/appraisal/fnc_opcom_lift.sqf::DUWS_fnc_opcom_liftOffer
+duws/server/warcom/opcom/appraisal/fnc_opcom_lift.sqf::DUWS_fnc_opcom_qrfDrop
 duws/server/persistence/fnc_campaign_store.sqf::DUWS_fnc_saveStamp

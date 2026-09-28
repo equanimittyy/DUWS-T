@@ -130,9 +130,11 @@ DUWS_fnc_opcom_bestSources = {
 // goes only once its last unit is in. With nothing affordable the best source goes alone, so the pick can save for it.
 // _buckets: [[rally, required, force, units, lambda], ...] as they stand (DUWS_fnc_opcom_attackBuckets). _vehicles: the
 // vehicles the attack already binds, which sets each further vehicle's OPCOM_ATTACK_VEHICLE_BOOST; -1 boosts none.
+// _ride: a member with no rally rides a land-taxi to DUWS_fnc_opcom_qrfDrop where one pays, else holds. A flag, not the
+// empty rally, which an assault bucket with no dry ground to stage on also has.
 DUWS_fnc_opcom_attackPackage = {
     params ["_offers", "_to", "_at", "_value", "_floor", "_buckets", "_base", "_label", ["_vehicles", -1],
-        ["_halflife", OPCOM_VALUE_HALFLIFE]];
+        ["_halflife", OPCOM_VALUE_HALFLIFE], ["_ride", false]];
     _buckets = +_buckets;
     private _rows = _offers apply { [_x, _value, _to, true, 0, 0, _base, _halflife] call DUWS_fnc_opcom_sourceRow };
     // Infantry and vehicles ranked apart: the boost scales every vehicle's score alike, so only the two heads need
@@ -180,15 +182,22 @@ DUWS_fnc_opcom_attackPackage = {
         _least sort true;
         (_least select 0) select 1
     };
-    // A lift another member already takes is dropped, so the unit walks.
+    // A lift another member already takes is dropped, so the unit walks, or a rider holds.
     private _fnc_member = {
         params ["_row", "_b", "_wallet"];
         (_buckets select _b) params ["_rally", "", "", "", "_lambda"];
         private _task = [["move", _rally, "", [], _lambda], []] select (_rally isEqualTo []);
-        private _c = [_row, [_rally, _at] select (_rally isEqualTo []), _task, _label, _wallet] call DUWS_fnc_opcom_liftOffer;
-        if ((((_c select 0) select 3) param [0, []]) in _used) then {
+        private _to = [_rally, _at] select (_rally isEqualTo []);
+        private _rides = _ride && {_rally isEqualTo []};
+        if (_rides) then {
+            _to = [(_row select 0) select 1, _at] call DUWS_fnc_opcom_qrfDrop;
+            if !(_to isEqualTo []) then { _task = ["move", _at, "", [], _lambda] };
+        };
+        private _c = [_row, _to, _task, _label, _wallet, _halflife] call DUWS_fnc_opcom_liftOffer;
+        private _lift = ((_c select 0) select 3) param [0, []];
+        if (_lift in _used || {_rides && {_lift isEqualTo []}}) then {
             _row params ["_src", "_rv", "_rpw", "_rc", "_rp"];
-            _c = [[_src select 0, _task, _rpw * _rv, []], _rp, "", _rv, _rpw, _rc];
+            _c = [[_src select 0, [_task, []] select _rides, _rpw * _rv, []], _rp, "", _rv, _rpw, _rc];
         };
         _c
     };

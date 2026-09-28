@@ -55,6 +55,14 @@ DUWS_fnc_opcom_liftFor = {
     _best
 };
 
+// -> [] on water, where no hull sets a rider down.
+DUWS_fnc_opcom_qrfDrop = {
+    params ["_from", "_at"];
+    private _f = OPCOM_QRF_DROP_K * OPCOM_GRID_CELL / ((_at distance2D _from) max 1);
+    private _drop = [(_at select 0) + ((_from select 0) - (_at select 0)) * _f, (_at select 1) + ((_from select 1) - (_at select 1)) * _f, 0];
+    [_drop, []] select ([_drop] call DUWS_fnc_opcom_isWaterPt)
+};
+
 // The saving joins the Value, the lift's price the price and its Cost the Cost. expValue stays the walk's: a Ferry
 // prices the order, not the ride. _wallet is what the lift is priced against, less what a package already spends.
 DUWS_fnc_opcom_liftOffer = {
@@ -86,9 +94,9 @@ DUWS_fnc_opcom_liftRun = {
         [_ref, _tr] call DUWS_fnc_opcom_dismiss;
         false
     };
-    [_tr, _t, _t get "target"] call DUWS_fnc_opcom_carryBind;
+    [_tr, _t, _to] call DUWS_fnc_opcom_carryBind;
     ["INFO", "OPCOM", format ["taxi: tasking %1 rides %2 transport %3 to %4", _t get "id", _mt, _tr get "id",
-        (_t get "target") apply { round _x }]] call fnc_log;
+        _to apply { round _x }]] call fnc_log;
     true
 };
 
