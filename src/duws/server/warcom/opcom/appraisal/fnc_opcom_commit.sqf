@@ -76,7 +76,7 @@ DUWS_fnc_opcom_attackSweep = {
             if (_roles isNotEqualTo []) then {
                 private _title = format ["%1 %2", ["Assault", "Flank"] select (_kind isEqualTo "flank"), _label];
                 ([[_at, _to, _kind isEqualTo "flank"] call _fnc_sources, _to, _at, _worth, _floor,
-                    _roles apply { [_x select 1, _x select 2, 0, 0, _x select 4] }, 0, _title] call DUWS_fnc_opcom_attackPackage)
+                    _roles apply { [_x select 1, _x select 2, 0, 0, _x select 4] }, 0, _title, 0] call DUWS_fnc_opcom_attackPackage)
                     params [["_members", []], "_price", "_v", "_pw", "_c", "_names"];
                 // From this ratio up a flank buys a setup leg and nothing else.
                 if (_members isNotEqualTo [] && {_kind isEqualTo "assault" || {sqrt (_pw / ((1 - _pw) max 0.001)) < OPCOM_BAND_CRUSH}}) then {
@@ -112,8 +112,12 @@ DUWS_fnc_opcom_attackSweep = {
         if (_kind isNotEqualTo "qrf" && {([_attack] call DUWS_fnc_opcom_joinBucket) >= 0}) then {
             private _at = _attack get "pos";
             private _title = format ["Join the %1 on %2", _kind, _attack get "label"];
+            private _vehicles = 0;
+            {
+                _vehicles = _vehicles + ({ (_x get "moveType") isNotEqualTo "inf" } count ([_attack, _x] call DUWS_fnc_opcom_roleUnits));
+            } forEach (_attack get "roles");
             ([[_at, _at, _kind isEqualTo "flank"] call _fnc_sources, _at, _at, [_attack get "target"] call DUWS_fnc_opcom_siteWorth,
-                _floor, [_attack] call DUWS_fnc_opcom_attackBuckets, [_attack] call DUWS_fnc_opcom_boundForce, _title]
+                _floor, [_attack] call DUWS_fnc_opcom_attackBuckets, [_attack] call DUWS_fnc_opcom_boundForce, _title, _vehicles]
                 call DUWS_fnc_opcom_attackPackage) params [["_members", []], "_price", "_v", "_pw", "_c", "_names"];
             if (_members isNotEqualTo []) then {
                 (_out get _kind) pushBack [[_members, ["join", _attack get "id"]], _price, format ["%1 with %2", _title, _names],

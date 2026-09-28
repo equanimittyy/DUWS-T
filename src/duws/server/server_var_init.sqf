@@ -896,6 +896,9 @@ OPCOM_ATTACK_COOLDOWN = [240, 720];   // ticks; 20-60 min @ 5s tick
 OPCOM_ASSAULT_CELLS = 3;
 // The most units one attack binds across all its buckets. Tune.
 OPCOM_ATTACK_UNITS = 10;
+// The Value factor on the next vehicle an assault or flank takes, indexed by the vehicles it already binds; 1 past the
+// end. Tune.
+OPCOM_ATTACK_VEHICLE_BOOST = [2, 1.75, 1.5, 1.25];
 // The least Chebyshev cells from its target's cell an attacker stages at: 4 (2 km) keeps the muster well clear of the
 // 3x3 block the muster bars and P(win) read, and of the fight it is gathering for. Tune.
 OPCOM_RALLY_K = 4;

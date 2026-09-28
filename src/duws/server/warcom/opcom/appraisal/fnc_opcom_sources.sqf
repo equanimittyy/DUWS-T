@@ -128,14 +128,36 @@ DUWS_fnc_opcom_bestSources = {
 // OPCOM_ATTACK_UNITS. A member is [unit target, bucket, price], staged at the bucket DUWS_fnc_opcom_joinBucket would
 // name. A free unit serves once, as a member or as another's lift. The Value is the weakest member's, since the attack
 // goes only once its last unit is in. With nothing affordable the best source goes alone, so the pick can save for it.
-// _buckets: [[rally, required, force, units, lambda], ...] as they stand (DUWS_fnc_opcom_attackBuckets).
+// _buckets: [[rally, required, force, units, lambda], ...] as they stand (DUWS_fnc_opcom_attackBuckets). _vehicles: the
+// vehicles the attack already binds, which sets each further vehicle's OPCOM_ATTACK_VEHICLE_BOOST; -1 boosts none.
 DUWS_fnc_opcom_attackPackage = {
-    params ["_offers", "_to", "_at", "_value", "_floor", "_buckets", "_base", "_label"];
+    params ["_offers", "_to", "_at", "_value", "_floor", "_buckets", "_base", "_label", ["_vehicles", -1]];
     _buckets = +_buckets;
     private _rows = _offers apply { [_x, _value, _to, true, 0, 0, _base] call DUWS_fnc_opcom_sourceRow };
-    private _rank = [];
-    { _rank pushBack [[_x select 1, _x select 2, _x select 3] call DUWS_fnc_opcom_score, _forEachIndex] } forEach _rows;
-    _rank sort false;
+    // Infantry and vehicles ranked apart: the boost scales every vehicle's score alike, so only the two heads need
+    // comparing again after each vehicle taken.
+    private _ranks = [[], []];
+    {
+        (_ranks select !(((_x select 0) select 3) isEqualTo "inf")) pushBack
+            [[_x select 1, _x select 2, _x select 3] call DUWS_fnc_opcom_score, _forEachIndex];
+    } forEach _rows;
+    { _x sort false } forEach _ranks;
+    private _k = [0, 0];
+    private _fnc_boost = { if (_vehicles < 0) then { 1 } else { OPCOM_ATTACK_VEHICLE_BOOST param [_vehicles, 1] } };
+    // -> the rank the next source comes off, 0 infantry or 1 vehicle; -1 once both are spent.
+    private _fnc_next = {
+        private _s = [0, 1] apply { ((_ranks select _x) param [_k select _x, [-1]]) select 0 };
+        if ((_s select 0) < 0 && {(_s select 1) < 0}) exitWith { -1 };
+        [0, 1] select ((_s select 1) * (call _fnc_boost) > (_s select 0))
+    };
+    private _fnc_row = {
+        params ["_i"];
+        private _row = _rows select (((_ranks select _i) select (_k select _i)) select 1);
+        if (_i == 0) exitWith { _row };
+        _row = +_row;
+        _row set [1, (_row select 1) * (call _fnc_boost)];
+        _row
+    };
     private _ene = ([_at] call DUWS_fnc_opcom_blockForce) select 1;
     private _gain = call DUWS_fnc_opcom_blockGain;
     private _hires = OPCOM_CAP_UNITS_PER_ZONE * count zone_meta_array - (["unitCount", DUWS_fnc_opcom_unitCount] call DUWS_fnc_opcom_tickCached);
@@ -189,23 +211,26 @@ DUWS_fnc_opcom_attackPackage = {
         private _lift = ((_c select 0) select 3) param [0, []];
         if ((_lift param [0, ""]) isEqualTo "free") then { _used pushBack _lift };
         if (_hire) then { _hires = _hires - 1 } else { _used pushBack _ref };
+        if (_vehicles >= 0 && {!((_src select 3) isEqualTo "inf")}) then { _vehicles = _vehicles + 1 };
     };
-    private _k = 0;
-    while { _room > 0 && {_k < count _rank} && {_force * _gain / (_ene + 1) < OPCOM_MUSTER_IDEAL} } do {
-        private _row = _rows select ((_rank select _k) select 1);
+    private _i = call _fnc_next;
+    while { _room > 0 && {_i >= 0} && {_force * _gain / (_ene + 1) < OPCOM_MUSTER_IDEAL} } do {
+        private _row = [_i] call _fnc_row;
         private _src = _row select 0;
         private _hire = ((_src select 0) select 0) isEqualTo "hire";
         private _b = call _fnc_bucket;
         private _c = [_row, _b, WARCOM_opfor_ap - _price] call _fnc_member;
         if ((_hire && {_hires <= 0}) || {(_src select 0) in _used} || {(_price + (_c select 1)) > WARCOM_opfor_ap}) then {
-            _k = _k + 1;
+            _k set [_i, (_k select _i) + 1];
         } else {
             [_src, _b, _c] call _fnc_take;
-            if (!_hire) then { _k = _k + 1 };
+            if (!_hire) then { _k set [_i, (_k select _i) + 1] };
         };
+        _i = call _fnc_next;
     };
-    if (_members isEqualTo [] && {count _rank > 0}) then {
-        private _row = _rows select ((_rank select 0) select 1);
+    if (_members isEqualTo [] && {count _rows > 0}) then {
+        _k = [0, 0];
+        private _row = [call _fnc_next] call _fnc_row;
         private _b = call _fnc_bucket;
         [_row select 0, _b, [_row, _b, WARCOM_opfor_ap] call _fnc_member] call _fnc_take;
     };

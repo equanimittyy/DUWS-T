@@ -2053,8 +2053,8 @@ private _fnc_unit = { params ["_id", "_x0", "_force"]; [["free", _id], [_x0, 0, 
 private _row = [["hire", "rifles", "z"], [0, 0, 0], 8, "inf", [], 10, 10, 1];
 private _stand = [[[], true, 0, 0, 0]];
 private _fnc_pack = {
-    params ["_offers", ["_buckets", [[[], true, 0, 0, 0]]], ["_floor", 0]];
-    [_offers, [0, 0, 0], [0, 0, 0], 20, _floor, _buckets, 0, "Assault X"] call DUWS_fnc_opcom_attackPackage
+    params ["_offers", ["_buckets", [[[], true, 0, 0, 0]]], ["_floor", 0], ["_vehicles", -1]];
+    [_offers, [0, 0, 0], [0, 0, 0], 20, _floor, _buckets, 0, "Assault X", _vehicles] call DUWS_fnc_opcom_attackPackage
 };
 WARCOM_opfor_ap = 100;
 ["attackPackage: the best sources join in score order until the ideal bar",
@@ -2078,6 +2078,18 @@ WARCOM_opfor_ap = 100;
     [1, 2]] call fnc_assertEq;
 ["attackPackage: a package under the floor is no offer",
     [[[1, 0, 4] call _fnc_unit], _stand, 0.95] call _fnc_pack, []] call fnc_assertEq;
+OPCOM_ATTACK_VEHICLE_BOOST = [2, 1.75, 1.5, 1.25];
+private _fnc_veh = { params ["_id", "_x0", "_force"]; [["free", _id], [_x0, 0, 0], _force, "wheeled", [], 0, 4, 1] };
+private _fnc_order = { (_this select 0) apply { ((_x select 0) select 0) select 1 } };
+["attackPackage: with no boost a vehicle joins in score order",
+    [[[1, 0, 4] call _fnc_unit, [2, 1000, 4] call _fnc_veh], _stand, 0, -1] call _fnc_pack call _fnc_order, [1, 2]] call fnc_assertEq;
+["attackPackage: the first vehicle's boost puts it ahead of a better-scored rifle",
+    [[[1, 0, 4] call _fnc_unit, [2, 1000, 4] call _fnc_veh], _stand, 0, 0] call _fnc_pack call _fnc_order, [2, 1]] call fnc_assertEq;
+["attackPackage: the boost falls with each vehicle taken, to none at four",
+    [[[1, 0, 4] call _fnc_unit, [2, 1000, 4] call _fnc_veh, [3, 1100, 4] call _fnc_veh], _stand, 0, 3] call _fnc_pack
+        call _fnc_order, [2, 1, 3]] call fnc_assertEq;
+["attackPackage: a boosted vehicle carries its boost into the Value",
+    ([[[2, 0, 4] call _fnc_veh], _stand, 0, 1] call _fnc_pack) select 2, 35] call fnc_assertClose;
 
 // --- DUWS_fnc_saveStamp: minutes since 2020-01-01 from a systemTimeUTC array ---
 // Differences, not absolute stamps: the harness compares str, and str of a seven-digit float drops digits.

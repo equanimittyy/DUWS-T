@@ -729,6 +729,11 @@ alone at `OPCOM_MUSTER_EXPIRY`.
   member's, since the attack goes only once its last unit is in, its `P(win)` is the whole package's, and its price
   and Cost are the members' sums. A member that cannot be raised or routed is refunded before the pick charges the
   rest. With nothing affordable the best source is offered alone, so the pick can save toward it.
+- **An assault or flank wants vehicles.** In its package a vehicle's Value is scaled by `OPCOM_ATTACK_VEHICLE_BOOST`,
+  indexed by the vehicles the attack already binds plus those the package has taken: 2 for the first, then 1.75,
+  1.5 and 1.25, and 1 from the fifth on. The boost reorders the package, so a vehicle can join ahead of a rifle
+  squad that scores better, and it lifts the package's Value when a boosted vehicle is its weakest member. A QRF
+  takes no boost.
 
 - **An attack stages on one bearing measured from the target,** 0° being the bearing to the first unit's start, the
   side the attack comes from, so every bucket starts on the same side of the fight. A rally is a cell centre at least
@@ -917,7 +922,7 @@ its target and the engine paths it. A group in combat ignores a move waypoint, s
 Phase 5 settles in play the band thresholds and their overlap, each role's λ and how often a route is re-planned,
 the longest off-road leg a hull drives without stalling, `OPCOM_MUSTER_EXPIRY`, `OPCOM_QRF_EXPIRY`, how far
 short of the target a rally has to sit to be safe enough to be worth the extra march (`OPCOM_RALLY_K`),
-`OPCOM_MUSTER_HOLD`, `OPCOM_ATTACK_BREAK`, `OPCOM_ATTACK_COOLDOWN`, how far out a `flank`'s hook waits (`OPCOM_HOOK_K`), `OPCOM_ATTACK_UNITS`, `OPCOM_PROBE_SHARE`, `OPCOM_PROBE_FRESH`, `OPCOM_ARTY_CREEP_SHARE` and the creep's box.
+`OPCOM_MUSTER_HOLD`, `OPCOM_ATTACK_BREAK`, `OPCOM_ATTACK_COOLDOWN`, how far out a `flank`'s hook waits (`OPCOM_HOOK_K`), `OPCOM_ATTACK_UNITS`, `OPCOM_ATTACK_VEHICLE_BOOST`, `OPCOM_PROBE_SHARE`, `OPCOM_PROBE_FRESH`, `OPCOM_ARTY_CREEP_SHARE` and the creep's box.
 
 ## What AP buys
 
