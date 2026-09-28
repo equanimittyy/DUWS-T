@@ -5,6 +5,8 @@ _checkedRadius = _this select 1;
 // Escalation applied here: this path never reaches the purchase handshake.
 _cost = [_this select 2] call fnc_escalation_cost;
 _caller = _this param [3, objNull];
+// The scan runs here, not on the caller's machine, so every exit below releases the caller's
+// uav_recon run from here.
 
 // Check and debit as adjacent statements on the server. fnc_mapclickuav read the balance
 // before a map-click window of up to 60 s, so its answer cannot be trusted by now; call
@@ -13,6 +15,7 @@ if (commandpointsblu1 < _cost) exitWith {
 	if (!isNull _caller) then {
 		[localize "STR_DUWS_T_e95mc4lv"] remoteExec ["hint", _caller];
 	};
+	["uav_recon"] remoteExec ["fnc_support_comm_add", _caller];
 };
 [-_cost, "uav_scan"] call fnc_cp_adjust;
 // Opening exchange in the fire-support cadence: the caller's request and Overlord's copy key up
@@ -92,6 +95,7 @@ if (!alive _vehicle) exitWith {
 	{ deleteVehicle _x } forEach units _group;
 	deleteVehicle _vehicle;
 	deleteMarker str(_markername);
+	["uav_recon"] remoteExec ["fnc_support_comm_add", _caller];
 };
 
 _speaker = localize "STR_DUWS_T_allseer";
@@ -171,12 +175,14 @@ if (!alive _vehicle) exitWith {
 	[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_uavscandown"] remoteExec ["fnc_duws_dialogue", 0];
 	{ deleteVehicle _x } forEach units _group;
 	deleteVehicle _vehicle;
+	["uav_recon"] remoteExec ["fnc_support_comm_add", _caller];
 };
 
 // Station time up with the drone intact: Allseer signs the recon off, then the UAV breaks
 // the loiter and egresses, deleted only once it has cleared the area -- so it flies out like
 // the laser bird rather than blinking off the map overhead.
 [localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_rfcxa2ku"] remoteExec ["fnc_duws_dialogue", 0];
+["uav_recon"] remoteExec ["fnc_support_comm_add", _caller];
 { deleteWaypoint _x } forEach (reverse (waypoints _group));
 private _egress = _centerPos getPos [3500, random 360];
 private _rtb = _group addWaypoint [_egress, 0];

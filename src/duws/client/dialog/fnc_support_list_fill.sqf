@@ -2,7 +2,7 @@
 // again after every purchase or refund, so it runs on whoever has the menu open.
 //
 // Two mechanisms, permanent first: a permanent row is bought once for the whole team and stays
-// bought, a consumable row belongs to its buyer and refunds at what it charged. Rows come from the
+// bought, a consumable row stacks copies that belong to its buyer and refund at what they charged. Rows come from the
 // catalogue (client/supports/fnc_supports_init.sqf) rather than being written out here, so the row
 // index is not a literal shared with fnc_request_support.sqf: with one, adding a row anywhere but
 // the end would repoint every row below it at another support's price and flag, and misalign the
@@ -63,7 +63,9 @@ private _rows = [];   // listbox index -> its def, [] for a heading
         // Name plus the shared price bracket (fnc_supports_init.sqf): the CP is read from the
         // catalogue and scaled by escalation, never baked into the label.
         private _label = (localize _labelKey) + ([_cost, _x param [7, 0], _free] call fnc_support_cost_bracket);
-        // The tier tag, appended after the price. A locked row is greyed below, whatever state colour
+        private _held = count ((missionNamespace getVariable ["DUWS_support_paid", createHashMap]) getOrDefault [_key, []]);
+        if (_held > 0) then { _label = _label + " " + format [localize "STR_DUWS_T_SUPPORT_HELD_TAG", _held] };
+        // The tier tag, appended last. A locked row is greyed below, whatever state colour
         // it would otherwise have carried.
         private _tier = [_key] call fnc_support_tier;
         private _tierLocked = !(["BLU", _tier] call DUWS_fnc_ap_unlocked);

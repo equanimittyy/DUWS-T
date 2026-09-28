@@ -150,7 +150,7 @@ lbSetCurSel [2102, 0];
 
 // A FOB buys no supports, so the strip goes entirely. The main window keeps its size.
 if (_isFob) exitWith {
-    { (_display displayCtrl _x) ctrlShow false } forEach [1804, 2103, 1603];
+    { (_display displayCtrl _x) ctrlShow false } forEach [1804, 2103, 1603, 1617];
 };
 
 [] call fnc_support_list_fill;

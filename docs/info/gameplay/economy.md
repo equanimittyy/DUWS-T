@@ -150,10 +150,10 @@ mechanisms differ in:
 
 | | Permanent (19 rows) | Consumable (18 rows) |
 |---|---|---|
-| Bought for | the whole team, once | the buyer alone |
-| Slot | none | one of `support_max_slots` |
-| Flag | broadcast, and recorded in `DUWS_support_permanent` | client-local |
-| Refund | never | 100% of what it charged |
+| Bought for | the whole team, once | the buyer alone, any number of copies |
+| Slot | none | one of `support_max_slots` per copy |
+| Flag | broadcast, and recorded in `DUWS_support_permanent` | client-local, true while a copy is held |
+| Refund | never | 100% of what one copy charged, the latest copy first |
 | On death | untouched | lost, `support_death_refund` of the slate returned |
 
 The split is not new; it was latent and unnamed. The four base facilities — arsenal, HALO, vehicle
@@ -184,17 +184,31 @@ late, and one computed at the current multiplier mints the difference for a play
 buy the slate at 1.0x, refund at 2.0x, and the difference comes from nowhere. What the server
 debited is what comes back.
 
-**It refunds unlocks, never uses.** A consumable is one use, paid at purchase. Calling it costs
-nothing more, and `fnc_support_consume` clears its flag and its recorded charge, so a used support has
-nothing left to refund. Only two calls charge again: a FOB deploy (10 CP) and a vehicle drop (the
+**It refunds unlocks, never uses.** A copy is one use, paid at purchase. Calling it costs nothing
+more, and `fnc_support_consume` removes that copy and its recorded charge, so a used copy has nothing
+left to refund. Only two calls charge again: a FOB deploy (10 CP) and a vehicle drop (the
 vehicle's own price, from `DUWS_fnc_vehPrice`).
 
-**A support that is not in hand cannot be refunded.** The comm-menu classes with
-`removeAfterExpressionCall = 1` are absent from the player's menu for as long as their mission is
-running, and `fnc_supports_init` tracks presence for its own reasons
-([`arma_engine_gotchas.md`](../architecture/arma_engine_gotchas.md#a-comm-menu-item-id-goes-stale-the-moment-the-item-is-used)),
-so that one test covers a fire mission in flight, a taxi in transit and a High Command aircraft in
-the air without a guard per support.
+**One run per support at a time, per player.** Each held copy is its own entry in the 0-8 menu.
+`fnc_support_comm_used` refuses a pick while another copy of the same class is still running, and
+redraws the menu from the held copies
+([`arma_engine_gotchas.md`](../architecture/arma_engine_gotchas.md#a-comm-menu-item-id-goes-stale-the-moment-the-item-is-used)).
+The class is released when its run ends:
+
+| Support | Released by |
+|---|---|
+| Supply drop, vehicle drop, paratroopers, the taxis, heavy heli transport, both High Command aircraft | `fnc_support_run`, when the support's script returns |
+| Fire missions (artillery, mortar, smoke, JDAM, laser, cluster, napalm) | `fnc_arty`, at the battery-slot release |
+| UAV recon | `fnc_uav_scanner` on the server, at the end of the scan |
+| Rally point | `fnc_rally_place` on the server, at placement |
+
+The artillery types and the High Command aircraft keep their team-wide locks on top
+(`server/supports/fnc_support_claim_init.sqf`).
+
+**A picked copy cannot be refunded before it commits.** Between the pick and its commit point (map
+click, LZ found, claim granted) the copy is still paid for and holds its slot, but
+`fnc_support_in_hand` leaves it out, so it cannot be sold out from under its own run. Once it
+commits, it is spent.
 
 Both constants are in `server/server_var_init.sqf` and broadcast because clients read them:
 `support_max_slots` (8) and `support_death_refund` (0.5, a share of both currencies). The death share

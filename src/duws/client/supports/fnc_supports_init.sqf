@@ -2,8 +2,9 @@
 // a registry, so several functions live in this one file.
 //
 // PERM rows are bought once for the team, saved server-side, take no slot and never refund
-// (infrastructure). CONS rows belong to the buyer, take a support_max_slots slot, and refund in
-// full -- the slate is meant to be re-cut as the campaign teaches the player what they need.
+// (infrastructure). CONS rows belong to the buyer and stack: each copy takes a support_max_slots
+// slot and refunds in full -- the slate is meant to be re-cut as the campaign teaches the player
+// what they need. A CONS flag reads true while at least one copy is held.
 #include "..\..\shared\includes\action_style.hpp"
 
 // The catalogue: one ordered list, permanent rows first. fnc_duws_help reads it raw for the manual;
@@ -157,54 +158,100 @@ fnc_support_owned = {
 	missionNamespace getVariable [_flagVar, false]
 };
 
-// Every radio support is a CfgCommunicationMenu class; the fourteen with removeAfterExpressionCall=1
-// are deleted by the engine on use and re-added later, so the new id from BIS_fnc_addCommMenuItem
-// must be kept or BIS_fnc_removeCommMenuItem (needed for a refund) has nothing to target.
-// The record is also the presence test: an entry exists exactly while the item is held, so refund
-// eligibility is one lookup and an in-flight support can't be refunded out from under itself.
-fnc_support_comm_add = {
-	params [["_class", ""]];
-	// Broadcast to everyone by the permanent-support handlers, which on a dedicated server means
-	// this also lands on a machine with no player to hand the item to.
-	if (_class == "" || !hasInterface) exitWith {};
-	private _held = missionNamespace getVariable ["DUWS_support_comm", createHashMap];
-	// Refused rather than re-added when no longer owned: a refund taken while the item was away on
-	// a mission has no id to remove, so this is where that removal lands.
-	private _def = ([] call fnc_support_defs) select { (_x select 5) == _class };
-	if (count _def > 0 && {!([(_def select 0) select 3] call fnc_support_owned)}) exitWith {};
-	// A second add would leave a duplicate row in the 0-8 menu with an id nothing tracks.
-	if (_class in _held) exitWith {};
-	_held set [_class, [player, _class] call BIS_fnc_addCommMenuItem];
+// Copies the player can still call or refund. A picked copy that has not committed yet is still paid
+// for and keeps its slot, but its entry is gone from the menu and it cannot be sold.
+fnc_support_in_hand = {
+	params ["_key", "_class"];
+	count ((missionNamespace getVariable ["DUWS_support_paid", createHashMap]) getOrDefault [_key, []])
+		- ([0, 1] select ((missionNamespace getVariable ["DUWS_support_running", createHashMap]) getOrDefault [_class, false]))
+};
+
+// The latest copy: a buy undone at once gets back exactly what it charged.
+fnc_support_take = {
+	params ["_key", "_flagVar"];
+	private _paid = missionNamespace getVariable ["DUWS_support_paid", createHashMap];
+	private _copies = _paid getOrDefault [_key, []];
+	if (_copies isEqualTo []) exitWith { [] };
+	private _charge = _copies deleteAt (count _copies - 1);
+	if (_copies isEqualTo []) then {
+		_paid deleteAt _key;
+		missionNamespace setVariable [_flagVar, false];
+	};
+	support_count = (support_count - 1) max 0;
+	_charge
+};
+
+// The engine deletes a removeAfterExpressionCall=1 entry the moment it is picked, so an id kept from
+// the add can point at nothing, and copies of one class are identical entries, so which one was picked
+// is unknowable. Whether an id is a stable handle or an index into a compacting array is undocumented
+// too. So the menu is never edited in place: the recorded slate is torn down in descending id order
+// (correct either way) and redrawn from what is held. Silent, or every redraw raises a card per entry.
+fnc_support_comm_sync = {
+	// Reached through the permanent-support handlers broadcast to everyone, which on a dedicated
+	// server means a machine with no player to hand the item to.
+	if (!hasInterface) exitWith {};
+	private _ids = flatten values (missionNamespace getVariable ["DUWS_support_comm", createHashMap]);
+	_ids sort false;
+	{ [player, _x] call BIS_fnc_removeCommMenuItem } forEach _ids;
+	private _running = missionNamespace getVariable ["DUWS_support_running", createHashMap];
+	private _held = createHashMap;
+	{
+		_x params ["_key", "_kind", "", "_flagVar", "", "_class"];
+		private _n = if (_kind == "CONS") then { [_key, _class] call fnc_support_in_hand } else {
+			[0, 1] select (([_flagVar] call fnc_support_owned) && {!(_class in _running)})
+		};
+		private _entries = [];
+		for "_i" from 1 to _n do { _entries pushBack ([player, _class, nil, nil, ""] call BIS_fnc_addCommMenuItem) };
+		_held set [_class, _entries];
+	} forEach (([] call fnc_support_catalogue) select { (_x select 5) != "" });
 	missionNamespace setVariable ["DUWS_support_comm", _held];
 };
 
-// Called only from the comm-menu expression (shared/includes/supports_radio_modern.hpp) -- the one
-// place the engine's own item removal is observable.
-// Clearing the flag frees the slot and blocks fnc_support_comm_add's re-add until re-bought.
-// Ownership-guarded so a stray call can't drive support_count negative; CONS only, so FOB (PERM)
-// stays reusable and is never consumed.
+// A hand-back (the pick was abandoned before it committed) or the end of the class's run: either way
+// the next copy of the class can be called.
+fnc_support_comm_add = {
+	params [["_class", ""]];
+	(missionNamespace getVariable ["DUWS_support_running", createHashMap]) deleteAt _class;
+	[] call fnc_support_comm_sync;
+};
+
+// The class stays locked past this commit, until its run ends. CONS only, so FOB (PERM) stays
+// reusable and is never consumed.
 fnc_support_consume = {
 	params [["_class", ""]];
 	private _def = ([] call fnc_support_defs) select { (_x select 5) == _class };
 	if (count _def == 0) exitWith {};
 	(_def select 0) params ["_key", "_kind", "", "_flagVar"];
-	if (_kind == "CONS" && {[_flagVar] call fnc_support_owned}) then {
-		missionNamespace setVariable [_flagVar, false];
-		support_count = (support_count - 1) max 0;
-		private _paid = missionNamespace getVariable ["DUWS_support_paid", createHashMap];
-		_paid deleteAt _key;
-		missionNamespace setVariable ["DUWS_support_paid", _paid];
-	};
+	if (_kind != "CONS" || {(([_key, _flagVar] call fnc_support_take) isEqualTo [])}) exitWith {};
+	private _running = missionNamespace getVariable ["DUWS_support_running", createHashMap];
+	if (_class in _running) then { _running set [_class, false] };
+	[] call fnc_support_comm_sync;
 };
 
+// Called only from the comm-menu expressions (shared/includes/supports_radio_modern.hpp) -- the one
+// place the engine's own item removal is observable. One run per class at a time: a copy picked while
+// another of its class is still running is refused and its entry redrawn. A support that can still be
+// aborted after the pick (map closed, no LZ) passes _defer and consumes at its own commit point.
 fnc_support_comm_used = {
 	params [["_class", ""], ["_defer", false]];
-	private _held = missionNamespace getVariable ["DUWS_support_comm", createHashMap];
-	_held deleteAt _class;
-	missionNamespace setVariable ["DUWS_support_comm", _held];
-	// A map-click support passes _defer -- it can still be aborted (map closed, no LZ) after
-	// selection, so it consumes itself at its own commit point instead of here.
+	private _running = missionNamespace getVariable ["DUWS_support_running", createHashMap];
+	if (_class in _running) exitWith {
+		hint localize "STR_DUWS_T_SUPPORT_ONE_RUN";
+		[] call fnc_support_comm_sync;
+		false
+	};
+	_running set [_class, true];
+	missionNamespace setVariable ["DUWS_support_running", _running];
 	if (!_defer) then { [_class] call fnc_support_consume };
+	true
+};
+
+// For a support whose whole run is one script: the class is released when the script returns, by
+// whichever of its exits, rather than at each exit.
+fnc_support_run = {
+	params ["_class", "_fnc", "_args"];
+	_args call _fnc;
+	[_class] call fnc_support_comm_add;
 };
 
 // A dead support is a wreck/corpse the mission GC reaps on its own; a still-ALIVE one is never a
@@ -224,28 +271,13 @@ fnc_support_despawn = {
 	};
 };
 
-// Whether a comm-menu item id is a stable handle or an index into a compacting array is
-// undocumented, so removing one item might renumber the rest. Rebuild defensively instead: tear
-// down the whole slate in descending id order (correct either way) and re-add from the record.
-fnc_support_comm_drop = {
-	params [["_class", ""]];
-	private _held = missionNamespace getVariable ["DUWS_support_comm", createHashMap];
-	if !(_class in _held) exitWith {};
-	private _keep = (keys _held) - [_class];
-	private _ids = (keys _held) apply { _held get _x };
-	_ids sort false;
-	{ [player, _x] call BIS_fnc_removeCommMenuItem } forEach _ids;
-	missionNamespace setVariable ["DUWS_support_comm", createHashMap];
-	{ [_x] call fnc_support_comm_add } forEach _keep;
-};
-
 // Local half of a purchase: the buyer applies effects and broadcasts the flag (fires other clients'
 // publicVariableEventHandlers), then tells the server separately so PERM unlocks reach the save.
 // Setting a flag true is idempotent, so this doesn't need the single-writer route pool arithmetic does.
 fnc_support_buy = {
 	params [["_def", []]];
 	if (_def isEqualTo []) exitWith { false };
-	_def params ["_key", "_kind", "_cost", "_flagVar", "_labelKey", "_commItem", "_insBlocked"];
+	_def params ["_key", "_kind", "_cost", "_flagVar", "_labelKey", "", "_insBlocked"];
 	private _apCost = _def param [7, 0];
 
 	// Tier gate mirrors the greyed-row lock in the list -- refused before any charge is taken.
@@ -256,7 +288,11 @@ fnc_support_buy = {
 
 	private _insurgent = !isNil "insurgent_mode_enable" && {insurgent_mode_enable};
 	if (_insBlocked && _insurgent) exitWith { hint localize "STR_DUWS_T_inssupport"; false };
-	if ([_flagVar] call fnc_support_owned) exitWith { hint localize "STR_DUWS_T_8c1i4vga"; false };
+	// Consumables stack, except the Mobile HQ designation: its entry is never spent, so a second copy
+	// would only hold a slot.
+	if ([_flagVar] call fnc_support_owned && {_kind == "PERM" || _key == "mhq_slot"}) exitWith {
+		hint localize "STR_DUWS_T_8c1i4vga"; false
+	};
 	if (_kind == "CONS" && {support_count >= support_max_slots}) exitWith {
 		["info", [localize "STR_DUWS_T_45a8q6tj",
 			format [localize "STR_DUWS_T_SUPPORT_SLOTS_FULL", support_max_slots]]] call bis_fnc_showNotification;
@@ -287,12 +323,14 @@ fnc_support_buy = {
 		// base would under/overpay depending on when escalation moved relative to the purchase.
 		// Always a [cp, ap] pair so the refund path is one shape; a CP-only purchase is wrapped with 0 AP.
 		private _paid = missionNamespace getVariable ["DUWS_support_paid", createHashMap];
-		_paid set [_key, if (_apCost > 0) then { duws_last_charge } else { [duws_last_charge, 0] }];
+		private _copies = _paid getOrDefault [_key, []];
+		_copies pushBack (if (_apCost > 0) then { duws_last_charge } else { [duws_last_charge, 0] });
+		_paid set [_key, _copies];
 		missionNamespace setVariable ["DUWS_support_paid", _paid];
 	};
 
 	[_key] call fnc_support_apply;
-	[_commItem] call fnc_support_comm_add;
+	[] call fnc_support_comm_sync;
 	ctrlSetText [1000, format ["%1", commandpointsblu1]];
 	playSound "boots";
 	true
@@ -325,9 +363,8 @@ fnc_support_apply = {
 	};
 };
 
-// Refund returns exactly what was charged, keeping the CONS slate re-cuttable. Requiring the item
-// be in hand is the single in-use guard -- one away on a mission, in transit, or flying is absent
-// from the record and can't be sold out from under itself.
+// Refund returns exactly what one copy charged, keeping the CONS slate re-cuttable. Only a copy in
+// hand sells: a picked one that has not committed yet cannot be sold out from under itself.
 fnc_support_refund = {
 	params [["_def", []]];
 	if (_def isEqualTo []) exitWith { false };
@@ -335,19 +372,13 @@ fnc_support_refund = {
 
 	if (_kind != "CONS") exitWith { hint localize "STR_DUWS_T_SUPPORT_NO_REFUND"; false };
 	if !([_flagVar] call fnc_support_owned) exitWith { false };
-	if !(_commItem in (missionNamespace getVariable ["DUWS_support_comm", createHashMap])) exitWith {
+	if (([_key, _commItem] call fnc_support_in_hand) < 1) exitWith {
 		hint localize "STR_DUWS_T_dvbox9ay";
 		false
 	};
 
-	private _paid = missionNamespace getVariable ["DUWS_support_paid", createHashMap];
-	(_paid getOrDefault [_key, [0, 0]]) params [["_backCP", 0], ["_backAP", 0]];
-	_paid deleteAt _key;
-	missionNamespace setVariable ["DUWS_support_paid", _paid];
-
-	[_commItem] call fnc_support_comm_drop;
-	missionNamespace setVariable [_flagVar, false];
-	support_count = (support_count - 1) max 0;
+	([_key, _flagVar] call fnc_support_take) params [["_backCP", 0], ["_backAP", 0]];
+	[] call fnc_support_comm_sync;
 	// A dual support returns its AP too, or refunding would quietly tax the scarce pool the purchase
 	// was meant to be reversible in.
 	if (_backCP > 0) then { [_backCP, "support_refund"] remoteExec ["fnc_cp_adjust", 2] };
@@ -367,10 +398,12 @@ fnc_support_wipe = {
 	private _paid = missionNamespace getVariable ["DUWS_support_paid", createHashMap];
 	if (count _paid == 0) exitWith {};
 	// Returns support_death_refund of the slate in both currencies -- AP isn't taxed either, the
-	// same both-halves shape the manual refund uses. _paid entries are [cp, ap] pairs.
+	// same both-halves shape the manual refund uses. _paid holds a [cp, ap] pair per copy.
 	private _totalCP = 0;
 	private _totalAP = 0;
-	{ _totalCP = _totalCP + (_y param [0, 0]); _totalAP = _totalAP + (_y param [1, 0]); } forEach _paid;
+	{
+		{ _totalCP = _totalCP + (_x param [0, 0]); _totalAP = _totalAP + (_x param [1, 0]); } forEach _y;
+	} forEach _paid;
 	private _backCP = round (_totalCP * support_death_refund);
 	private _backAP = round (_totalAP * support_death_refund);
 
@@ -380,7 +413,8 @@ fnc_support_wipe = {
 
 	missionNamespace setVariable ["DUWS_support_paid", createHashMap];
 	// The body is gone and its comm menu with it, so there is nothing to remove -- only the record
-	// of what was in it, which would otherwise refuse every re-add after respawn.
+	// of what was in it. DUWS_support_running stays: a run in flight outlives its caller and releases
+	// its class when it ends.
 	missionNamespace setVariable ["DUWS_support_comm", createHashMap];
 	support_count = 0;
 

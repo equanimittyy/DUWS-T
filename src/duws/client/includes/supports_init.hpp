@@ -26,18 +26,19 @@ support_paradrop_available = false;
 // below, and this is one lead spending a slot to carry the ability.
 support_mobile_HQ_slot_available = false;
 
-// How many consumable supports this player is holding, against server_var_init's support_max_slots.
+// How many consumable copies this player is holding, against server_var_init's support_max_slots.
 // Per-player and never broadcast, because the slate is. Initialised for everyone rather than for
 // squad leads alone: it is now the refund's bookkeeping as well as the purchase gate, and a slot
 // counter that is undefined on some machines makes both throw there.
 support_count = 0;
 
-// What each held consumable actually charged, keyed by catalogue key, and which comm-menu items
-// the player is currently holding, keyed by class. Both are per-player, so neither is broadcast;
-// both are plain strings and numbers, so neither is the kind of value the mission namespace
-// refuses to serialise.
+// What each held copy of a consumable actually charged, keyed by catalogue key; the comm-menu entry
+// ids on show, keyed by class; and the classes with a run under way, true until the pick commits.
+// All per-player, so none is broadcast; all plain strings and numbers, so none is the kind of value
+// the mission namespace refuses to serialise.
 DUWS_support_paid = createHashMap;
 DUWS_support_comm = createHashMap;
+DUWS_support_running = createHashMap;
 
 if (isNil "support_mobile_HQ_available") then {
     support_mobile_HQ_available = false;
@@ -72,7 +73,7 @@ if (isNil "support_radio3_available") then {
 
 // The FOB unlock hands its comm item to every player, being bought for the team. The
 // publicVariableEventHandler is the hook rather than a broadcast from the buyer: it fires once the
-// flag has landed here, so fnc_support_comm_add's ownership test cannot lose a race with it.
+// flag has landed here, so fnc_support_comm_sync's ownership test cannot lose a race with it.
 //
 // The Mobile HQ has no twin here: its unlock opens the mhq_slot row instead, which is what stops
 // the team being locked out for good when the one player holding a handed-out token leaves.

@@ -4367,6 +4367,14 @@
                 <Original>REFUND</Original>
                 <English>REFUND</English>
             </Key>
+            <Key ID="STR_DUWS_T_SUPPORT_HELD_TAG">
+                <Original>x%1</Original>
+                <English>x%1</English>
+            </Key>
+            <Key ID="STR_DUWS_T_SUPPORT_ONE_RUN">
+                <Original>One of these is already under way. Call the next when it ends.</Original>
+                <English>One of these is already under way. Call the next when it ends.</English>
+            </Key>
             <Key ID="STR_DUWS_T_SUPPORT_REFUNDED">
                 <Original>Support refunded for %1 CP.</Original>
                 <English>Support refunded for %1 CP.</English>

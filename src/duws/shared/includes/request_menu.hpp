@@ -372,7 +372,7 @@ class ressourceheader
             w = 17.3 * GUI_GRID_W;
             h = 18 * GUI_GRID_H;
             sizeEx = 0.025;
-            // The button below both buys and refunds, so its label follows the selection.
+            // Refund is live only on a row with a copy in hand, so it follows the selection.
             onLBSelChanged = "_this call fnc_support_sel_changed";
         };
         class supportunlockbutton: RscButton
@@ -382,10 +382,21 @@ class ressourceheader
             sizeEx = 0.025;
             x = 22.2 * GUI_GRID_W + GUI_GRID_X;
             y = 20.4 * GUI_GRID_H + GUI_GRID_Y;
-            w = 17.3 * GUI_GRID_W;
+            w = 8.5 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
-            action = "[] spawn fnc_request_support";
+            action = "[false] spawn fnc_request_support";
             tooltip = "$STR_DUWS_T_dsl9rr00";
+        };
+        class supportrefundbutton: RscButton
+        {
+            idc = 1617;
+            text = "$STR_DUWS_T_SUPPORT_REFUND_BUTTON";
+            sizeEx = 0.025;
+            x = 31 * GUI_GRID_W + GUI_GRID_X;
+            y = 20.4 * GUI_GRID_H + GUI_GRID_Y;
+            w = 8.5 * GUI_GRID_W;
+            h = 1.5 * GUI_GRID_H;
+            action = "[true] spawn fnc_request_support";
         };
     };
 };

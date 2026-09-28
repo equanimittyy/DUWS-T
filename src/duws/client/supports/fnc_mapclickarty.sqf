@@ -20,7 +20,7 @@ _fnc_restoreCommMenu = {
 	private _item = switch (_supportype) do {
 		case 1: {"artillery"};
 		case 2: {"mortar"};
-		case 3: {"JDAM"};
+		case 3: {"jdam"};
 		case 4: {"laser"};
 		case 5: {"cluster"};
 		case 6: {"napalm"};
@@ -38,23 +38,21 @@ if (commandpointsblu1 < _cost) exitWith {
 	call _fnc_restoreCommMenu;
 };
 
-// One fire mission per support type across the whole team. The unlock and the 300 s cooldown
-// below are both per player, so two squad leads could otherwise walk mortars onto the map at the
-// same moment and talk over each other on the net for the whole salvo. Claimed before the map
-// opens, so a refusal costs the caller nothing but the hint.
+// One fire mission per support type across the whole team. The run lock is per player, so two
+// squad leads could otherwise walk mortars onto the map at the same moment and talk over each
+// other on the net for the whole salvo. Claimed before the map opens, so a refusal costs the
+// caller nothing but the hint.
 if !([_supportype] call fnc_support_claim) exitWith {
 	hint localize "STR_DUWS_T_SUPPORT_BUSY";
 	call _fnc_restoreCommMenu;
 };
 
 // Laser skips the click flow: the jet loiters over the caller and drops on the player's own laser.
-// fnc_arty owns the slot release, so this path only mirrors the click path's in-range reset and cooldown.
+// fnc_arty owns the slot release and the entry, so this path only mirrors the click path's in-range reset.
 if (_supportype == 4) exitWith {
 	[getPos player, _salvos, _radius, _interval, _rps, _supportype, _cost, _ammotype] spawn fnc_arty;
 	waitUntil {sleep 0.5; !isNil "arty_Blufor_close"};
 	arty_Blufor_close = nil;
-	sleep 300;
-	call _fnc_restoreCommMenu;
 };
 
 _pos = [];
@@ -84,21 +82,20 @@ while {_timer > 0 AND !clicked} do {
 ["ARTY"] call fnc_mapclick_release;
 openMap false;
 
-// Each path that ends without ordnance hands the slot back. fnc_arty owns the release on the
-// paths it reaches instead -- and the slot expires on its own besides, so a caller that drops
-// out between the two cannot strand its support type for the rest of the campaign.
+// Each path that ends without ordnance hands the slot and the entry back. fnc_arty owns both on the
+// paths it reaches instead -- and the slot expires on its own besides, so a caller that drops out
+// between the two cannot strand its support type for the rest of the campaign.
 if (clicked) then {
 	waitUntil {sleep 0.5;!isNil "arty_Blufor_close"};
 	if !(arty_Blufor_close) exitWith {
 		[_supportype] remoteExec ["fnc_support_release", 2];
 		hint localize "STR_DUWS_T_7yy0wapp";
 		arty_Blufor_close = nil;
+		call _fnc_restoreCommMenu;
 	};
 	arty_Blufor_close = nil;
-	sleep 300;
 } else {
 	[_supportype] remoteExec ["fnc_support_release", 2];
 	hint localize "STR_DUWS_T_346eazcm";	
+	call _fnc_restoreCommMenu;
 };
-
-call _fnc_restoreCommMenu;

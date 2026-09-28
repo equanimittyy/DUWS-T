@@ -2,7 +2,8 @@
 // reaches fnc_rally_place with remoteExec [..., 2].
 //
 // One rally point stands at a time. The comm item defers its consume to here, so a placement the
-// lockout refuses hands the item back instead of spending it.
+// lockout refuses hands the item back instead of spending it. The placement is the whole run, so a
+// spent one releases the caller's next copy at once.
 //
 // The flag is a fast-travel destination, not a respawn position: the trip is taken deliberately from
 // a base, so the player arrives kitted and with their squad instead of naked off a death.
@@ -31,6 +32,7 @@ fnc_rally_place = {
         ["rally_point"] remoteExec ["fnc_support_comm_add", _caller];
     };
     ["rally_point"] remoteExec ["fnc_support_consume", _caller];
+    ["rally_point"] remoteExec ["fnc_support_comm_add", _caller];
     DUWS_rally_unlockAt = time + RALLY_LOCKOUT;
     [] call fnc_rally_remove;
 

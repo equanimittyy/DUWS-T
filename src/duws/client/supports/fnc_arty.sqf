@@ -239,6 +239,7 @@ if (_ammotype == "Laser") then {
 
 if (!_veh_alive) exitWith {
 	[_supportype] remoteExec ["fnc_support_release", 2];
+	[_consumeClass] call fnc_support_comm_add;
 	// This early-out skips the tail cleanup, so wipe the target markers and the downed aircraft here
 	// or they leak: script markers are never GC'd and would orphan for the rest of the mission, and the
 	// wreck and its group would linger 3 km out.
@@ -379,9 +380,10 @@ if (_ammotype == "Laser") then {
 	};
 };	
 
-// Slot handed back the moment the ordnance is off, not after the cleanup below: that still clears the
-// markers and flies the jet home before deleting it, and the battery is free long before that.
+// Slot and entry handed back the moment the ordnance is off, not after the cleanup below: that still
+// clears the markers and flies the jet home before deleting it, and the battery is free long before that.
 [_supportype] remoteExec ["fnc_support_release", 2];
+[_consumeClass] call fnc_support_comm_add;
 
 // Laser reports its outcome over the radio (captured / abort); other types close on the firing callsign.
 if (_ammotype != "Laser") then {
