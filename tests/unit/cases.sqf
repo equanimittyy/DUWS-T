@@ -1760,6 +1760,7 @@ DUWS_fnc_opcom_coverAt = { 0 };
 OPCOM_VALUE_HALFLIFE = 40;
 ["delay: a delivery on the spot keeps its whole Value", [0, 4] call DUWS_fnc_opcom_delay, 1] call fnc_assertClose;
 ["delay: a drive of one half-life keeps half", [5000, 4] call DUWS_fnc_opcom_delay, 0.5] call fnc_assertClose;
+["delay: a shorter half-life, as a QRF's, halves over fewer ticks", [5000, 4, 20] call DUWS_fnc_opcom_delay, 0.25] call fnc_assertClose;
 
 // --- DUWS_fnc_opcom_blockGain / DUWS_fnc_opcom_pWinSend: the odds with the unit sent added ---
 OPCOM_GRID_SPREAD = 1000;
@@ -2098,6 +2099,11 @@ private _fnc_order = { (_this select 0) apply { ((_x select 0) select 0) select 
         call _fnc_order, [2, 1, 3]] call fnc_assertEq;
 ["attackPackage: a boosted vehicle carries its boost into the Value",
     ([[[2, 0, 4] call _fnc_veh], _stand, 0, 1] call _fnc_pack) select 2, 35] call fnc_assertClose;
+DUWS_fnc_opcom_moveDelay = { params ["", "", ["_h", 0]]; [1, 0.5] select (_h == 60) };
+["attackPackage: a half-life passed in, as a QRF's, reaches each source's delay",
+    ([[[1, 0, 4] call _fnc_unit], [0, 0, 0], [0, 0, 0], 20, 0, _stand, 0, "QRF X", -1, 60] call DUWS_fnc_opcom_attackPackage) select 2,
+    10] call fnc_assertClose;
+DUWS_fnc_opcom_moveDelay = { 1 };
 
 // --- DUWS_fnc_saveStamp: minutes since 2020-01-01 from a systemTimeUTC array ---
 // Differences, not absolute stamps: the harness compares str, and str of a seven-digit float drops digits.

@@ -193,7 +193,8 @@ DUWS_fnc_opcom_qrfSweep = {
         private _offers = (_free + ([DUWS_fnc_opcom_isCombatant, _at, _zones] call DUWS_fnc_opcom_hireSources)) select {
             ((DUWS_opcom_moveWater get (_x select 3)) isNotEqualTo "land") || {!([_x, _mass] call DUWS_fnc_opcom_acrossWater)}
         };
-        ([_offers, _at, _at, [_at] call _fnc_value, _floor, _buckets, _base, _label] call DUWS_fnc_opcom_attackPackage)
+        ([_offers, _at, _at, [_at] call _fnc_value, _floor, _buckets, _base, _label, -1, OPCOM_QRF_HALFLIFE]
+            call DUWS_fnc_opcom_attackPackage)
             params [["_members", []], "_price", "_v", "_pw", "_c", "_names"];
         if (_members isNotEqualTo []) then {
             _out pushBack [[_members, _atk], _price, format ["%1 with %2", _label, _names], _v, _pw, _c];

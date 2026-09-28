@@ -889,6 +889,8 @@ OPCOM_MUSTER_STAGED = 60;        // ticks; 5 min @ 5s tick
 OPCOM_MUSTER_EXPIRY = 360;       // ticks; 30 min @ 5s tick
 // A QRF's muster window: its target moves, so it goes on what it has by then. Tune.
 OPCOM_QRF_EXPIRY = 6;            // ticks; 30 s @ 5s tick
+// A QRF's delay half-life, in place of OPCOM_VALUE_HALFLIFE: its sighting goes stale in OPCOM_BELIEF_FRESH. Tune.
+OPCOM_QRF_HALFLIFE = 60;         // ticks; 5 min @ 5s tick
 // Below this ratio of force to believed BLUFOR force an offensive holds rather than musters.
 OPCOM_MUSTER_HOLD = 0.5;
 // An attack under way fails below this ratio, on the muster bars' scale. Tune.

@@ -85,7 +85,7 @@ DUWS_fnc_opcom_hireSources = {
 // scored and never charged, which is what lets a near hire beat a far free unit. _base is force already bound to the
 // fight (DUWS_fnc_opcom_pWinSend).
 DUWS_fnc_opcom_sourceRow = {
-    params ["_src", "_value", "_to", "_fight", ["_price", 0], ["_cost", 0], ["_base", 0]];
+    params ["_src", "_value", "_to", "_fight", ["_price", 0], ["_cost", 0], ["_base", 0], ["_halflife", OPCOM_VALUE_HALFLIFE]];
     _src params ["_ref", "_from", "_force", "_mt", "", "_sp", "_stake", "_mix"];
     private _pw = 1;
     if (_fight) then {
@@ -96,7 +96,7 @@ DUWS_fnc_opcom_sourceRow = {
         };
     };
     private _d = _from distance2D _to;
-    [_src, _value * _mix * ([_d, _mt] call DUWS_fnc_opcom_moveDelay), _pw, _cost + _stake + OPCOM_AP_PER_KM * _d / 1000, _price + _sp]
+    [_src, _value * _mix * ([_d, _mt, _halflife] call DUWS_fnc_opcom_moveDelay), _pw, _cost + _stake + OPCOM_AP_PER_KM * _d / 1000, _price + _sp]
 };
 
 // -> [[source, Value, P(win), Cost, price], ...]: the best of _offers sent at _to, and beside it a dearer one that
@@ -131,9 +131,10 @@ DUWS_fnc_opcom_bestSources = {
 // _buckets: [[rally, required, force, units, lambda], ...] as they stand (DUWS_fnc_opcom_attackBuckets). _vehicles: the
 // vehicles the attack already binds, which sets each further vehicle's OPCOM_ATTACK_VEHICLE_BOOST; -1 boosts none.
 DUWS_fnc_opcom_attackPackage = {
-    params ["_offers", "_to", "_at", "_value", "_floor", "_buckets", "_base", "_label", ["_vehicles", -1]];
+    params ["_offers", "_to", "_at", "_value", "_floor", "_buckets", "_base", "_label", ["_vehicles", -1],
+        ["_halflife", OPCOM_VALUE_HALFLIFE]];
     _buckets = +_buckets;
-    private _rows = _offers apply { [_x, _value, _to, true, 0, 0, _base] call DUWS_fnc_opcom_sourceRow };
+    private _rows = _offers apply { [_x, _value, _to, true, 0, 0, _base, _halflife] call DUWS_fnc_opcom_sourceRow };
     // Infantry and vehicles ranked apart: the boost scales every vehicle's score alike, so only the two heads need
     // comparing again after each vehicle taken.
     private _ranks = [[], []];
