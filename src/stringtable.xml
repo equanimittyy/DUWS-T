@@ -3498,7 +3498,7 @@
 					\n\n天气：%5
 					\n时间：%6
 					\n快速旅行：%7
-					\n宙斯可见度：%8
+					\nZeus 可见度：%8
 					\n简化区域：%9
 					\n平民存在：%10
 				</Chinesesimp>
@@ -18763,6 +18763,8 @@
                 <Polish>Brakuje ci następujących modów:\n%1</Polish>
                 <Czech>Chybí ti následující mody:\n%1</Czech>
                 <Chinese>你缺少以下模組：\n%1</Chinese>
+                <Russian>Тебе не хватает следующих модов:\n%1</Russian>
+                <French>Il vous manque les mods suivants :\n%1</French>
             </Key>
         </Container>
     </Package>
