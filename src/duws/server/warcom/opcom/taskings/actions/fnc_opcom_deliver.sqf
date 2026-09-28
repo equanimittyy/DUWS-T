@@ -101,6 +101,10 @@ DUWS_fnc_opcom_deliver = {
         case "fortify": { [_arg, "opcom_fortify"] call fnc_town_garrison_fortify };
         case "rapport": {
             [_arg, -OPCOM_RAPPORT_STEP, "opcom_rapport", true] call fnc_town_rep_adjust;
+            OPCOM_RAPPORT_COOLDOWN params ["_min", "_max"];
+            private _n = _min + floor random (_max - _min + 1);
+            DUWS_opcom_rapportReadyTick = DUWS_opcom_tick + _n;
+            ["INFO", "OPCOM", format ["deliver: no Rapport for %1 ticks", _n]] call fnc_log;
             if ((missionNamespace getVariable ["civ_visible", []]) param [_arg, true]) then {
                 [localize "STR_DUWS_T_ALLSEER", format [localize "STR_DUWS_T_OPCOM_RAPPORT_DELIVERED", [_arg] call DUWS_fnc_opcom_townLabel]]
                     remoteExec ["fnc_duws_dialogue", 0];

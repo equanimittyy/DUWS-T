@@ -135,6 +135,7 @@ DUWS_fnc_campaignSnapshot = {
         ["taskings", call DUWS_fnc_campaignTaskings], ["taskSeq", missionNamespace getVariable ["DUWS_opcom_taskSeq", 0]],
         ["attacks", missionNamespace getVariable ["DUWS_opcom_attacks", []]], ["attackSeq", missionNamespace getVariable ["DUWS_opcom_attackSeq", 0]],
         ["attackReadyTick", missionNamespace getVariable ["DUWS_opcom_attackReadyTick", 0]],
+        ["rapportReadyTick", missionNamespace getVariable ["DUWS_opcom_rapportReadyTick", 0]],
         ["tick", missionNamespace getVariable ["DUWS_opcom_tick", 0]], ["hqKnown", missionNamespace getVariable ["DUWS_opcom_hqKnown", false]],
         ["mineVariants", DUWS_opcom_mineVariants], ["hpSeq", missionNamespace getVariable ["DUWS_hpOpcomSeq", 0]]
     ]];

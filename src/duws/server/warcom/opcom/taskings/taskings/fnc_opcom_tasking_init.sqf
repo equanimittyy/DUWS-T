@@ -11,6 +11,7 @@ DUWS_opcom_attacks = [];
 DUWS_opcom_attackSeq = 0;
 // A tick, not a duration: DUWS_opcom_tick is saved.
 DUWS_opcom_attackReadyTick = 0;
+DUWS_opcom_rapportReadyTick = 0;
 // Not saved: a load starts every battery ready.
 DUWS_opcom_batteryReadyTick = createHashMap;
 

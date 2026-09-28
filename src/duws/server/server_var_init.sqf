@@ -776,6 +776,8 @@ OPCOM_AP_PER_KM = 0.5;
 OPCOM_AP_RAPPORT = 5;
 // The reputation a delivered Rapport takes off its town, of the 10 that flip it.
 OPCOM_RAPPORT_STEP = 3;
+// How long no Rapport sets off after one delivers, rolled between the two. Tune.
+OPCOM_RAPPORT_COOLDOWN = [60, 360];   // ticks; 5-30 min @ 5s tick
 // Asset hardpoints are flat-priced: what they are worth is reach, eyes or fire missions, not the force they field.
 OPCOM_AP_TOWER = 15;
 OPCOM_AP_OP = 8;
