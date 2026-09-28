@@ -369,6 +369,18 @@ class CfgNotifications
         difficulty[] = {};
     };
 
+    class hq_exposed
+    {
+        title = "$STR_DUWS_T_HQ_EXPOSED_TITLE";
+        iconPicture = "\A3\ui_f\data\map\markers\military\warning_ca.paa";
+        iconText = "";
+        description = "$STR_DUWS_T_HQ_EXPOSED_MSG";
+        color[] = {1,0.2,0.2,1};
+        duration = 4;
+        priority = 0;
+        difficulty[] = {};
+    };
+
     class SupportUnlock
     {
         title = "$STR_DUWS_T_SUPPORT_UNLOCK_TITLE";

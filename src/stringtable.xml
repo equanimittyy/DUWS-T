@@ -5904,6 +5904,14 @@
                 <Original>Enemies overran the rally point</Original>
                 <English>Enemies overran the rally point</English>
             </Key>
+            <Key ID="STR_DUWS_T_HQ_EXPOSED_TITLE">
+                <Original>HQ Exposed</Original>
+                <English>HQ Exposed</English>
+            </Key>
+            <Key ID="STR_DUWS_T_HQ_EXPOSED_MSG">
+                <Original>OPFOR has located BLUFOR HQ</Original>
+                <English>OPFOR has located BLUFOR HQ</English>
+            </Key>
             <Key ID="STR_DUWS_T_RALLY_LOCKED">
                 <Original>New rally point locked for %1 min.</Original>
                 <English>New rally point locked for %1 min.</English>

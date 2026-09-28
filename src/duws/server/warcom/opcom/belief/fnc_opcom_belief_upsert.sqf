@@ -29,4 +29,5 @@ if (_i < 0) then {
 if (!DUWS_opcom_hqKnown && {!isNil "PosOfBLUHQ"} && {PosOfBLUHQ isNotEqualTo []} && {([_pos, PosOfBLUHQ] call DUWS_fnc_opcom_cellDist) <= OPCOM_HQ_REVEAL_K}) then {
     DUWS_opcom_hqKnown = true;
     ["INFO", "OPCOM", "player HQ revealed by a sighting near it"] call fnc_log;
+    ["hq_exposed"] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
 };
