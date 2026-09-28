@@ -522,6 +522,19 @@ DUWS_fnc_restoreOpcom = {
     private _ids = DUWS_opcom_taskings apply { _x get "id" };
     DUWS_opcom_attacks = _o getOrDefault ["attacks", []];
     { { _x set ["units", (_x get "units") select { _x in _ids }] } forEach (_x get "roles") } forEach DUWS_opcom_attacks;
+    // The FOBs stand by now (fnc_opcom_perception_run).
+    private _fobs = DUWS_restore getOrDefault ["fobs", []];
+    private _rekey = createHashMap;
+    {
+        private _at = (_fobs select _forEachIndex) select 0;
+        private _i = Array_of_FOBpos findIf { (_x distance2D _at) < 5 };
+        if (_i >= 0) then { _rekey set [_x, (Array_of_FOBS select _i) getVariable ["DUWS_siteKey", ""]] };
+    } forEach (_o getOrDefault ["fobKeys", []]);
+    DUWS_opcom_fobsKnown = ((_o getOrDefault ["fobsKnown", []]) select { _x in _rekey }) apply { _rekey get _x };
+    { if ((_x get "target") in _rekey) then { _x set ["target", _rekey get (_x get "target")] } } forEach DUWS_opcom_attacks;
+    {
+        if ((_x getOrDefault ["targetZone", ""]) in _rekey) then { _x set ["targetZone", _rekey get (_x get "targetZone")] };
+    } forEach DUWS_opcom_taskings;
 
     {
         private _r = [_x get "carrying"] call DUWS_fnc_opcom_byId;

@@ -13974,6 +13974,30 @@
                 <Chinese>OPFOR 已發現 BLUFOR 總部</Chinese>
                 <Spanish>OPFOR ha localizado el CG de BLUFOR</Spanish>
             </Key>
+            <Key ID="STR_DUWS_T_FOB_EXPOSED_TITLE">
+                <Original>FOB Exposed</Original>
+                <English>FOB Exposed</English>
+                <Chinesesimp>FOB 暴露</Chinesesimp>
+                <German>FOB enttarnt</German>
+                <Polish>FOB odkryty</Polish>
+                <Czech>FOB odhalen</Czech>
+                <Russian>FOB обнаружен</Russian>
+                <French>FOB repéré</French>
+                <Chinese>FOB 暴露</Chinese>
+                <Spanish>FOB al descubierto</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_FOB_EXPOSED_MSG">
+                <Original>OPFOR has located FOB %1</Original>
+                <English>OPFOR has located FOB %1</English>
+                <Chinesesimp>OPFOR 已发现 FOB %1</Chinesesimp>
+                <German>OPFOR hat die FOB %1 geortet</German>
+                <Polish>OPFOR namierzył FOB %1</Polish>
+                <Czech>OPFOR odhalil FOB %1</Czech>
+                <Russian>OPFOR обнаружил FOB %1</Russian>
+                <French>L'OPFOR a repéré le FOB %1</French>
+                <Chinese>OPFOR 已發現 FOB %1</Chinese>
+                <Spanish>OPFOR ha localizado el FOB %1</Spanish>
+            </Key>
             <Key ID="STR_DUWS_T_RALLY_LOCKED">
                 <Original>New rally point locked for %1 min.</Original>
                 <English>New rally point locked for %1 min.</English>

@@ -6,7 +6,11 @@ if (!isServer) exitWith {};
 call fnc_opcom_belief_init;
 call fnc_opcom_grid_init;
 call fnc_opcom_tasking_init;
-if (DUWS_campaignLoaded) then { call DUWS_fnc_restoreOpcom };
+if (DUWS_campaignLoaded) then {
+    // Once the FOBs stand: the restore re-keys OPCOM's hold on each FOB to the one rebuilt in its place.
+    while {!(["SAVE", "the restored FOBs", {!("bases" in DUWS_restorePending)}, 300] call fnc_waitLogged)} do {};
+    call DUWS_fnc_restoreOpcom;
+};
 
 // The drip's fractions of an AP, to the wallet and to the tier, paid out whole because fnc_ap_adjust keeps both whole.
 private _dripCarry = 0;

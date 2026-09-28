@@ -32,9 +32,9 @@ DUWS_fnc_opcom_sendRun = {
 // offensives. It commits as an assault or a flank, each its own action row, its units stage and launch together
 // (fnc_opcom_attack), and the bucket DUWS_fnc_opcom_joinBucket names is a target of its own, filled by a later pick.
 //
-// Zones and towns on the same terms, and the HQ once found. What differs is how the ground answers: a zone flips on
-// presence, a town only by having its garrison cleared, so a town with no garrison is no target -- there would be
-// nothing to beat, and reputation rather than a fight is what owns it.
+// Zones and towns on the same terms, and the HQ and each FOB once found. What differs is how the ground answers: a
+// zone flips on presence, a town only by having its garrison cleared, so a town with no garrison is no target --
+// there would be nothing to beat, and reputation rather than a fight is what owns it.
 //
 // A source across water from its target reaches it only by ferry, which carries men alone, and lands them a trip at a
 // time, which no flank's timing survives: such a source is offered only if it is transportable, and only to assault.
@@ -104,6 +104,16 @@ DUWS_fnc_opcom_attackSweep = {
             private _hp = (["HQ"] call fnc_site_at) getOrDefault ["pos", []];
             if (_hp isNotEqualTo []) then { ["HQ", _hp, _hp, "HQ"] call _fnc_consider };
         };
+        // Only a FOB that a capture at its centre takes: one inside a held zone or a garrisoned town falls with it.
+        {
+            private _fk = _x getVariable ["DUWS_siteKey", ""];
+            if (_fk in DUWS_opcom_fobsKnown) then {
+                private _fp = ([_fk] call fnc_site_at) get "pos";
+                if (([_fp] call DUWS_fnc_opcom_captureKey) isEqualTo _fk) then {
+                    [_fk, _fp, _fp, format ["FOB %1", Array_of_FOBname select _forEachIndex]] call _fnc_consider;
+                };
+            };
+        } forEach Array_of_FOBS;
     };
     {
         private _attack = _x;

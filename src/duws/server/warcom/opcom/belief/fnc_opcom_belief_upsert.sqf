@@ -27,8 +27,19 @@ if (_i < 0) then {
 // Until one of the HQ's own defenders is seen the HQ pulls no defense toward itself, so the opening campaign
 // defends evenly instead of massing on a base the commander has no business knowing. A squad seen passing
 // gives no base away; its standing garrison does. One-way: a base found once stays found.
-if (!DUWS_opcom_hqKnown && {private _roster = ["HQ", "infantry"] call fnc_site_roster; ((units (groupFromNetId _key)) findIf { _x in _roster }) >= 0}) then {
+private _units = units (groupFromNetId _key);
+if (!DUWS_opcom_hqKnown && {private _roster = ["HQ", "infantry"] call fnc_site_roster; (_units findIf { _x in _roster }) >= 0}) then {
     DUWS_opcom_hqKnown = true;
     ["INFO", "OPCOM", "player HQ revealed by a sighting of its garrison"] call fnc_log;
     ["hq_exposed"] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
 };
+// A FOB is found the same way, and only a found one is an attack target.
+{
+    private _fk = _x getVariable ["DUWS_siteKey", ""];
+    if (!(_fk in DUWS_opcom_fobsKnown) && {private _roster = [_fk, "infantry"] call fnc_site_roster; (_units findIf { _x in _roster }) >= 0}) then {
+        DUWS_opcom_fobsKnown pushBack _fk;
+        private _name = Array_of_FOBname select _forEachIndex;
+        ["INFO", "OPCOM", format ["FOB %1 revealed by a sighting of its garrison", _name]] call fnc_log;
+        ["fob_exposed", [_name]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
+    };
+} forEach Array_of_FOBS;

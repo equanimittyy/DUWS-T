@@ -838,6 +838,9 @@ OPCOM_TOWN_WORTH = 5;
 // rather than drawing every attack.
 OPCOM_HQ_WORTH = 50;
 
+// A found FOB's worth as an attack target: the middle of a zone's range.
+OPCOM_FOB_WORTH = 40;
+
 // Banking's flat score, under the break-even 1 of an action that returns exactly what it costs, so OPCOM saves only
 // when nothing on the shortlist pays for itself.
 OPCOM_BANK_SCORE = 0.5;

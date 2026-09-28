@@ -10,6 +10,7 @@ DUWS_opcom_belief_str  = [];   // believed BLUFOR force there
 DUWS_opcom_contested   = createHashMap;   // site key -> true while contested, rebuilt each tick (fnc_opcom_contested)
 
 DUWS_opcom_hqKnown = false;   // one-way, set by fnc_opcom_belief_upsert on the first sighting of an HQ defender
+DUWS_opcom_fobsKnown = [];    // FOB site keys, each added the same way on the first sighting of its garrison
 
 DUWS_opcom_tick = 0;
 DUWS_opcom_dbg_fresh = 0;   // groups the sense sweep found freshly-sensed last tick, for the debug line

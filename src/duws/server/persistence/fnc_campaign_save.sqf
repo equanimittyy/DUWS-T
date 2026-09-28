@@ -137,6 +137,9 @@ DUWS_fnc_campaignSnapshot = {
         ["attackReadyTick", missionNamespace getVariable ["DUWS_opcom_attackReadyTick", 0]],
         ["rapportReadyTick", missionNamespace getVariable ["DUWS_opcom_rapportReadyTick", 0]],
         ["tick", missionNamespace getVariable ["DUWS_opcom_tick", 0]], ["hqKnown", missionNamespace getVariable ["DUWS_opcom_hqKnown", false]],
+        ["fobsKnown", missionNamespace getVariable ["DUWS_opcom_fobsKnown", []]],
+        // Row for row with "fobs": a load renews the netId in a FOB's site key, so the restore re-keys by position.
+        ["fobKeys", Array_of_FOBS apply { _x getVariable ["DUWS_siteKey", ""] }],
         ["mineVariants", DUWS_opcom_mineVariants], ["hpSeq", missionNamespace getVariable ["DUWS_hpOpcomSeq", 0]]
     ]];
 
