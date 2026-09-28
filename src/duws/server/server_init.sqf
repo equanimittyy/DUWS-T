@@ -205,8 +205,6 @@ if (DUWS_campaignLoaded) then { [(DUWS_restore get "factions") getOrDefault ["ed
 
 ["Initialize"] call BIS_fnc_dynamicGroups; 
 
-enableSaving [false, false];
-
 while {!(["BOOT", "HQ_pos_found_generated", {HQ_pos_found_generated}, 300] call fnc_waitLogged)} do {};
 
 // Weapons list, not items: some factions bork on items.

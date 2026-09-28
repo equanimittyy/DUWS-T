@@ -5,6 +5,9 @@
 // after the fact -- and a stale .pbo left in mpmissions reads exactly like a failed fix.
 diag_log format ["------------------ DUWS_T START ---- build %1 ---- player: %2", DUWS_BUILD_STAMP, profileName];
 
+// Before the setup screens, which idle for minutes: the campaign snapshot is the only save the mission supports.
+enableSaving [false, false];
+
 // Lobby log level, read on every machine because each keeps its own copy of the global.
 // Must land before server_init/client_init compile fnc_log_init, which only defaults the
 // level when it is still nil. Left unset if the parameter is missing, so a mission built
