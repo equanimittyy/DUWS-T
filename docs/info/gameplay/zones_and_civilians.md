@@ -513,10 +513,10 @@ appraise them as neutral.
 | Tier | Fields | Reached by |
 |---|---|---|
 | 0 | — | not OPFOR ground |
-| I | Patrols, a team, a weapons team, a car | reputation `<= -10` |
-| II | The above heavier, plus a sniper pair, an APC and dug-in elements | purchase |
-| III | The above heavier, with wide-patrol teams and a second APC | purchase |
-| IV | The above, plus a lone IFV and more building-occupying units | purchase |
+| I | A patrol, a team, a car | reputation `<= -10` |
+| II | The above heavier, plus an APC and a dug-in element | purchase |
+| III | The above heavier, plus a wide-patrol team, two weapons teams and a second dug-in element | purchase |
+| IV | The above heavier, plus a lone IFV and more wide-patrol teams | purchase |
 
 A purchased tier arrives mostly owed. `fnc_town_garrison_fortify` raises the tier by one, never from
 tier 0, and files all but a tenth of the tokens the raise adds, rounded up, as lost
@@ -559,8 +559,8 @@ thread rather than in the commander's appraisal: a purchase made while the playe
 otherwise still pop its men in the moment they walked back.
 
 **It is units only — no static emplacements and no prefab**, because built defences are what make a
-zone an objective and a town must not compete with one. Tier IV reaches the zone benchmark — three
-squads holding three buildings — by occupying buildings instead.
+zone an objective and a town must not compete with one. Its dug-in squads hold buildings instead: two
+at tier IV, one fewer than a tier IV zone.
 
 **Clearing destroys the purchase, not the ownership.** The tier files back down to I rather than to
 0 — the town is still enemy ground, and what was beaten is the commander's spending, not the enemy's
@@ -817,8 +817,9 @@ more usefully — **which of them cannot be moved alone.**
 **Couplings that fail quietly.**
 
 - **The OPFOR cap seed sits at the break line.** A site OPFOR have just taken keeps a tenth of its
-  tier I tokens, rounded up, which is at or under the `0.15` line at every multiplier except a tier I
-  zone or town at multiplier 1 (one token of five). Such a site reads beaten from its first raise, and only
+  tier I tokens, rounded up. For a zone at multiplier 2 or 3, and a town at multiplier 3, that is at or
+  under the `0.15` line; a zone at multiplier 1 keeps one token of five, and a town at multiplier 1 or 2
+  keeps one of three or of six, both above it. A site under the line reads beaten from its first raise, and only
   the count over the ring holds it until the commander reinforces. Moving either number changes that
   for every capture at once.
 - **`CLEAR_REP` decides the clear count non-obviously.** The band is inclusive at `-10`, so `+10` takes
@@ -828,11 +829,9 @@ more usefully — **which of them cannot be moved alone.**
   deadline further out than the hold as one a previous session wrote. Add a longer hold without
   moving that bound and a genuine deadline gets discarded as stale.
 
-**Two figures that are arithmetic rather than balance.** A zone's tier IV row lands on twenty-two groups,
+**A figure that is arithmetic rather than balance.** A zone's tier IV row lands on twenty-two groups,
 which at full garrison density is also the site's group ceiling — raising it raises what every tier IV zone on the map costs
-the server, not just the one in front of the player. And a town's tier IV carries three `garrison:garrison_element`
-slots to match the three on the zone's tier IV row; changing one without the other
-makes "tier IV reaches the zone benchmark" untrue.
+the server, not just the one in front of the player.
 
 ### BLUFOR inherits nothing
 
