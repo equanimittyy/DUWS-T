@@ -1,6 +1,3 @@
-/// Styles
-
-// Control types
 #define CT_STATIC             0
 #define CT_BUTTON             1
 #define CT_EDIT               2
@@ -41,7 +38,6 @@
 #define GUI_GRID_WAbs         (1)
 #define GUI_GRID_HAbs         (1)
 
-// Static styles
 #define ST_POS                0x0F
 #define ST_HPOS               0x03
 #define ST_VPOS               0x0C
@@ -72,31 +68,25 @@
 
 #define ST_TITLE              ST_TITLE_BAR + ST_CENTER
 
-// Slider styles
 #define SL_DIR                0x400
 #define SL_VERT               0
 #define SL_HORZ               0x400
 
 #define SL_TEXTURES           0x10
 
-// progress bar 
 #define ST_VERTICAL           0x01
 #define ST_HORIZONTAL         0
 
-// Listbox styles
 #define LB_TEXTURES           0x10
 #define LB_MULTI              0x20
 
-// Tree styles
 #define TR_SHOWROOT           1
 #define TR_AUTOCOLLAPSE       2
 
-// MessageBox styles
 #define MB_BUTTON_OK          1
 #define MB_BUTTON_CANCEL      2
 #define MB_BUTTON_USER        4
 
-/// Base Classes
 class RscText
 {
     access = 0;
@@ -276,7 +266,7 @@ class RscButton
     colorText[] = {0.8784,0.8471,0.651,1};
     colorDisabled[] = {0.4,0.4,0.4,1};
     colorBackground[] = {0.067, 0.518, 0.729,0.5};
-    colorBackgroundDisabled[] = {0.95,0.95,0.95,1};
+    colorBackgroundDisabled[] = {0.35,0.35,0.35,0.5};
     colorBackgroundActive[] = {0,0.8,0,1};
     colorFocused[] = {0,0.8,0};
     colorShadow[] = {0.023529,0,0.0313725,1};

@@ -88,7 +88,6 @@ class civ_dialog
             w = 8.2 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
             colorBackground[] = {0.16, 0.3, 0.55, 0.7};
-            colorBackgroundDisabled[] = {0.35, 0.35, 0.35, 0.5};
             tooltip = "$STR_DUWS_T_CIV_ROW_INTEL_DESC";
             action = "closeDialog 0; [DUWS_civ_target, player, 'INTEL'] remoteExec ['fnc_civ_request', 2];";
         };
@@ -271,7 +270,6 @@ class civ_bribe_dialog
             w = 8 * GUI_GRID_W;
             h = 1.4 * GUI_GRID_H;
             colorBackground[] = {0.16, 0.3, 0.55, 0.7};
-            colorBackgroundDisabled[] = {0.35, 0.35, 0.35, 0.5};
             action = "DUWS_civ_bribe_accepted = true; closeDialog 0;";
         };
         class civb_refuse: RscButton

@@ -71,7 +71,6 @@ class disguise_dialog
             w = 13.5 * GUI_GRID_W;
             h = 1.3 * GUI_GRID_H;
             colorBackground[] = {0.16, 0.3, 0.55, 0.7};
-            colorBackgroundDisabled[] = {0.35, 0.35, 0.35, 0.5};
             tooltip = "$STR_DUWS_T_DISGUISE_MENU_CIV_DESC";
             action = "closeDialog 0; [player] remoteExec ['fnc_disguiseAsCivilian', 2];";
         };
@@ -106,7 +105,6 @@ class disguise_dialog
             w = 13.5 * GUI_GRID_W;
             h = 1.3 * GUI_GRID_H;
             colorBackground[] = {0.16, 0.3, 0.55, 0.7};
-            colorBackgroundDisabled[] = {0.35, 0.35, 0.35, 0.5};
             tooltip = "$STR_DUWS_T_DISGUISE_MENU_ENEMY_DESC";
             action = "closeDialog 0; [player] remoteExec ['fnc_disguiseAsEnemy', 2];";
         };

@@ -8,8 +8,7 @@ private _cs = if (isNil "duws_callsign") then {"Alpha 1-1"} else {duws_callsign}
 ctrlSetText [1400, _cs];
 
 // Hardcore hides the zones, so hand-placing them defeats the mode: force random by
-// disabling START-M. Its greyed look is the button's colorBackgroundDisabled in
-// callsign_menu.hpp -- a disabled RscButton paints that slot and ignores the enabled one.
+// disabling START-M.
 if (!isNil "hardcore_mode_enable" && {hardcore_mode_enable}) then {
     ctrlEnable [1601, false];
 };

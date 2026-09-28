@@ -113,7 +113,6 @@ class duws_campaign_fork
             idc = 9808;
             text = "$STR_DUWS_T_fork_load";
             x = 8.75 * GUI_GRID_W + GUI_GRID_X;
-            colorBackgroundDisabled[] = {0.35, 0.35, 0.35, 0.5};
             tooltip = "$STR_DUWS_T_fork_load_tip";
             action = "['load'] spawn fnc_campaign_fork_action;";
         };
