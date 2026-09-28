@@ -59,8 +59,9 @@ DUWS_fnc_campaignSnapshot = {
     _s set ["world", worldName];
     _s set ["started", DUWS_campaignStarted];
     _s set ["saved", systemTimeUTC];
-    _s set ["ended", DUWS_campaignEnded];
-    _s set ["lost", [missionNamespace getVariable ["campaign_lost_body", ""], missionNamespace getVariable ["campaign_lost_ending", ""]]];
+    // A loss is decided up to 15 s before the ending stamps DUWS_campaignEnded; a player who quits on its card
+    // would otherwise leave a lost campaign that loads live.
+    _s set ["ended", [DUWS_campaignEnded, "lost"] select (DUWS_campaignEnded isEqualTo "" && {!isNil "campaign_lost"})];
 
     _s set ["settings", createHashMapFromArray ((DUWS_campaignSettings select { !isNil _x }) apply { [_x, missionNamespace getVariable _x] })];
     _s set ["params", createHashMapFromArray (DUWS_campaignParams apply { [_x select 0, missionNamespace getVariable [_x select 1, _x select 2]] })];

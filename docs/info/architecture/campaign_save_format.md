@@ -168,6 +168,11 @@ For DUWS_T the mod-set check maps onto faction auto-detection: the save stores t
 faction *identity*, not resolved classnames, and a save whose faction is no longer detectable is
 labelled as such on the load screen rather than loaded into a campaign of missing classnames.
 
+**A lost campaign is refused, on its header and again on its payload,** so an import of one is
+refused too. Which events lose the campaign is its `DUWS_LoseConditions`. The loss setters read that
+parameter, and a load takes it from the snapshot, not from the lobby. So a host cannot re-open a lost
+campaign when they change the parameter. A won campaign stays loadable.
+
 ## Version and migration
 
 The format version is an integer, not a string, so it can be compared: Antistasi parses `"3.11.4"`

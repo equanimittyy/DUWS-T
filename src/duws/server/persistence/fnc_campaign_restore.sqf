@@ -10,6 +10,7 @@ DUWS_fnc_restoreCheck = {
     params ["_d"];
     if !(_d isEqualType createHashMap) exitWith { "STR_DUWS_T_LOAD_BAD_INPUT" };
     if ((_d getOrDefault ["version", -1]) isNotEqualTo DUWS_saveFormat) exitWith { "STR_DUWS_T_LOAD_BAD_VERSION" };
+    if ((_d getOrDefault ["ended", ""]) isEqualTo "lost") exitWith { "STR_DUWS_T_LOAD_LOST" };
     if ((_d getOrDefault ["world", ""]) isNotEqualTo worldName) exitWith { "STR_DUWS_T_LOAD_BAD_WORLD" };
     private _types = [
         ["settings", createHashMap], ["factions", createHashMap], ["hq", []], ["zones", []], ["hardpoints", []]
@@ -212,15 +213,6 @@ DUWS_fnc_restoreApply = {
     DUWS_capturedPool = _pool; publicVariable "DUWS_capturedPool";
     DUWS_limitedSeeded = _d getOrDefault ["seeded", []];
 
-    // A lost campaign's ending is stored nowhere else; restored as live it would play on a flattened map.
-    if (DUWS_campaignEnded isEqualTo "lost") then {
-        (_d getOrDefault ["lost", ["", ""]]) params ["_body", "_ending"];
-        campaign_lost = true;
-        campaign_lost_body = [_body, "STR_DUWS_T_CAMPAIGN_LOST"] select (_body isEqualTo "");
-        campaign_lost_ending = [_ending, "island_ruined"] select (_ending isEqualTo "");
-        publicVariable "campaign_lost";
-        publicVariable "campaign_lost_body";
-    };
     // The one setting whose effect is terrain, and terrain resets with the session.
     if (missionNamespace getVariable ["apocalypse_mode", false]) then { [] spawn fnc_apocalypse_buildings };
 

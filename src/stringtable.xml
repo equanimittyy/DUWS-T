@@ -1175,10 +1175,6 @@
                 <Original>This campaign was won.</Original>
                 <English>This campaign was won.</English>
             </Key>
-            <Key ID="STR_DUWS_T_fork_ended_lost">
-                <Original>This campaign was lost.</Original>
-                <English>This campaign was lost.</English>
-            </Key>
             <Key ID="STR_DUWS_T_fork_missing">
                 <Original>Loads without: %1.</Original>
                 <English>Loads without: %1.</English>
@@ -1222,6 +1218,10 @@
             <Key ID="STR_DUWS_T_LOAD_BAD_FACTION">
                 <Original>A faction it uses is not loaded</Original>
                 <English>A faction it uses is not loaded</English>
+            </Key>
+            <Key ID="STR_DUWS_T_LOAD_LOST">
+                <Original>This campaign was lost</Original>
+                <English>This campaign was lost</English>
             </Key>
             <Key ID="STR_DUWS_T_LOAD_DROPPED">
                 <Original>Campaign loaded.\n\nNot restored:\n%1 enemy units\n%2 vehicles\n%3 captured gear types</Original>
