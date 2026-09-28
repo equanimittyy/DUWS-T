@@ -146,7 +146,7 @@ scatter and their crews are not part of it.
 
 **Tier moves the whole fight, dug-in slots included.** A repeated entry is how a tier fields two of
 something; nothing about the *ground* multiplies a row afterwards, and the one thing that does — the
-campaign's enemy multiplier — scales whole cards and applies to every zone alike. The dug-in slots,
+campaign's enemy multiplier — scales whole cards and applies to every OPFOR zone alike. The dug-in slots,
 `garrison:garrison_element`, climb from none at tier I to four at tier IV on OPFOR's rows and three on
 BLUFOR's, so only a heavier zone digs in.
 `fnc_zone_tier_roll` refuses to roll twice, and tests for a missing tier rather than a positive one, so a
@@ -179,8 +179,8 @@ resets both: the tier to I and the strength to `0.1`.
 
 **A composition must not be scaled by a zone's radius.** The map reports a zone's tier, so a radius
 multiplier puts two zones the readout calls tier IV on the ground at different strengths, for a
-reason the player cannot read off either. `DUWS_fnc_zoneSpawnList` therefore takes the tier and the
-campaign's enemy multiplier, which is the same for every zone, and nothing about the site itself.
+reason the player cannot read off either. `DUWS_fnc_zoneSpawnList` therefore takes only the tier and the
+side, and nothing about the site itself.
 
 What radius does decide is where the same men stand and what the ground is worth: the spread
 `DUWS_fnc_raiseGarrison` places them over, the capture trigger's area, the map marker, and the CP
@@ -845,7 +845,7 @@ and building one is the player's job and their expense.
 
 A bought tier fields a tenth of what it adds and owes the rest, so the first buy stands a thin tier I
 that climbs by **30 % per reinforcement** — the same two sinks and the same ledger the enemy commander
-spends on. The garrison itself is the same model on its own weaker tier rows, raised through BLUFOR's hulls and
+spends on. The garrison itself is the same model on its own weaker tier rows, with no enemy-multiplier reserve copies, raised through BLUFOR's hulls and
 their own Army Power rungs, streaming and wearing down exactly as the enemy's does
 ([`garrison_and_reserves.md`](garrison_and_reserves.md#whose-garrison-it-is)).
 

@@ -20,6 +20,13 @@ DUWS_fnc_garrisonSideOf = {
 	"OPF"
 };
 
+// The enemy multiplier deepens the enemy alone: a garrison the player builds is its tier row, whatever the setting.
+DUWS_fnc_garrisonMult = {
+	params ["_key"];
+	if (([_key] call DUWS_fnc_garrisonSideOf) isEqualTo "BLU") exitWith { 1 };
+	(round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1
+};
+
 // The full fighting potential, stamped at raise and re-stamped by a tier buy, an OPFOR cap or a town clear. Every strength
 // measure counts tokens, not men: a tank weighs the same as a patrol.
 // Tokens behind an unearned Army Power rung are skipped at read, not stamp, so a site gains them the moment the rung is
@@ -106,7 +113,7 @@ DUWS_fnc_garrisonDerive = {
 // its accounted units stay in the ceiling; the sync then diffs against them. -> garrison
 DUWS_fnc_garrisonRestand = {
 	params ["_key", "_x1"];
-	private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1;
+	private _mult = [_key] call DUWS_fnc_garrisonMult;
 	private _side = [_key] call DUWS_fnc_garrisonSideOf;
 	private _stand = [_x1 select { !([_x, _side] call DUWS_fnc_tokenLocked) }] call DUWS_fnc_zoneDensityStand;
 	private _opcom = ([_key] call DUWS_fnc_garrisonReserve) select { (_x select [0, 8]) == "opcomdef" };
@@ -215,7 +222,7 @@ DUWS_fnc_garrisonReinforce = {
 // so the grid and the readout see the buy at once. The caller re-stands a standing garrison.
 DUWS_fnc_garrisonBuyTier = {
 	params ["_key", "_oldX1", "_newX1"];
-	private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1;
+	private _mult = [_key] call DUWS_fnc_garrisonMult;
 	private _full = [_newX1, _mult] call DUWS_fnc_scaleComposition;
 	private _owed = [[_oldX1, _mult] call DUWS_fnc_scaleComposition, _full] call DUWS_fnc_spawnDiff;
 	private _side = [_key] call DUWS_fnc_garrisonSideOf;

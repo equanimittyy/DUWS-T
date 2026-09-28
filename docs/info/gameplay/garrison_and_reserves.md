@@ -62,6 +62,7 @@ field (`full`), minus the tokens it has actually lost (`lost`):
 
 ```
 full      = mult copies of the filtered x1 tier list, stamped at raise
+              (mult = 1 for a BLUFOR garrison: DUWS_fnc_garrisonMult)
               (filtered = what the side can field, given settings and faction)
 locked    = the tokens in full behind an Army Power rung the side has not earned
 lost      = flat token list, persists across a stow
@@ -170,7 +171,9 @@ and without the mark the next raise would stand it again.
 
 `enemyunitMultiplier` is reserve depth, not a live-force multiplier. A site always stands up its
 **x1** tier composition; the surplus `(mult - 1)` copies wait as a pool that refills the garrison
-as casualties are taken. This exists because a composition token is a group, and the engine
+as casualties are taken. The setting deepens OPFOR only: `DUWS_fnc_garrisonMult {key}`
+(`src/duws/server/garrison/fnc_garrison_strength_init.sqf`) answers 1 for a BLUFOR garrison, so a harder
+campaign never also deepens the player's own defence, and a reinforce or tier buy there works off the x1 row. This exists because a composition token is a group, and the engine
 silently drops any `createGroup`/`BIS_fnc_spawnGroup` call once a side passes **144 groups**
 (`docs/info/architecture/arma_engine_gotchas.md`) — scaling the live composition wholesale at x3 could ask for
 triple a tier's groups on one site alone, and two hot sites at once would blow the wall.

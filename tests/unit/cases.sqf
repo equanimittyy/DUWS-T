@@ -754,6 +754,14 @@ enemyunitMultiplier = 2;
 enemyunitMultiplier = nil;
 ["garrisonBuyTier: the tenth is taken of every multiplier copy the tier adds",
     (count (["gk"] call DUWS_fnc_garrisonLost)), 9] call fnc_assertEq;
+DUWS_fnc_garrisonSideOf = { "BLU" };
+missionNamespace setVariable ["DUWS_garrisonLost_gk", []];
+enemyunitMultiplier = 2;
+["gk", ["a"], ["a", "b", "b", "b", "b", "b"]] call DUWS_fnc_garrisonBuyTier;
+enemyunitMultiplier = nil;
+DUWS_fnc_garrisonSideOf = { "OPF" };
+["garrisonBuyTier: a BLUFOR garrison ignores the enemy multiplier",
+    (count (["gk"] call DUWS_fnc_garrisonFull)), 6] call fnc_assertEq;
 
 DUWS_zoneGroupCeiling = 130;
 DUWS_fnc_sideGroupCount = { 0 };
