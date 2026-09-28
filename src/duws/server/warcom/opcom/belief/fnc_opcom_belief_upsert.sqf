@@ -24,10 +24,11 @@ if (_i < 0) then {
 
 [_pos, _str] call DUWS_fnc_opcom_trafficStamp;
 
-// Until BLUFOR is seen near it the HQ pulls no defense toward itself, so the opening campaign defends evenly
-// instead of massing on a base the commander has no business knowing. One-way: a base found once stays found.
-if (!DUWS_opcom_hqKnown && {!isNil "PosOfBLUHQ"} && {PosOfBLUHQ isNotEqualTo []} && {([_pos, PosOfBLUHQ] call DUWS_fnc_opcom_cellDist) <= OPCOM_HQ_REVEAL_K}) then {
+// Until one of the HQ's own defenders is seen the HQ pulls no defense toward itself, so the opening campaign
+// defends evenly instead of massing on a base the commander has no business knowing. A squad seen passing
+// gives no base away; its standing garrison does. One-way: a base found once stays found.
+if (!DUWS_opcom_hqKnown && {private _roster = ["HQ", "infantry"] call fnc_site_roster; ((units (groupFromNetId _key)) findIf { _x in _roster }) >= 0}) then {
     DUWS_opcom_hqKnown = true;
-    ["INFO", "OPCOM", "player HQ revealed by a sighting near it"] call fnc_log;
+    ["INFO", "OPCOM", "player HQ revealed by a sighting of its garrison"] call fnc_log;
     ["hq_exposed"] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
 };

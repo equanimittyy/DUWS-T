@@ -621,8 +621,6 @@ OPCOM_GRID_SPREAD = 1000;
 // cannot sit just outside it unseen.
 OP_OBSERVE_K = 2;
 
-OPCOM_HQ_REVEAL_K = 2;
-
 // The grid is built, rebuilt, routed and drawn only inside a box around the play area (every zone, town and
 // the HQ grown by its radius plus this buffer) -- OPCOM never calculates the empty rest of the map. Counted
 // in cells, not metres, so it holds if the cell size changes. Must exceed the largest deposit reach in cells
