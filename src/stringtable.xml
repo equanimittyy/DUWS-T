@@ -5893,8 +5893,8 @@
                 <English>Rally Point Placed</English>
             </Key>
             <Key ID="STR_DUWS_T_RALLY_PLACED_MSG">
-                <Original>BLUFOR can fast travel to the rally point</Original>
-                <English>BLUFOR can fast travel to the rally point</English>
+                <Original>BLUFOR rally point is now available for fast travel</Original>
+                <English>BLUFOR rally point is now available for fast travel</English>
             </Key>
             <Key ID="STR_DUWS_T_RALLY_LOST_TITLE">
                 <Original>Rally Point Lost</Original>
