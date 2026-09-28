@@ -27,6 +27,17 @@ OPFfactionData = [];
 Factions_Available_OPFOR_X = [];publicVariable "Factions_Available_OPFOR_X";
 Factions_Available_BLUFOR_X = [];publicVariable "Factions_Available_BLUFOR_X";
 
+// [mod name, one of its CfgPatches classes] per mod the host loaded. A joining client probes the class, not
+// the name or folder: those can differ between two machines that both have the mod.
+private _modNames = createHashMapFromArray (getLoadedModsInfo apply { [toLower (_x select 1), _x select 0] });
+private _modProbes = createHashMap;
+{
+	private _dir = toLower configSourceMod _x;
+	if !(_dir in _modProbes) then { _modProbes set [_dir, configName _x] };
+} forEach ("true" configClasses (configFile >> "CfgPatches"));
+DUWS_hostMods = (keys _modProbes) apply { [_modNames getOrDefault [_x, _x], _modProbes get _x] };
+publicVariable "DUWS_hostMods";
+
 amount_zones_created = 0;publicVariable "amount_zones_created";
 
 // Zones whose build-out finished, as opposed to amount_zones_created, which fnc_createZone

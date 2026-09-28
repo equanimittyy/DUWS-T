@@ -345,6 +345,11 @@ zombies never fight each other. A zone's enemy trigger counts EAST only
   it (see [`architecture.md`](../architecture.md)).
 - Faction variables are plain globals populated server-side and `publicVariable`d; a consumer that runs
   before faction init sees nil.
+- A client that does not have one of the host's mods cannot load the gear, units or vehicles of that mod.
+  Its arsenal therefore shows only the classes that its own install has. The server publishes one
+  `CfgPatches` class for each mod that it loaded (`DUWS_hostMods`, `server/server_var_init.sqf`). Each
+  client probes these classes when it joins. If a mod is missing, a hint that lists the missing mods
+  replaces the welcome hint (`client/client_init.sqf`).
 - The static library and the registry in `fnc_factions_check_modern.sqf` must stay in lockstep — a template
   file with no registry entry is unreachable, and a registry entry with no file fails the dynamic load at
   selection time.

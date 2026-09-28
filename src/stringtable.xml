@@ -13883,6 +13883,14 @@
                 <Polish>Dołączono do gry.&lt;br/&gt;&lt;br/&gt;Witaj w %1, %2.</Polish>
                 <Czech>Připojení do hry.&lt;br/&gt;&lt;br/&gt;Vítej v %1, %2.</Czech>
             </Key>
+            <Key ID="STR_DUWS_T_MODS_MISSING">
+                <Original>You are missing the following mods:\n%1</Original>
+                <English>You are missing the following mods:\n%1</English>
+                <Chinesesimp>你缺少以下模组：\n%1</Chinesesimp>
+                <German>Dir fehlen folgende Mods:\n%1</German>
+                <Polish>Brakuje ci następujących modów:\n%1</Polish>
+                <Czech>Chybí ti následující mody:\n%1</Czech>
+            </Key>
         </Container>
     </Package>
 </Project>

@@ -376,7 +376,12 @@ if (!(player getVariable ["intro_completed", false]) && {!isNil "PosOfBLUHQ" && 
 };
 
 playMusic ["EventTrack01a_F_EPA", 0];
-hintsilent parseText format[localize "STR_DUWS_T_ix8g2neb",worldName,profileName];
+private _missingMods = DUWS_hostMods select { !isClass (configFile >> "CfgPatches" >> (_x select 1)) } apply { _x select 0 };
+if (_missingMods isEqualTo []) then {
+	hintsilent parseText format[localize "STR_DUWS_T_ix8g2neb",worldName,profileName];
+} else {
+	hint format [localize "STR_DUWS_T_MODS_MISSING", _missingMods joinString "\n"];
+};
 
 forceWeatherChange;
 
