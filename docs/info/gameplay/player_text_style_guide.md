@@ -19,6 +19,13 @@ German/Spanish/Chinese tag that disagrees with `<English>` as a bug, and do not 
 gap closed. Retranslation is a pass of its own, because the briefings encode gameplay numbers a
 translator has to check against the mission code rather than against the old text.
 
+**What a translation keeps from English.** A translation pass fills only the language tags: it never
+changes `<Original>`, `<English>` or the set of `Key ID`s. Callsigns (`Alpha 1-1`, `Overlord`,
+`Allseer`) and the `BLUFOR`/`OPFOR` labels stay in English inside every language tag. For
+`Alpha 1-1` this is a code constraint, not only a style choice: `fnc_cs` replaces that literal only,
+so a translated callsign ignores the host's `duws_callsign`. Each translation keeps every `%n`
+placeholder of its English line; the order can change, because `format` substitutes by index.
+
 ## Military-like language
 
 The house voice is a professional military register: flat declaratives in the present tense,
