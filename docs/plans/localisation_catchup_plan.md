@@ -6,11 +6,11 @@ language and the single source of truth.
 
 ## Goal
 
-The German, Spanish and Traditional Chinese translations in `src/stringtable.xml`
-are stale: they were written against older English copy and have drifted. Rather
-than patch gaps, we **re-translate every line** for each target language, straight
-from today's English source, one language per pass. Simplified Chinese has had its
-pass.
+Every target language was retranslated from the current English, one language per
+pass, and each language tag now tracks English (see the player-text style guide).
+This plan is how to run a full pass again: for a new language, or after a large
+English rework. Rather than patch gaps, a pass **re-translates every line** straight
+from today's English source.
 
 ## Non-goals (hard constraints)
 
@@ -24,31 +24,28 @@ pass.
 
 ## Current coverage
 
-1666 keys total, across 26 containers. 49 of them stay English in every language
-(see [Do-not-translate list](#do-not-translate-list)), so a complete language has
-1617 tags.
+1667 keys total, across 26 containers. 49 of them stay English in every language
+(see [Do-not-translate list](#do-not-translate-list)); a translation identical to the
+English also gets no tag, so the tag count differs by language.
 
 | Arma tag | Language | Keys present | State |
 |---|---|---|---|
-| `<Original>` / `<English>` | English (source) | 1666 | Frozen — never edited |
-| `<German>` | German | 607 | Stale — redo all |
-| `<Spanish>` | Spanish | 606 | Stale — redo all |
-| `<Chinesesimp>` | Chinese (Simplified) | 1617 | Done — matches the current English |
-| `<Chinese>` | Chinese (Traditional) | 17 | Stale — redo all |
-| `<Polish>` | Polish | 0 | New |
-| `<Czech>` | Czech | 0 | New |
-| `<Russian>` | Russian | 0 | New |
-| `<French>` | French | 0 | New |
-
-"Keys present" is only the starting count; a pass overwrites or creates the tag on
-every translatable key regardless.
+| `<Original>` / `<English>` | English (source) | 1667 | Frozen — never edited |
+| `<German>` | German | 1579 | Done |
+| `<Spanish>` | Spanish | 1599 | Done |
+| `<Chinesesimp>` | Chinese (Simplified) | 1618 | Done |
+| `<Chinese>` | Chinese (Traditional) | 1618 | Done |
+| `<Polish>` | Polish | 1595 | Done |
+| `<Czech>` | Czech | 1593 | Done |
+| `<Russian>` | Russian | 1616 | Done |
+| `<French>` | French | 1592 | Done |
 
 ## Target languages
 
 Nine total: English (source, untouched) plus eight translation targets. Arma's
 stringtable uses a fixed set of language child-tag names; the mapping below is the
-authoritative tag to write. Confirm each remaining tag name against the packed game
-before its pass.
+authoritative tag to write. Confirm a new tag name against the packed game before
+its pass.
 
 | Target | Arma tag | Why in scope |
 |---|---|---|
@@ -89,29 +86,36 @@ them rather than guessing.
 
 ## Workflow structure
 
-Editing one 1666-key XML file with several agents in parallel would clobber.
+Editing one XML file of more than 1600 keys with several agents in parallel would clobber.
 Instead, fan out on disjoint data and merge once. Each language is one pass:
 
 1. **Export (main thread).** For every translatable key, emit `key ID + container
    name + English source text`, unescaped. Container name gives tone/context (e.g.
    terse map marker vs. full manual prose). Also keep every key's English as a
    baseline for the merge.
-2. **Glossary (one Sonnet agent).** It reads the whole export and the player-text
-   style guide and writes the language's glossary: recurring mechanic nouns, support
-   names, radio procedure words, UI verbs, and a keep-or-translate decision for each
-   acronym. The main thread reviews it before fan-out. Common words are marked so
-   the checker does not flag them in other senses.
-3. **Translate (four Sonnet agents).** Split the containers into four groups of
-   about 20,000 English characters each; the `Manual, Help & Credits` container
-   alone is about 17,000. Each agent gets the shared brief (voice, hard rules,
-   output format), the glossary and its group. It never sees the XML, writes a
+2. **Glossary and conventions (one Sonnet agent).** Starting from an earlier pass's
+   term list, it writes the language's glossary (mechanic nouns, support names, radio
+   procedure words, UI verbs, a keep-or-translate decision per acronym, and an
+   inflection stem the checker can match) and a short conventions sheet (address
+   form, quotes, spacing, numbers, count and gender constructions). The main thread
+   reviews both before fan-out; every pass so far needed a handful of fixes, such as
+   a word for "negative" that meant a photo negative. Common words are marked so the
+   checker does not flag them in other senses.
+3. **Translate (five Sonnet agents).** Split the containers into five groups of
+   16,000 to 20,000 English characters; the `Manual, Help & Credits` container alone
+   is about 17,000. Each agent gets the shared brief (voice, hard rules, output
+   format), the language sheets and its group. It never sees the XML, writes an
    `ID -> translated text` JSON mapping in parts, and runs the checker until it
    reports 0 errors.
-4. **Merge (main thread, single writer).** Fold the mapping into
-   `src/stringtable.xml`: replace the language tag in place, or insert it after
-   `<English>`. Skip a key whose English changed after the export, and translate it
-   at the end against the new English.
-5. **Validate.** See checklist below.
+4. **Consistency (one Sonnet agent).** A cross-group review lists prose that names a
+   UI label in other words than the label's own key, and identical English labels
+   translated differently. The agent fixes the real ones; a case ending the grammar
+   needs is not a mismatch.
+5. **Merge (main thread, single writer).** Fold the mapping into
+   `src/stringtable.xml`: replace the language tag in place, or insert it at the end
+   of the key. Skip a key whose English changed after the export, and translate it at
+   the end against the new English.
+6. **Validate.** See checklist below.
 
 Rationale for the fragment-and-merge shape over per-agent worktrees: every agent
 would otherwise edit the same lines of the same file, producing unmergeable
@@ -122,8 +126,8 @@ untouched.
 ## Files touched
 
 - `src/stringtable.xml` — all translation tags land here.
-- `docs/info/gameplay/player_text_style_guide.md` — which tags lag English, and each
-  finished language's punctuation, spacing and term conventions.
+- `docs/info/gameplay/player_text_style_guide.md` — the rule that every tag tracks
+  English, and each language's address, punctuation, spacing and term conventions.
 - This plan doc — reference only; not shipped.
 
 Do not create per-language stringtable files or split the table; Arma expects the
@@ -146,7 +150,8 @@ single `stringtable.xml`.
 Each agent runs the per-key checker before it finishes:
 
 - Placeholder, markup-tag, literal `\n` and line-break counts match the English.
-- Every callsign and BLUFOR/OPFOR/INDFOR token appears as often as in the English.
+- Every callsign and BLUFOR/OPFOR/INDFOR token, and the CP and AP currencies, appear
+  as often as in the English.
 - `!` only where the English has one.
 - The final period mirrors the English (`.` and `...` map to the language's own
   marks), except abbreviations such as the tier labels `Inf.` and `Mot.`.
@@ -167,5 +172,4 @@ Full scope — no container deferred. The long-form prose keys (the `Manual, Hel
 Credits` container, journal/briefing entries, side-mission narrative text) are the
 bulk of the token cost but are explicitly **in scope** for full translation in each
 pass. Each language must ship complete; a partially-translated manual reads worse
-than none. The Simplified Chinese pass used about 620,000 Sonnet tokens across its
-five agents.
+than none. One language pass uses about 700,000 Sonnet tokens across its agents.
