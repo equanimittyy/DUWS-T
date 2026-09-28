@@ -7,8 +7,9 @@ private _requester = remoteExecutedOwner;
 // abort would be free to spam the next offer.
 if (!isNil "BLD1" && {alive BLD1}) exitWith {
     [{hint localize "STR_DUWS_T_mfxb090t"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
-    DUWS_lastMissionStartDate = dateToNumber date;
-    publicVariable "DUWS_lastMissionStartDate";
+    DUWS_missionStartDates pushBack (dateToNumber date);
+    DUWS_missionStartDates = DUWS_missionStartDates select [(count DUWS_missionStartDates - mission_gate_allowance) max 0, mission_gate_allowance];
+    publicVariable "DUWS_missionStartDates";
     ["INFO", "MISSION", "steal_builder refused: previous builder still alive"] call fnc_log;
 };
 

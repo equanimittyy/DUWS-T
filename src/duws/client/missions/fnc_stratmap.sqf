@@ -17,7 +17,7 @@ sleep 4;
 if (!((vehiclevarname player) in game_master)) exitWith {hint format [localize "STR_DUWS_T_eck4xh9m", call fnc_gm_occupant]};
 
 // Gates the whole list, not each type -- one gate per mission would leave the player browsing
-// offers none of which can start. Same three-in-game-hour wait fnc_mission_begin enforces
+// offers none of which can start. Same start gate fnc_mission_begin enforces
 // server-side, checked here (ahead of the cached-offer reuse below, so a cached open obeys it too)
 // so the player is told before the map opens.
 private _gateLeft = [] call fnc_mission_gate_left;

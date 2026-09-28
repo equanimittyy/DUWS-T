@@ -27,10 +27,10 @@ if !(missionNamespace getVariable ["Mission_available", true]) then {
 		["Mission type=%1 starting while another is still live -- reward globals will be clobbered",
 		_missionType]] call fnc_log;
 };
-// Stamp the gate at the start of every mission: the next one waits three in-game hours from here,
-// measured on the campaign clock so a rest skips it. Broadcast so the readout and map agree.
-DUWS_lastMissionStartDate = dateToNumber date;
-publicVariable "DUWS_lastMissionStartDate";
+// On the campaign clock so a rest skips it; broadcast so the map agrees with the server.
+DUWS_missionStartDates pushBack (dateToNumber date);
+DUWS_missionStartDates = DUWS_missionStartDates select [(count DUWS_missionStartDates - mission_gate_allowance) max 0, mission_gate_allowance];
+publicVariable "DUWS_missionStartDates";
 // Holds off the next mission until this thread finishes; each thread clears it on exit.
 Mission_available = false;
 publicVariable "Mission_available";

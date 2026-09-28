@@ -308,15 +308,14 @@ manually_chosen = false;publicVariable "manually_chosen";
 
 Mission_available = true;publicVariable "Mission_available";
 
-// The side-mission gate: a new mission may start only once this many in-game hours have passed since
-// the last one started (see fnc_mission_gate_left.sqf). The slot itself frees the moment one ends, so
-// this alone paces missions; a rest at HQ skips three hours and so clears it in one go.
-// Broadcast: the readout and the strategic map both read it on the client.
+// The slot frees the moment a mission ends, so this rolling window alone paces side missions
+// (fnc_mission_gate_left.sqf). Broadcast: the strategic map reads both.
 mission_gate_hours = 3;publicVariable "mission_gate_hours";
+mission_gate_allowance = 2;publicVariable "mission_gate_allowance";
 
-// The last mission's start, stamped as a campaign-date number (dateToNumber date). Zero until the
-// first mission, which reads as long past and so opens the gate.
-DUWS_lastMissionStartDate = 0;publicVariable "DUWS_lastMissionStartDate";
+// Campaign-date numbers, oldest first. Only the last mission_gate_allowance are kept: an older stamp
+// can no longer close the gate.
+DUWS_missionStartDates = [];publicVariable "DUWS_missionStartDates";
 
 // Seconds of in-game time a rest has skipped past engine `time`. The campaign clock (fnc_campaign_now)
 // adds it so a rest expires live mission deadlines; bumped by skiptime in fnc_rest_heal.

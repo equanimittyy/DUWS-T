@@ -13,12 +13,13 @@
 // for an abort before anything was built. _hintKey overrides the generic "generation failed" line.
 params ["_missionType", ["_requester", 0], ["_reason", ""], ["_compKey", ""], ["_hintKey", "STR_DUWS_T_MISSION_GEN_FAILED"]];
 
-// fnc_mission_begin stamps the gate before the thread has found so much as a position, so a thread
-// that gives up here would burn three in-game hours having spawned nothing. Cleared rather than
-// restored to a previous value: the mission never ran, so it has no wait to serve. Zero reads as
-// long past on the campaign clock, so the gate opens again at once.
-DUWS_lastMissionStartDate = 0;
-publicVariable "DUWS_lastMissionStartDate";
+// fnc_mission_begin stamps the gate before the thread finds a position, so an abort drops that stamp;
+// the one begin trimmed had already aged out. A thread that aborts before begin (Mission_available
+// still true) never stamped, and a pop there would refund a start a finished mission spent.
+if (!Mission_available) then {
+    DUWS_missionStartDates resize ((count DUWS_missionStartDates - 1) max 0);
+    publicVariable "DUWS_missionStartDates";
+};
 Mission_available = true;
 publicVariable "Mission_available";
 

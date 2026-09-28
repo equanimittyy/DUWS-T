@@ -23,13 +23,12 @@ private _types = _defs apply { _x select 4 };
 // is what keeps a normal back-out on the same offers; this is the intended way to roll new ones.
 // The type step forces one type into the draw, to test its siting without the draw RNG.
 if (_this == "reroll") exitWith {
-	// Clears the start gate the way the force tool does (stamp to 0): a dev re-roll that still
-	// tripped the three-hour wait would open the picker but roll a set none could start;
-	// fnc_mission_begin re-stamps on the next start. _this is the type to force, -1 to skip.
+	// Clears the start gate the way the force tool does, or the re-rolled set could not start.
+	// _this is the type to force, -1 to skip.
 	private _reroll = {
 		DUWS_dbgForceDrawType = _this;
-		DUWS_lastMissionStartDate = 0;
-		publicVariable "DUWS_lastMissionStartDate";
+		DUWS_missionStartDates = [];
+		publicVariable "DUWS_missionStartDates";
 		DUWS_missionOffers = [];
 		[] spawn fnc_stratmap;
 	};

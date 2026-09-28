@@ -36,8 +36,8 @@ if (_found isEqualTo []) exitWith {
 _found params ["_pos", "_destZone"];
 
 // Open the gate so the forced thread's own fnc_mission_begin check passes; it re-stamps on start.
-DUWS_lastMissionStartDate = 0;
-publicVariable "DUWS_lastMissionStartDate";
+DUWS_missionStartDates = [];
+publicVariable "DUWS_missionStartDates";
 Mission_available = true;
 publicVariable "Mission_available";
 
