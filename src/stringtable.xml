@@ -2270,9 +2270,9 @@
                 <Original>Gun crews are already being redeployed.</Original>
                 <English>Gun crews are already being redeployed.</English>
             </Key>
-            <Key ID="STR_DUWS_T_ZONE_REDEPLOY_NO_GARRISON">
-                <Original>This zone has no garrison to man its guns.</Original>
-                <English>This zone has no garrison to man its guns.</English>
+            <Key ID="STR_DUWS_T_ZONE_REDEPLOY_NO_TIER">
+                <Original>Requires Tier I+.</Original>
+                <English>Requires Tier I+.</English>
             </Key>
             <Key ID="STR_DUWS_T_check_vehicle_status">
                 <Original>Check Vehicle Status</Original>

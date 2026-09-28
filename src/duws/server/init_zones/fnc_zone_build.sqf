@@ -43,8 +43,8 @@ DUWS_fnc_zoneBuildSleep = {
     [_key] call fnc_duws_stow;
 };
 
-// Only while the zone's garrison stands, the rule DUWS_fnc_buildCrewSite keeps: the gunners join the garrison roster, and
-// only a standing garrison's roster is collected when the zone streams out or falls.
+// Tier I and up: a zone with a tier raises, and a raise adopts every seated gunner into the garrison roster that its
+// stream-out collects (DUWS_fnc_zoneManStatics). A tier-0 zone never raises, so its gunners would stand for good.
 DUWS_fnc_zoneRedeploy = {
     params ["_flg"];
     private _owner = remoteExecutedOwner;
@@ -54,8 +54,8 @@ DUWS_fnc_zoneRedeploy = {
     if (_flg getVariable ["DUWS_redeployBusy", false]) exitWith {
         (localize "STR_DUWS_T_ZONE_REDEPLOY_BUSY") remoteExec ["hint", _owner];
     };
-    if (([_key] call fnc_site_alive) == 0) exitWith {
-        (localize "STR_DUWS_T_ZONE_REDEPLOY_NO_GARRISON") remoteExec ["hint", _owner];
+    if (([_key] call fnc_zone_tier) < 1) exitWith {
+        (localize "STR_DUWS_T_ZONE_REDEPLOY_NO_TIER") remoteExec ["hint", _owner];
     };
     if (commandpointsblu1 < 2) exitWith {
         (localize "STR_DUWS_T_e95mc4lv") remoteExec ["hint", _owner];

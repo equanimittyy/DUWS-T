@@ -22,15 +22,6 @@ DUWS_fnc_siteBuildArm = {
     [[_factory, _siteKey], {
         params ["_factory", "_siteKey"];
         if (!hasInterface || isNull _factory) exitWith {};
-        // Above the R3F gate, since a zone's guns need crews without R3F too. The flag's carry gate is its BLUFOR-held
-        // test (fnc_zone_flag_logistics).
-        if ((_siteKey select [0, 5]) isEqualTo "zone_") then {
-            _factory addAction [ACT_COMMIT("STR_DUWS_T_ZONE_REDEPLOY_ACTION"),
-                { [_this select 0] remoteExec ["DUWS_fnc_zoneRedeploy", 2] },
-                [], 10, false, true, "",
-                "_this == player && {(vehicleVarName _this) in Squad_Leaders} && {!(_target getVariable ['R3F_LOG_disabled', true])}",
-                ACT_REACH];
-        };
         waitUntil { !isNil "R3F_LOG_active" };
         if (!R3F_LOG_active) exitWith {};
         [_factory, 0, west, ["Fortifications", "Static"]] call R3F_LOG_FNCT_usine_init;
@@ -45,6 +36,14 @@ DUWS_fnc_siteBuildArm = {
             },
             [], 5, false, false, "",
             "!R3F_LOG_mutex_local_verrou && R3F_LOG_objet_addAction == _target && R3F_LOG_action_ouvrir_usine_valide"];
+        // The flag's carry gate is its BLUFOR-held test (fnc_zone_flag_logistics).
+        if ((_siteKey select [0, 5]) isEqualTo "zone_") then {
+            _factory addAction ["<t color=""#ff9600"">" + localize "STR_DUWS_T_ZONE_REDEPLOY_ACTION" + "</t>",
+                { [_this select 0] remoteExec ["DUWS_fnc_zoneRedeploy", 2] },
+                [], 5, false, true, "",
+                "_this == player && {(vehicleVarName _this) in Squad_Leaders} && {!(_target getVariable ['R3F_LOG_disabled', true])}",
+                ACT_REACH];
+        };
     }] remoteExec ["spawn", 0, format ["DUWS_siteBuild_%1", netId _factory]];
 };
 
