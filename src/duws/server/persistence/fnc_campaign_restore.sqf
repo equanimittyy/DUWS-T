@@ -105,7 +105,8 @@ DUWS_fnc_restoreAnswer = {
 };
 
 // With nothing saved the terrain survey starts under the fork, so no new campaign waits on the screen. The bound
-// is short while nobody is connected, so an unattended restart comes back up on its own campaign.
+// is short while nobody is connected, so an unattended restart comes back up on its own campaign. Unbounded when
+// nothing loads, so the game master lands on each save's refusal rather than on a new setup.
 DUWS_fnc_restoreGate = {
     params ["_fnc_survey"];
     call DUWS_fnc_saveScan;
@@ -117,14 +118,19 @@ DUWS_fnc_restoreGate = {
         sleep 1;
         !isNil "DUWS_loadChoice" || {time - _start > ([30, 600] select (([] call DUWS_fnc_humanCount) > 0))}
     };
-    private _choice = missionNamespace getVariable ["DUWS_loadChoice", nil];
-    if (isNil "_choice") then {
+    if (isNil "DUWS_loadChoice") then {
         private _i = DUWS_saveList findIf { (_x select 2) isEqualTo "" };
-        _choice = if (_i < 0) then { [] } else { [(DUWS_saveList select _i) select 0, false] };
-        ["INFO", "SAVE", format ["fork unanswered after %1 s: %2", round (time - _start),
-            ["new campaign", format ["loading the newest campaign %1", _choice]] select (_choice isNotEqualTo [])]] call fnc_log;
-        DUWS_loadChoice = _choice;
+        private _newest = if (_i < 0) then { [] } else { [(DUWS_saveList select _i) select 0, false] };
+        // A header can pass the scan over a payload that does not parse.
+        if (_newest isNotEqualTo [] && {((_newest call DUWS_fnc_restoreRead) select 1) isEqualTo ""}) then {
+            ["INFO", "SAVE", format ["fork unanswered after %1 s: loading the newest campaign %2", round (time - _start), _newest]] call fnc_log;
+            DUWS_loadChoice = _newest;
+        } else {
+            ["INFO", "SAVE", format ["fork unanswered after %1 s: nothing loads, waiting for the game master", round (time - _start)]] call fnc_log;
+            while {!(["SAVE", "the game master's answer to the load screen", {!isNil "DUWS_loadChoice"}, 600] call fnc_waitLogged)} do {};
+        };
     };
+    private _choice = DUWS_loadChoice;
     if ([_choice] call DUWS_fnc_restoreAnswer) then {
         if (!isNull _survey) then { terminate _survey };
     } else {
