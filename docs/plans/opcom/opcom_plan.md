@@ -813,7 +813,8 @@ alone at `OPCOM_MUSTER_EXPIRY`.
   or short of it. A **FOB** has no pool for OPFOR to home to either, so its attackers end the same way. It falls when
   overrun: an attacker, live or virtual, that has stood inside its radius for `DUWS_captureHold` with no BLUFOR in
   the ring destroys the building, and `fnc_fob_destroyed` withdraws the respawn, the marker and the site. The hold
-  restarts while any BLUFOR stand in the ring. A capture resolves its target zones first, then garrisoned towns,
+  runs per FOB, once a tick after the task step (`DUWS_fnc_opcom_fobOverrun`), and restarts while any BLUFOR stand
+  in the ring. While it runs, `DUWS_overrunHold` on the building closes fast travel to that FOB. A capture resolves its target zones first, then garrisoned towns,
   then the nearest base (`DUWS_fnc_opcom_captureKey`). **QRF** (`intercept`) — at the sighting's last known position the unit
   reads truth within its own K: nothing there, it drops to `guard` in place; BLUFOR there, it fights them live and
   guards once none remain, until its QRF moves on to another group ([§QRF](#qrf-an-attack-on-a-moving-cluster)). It
