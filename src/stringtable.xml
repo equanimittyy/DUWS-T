@@ -1451,7 +1451,7 @@
             </Key>
             <Key ID="STR_DUWS_T_civamount2">
                 <German>Anzahl der spawnenden Zivilisten, wenn der Spieler eine Stadt betritt (Höhere Werte beeinträchtigen die Leistung stärker). Ohne Wirkung, wenn das Zivilisten / Ansehenssystem auf AUS steht.</German>
-                <Chinesesimp>玩家进入城镇时生成的平民数量（数值越高对性能影响越大）。当平民/声望系统设为“关”时无效。</Chinesesimp>
+                <Chinesesimp>玩家进入城镇时生成的平民数量（数值越高对性能影响越大）。当平民 / 声望系统设为“关”时无效。</Chinesesimp>
                 <Spanish>Cantidad de civiles generados al entrar el jugador en un pueblo (Mayor valor, mayor impacto en el rendimiento). No tiene efecto cuando el Sistema de civiles y reputación está desactivado.</Spanish>
                 <Original>Number of civilians spawned when the player enters a town (Higher values impact performance). Has no effect when the Civilian / Reputation System is set to OFF.</Original>
                 <English>Number of civilians spawned when the player enters a town (Higher values impact performance). Has no effect when the Civilian / Reputation System is set to OFF.</English>
@@ -8947,7 +8947,7 @@
             <Key ID="STR_DUWS_T_MAN_B_INTEL">
                 <Original>Intel reveals things you have not found yet, such as hidden enemy zones, towns, defensive positions and enemy units on the move. You gain it by searching enemy bodies, mission objectives and arrested civilians, and by scouting zones and towns yourself. The Recon Enemy Position side mission and the Intelligence Center support also turn up intel.</Original>
                 <English>Intel reveals things you have not found yet, such as hidden enemy zones, towns, defensive positions and enemy units on the move. You gain it by searching enemy bodies, mission objectives and arrested civilians, and by scouting zones and towns yourself. The Recon Enemy Position side mission and the Intelligence Center support also turn up intel.</English>
-                <Chinesesimp>情报可以揭示你尚未发现的事物，例如隐藏的敌方区域、城镇、防御据点以及移动中的敌方单位。你可以通过搜索敌人尸体、任务目标和被捕平民，或亲自侦察区域和城镇来获取情报。“侦察敌方据点”支线任务和“情报中心”支援也能带来情报。</Chinesesimp>
+                <Chinesesimp>情报可以揭示你尚未发现的事物，例如隐藏的敌方区域、城镇、防御据点以及移动中的敌方单位。你可以通过搜索敌人尸体、任务目标和被捕平民，或亲自侦察区域和城镇来获取情报。“侦察敌方阵地”支线任务和“情报中心”支援也能带来情报。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_MAN_L_SEARCH">
                 <Original>Searching</Original>
@@ -9007,7 +9007,7 @@
             <Key ID="STR_DUWS_T_MAN_B_CIVJOBS">
                 <Original>Civilians sometimes have work for you. Choose Ask for Work to hear about it: clearing a bandit camp, recovering a stolen car, raising money for rebuilding, or clearing an old minefield. Finish the job and return to the civilian who gave it to you for CP, cash and reputation. If that civilian dies, the job fails.</Original>
                 <English>Civilians sometimes have work for you. Choose Ask for Work to hear about it: clearing a bandit camp, recovering a stolen car, raising money for rebuilding, or clearing an old minefield. Finish the job and return to the civilian who gave it to you for CP, cash and reputation. If that civilian dies, the job fails.</English>
-                <Chinesesimp>平民有时会有工作交给你。选择“请求工作”即可了解详情：清剿强盗营地、找回被盗车辆、为重建筹款，或清除一片旧雷区。完成工作后返回给你委托的平民处，即可获得 CP、现金和声望。若该平民死亡，任务将会失败。</Chinesesimp>
+                <Chinesesimp>平民有时会有工作交给你。选择“询问工作”即可了解详情：清剿强盗营地、找回被盗车辆、为重建筹款，或清除一片旧雷区。完成工作后返回给你委托的平民处，即可获得 CP、现金和声望。若该平民死亡，任务将会失败。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_MAN_L_HOSTILETOWN">
                 <Original>Hostile Towns</Original>
