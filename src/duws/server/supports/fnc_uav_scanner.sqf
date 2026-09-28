@@ -152,7 +152,7 @@ while {alive _vehicle && _elapsed < _scanDuration} do {
 			};
 			_seen pushBack _mk;
 		} forEach _units;
-	} forEach [[list _trg, "e", "ColorRed"], [list _trgwest, "w", "ColorBlue"], [list _trgguer, "i", "ColorGUER"]];
+	} forEach [[list _trg, "e", "ColorRed"], [(list _trgwest) select {vehicle _x != _vehicle}, "w", "ColorBlue"], [list _trgguer, "i", "ColorGUER"]];
 	{
 		if !(_x in _seen) then { deleteMarker _x; _reconMarkers deleteAt _x };
 	} forEach keys _reconMarkers;
