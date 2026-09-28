@@ -11591,16 +11591,16 @@
                 <Spanish>OPFOR retiene a un periodista civil como rehén en un edificio de esta zona. Elimina a sus captores y luego llévalo al CG.</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_RESCUE_HOSTAGE_NOTE">
-                <Original>The hostage will be executed within 3 minutes if BLUFOR is detected within the area. Discretion is advised.</Original>
-                <English>The hostage will be executed within 3 minutes if BLUFOR is detected within the area. Discretion is advised.</English>
-                <Chinesesimp>若 BLUFOR 在本区域内被发现，人质将在 3 分钟内被处决。建议谨慎行动。</Chinesesimp>
-                <German>Die Geisel wird binnen 3 Minuten hingerichtet, falls BLUFOR im Gebiet entdeckt wird. Vorsicht ist geboten.</German>
-                <Polish>Zakładnik zostanie stracony w ciągu 3 minut, jeśli BLUFOR zostanie wykryty w tym rejonie. Zalecana ostrożność.</Polish>
-                <Czech>Pokud bude BLUFOR v oblasti odhaleno, rukojmí bude do 3 minut popraveno. Doporučuje se opatrnost.</Czech>
-                <Russian>Заложника казнят в течение 3 минут, если BLUFOR будет обнаружен в этом районе. Рекомендуется соблюдать скрытность.</Russian>
-                <French>L'otage sera exécuté dans les 3 minutes si BLUFOR est détecté dans la zone. La discrétion est recommandée.</French>
-                <Chinese>若 BLUFOR 在本區域內被發現，人質將在 3 分鐘內被處決。建議謹慎行動。</Chinese>
-                <Spanish>El rehén será ejecutado en un plazo de 3 minutos si BLUFOR es detectado en la zona. Se recomienda discreción.</Spanish>
+                <Original>The hostage will be executed within 5 minutes if BLUFOR is detected within the area. Discretion is advised.</Original>
+                <English>The hostage will be executed within 5 minutes if BLUFOR is detected within the area. Discretion is advised.</English>
+                <Chinesesimp>若 BLUFOR 在本区域内被发现，人质将在 5 分钟内被处决。建议谨慎行动。</Chinesesimp>
+                <German>Die Geisel wird binnen 5 Minuten hingerichtet, falls BLUFOR im Gebiet entdeckt wird. Vorsicht ist geboten.</German>
+                <Polish>Zakładnik zostanie stracony w ciągu 5 minut, jeśli BLUFOR zostanie wykryty w tym rejonie. Zalecana ostrożność.</Polish>
+                <Czech>Pokud bude BLUFOR v oblasti odhaleno, rukojmí bude do 5 minut popraveno. Doporučuje se opatrnost.</Czech>
+                <Russian>Заложника казнят в течение 5 минут, если BLUFOR будет обнаружен в этом районе. Рекомендуется соблюдать скрытность.</Russian>
+                <French>L'otage sera exécuté dans les 5 minutes si BLUFOR est détecté dans la zone. La discrétion est recommandée.</French>
+                <Chinese>若 BLUFOR 在本區域內被發現，人質將在 5 分鐘內被處決。建議謹慎行動。</Chinese>
+                <Spanish>El rehén será ejecutado en un plazo de 5 minutos si BLUFOR es detectado en la zona. Se recomienda discreción.</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_rescuehostage_brief">
                 <Original>Alpha 1-1, OPFOR is holding a hostage near %1. Move in and rescue him. Discretion is advised.</Original>

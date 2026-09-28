@@ -164,7 +164,7 @@ private _clearIcons = {
     #define CONFIRM   1.5     // knowsAbout for a confirmed ID (engine scale: 0 unknown .. 4 identified)
     #define DET_RANGE 300     // nearTargets query radius: how far a cordon guard's live fix on the player counts
     #define DET_FRESH 5       // engine re-fixes a target's nearTargets age every few seconds, so a tighter gate drops a watched player between refreshes; matches OPCOM_TICK_PERIOD (arma_engine_gotchas.md)
-    #define CLOCK_BASE 180    // armed once and never called off
+    #define CLOCK_BASE 300    // armed once and never called off
     #define CONFIRM_HOLD 3    // seconds a sighting must hold unbroken before arming -- short, so the guard's knowsAbout cannot drain out from under the hold
 
     // Held off the alarm and fired only on the freed branch: the execution clock is a race to wipe the
