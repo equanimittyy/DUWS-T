@@ -1030,6 +1030,22 @@ from and re-spawned them nearer. The ceiling was not one of those answers and st
 still run on all of it (`fnc_civ_handler_ravage.sqf`, `fnc_civ_handler_wbk.sqf`), which is why
 `fnc_civ_recycle.sqf` is still in the tree.
 
+### A crowd walks the roadside
+
+Every civilian in a town walks, and none of them stands still (`server/civilian/fnc_civ_wp_Tomata.sqf`).
+The route starts at the nearest road within 100 m of the civilian and follows connected road segments
+for 75–225 m, then comes back. The walker keeps to one side of the direction of travel, so the outbound
+leg is on one side of the street and the return leg is on the other.
+
+There is one waypoint per road segment, because the foot pathfinder takes the shortest line between two
+waypoints and sends a walker through yards and between houses. Each waypoint sits half the road's width
+from the centreline. A knee-height ray from the centreline pulls the waypoint in to 1 m short of a wall,
+fence or house. Bridges and points over water are left out.
+
+The waypoints have no timeout, because a pause at each point reads as a civilian who idles. A civilian
+with no road in reach walks a short circuit on open ground instead. The route is session state: a fill,
+a conversation and a panic calm-down each draw a new one.
+
 ### Ordering
 
 Civilian generation is a step of zone generation, not a parallel system racing it. The kick-off lives

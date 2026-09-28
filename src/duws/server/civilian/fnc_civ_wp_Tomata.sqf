@@ -1,7 +1,8 @@
 // Locality: server -- waypoints are ignored unless the group is local.
 /*
-    Gives a freshly spawned crowd something to do: every civilian walks a short circuit near where
-    it spawned. Params: [_groups, _buildings].
+    Gives a freshly spawned crowd something to do: every civilian walks the roadside near where it
+    spawned, out along one side of the street and back along the other. With no road in reach, a
+    civilian walks a short circuit on open ground instead. Params: [_groups, _buildings].
 */
 if (!isServer) exitWith {};
 
@@ -9,13 +10,14 @@ if (!isServer) exitWith {};
 // not trace the same path, short enough to keep the crowd in the cluster the spawn packed it
 // into -- waypoints drawn across the whole town are what had civilians jogging between postcodes.
 #define ROAM_RADIUS 60
+#define ROAD_REACH 100
+#define ROUTE_LENGTH 150
 
 params ["_groups", "_buildings"];
 
 _buildings = _buildings select {!isNull _x && {_x isKindOf "Building"}};
 
-// Water is the one surface worth rejecting: an unreachable waypoint inland is left behind by the
-// timeout, but a coastal town will happily walk someone into the sea.
+// Water is rejected because a coastal town would otherwise walk someone into the sea.
 private _fnc_strollPos = {
     params ["_origin"];
     private _pos = _origin;
@@ -26,8 +28,54 @@ private _fnc_strollPos = {
     _pos
 };
 
+// One waypoint per segment: the foot pathfinder takes the shortest line, so sparse ones cut through
+// yards. The side is relative to travel, so the reversed leg walks the far side of the street.
+private _fnc_verge = {
+    params ["_leg", "_side"];
+    private _points = [];
+    {
+        private _dir = if (_forEachIndex < count _leg - 1) then {
+            _x getDir (_leg select (_forEachIndex + 1))
+        } else {
+            (_leg select (_forEachIndex - 1)) getDir _x
+        };
+        private _c = getPosATL _x;
+        private _w = _c getPos [((getRoadInfo _x) select 1) / 2, _dir + _side];
+        // Knee height clears a kerb but not a garden wall.
+        private _hit = lineIntersectsSurfaces [AGLToASL [_c select 0, _c select 1, 0.5], AGLToASL [_w select 0, _w select 1, 0.5], objNull, objNull, true, 1, "GEOM"];
+        if !(_hit isEqualTo []) then {
+            _w = _c getPos [((_c distance2D ((_hit select 0) select 0)) - 1) max 0, _dir + _side];
+        };
+        if (!surfaceIsWater _w) then { _points pushBack _w };
+    } forEach _leg;
+    _points
+};
+
+// Bridges are left out: a verge point beside the deck is over the valley below it.
+private _fnc_roadRoute = {
+    params ["_unit"];
+    private _here = [getPos _unit, ROAD_REACH] call BIS_fnc_nearestRoad;
+    if (isNull _here || {(getRoadInfo _here) select 8}) exitWith { [] };
+    private _route = [_here];
+    private _walked = 0;
+    private _goal = ROUTE_LENGTH / 2 + random ROUTE_LENGTH;
+    while { _walked < _goal } do {
+        private _next = (roadsConnectedTo _here) select { !(_x in _route) && {!((getRoadInfo _x) select 8)} };
+        if (_next isEqualTo []) exitWith {};
+        private _step = selectRandom _next;
+        _walked = _walked + (_here distance2D _step);
+        _route pushBack _step;
+        _here = _step;
+    };
+    if (count _route < 2) exitWith { [] };
+    private _side = selectRandom [90, -90];
+    private _back = +_route;
+    reverse _back;
+    ([_route, _side] call _fnc_verge) + ([_back, _side] call _fnc_verge)
+};
+
 // Zombies keep the building-to-building hunt; a living town strolls instead, because a walking pace
-// and a smoke break are what a living town looks like, and neither reads as undead.
+// is what a living town looks like and does not read as undead.
 private _fnc_hunt = {
     params ["_group", "_buildings"];
     if !(_buildings isEqualTo []) then {
@@ -68,27 +116,33 @@ private _fnc_hunt = {
     _group setBehaviour "SAFE";
     _group setSpeedMode "LIMITED";
 
-    private _origin = getPos _unit;
+    private _points = [_unit] call _fnc_roadRoute;
+    if (_points isEqualTo []) then {
+        private _origin = getPos _unit;
+        for "_i" from 1 to (2 + floor random 2) do { _points pushBack ([_origin] call _fnc_strollPos) };
+    };
+
     private _first = [];
-    for "_i" from 1 to (2 + floor random 2) do {
-        private _wp = _group addWaypoint [[_origin] call _fnc_strollPos, 0];
+    {
+        private _wp = _group addWaypoint [_x, 0];
         if (_first isEqualTo []) then { _first = _wp };
         _wp setWaypointType "MOVE";
         _wp setWaypointSpeed "LIMITED";
         _wp setWaypointBehaviour "SAFE";
         _wp setWaypointCombatMode "GREEN";
-        // Short and varied, not a flat minute: the pause is what makes a walker read as someone
-        // going somewhere rather than a patrol on a loop.
-        _wp setWaypointTimeout [10, 30, 60];
-        _wp setWaypointCompletionRadius 5;
-    };
+        _wp setWaypointCompletionRadius 3;
+    } forEach _points;
 
-    private _cycle = _group addWaypoint [_origin, 0];
+    private _cycle = _group addWaypoint [_points select 0, 0];
     _cycle setWaypointType "CYCLE";
     _cycle setWaypointSpeed "LIMITED";
     _cycle setWaypointBehaviour "SAFE";
     _cycle setWaypointCombatMode "GREEN";
-    _cycle setWaypointCompletionRadius 5;
+    _cycle setWaypointCompletionRadius 3;
+
+    // The call-over and the panic delete the old circuit, which leaves the group's waypoint index
+    // where it was, so a shorter new circuit starts past its own end and the civilian stands.
+    _group setCurrentWaypoint _first;
 
     // The call-over ends on a doStop so the civilian stands still to be spoken to, and a stopped
     // unit ignores its group's waypoints until it is given a move of its own -- new orders do not
