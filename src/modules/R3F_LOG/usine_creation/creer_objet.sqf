@@ -7,8 +7,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Modified 2026-09-27 for DUWS_T: each new build is reported to the server, which files it under
- * its factory for the campaign save. (GPLv3 section 5a modification notice.)
+ * Modified for DUWS_T (GPLv3 section 5a modification notice):
+ * - 2026-09-27: each new build is reported to the server, which files it under its factory for the
+ *   campaign save.
+ * - 2026-09-28: a factory creates nothing while its site is contested.
  */
 
 if (R3F_LOG_mutex_local_verrou) then
@@ -27,6 +29,8 @@ else
 	_usine = uiNamespace getVariable "R3F_LOG_dlg_LO_usine";
 	
 	if (lbCurSel R3F_LOG_IDC_dlg_LO_liste_objets == -1) exitWith {R3F_LOG_mutex_local_verrou = false;};
+	// DUWS: no build while the factory's site is contested (fnc_site_build.sqf).
+	if ([_usine] call DUWS_fnc_buildContested) exitWith {hint localize "STR_DUWS_T_site_contested"; R3F_LOG_mutex_local_verrou = false;};
 	_classe = lbData [R3F_LOG_IDC_dlg_LO_liste_objets, lbCurSel R3F_LOG_IDC_dlg_LO_liste_objets];
 	
 	if (_classe != "") then

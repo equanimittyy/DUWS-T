@@ -50,6 +50,9 @@ DUWS_fnc_zoneRedeploy = {
     private _owner = remoteExecutedOwner;
     private _key = _flg getVariable ["DUWS_buildSite", ""];
     if (_key == "" || {!([_key] call fnc_zone_bluforHeld)}) exitWith {};
+    if ([_key] call DUWS_fnc_opcom_siteContested) exitWith {
+        (localize "STR_DUWS_T_site_contested") remoteExec ["hint", _owner];
+    };
     // DUWS_fnc_manStatics sleeps, so a second click in that window would man the same empty guns and charge again.
     if (_flg getVariable ["DUWS_redeployBusy", false]) exitWith {
         (localize "STR_DUWS_T_ZONE_REDEPLOY_BUSY") remoteExec ["hint", _owner];

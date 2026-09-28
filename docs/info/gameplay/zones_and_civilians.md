@@ -356,6 +356,16 @@ so the factory works only while BLUFOR hold the zone. When OPFOR retake the zone
 from them. When BLUFOR take the zone back, the builds count against the flag again. A base's factory stays open for
 as long as the base stands.
 
+**A contested site refuses its factory and its redeploy.** The contest is the one that disables Reinforce and Fortify
+(`DUWS_fnc_opcom_siteContested`). The HQ and each FOB are sites for it too, so the reach of a base is its 500 m site
+radius (`base_garrison_sleep_range`) plus one grid cell. While the contest holds, the site's factory creates nothing and
+takes no sale, Clear Fortifications removes nothing, and the 2 CP redeploy of the zone, the HQ or a FOB charges
+nothing. The actions stay visible, and each one tells the player "Contested: enemies nearby." The server checks Clear
+and the redeploys (`DUWS_fnc_siteBuildClear`, `DUWS_fnc_zoneRedeploy`, `fnc_redeployHQUnits.sqf`,
+`fnc_redeployFOBUnits.sqf`). R3F creates and sells on the client, so `DUWS_fnc_opcom_contestedUpdate` publishes the
+contested site keys (`DUWS_contestedSites`) when they change. R3F's create and sale scripts test the factory's site
+against that list (`DUWS_fnc_buildContested`).
+
 **The credits are R3F's own running balance.** R3F spends a factory's credits on a build and refunds them on a
 sale. A destroyed build is lost: nothing refunds it. A build costs at most 150 credits
 (`usine_creation/determiner_cout_creation.sqf`). What adds credits depends on the site:

@@ -9,8 +9,8 @@ DUWS_fnc_opcom_beliefIsSighting = {
     _key isEqualType "" && {(_key find ":") >= 1}
 };
 
-// Contested: a BLUFOR sighting within one grid cell of the site's edge -- some OPFOR knows BLUFOR is there. Zones
-// and towns both, so a garrison buy reads the same rule wherever it lands.
+// Contested: a BLUFOR sighting within one grid cell of the site's edge -- some OPFOR knows BLUFOR is there. Zones,
+// towns and bases alike, so a garrison buy and a base's upkeep read the same rule wherever they land.
 DUWS_fnc_opcom_contestedUpdate = {
     private _sighted = [];
     {
@@ -20,7 +20,7 @@ DUWS_fnc_opcom_contestedUpdate = {
     if (_sighted isNotEqualTo []) then {
         {
             private _key = _x;
-            if ((_key select [0, 5]) == "zone_" || {(_key select [0, 5]) == "town_"}) then {
+            if ((_key select [0, 5]) in ["zone_", "town_"] || {(_key select [0, 4]) == "FOB_"} || {_key == "HQ"}) then {
                 private _site = [_key] call fnc_site_at;
                 private _pos = _site getOrDefault ["pos", []];
                 private _reach = (_site getOrDefault ["radius", 0]) + OPCOM_GRID_CELL;
@@ -31,9 +31,17 @@ DUWS_fnc_opcom_contestedUpdate = {
         } forEach keys DUWS_sites;
     };
     DUWS_opcom_contested = _contested;
+    // R3F's create and sale run on the clients, which cannot read this server-side store.
+    private _keys = keys _contested;
+    _keys sort true;
+    if (_keys isNotEqualTo (missionNamespace getVariable ["DUWS_contestedSites", []])) then {
+        DUWS_contestedSites = _keys;
+        publicVariable "DUWS_contestedSites";
+    };
 };
 
+// Nil until OPCOM's loop starts, a few seconds after WARCOM init.
 DUWS_fnc_opcom_siteContested = {
     params ["_key"];
-    DUWS_opcom_contested getOrDefault [_key, false]
+    !isNil "DUWS_opcom_contested" && {DUWS_opcom_contested getOrDefault [_key, false]}
 };

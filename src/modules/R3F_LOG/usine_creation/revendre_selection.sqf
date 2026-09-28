@@ -9,9 +9,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Modified 2026-09-28 for DUWS_T: the sale reads a factory without cargo, such as a zone flag, as
- * holding nothing, so the sale completes instead of leaving the build marked as in transit.
- * (GPLv3 section 5a modification notice.)
+ * Modified for DUWS_T (GPLv3 section 5a modification notice):
+ * - 2026-09-28: the sale reads a factory without cargo, such as a zone flag, as holding nothing,
+ *   so the sale completes instead of leaving the build marked as in transit.
+ * - 2026-09-28: a factory takes no sale while its site is contested.
  */
 
 if (R3F_LOG_mutex_local_verrou) then
@@ -26,6 +27,9 @@ else
 	
 	_objet = R3F_LOG_objet_selectionne;
 	_usine = _this select 0;
+	
+	// DUWS: no sale while the factory's site is contested (fnc_site_build.sqf).
+	if ([_usine] call DUWS_fnc_buildContested) exitWith {hint localize "STR_DUWS_T_site_contested"; R3F_LOG_mutex_local_verrou = false;};
 	
 	if (!(isNull _objet) && !(_objet getVariable "R3F_LOG_disabled")) then
 	{

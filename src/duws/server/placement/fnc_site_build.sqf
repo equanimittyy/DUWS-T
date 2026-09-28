@@ -1,5 +1,5 @@
-// Locality: server, except DUWS_fnc_inBaseRing, DUWS_fnc_canSellTo and DUWS_fnc_buildCrewFree. A held zone's flag, the
-// HQ and each FOB are R3F factories for fortifications (docs/info/gameplay/zones_and_civilians.md).
+// Locality: server, except DUWS_fnc_inBaseRing, DUWS_fnc_canSellTo, DUWS_fnc_buildCrewFree and DUWS_fnc_buildContested. A
+// held zone's flag, the HQ and each FOB are R3F factories for fortifications (docs/info/gameplay/zones_and_civilians.md).
 //
 // A factory's credits are R3F's own running balance: R3F spends them on a build and refunds them on a sale, and the
 // callers add an allowance and the refund of a clear or of a rejected new build. A destroyed build is lost. Builds are filed under `<siteKey>_builds`,
@@ -69,6 +69,9 @@ DUWS_fnc_baseBuildGrant = {
 DUWS_fnc_siteBuildClear = {
     params ["_factory"];
     if (isNull _factory || {_factory getVariable ["R3F_LOG_CF_disabled", true]}) exitWith {};
+    if ([_factory getVariable ["DUWS_buildSite", ""]] call DUWS_fnc_opcom_siteContested) exitWith {
+        (localize "STR_DUWS_T_site_contested") remoteExec ["hint", remoteExecutedOwner];
+    };
     private _key = _factory getVariable ["DUWS_buildKey", ""];
     if (_key == "") exitWith {};
     private _members = (DUWS_compositions getOrDefault [_key, []]) select { !isNull _x };
@@ -156,6 +159,12 @@ DUWS_fnc_buildCrewSite = {
 DUWS_fnc_inBaseRing = {
     params ["_pos"];
     ((Array_of_FOBpos + [PosOfBLUHQ]) findIf { (_x distance2D _pos) <= DUWS_base_keep_radius }) >= 0
+};
+
+// Broadcast: R3F's create and sale run it on every client.
+DUWS_fnc_buildContested = {
+    params ["_factory"];
+    (_factory getVariable ["DUWS_buildSite", ""]) in (missionNamespace getVariable ["DUWS_contestedSites", []])
 };
 
 // Broadcast: R3F's direct sale runs it on every client. A site's build needs no range, as the drop check already holds

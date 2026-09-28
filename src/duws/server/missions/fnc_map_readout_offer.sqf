@@ -13,8 +13,7 @@ private _tier = if (_isZone) then { [_key] call fnc_zone_tier } else { [_id] cal
 private _top = count ([DUWS_townSpawnTiersBlu, DUWS_zoneSpawnTiersBlu] select _isZone);
 
 [
-	// Nil until OPCOM's loop starts, a few seconds after WARCOM init.
-	!isNil "DUWS_opcom_contested" && {[_key] call DUWS_fnc_opcom_siteContested},
+	[_key] call DUWS_fnc_opcom_siteContested,
 	([_key] call DUWS_fnc_garrisonStrength) < 1 && {([_key] call DUWS_fnc_garrisonReinforceCount) > 0},
 	_tier < _top
 ]

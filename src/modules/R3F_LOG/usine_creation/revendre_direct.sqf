@@ -15,6 +15,7 @@
  *   is friendly AI outside every player's group can be sold, and the server deletes that crew first.
  * - 2026-09-28: the sale reads a factory without cargo, such as a zone flag, as holding nothing,
  *   so the sale completes instead of leaving the build marked as in transit.
+ * - 2026-09-28: a factory takes no sale while its site is contested.
  */
 
 if (R3F_LOG_mutex_local_verrou) then
@@ -44,6 +45,9 @@ else
 			_distance_usine = _objet distance _x;
 		};
 	} forEach R3F_LOG_CF_liste_usines;
+	
+	// DUWS: no sale while the factory's site is contested (fnc_site_build.sqf).
+	if ([_usine] call DUWS_fnc_buildContested) exitWith {hint localize "STR_DUWS_T_site_contested"; R3F_LOG_mutex_local_verrou = false;};
 	
 	if (!isNull _usine && !isNull _objet) then
 	{

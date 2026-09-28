@@ -11,6 +11,10 @@ if (missionNamespace getVariable ["HQ_redeploy_busy", false]) exitWith {
     [localize "STR_DUWS_T_HQ_REDEPLOY_BUSY"] remoteExec ["hint", 0];
 };
 
+if (["HQ"] call DUWS_fnc_opcom_siteContested) exitWith {
+    (localize "STR_DUWS_T_site_contested") remoteExec ["hint", remoteExecutedOwner];
+};
+
 if (commandpointsblu1 < 2) exitWith {
     [localize "STR_DUWS_T_e95mc4lv"] remoteExec ["hint", [0,-2] select isDedicated];
 };

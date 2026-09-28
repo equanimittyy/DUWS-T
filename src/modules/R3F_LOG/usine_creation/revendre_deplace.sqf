@@ -6,6 +6,9 @@
  * This program is free software under the terms of the GNU General Public License version 3.
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Modified 2026-09-28 for DUWS_T: a factory takes no sale while its site is contested.
+ * (GPLv3 section 5a modification notice.)
  */
 
 if (R3F_LOG_mutex_local_verrou) then
@@ -20,6 +23,9 @@ else
 	
 	_objet = R3F_LOG_joueur_deplace_objet;
 	_usine = [_objet, 5] call R3F_LOG_FNCT_3D_cursorTarget_virtuel;
+	
+	// DUWS: no sale while the factory's site is contested (fnc_site_build.sqf).
+	if ([_usine] call DUWS_fnc_buildContested) exitWith {hint localize "STR_DUWS_T_site_contested"; R3F_LOG_mutex_local_verrou = false;};
 	
 	if (!isNull _usine && {
 		!(_usine getVariable ["R3F_LOG_CF_disabled", true]) && alive _usine && (vectorMagnitude velocity _usine < 6) &&

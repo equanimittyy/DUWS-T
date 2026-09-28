@@ -14,6 +14,10 @@ if ((_fob getVariable ["FOB_guard_busy", false]) || {_fob getVariable ["FOB_fort
     [localize "STR_DUWS_T_FOB_REDEPLOY_BUSY"] remoteExec ["hint", 0];
 };
 
+if ([_fob getVariable ["DUWS_buildSite", ""]] call DUWS_fnc_opcom_siteContested) exitWith {
+    (localize "STR_DUWS_T_site_contested") remoteExec ["hint", remoteExecutedOwner];
+};
+
 if (commandpointsblu1 < 2) exitWith {
     [localize "STR_DUWS_T_e95mc4lv"] remoteExec ["hint", [0,-2] select isDedicated];
 };

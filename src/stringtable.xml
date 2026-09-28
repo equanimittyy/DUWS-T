@@ -2427,6 +2427,10 @@
                 <Original>Contested: enemies nearby</Original>
                 <English>Contested: enemies nearby</English>
             </Key>
+            <Key ID="STR_DUWS_T_site_contested">
+                <Original>Contested: enemies nearby.</Original>
+                <English>Contested: enemies nearby.</English>
+            </Key>
             <Key ID="STR_DUWS_T_mapview_buy_no_ap">
                 <Original>Not enough Army Power.</Original>
                 <English>Not enough Army Power.</English>
