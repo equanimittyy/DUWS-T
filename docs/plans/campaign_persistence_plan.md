@@ -203,7 +203,7 @@ closing the game, so the periodic timer is the only thing standing between an AL
 interval. Neither ever reaches zero players, so the idle gate below never fires for them.
 
 Singleplayer is the case where this changes the most, because **there is no save there today**:
-`enableSaving [false, false]` (`server/server_init.sqf:196`) removes the engine autosave *and* the
+`enableSaving [false, false]` (`INIT.sqf:9`) removes the engine autosave *and* the
 pause menu's Save & Exit, so quitting a singleplayer campaign currently loses it outright. That
 line stays — an engine save and a snapshot are two sources of truth that would drift apart — which
 means the snapshot has to carry the whole job, and a player pressing Escape expecting to save needs
@@ -259,7 +259,7 @@ snapshot. The rows below are why the engine save could not be the mechanism.
 
 | Problem | Where |
 |---|---|
-| Engine autosave and the save menu are switched off at boot | `server/server_init.sqf:196` |
+| Engine autosave and the save menu are switched off at boot | `INIT.sqf:9` |
 | `civ_locations` stores Location objects in the mission namespace, which the mission's own rule forbids because the namespace is what a save serialises | `server/civilian/fnc_civ_init_Tomata.sqf:170`, rule in [`info/arma_engine_gotchas.md`](../info/architecture/arma_engine_gotchas.md) |
 | Consumable support unlocks stay client-local by design, and what each one charged is recorded only on the buyer's machine | `client/supports/fnc_supports_init.sqf` |
 | The MHQ is a broadcast object handle (`MHQ1 = _this; publicVariable "MHQ1"`) with no record of which vehicle it was | `client/dialog/fnc_MHQ_select.sqf:20-22` |
