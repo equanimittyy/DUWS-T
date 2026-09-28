@@ -25,6 +25,7 @@ DUWS_fnc_zoneFortGrant = {
         private _flg = [_zoneKey] call DUWS_fnc_zoneFlag;
         private _tier = [_zoneKey] call fnc_zone_tier;
         if (!isNull _flg) then {
+            _flg setVariable ["R3F_LOG_CF_disabled", false, true];
             _flg setVariable ["R3F_LOG_CF_credits", (_flg getVariable ["R3F_LOG_CF_credits", 0])
                 + (DUWS_zoneBuildPoints select (_tier min _new)) - (DUWS_zoneBuildPoints select (_tier min _old)), true];
         };

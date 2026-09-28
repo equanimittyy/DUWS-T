@@ -36,11 +36,13 @@ DUWS_fnc_siteBuildArm = {
     }] remoteExec ["spawn", 0, format ["DUWS_siteBuild_%1", netId _factory]];
 };
 
-// A base is BLUFOR's for as long as it stands, so its factory opens at once with the whole allowance.
+// A base is BLUFOR's for as long as it stands, so its factory opens with the whole allowance once Fortification I is
+// bought.
 DUWS_fnc_baseBuildArm = {
     params ["_building", "_siteKey"];
-    _building setVariable ["R3F_LOG_CF_disabled", false, true];
-    _building setVariable ["R3F_LOG_CF_credits", DUWS_baseBuildPoints select (missionNamespace getVariable ["DUWS_fortLevel", 0]), true];
+    private _fort = missionNamespace getVariable ["DUWS_fortLevel", 0];
+    _building setVariable ["R3F_LOG_CF_disabled", _fort == 0, true];
+    _building setVariable ["R3F_LOG_CF_credits", DUWS_baseBuildPoints select _fort, true];
     [_building, _siteKey] call DUWS_fnc_siteBuildArm;
 };
 
@@ -48,6 +50,7 @@ DUWS_fnc_baseBuildGrant = {
     params ["_old", "_new"];
     private _step = (DUWS_baseBuildPoints select _new) - (DUWS_baseBuildPoints select _old);
     {
+        _x setVariable ["R3F_LOG_CF_disabled", false, true];
         _x setVariable ["R3F_LOG_CF_credits", (_x getVariable ["R3F_LOG_CF_credits", 0]) + _step, true];
     } forEach (([bluHQ_object] + Array_of_FOBS) select { !isNull _x });
 };

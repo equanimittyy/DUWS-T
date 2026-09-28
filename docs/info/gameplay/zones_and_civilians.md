@@ -338,10 +338,15 @@ friendly AI outside every player's group is the exception (`DUWS_fnc_buildCrewFr
 sale have the server delete that crew first, and the drop mans the gun again. An enemy gunner, a squadmate or a
 drone's own AI keeps the gun where it is.
 
-**A zone's factory follows ownership.** `fnc_zone_flag_logistics` sets the factory gate (`R3F_LOG_CF_disabled`)
-with the carry gate, so the factory works only while BLUFOR hold the zone. When OPFOR retake the zone, the builds
-stay and OPFOR can fight from them. When BLUFOR take the zone back, the builds count against the flag again. A
-base's factory is open for as long as the base stands.
+**A factory opens only with Fortification I.** Until the team buys it, every factory's gate (`R3F_LOG_CF_disabled`)
+stays closed, which hides the Open, Clear and sell-back actions. `DUWS_fnc_baseBuildArm` closes a new base's factory
+when no level is owned, and the first purchase opens every base and held zone factory (`DUWS_fnc_baseBuildGrant`,
+`DUWS_fnc_zoneFortGrant`).
+
+**A zone's factory also follows ownership.** `fnc_zone_flag_logistics` sets the factory gate with the carry gate,
+so the factory works only while BLUFOR hold the zone. When OPFOR retake the zone, the builds stay and OPFOR can fight
+from them. When BLUFOR take the zone back, the builds count against the flag again. A base's factory stays open for
+as long as the base stands.
 
 **The credits are R3F's own running balance.** R3F spends a factory's credits on a build and refunds them on a
 sale. A destroyed build is lost: nothing refunds it. A build costs at most 150 credits
@@ -358,8 +363,8 @@ sale. A destroyed build is lost: nothing refunds it. A build costs at most 150 c
 | Allowance (R3F credits) | 0 | 250 | 500 | 1000 | 2000 |
 
 The zone table gives the total allowance at each tier. A zone gets the allowance of the lower of its tier and the
-Fortification level, so a zone at tier III with Fortification I has 250. Tier 0 and no Fortification both give no
-allowance, so the player must buy a garrison tier and Fortification I before they can fortify a zone.
+Fortification level, so a zone at tier III with Fortification I has 250. Tier 0 gives no allowance, so the player
+must buy a garrison tier and Fortification I before they can fortify a zone.
 
 | Fortification level | none | I | II | III | IV |
 |---|---|---|---|---|---|
@@ -367,12 +372,12 @@ allowance, so the player must buy a garrison tier and Fortification I before the
 | Price | none | 10 CP | 15 CP, 15 AP | 25 CP, 20 AP | 30 CP, 25 AP |
 | BLUFOR AP tier that shows the row | none | 2 | 3 | 4 | 5 |
 
-**Fortification is a permanent support that sets the bases' allowance and caps the zones'.** The team buys its
-levels in order (`fort1` to `fort4`, `client/supports/fnc_supports_init.sqf`). With no level, a base has no
-allowance. On each purchase, `fnc_support_perm_grant` recounts `DUWS_fortLevel` from `DUWS_support_permanent`. It
-then adds the step to the HQ, to every standing FOB, and to every held zone whose tier is above the old level. A FOB
-built later gets the whole allowance of the current level. A restore recounts the level from the restored record,
-as it does for the radio and intel levels.
+**Fortification is a permanent support that sets the bases' allowance and caps the zones'.** The team buys its levels
+in order (`fort1` to `fort4`, `client/supports/fnc_supports_init.sqf`). With no level, no factory opens. On each
+purchase, `fnc_support_perm_grant` recounts `DUWS_fortLevel` from `DUWS_support_permanent`. It then adds the step to
+the HQ, to every standing FOB, and to every held zone whose tier is above the old level. A FOB built later gets the
+whole allowance of the current level. A restore recounts the level from the restored record, as it does for the radio
+and intel levels.
 
 **A build belongs to the factory that made it.** R3F reports each build to `DUWS_fnc_buildRegister`, which files it
 under the factory's own key, `<siteKey>_builds`. That key is separate from the site's key, so a clear removes the
