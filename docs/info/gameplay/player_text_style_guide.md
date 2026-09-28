@@ -40,6 +40,7 @@ language may add one after the intact `Overlord` or `Allseer` (`Overlordovi`).
 | `<German>` | du; Overlord to the squad: ihr | „…“ | Decimal comma; `%1 m`; a count or unknown-gender placeholder goes after a colon (`Zerstört: %1`); an English em dash becomes ` – ` | vehicle Fahrzeug, HQ stays HQ, task force Task Force, mortar Mörser |
 | `<Polish>` | ty; Overlord to the squad: plural imperatives | „…” | Decimal comma; `%1 m`; a count or unknown-gender placeholder goes after a colon (`Zniszczono: %1`); no gendered past tense aimed at the player, masculine where it cannot be avoided | vehicle pojazd, HQ stays HQ, town miejscowość, hardpoint punkt oporu |
 | `<Czech>` (also serves Slovak) | ty; Overlord to the squad: plural imperatives | „…“ | Decimal comma; `%1 m`; a count or unknown-gender placeholder goes after a colon (`Zničeno: %1`); no gendered past tense aimed at the player, masculine where it cannot be avoided | vehicle vozidlo, HQ stays HQ, town obec, hardpoint opěrný bod |
+| `<Russian>` | ты; Overlord to the squad: plural imperatives | «…» | Decimal comma; `%1 м`; a count or unknown-gender placeholder goes after a colon (`Уничтожено: %1`); no gendered past tense aimed at the player; a radio call names the addressee first (`Overlord, это Allseer.`); Overlord and Allseer stay uninflected | vehicle техника, HQ штаб, town населённый пункт, UAV БПЛА |
 
 ## Military-like language
 
