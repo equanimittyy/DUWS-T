@@ -941,9 +941,15 @@ The log keeps the detail; the hint keeps the number.
 A dedicated server restarting unattended has no game master connected, and coming back up on its own
 campaign is the checkpoint the whole dedicated story rests on. So the screen has a timeout, on the
 same pattern as every other setup gate, and **the timeout loads the newest valid snapshot that has
-not ended when one exists and starts a new campaign when none does.** The bound is 30 seconds while no
-human is connected and 600 once one is, so an unattended restart is not delayed by a screen nobody can
-see and a host is not raced past by a timer.
+not ended when one exists.** The bound is 30 seconds while no human is connected and 600 once one is,
+so an unattended restart is not delayed by a screen nobody can see and a host is not raced past by a
+timer.
+
+**When nothing loads, the screen stays up until the game master answers it.** Nothing loads when there
+are no saves, when every save is refused, or when the newest save's payload does not parse. A new
+campaign needs the game master's picks on the setup screens anyway, so a timeout into New Game only
+moves the wait to the faction screen. The load screen is where the game master sees why each save was
+refused, for example a faction mod that is not loaded.
 
 Antistasi makes the same timeout a mission parameter defaulting to off (`autoLoadLastGame`,
 `-1` through 600 seconds). Here it defaults to on, because a server that will not restart into its
