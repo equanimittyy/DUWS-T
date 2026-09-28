@@ -2068,6 +2068,7 @@ DUWS_fnc_opcom_blockGain = { 1 };
 DUWS_fnc_opcom_cellDist = { 9 };
 test_ene = 4;
 DUWS_fnc_opcom_blockForce = { [0, test_ene] };
+DUWS_fnc_opcom_packageMix = { 1 };
 private _fnc_unit = { params ["_id", "_x0", "_force"]; [["free", _id], [_x0, 0, 0], _force, "inf", [], 0, 4, 1] };
 private _row = [["hire", "rifles", "z"], [0, 0, 0], 8, "inf", [], 10, 10, 1];
 private _stand = [[[], true, 0, 0, 0]];
@@ -2109,6 +2110,12 @@ private _fnc_order = { (_this select 0) apply { ((_x select 0) select 0) select 
         call _fnc_order, [2, 1, 3]] call fnc_assertEq;
 ["attackPackage: a boosted vehicle carries its boost into the Value",
     ([[[2, 0, 4] call _fnc_veh], _stand, 0, 1] call _fnc_pack) select 2, 35] call fnc_assertClose;
+test_ene = 20;
+DUWS_fnc_opcom_packageMix = { params ["_row", "_taken"]; 1 / (1 + ({ _x isEqualTo _row } count _taken)) };
+["attackPackage: a hire taken counts toward the mix, so the next row joins before it repeats",
+    [[_row, [["hire", "weapons_team", "z"], [0, 0, 0], 8, "inf", [], 10, 12, 1]]] call _fnc_pack call _fnc_order,
+    ["rifles", "weapons_team", "rifles", "weapons_team"]] call fnc_assertEq;
+DUWS_fnc_opcom_packageMix = { 1 };
 DUWS_fnc_opcom_moveDelay = { params ["", "", ["_h", 0]]; [1, 0.5] select (_h == 60) };
 ["attackPackage: a half-life passed in, as a QRF's, reaches each source's delay",
     ([[[1, 0, 4] call _fnc_unit], [0, 0, 0], [0, 0, 0], 20, 0, _stand, 0, "QRF X", -1, 60] call DUWS_fnc_opcom_attackPackage) select 2,

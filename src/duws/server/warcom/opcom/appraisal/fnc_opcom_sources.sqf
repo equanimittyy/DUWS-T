@@ -52,6 +52,14 @@ DUWS_fnc_opcom_hireRowsSweep = {
     _out
 };
 
+DUWS_fnc_opcom_packageMix = {
+    params ["_row", "_taken"];
+    (["roster", DUWS_fnc_opcom_rosterSweep] call DUWS_fnc_opcom_tickCached) params ["_counts", "_open"];
+    _counts = +_counts;
+    { _counts set [_x, (_counts getOrDefault [_x, 0]) + 1] } forEach _taken;
+    [["recruitMix"] call DUWS_fnc_opcom_archetypeTable, _counts, _row, _open] call DUWS_fnc_opcom_mixFactor
+};
+
 DUWS_fnc_opcom_freeSource = {
     params ["_t"];
     [["free", _t get "id"], _t get "pos", _t get "effForce", _t get "moveType", _t get "flags", 0,
@@ -125,9 +133,11 @@ DUWS_fnc_opcom_bestSources = {
 // -> [members, price, Value, P(win), Cost, names]: the units one pick sends into an attack, [] when they fall under
 // _floor. No-retreat punishes a muster that trickles in, so sources join best score first, a hire again for as long as
 // the wallet and the unit cap allow, until the bound force meets the ideal bar or the attack holds
-// OPCOM_ATTACK_UNITS. A member is [unit target, bucket, price], staged at the bucket DUWS_fnc_opcom_joinBucket would
-// name. A free unit serves once, as a member or as another's lift. The Value is the weakest member's, since the attack
-// goes only once its last unit is in. With nothing affordable the best source goes alone, so the pick can save for it.
+// OPCOM_ATTACK_UNITS. Each hire taken counts toward the roster its recruitMix factor reads: a mix read once per pick
+// let one row fill the whole package, as an assault of four MBTs. A member is [unit target, bucket, price], staged at
+// the bucket DUWS_fnc_opcom_joinBucket would name. A free unit serves once, as a member or as another's lift. The Value
+// is the weakest member's, since the attack goes only once its last unit is in. With nothing affordable the best source
+// goes alone, so the pick can save for it.
 // _buckets: [[rally, required, force, units, lambda], ...] as they stand (DUWS_fnc_opcom_attackBuckets). _vehicles: the
 // vehicles the attack already binds, which sets each further vehicle's OPCOM_ATTACK_VEHICLE_BOOST; -1 boosts none.
 // _ride: a member with no rally rides a land-taxi to DUWS_fnc_opcom_qrfDrop where one pays, else holds. A flag, not the
@@ -145,17 +155,32 @@ DUWS_fnc_opcom_attackPackage = {
             [[_x select 1, _x select 2, _x select 3] call DUWS_fnc_opcom_score, _forEachIndex];
     } forEach _rows;
     { _x sort false } forEach _ranks;
-    private _k = [0, 0];
+    private _all = +_ranks;
+    private _taken = [];
+    private _unmixed = _rows apply { (_x select 1) / ((_x select 0) select 7) };
+    private _fnc_remix = {
+        {
+            {
+                private _r = _rows select (_x select 1);
+                private _ref = (_r select 0) select 0;
+                if ((_ref select 0) isEqualTo "hire") then {
+                    _r set [1, (_unmixed select (_x select 1)) * ([_ref select 1, _taken] call DUWS_fnc_opcom_packageMix)];
+                    _x set [0, [_r select 1, _r select 2, _r select 3] call DUWS_fnc_opcom_score];
+                };
+            } forEach _x;
+            _x sort false;
+        } forEach _ranks;
+    };
     private _fnc_boost = { if (_vehicles < 0) then { 1 } else { OPCOM_ATTACK_VEHICLE_BOOST param [_vehicles, 1] } };
     // -> the rank the next source comes off, 0 infantry or 1 vehicle; -1 once both are spent.
     private _fnc_next = {
-        private _s = [0, 1] apply { ((_ranks select _x) param [_k select _x, [-1]]) select 0 };
+        private _s = _ranks apply { (_x param [0, [-1]]) select 0 };
         if ((_s select 0) < 0 && {(_s select 1) < 0}) exitWith { -1 };
         [0, 1] select ((_s select 1) * (call _fnc_boost) > (_s select 0))
     };
     private _fnc_row = {
         params ["_i"];
-        private _row = _rows select (((_ranks select _i) select (_k select _i)) select 1);
+        private _row = _rows select (((_ranks select _i) select 0) select 1);
         if (_i == 0) exitWith { _row };
         _row = +_row;
         _row set [1, (_row select 1) * (call _fnc_boost)];
@@ -231,15 +256,20 @@ DUWS_fnc_opcom_attackPackage = {
         private _b = call _fnc_bucket;
         private _c = [_row, _b, WARCOM_opfor_ap - _price] call _fnc_member;
         if ((_hire && {_hires <= 0}) || {(_src select 0) in _used} || {(_price + (_c select 1)) > WARCOM_opfor_ap}) then {
-            _k set [_i, (_k select _i) + 1];
+            (_ranks select _i) deleteAt 0;
         } else {
             [_src, _b, _c] call _fnc_take;
-            if (!_hire) then { _k set [_i, (_k select _i) + 1] };
+            if (_hire) then {
+                _taken pushBack ((_src select 0) select 1);
+                call _fnc_remix;
+            } else {
+                (_ranks select _i) deleteAt 0;
+            };
         };
         _i = call _fnc_next;
     };
     if (_members isEqualTo [] && {count _rows > 0}) then {
-        _k = [0, 0];
+        _ranks = _all;
         private _row = [call _fnc_next] call _fnc_row;
         private _b = call _fnc_bucket;
         [_row select 0, _b, [_row, _b, WARCOM_opfor_ap] call _fnc_member] call _fnc_take;
