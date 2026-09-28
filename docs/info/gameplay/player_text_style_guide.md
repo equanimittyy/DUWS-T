@@ -10,21 +10,30 @@ much of it are styled.
 falls back to `<Original>` when the active language has no tag. Edit the two in lockstep — changing
 only `<English>` leaves the old wording live for anyone whose game language isn't listed on that key.
 
-**The localised tags lag English on purpose.** The `<German>`, `<Spanish>` and `<Chinesesimp>` tags
-were translated from the pre-rework text and have not been carried through the English prose passes.
+**The German and Spanish tags lag English on purpose.** The `<German>` and `<Spanish>` tags were
+translated from the pre-rework text and have not been carried through the English prose passes.
 They still hold retired callsigns (`Action Squad`, `Overlord 1-1`, `Viper 1-5`), the old
 unnamed-department phrasing for Allseer, and pre-rework briefings whose timings and reward tags no
-longer match the English. This is known divergence, not corruption: do not treat a
-German/Spanish/Chinese tag that disagrees with `<English>` as a bug, and do not machine-translate the
-gap closed. Retranslation is a pass of its own, because the briefings encode gameplay numbers a
-translator has to check against the mission code rather than against the old text.
+longer match the English. This is known divergence, not corruption: do not treat a German or Spanish
+tag that disagrees with `<English>` as a bug, and do not machine-translate the gap closed.
+Retranslation is a pass of its own, because the briefings encode gameplay numbers a translator has
+to check against the mission code rather than against the old text. `<Chinesesimp>` had such a pass
+and matches the current English; the few `<Chinese>` (Traditional) tags are still stale.
 
 **What a translation keeps from English.** A translation pass fills only the language tags: it never
 changes `<Original>`, `<English>` or the set of `Key ID`s. Callsigns (`Alpha 1-1`, `Overlord`,
 `Allseer`) and the `BLUFOR`/`OPFOR` labels stay in English inside every language tag. For
 `Alpha 1-1` this is a code constraint, not only a style choice: `fnc_cs` replaces that literal only,
 so a translated callsign ignores the host's `duws_callsign`. Each translation keeps every `%n`
-placeholder of its English line; the order can change, because `format` substitutes by index.
+placeholder of its English line; the order can change, because `format` substitutes by index. A key
+whose text stays English (a callsign, a bare number) gets no language tag, so it falls back to
+`<Original>` and follows later English edits.
+
+**Simplified Chinese conventions.** Chinese text uses full-width punctuation, and ends with 。 only
+where the English line ends with a period. One half-width space separates a Chinese character from an
+adjacent Latin word, number or placeholder (`向 Alpha 1-1 报告`, `%1 米`); no space touches full-width
+punctuation. "Vehicle" is always 载具, and HQ is 总部, while FOB, CP, AP, HC and CAS stay as Latin
+acronyms.
 
 ## Military-like language
 
