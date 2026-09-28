@@ -52,8 +52,17 @@ private _towerGuards = missionNamespace getVariable ["HQ_redeploy_towerGuards", 
     };
 } forEach _towerGuards;
 
+// Dead gunners only: DUWS_fnc_buildCrewClear would also delete a drone's AI crew, which is the drone itself.
+private _buildKey = bluHQ_object getVariable ["DUWS_buildKey", ""];
+{
+    private _gun = _x;
+    { _gun deleteVehicleCrew _x } forEach ((crew _gun) select { !alive _x });
+} forEach (DUWS_compositions getOrDefault [_buildKey, []]);
+
 // Anchors are already in the namespace from the build; the routine reads them itself.
 call fnc_placeHQUnits;
+
+[DUWS_compositions getOrDefault [_buildKey, []], true] call DUWS_fnc_buildCrew;
 
 missionNamespace setVariable ["HQ_redeploy_busy", false];
 
