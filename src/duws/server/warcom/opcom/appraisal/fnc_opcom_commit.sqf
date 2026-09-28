@@ -100,7 +100,7 @@ DUWS_fnc_opcom_attackSweep = {
                 };
             };
         } forEach (missionNamespace getVariable ["DUWS_townGarrisonTier", []]);
-        if (DUWS_opcom_hqKnown && {["HQ"] call DUWS_fnc_opcom_captureHolds}) then {
+        if (DUWS_opcom_hqKnown && {WARCOM_zones_controled_by_BLUFOR isEqualTo []} && {["HQ"] call DUWS_fnc_opcom_captureHolds}) then {
             private _hp = (["HQ"] call fnc_site_at) getOrDefault ["pos", []];
             if (_hp isNotEqualTo []) then { ["HQ", _hp, _hp, "HQ"] call _fnc_consider };
         };
