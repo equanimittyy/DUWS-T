@@ -2355,10 +2355,6 @@
                 <Original>a civilian vehicle was taken</Original>
                 <English>a civilian vehicle was taken</English>
             </Key>
-            <Key ID="STR_DUWS_T_civ_rep_why_rapport">
-                <Original>OPCOM delivered supplies</Original>
-                <English>OPCOM delivered supplies</English>
-            </Key>
             <Key ID="STR_DUWS_T_civ_rep_why_other">
                 <Original>recent events</Original>
                 <English>recent events</English>
@@ -5707,6 +5703,10 @@
             <Key ID="STR_DUWS_T_OP_COMPROMISED_MSG">
                 <Original>Your position was revealed to OPFOR due to an enemy recon post</Original>
                 <English>Your position was revealed to OPFOR due to an enemy recon post</English>
+            </Key>
+            <Key ID="STR_DUWS_T_OPCOM_RAPPORT_DELIVERED">
+                <Original>We have reports that OPFOR delivered aid supplies to %1.</Original>
+                <English>We have reports that OPFOR delivered aid supplies to %1.</English>
             </Key>
             <Key ID="STR_DUWS_T_OPCOM_ARTY_INBOUND">
                 <Original>Be advised, enemy guns are firing on %1. Rounds will land soon. Clear the area.</Original>

@@ -99,7 +99,13 @@ DUWS_fnc_opcom_deliver = {
     switch (_kind) do {
         case "reinforce": { [_arg, "opcom_reinforce"] call fnc_town_garrison_reinforce };
         case "fortify": { [_arg, "opcom_fortify"] call fnc_town_garrison_fortify };
-        case "rapport": { [_arg, -OPCOM_RAPPORT_STEP, "opcom_rapport"] call fnc_town_rep_adjust };
+        case "rapport": {
+            [_arg, -OPCOM_RAPPORT_STEP, "opcom_rapport", true] call fnc_town_rep_adjust;
+            if ((missionNamespace getVariable ["civ_visible", []]) param [_arg, true]) then {
+                [localize "STR_DUWS_T_ALLSEER", format [localize "STR_DUWS_T_OPCOM_RAPPORT_DELIVERED", [_arg] call DUWS_fnc_opcom_townLabel]]
+                    remoteExec ["fnc_duws_dialogue", 0];
+            };
+        };
         case "build": { [_spec, "", _arg, _refund] call DUWS_fnc_opcom_build };
         case "mine": { [_arg, _spec select 0, _spec select 1, _refund] call DUWS_fnc_opcom_mineBuild };
     };
