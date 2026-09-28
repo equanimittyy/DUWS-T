@@ -26,7 +26,7 @@ if (_gateLeft > 0) exitWith {
 };
 
 // Reuse a still-current offer set instead of re-rolling it: regenerating on every open handed a
-// backed-out player seven brand-new missions to reconsider. Persists until one is picked
+// backed-out player a brand-new set of missions to reconsider. Persists until one is picked
 // (fnc_mission_launch clears it) or the debug re-roll fires; reached only past the Mission_available
 // and game_master gates above, so a cached open still obeys the start gate.
 private _cachedOffers = missionNamespace getVariable ["DUWS_missionOffers", []];
@@ -61,7 +61,7 @@ _handle = [] spawn {
   private _bag = [];
   { _bag pushBack _forEachIndex } forEach _missionDefs;
 
-  private _missionDraw = 7 min (count _bag);
+  private _missionDraw = 9 min (count _bag);
 
   // Two offers push deep into enemy ground (hard, a difficulty-scaled bonus); the rest seat on the
   // frontline (easy, base pay). Any type may fill a hard slot: findSite scores a deep placement 0 where

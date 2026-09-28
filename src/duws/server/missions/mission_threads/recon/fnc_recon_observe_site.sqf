@@ -13,7 +13,7 @@
 // Runs client-side inside the picker (client/missions/fnc_stratmap.sqf), so it reads only broadcast
 // state, all of it through fnc_recon_observe_pick. The feasibility raycast is terrain-only
 // (terrainIntersectASL, a single cheap query); the thread adds object occlusion once for the launched
-// mission rather than for all seven drawn offers.
+// mission rather than for every drawn offer.
 //
 // Contract: ["ALL"] -> [pos, ...] every target | [_candidatePos] -> [_targetPos] accept | [] reject.
 params ["_pos"];

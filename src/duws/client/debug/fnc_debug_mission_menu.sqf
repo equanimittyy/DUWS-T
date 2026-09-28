@@ -19,7 +19,7 @@ private _defs = [
 ];
 private _types = _defs apply { _x select 4 };
 
-// Clears fnc_stratmap's cached offer set and reopens the picker, rolling a fresh seven. The cache
+// Clears fnc_stratmap's cached offer set and reopens the picker, rolling a fresh set. The cache
 // is what keeps a normal back-out on the same offers; this is the intended way to roll new ones.
 // The type step forces one type into the draw, to test its siting without the draw RNG.
 if (_this == "reroll") exitWith {
