@@ -10,15 +10,14 @@ much of it are styled.
 falls back to `<Original>` when the active language has no tag. Edit the two in lockstep — changing
 only `<English>` leaves the old wording live for anyone whose game language isn't listed on that key.
 
-**The German and Spanish tags lag English on purpose.** The `<German>` and `<Spanish>` tags were
-translated from the pre-rework text and have not been carried through the English prose passes.
-They still hold retired callsigns (`Action Squad`, `Overlord 1-1`, `Viper 1-5`), the old
-unnamed-department phrasing for Allseer, and pre-rework briefings whose timings and reward tags no
-longer match the English. This is known divergence, not corruption: do not treat a German or Spanish
-tag that disagrees with `<English>` as a bug, and do not machine-translate the gap closed.
-Retranslation is a pass of its own, because the briefings encode gameplay numbers a translator has
-to check against the mission code rather than against the old text. `<Chinesesimp>` had such a pass
-and matches the current English; the few `<Chinese>` (Traditional) tags are still stale.
+**Every language tag tracks English.** When an `<English>` line changes, every language tag on that
+key changes with it in the same edit, under the rules below; a key without language tags needs
+nothing. Retranslating a whole language is a pass of its own
+([localisation plan](../../plans/localisation_catchup_plan.md)), because the briefings encode
+gameplay numbers a translator has to check against the current English rather than against old
+text. The `<Spanish>` and the few `<Chinese>` (Traditional) tags still hold pre-rework text —
+retired callsigns (`Action Squad`, `Overlord 1-1`, `Viper 1-5`) and briefings whose timings and
+reward tags no longer match — until their pass.
 
 **What a translation keeps from English.** A translation pass fills only the language tags: it never
 changes `<Original>`, `<English>` or the set of `Key ID`s. Callsigns (`Alpha 1-1`, `Overlord`,
@@ -29,11 +28,15 @@ placeholder of its English line; the order can change, because `format` substitu
 whose text stays English (a callsign, a bare number) gets no language tag, so it falls back to
 `<Original>` and follows later English edits.
 
-**Simplified Chinese conventions.** Chinese text uses full-width punctuation, and ends with 。 only
-where the English line ends with a period. One half-width space separates a Chinese character from an
-adjacent Latin word, number or placeholder (`向 Alpha 1-1 报告`, `%1 米`); no space touches full-width
-punctuation. "Vehicle" is always 载具, and HQ is 总部, while FOB, CP, AP, HC and CAS stay as Latin
-acronyms.
+**Per-language conventions.** An edit to a language tag repeats that language's row. For a term the
+table does not fix, reuse the rendering other keys already give the same English word, and quote a
+UI label in prose exactly as its own key reads. FOB, CP, AP, HC and CAS stay Latin acronyms in every
+language.
+
+| Tag | Address | Quotes | Punctuation and numbers | Fixed terms |
+|---|---|---|---|---|
+| `<Chinesesimp>` | 你 | “…” | Full-width punctuation; 。 only where the English ends with a period; a half-width space between a Chinese character and an adjacent Latin word, number or placeholder, none next to full-width punctuation | vehicle 载具, HQ 总部 |
+| `<German>` | du; Overlord to the squad: ihr | „…“ | Decimal comma; `%1 m`; a count or unknown-gender placeholder goes after a colon (`Zerstört: %1`); an English em dash becomes ` – ` | vehicle Fahrzeug, HQ stays HQ, task force Task Force, mortar Mörser |
 
 ## Military-like language
 
