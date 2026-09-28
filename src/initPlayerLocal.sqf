@@ -305,15 +305,17 @@ DUWS_fnc_cargoType = {
 
 // Add (_add true) or clear (_add false) a foreign class on the local shelf. The captured pool is
 // stocked onto the client's own cargo on open and cleared back off on close, so the shelf shows the
-// pool's current contents and never accumulates stale foreign gear across sessions.
+// pool's current contents and never accumulates stale foreign gear across sessions. Local only: the BIS
+// functions' third argument broadcasts this machine's whole shelf over every other machine's copy.
 DUWS_fnc_shelfForeign = {
     params ["_cls", "_type", "_add"];
-    switch (_type) do {
-        case "weapon":   { [missionNamespace, _cls, _add] call BIS_fnc_addVirtualWeaponCargo; };
-        case "magazine": { [missionNamespace, _cls, _add] call BIS_fnc_addVirtualMagazineCargo; };
-        case "backpack": { [missionNamespace, _cls, _add] call BIS_fnc_addVirtualBackpackCargo; };
-        default          { [missionNamespace, _cls, _add] call BIS_fnc_addVirtualItemCargo; };
+    private _fnc = switch (_type) do {
+        case "weapon":   { [BIS_fnc_removeVirtualWeaponCargo, BIS_fnc_addVirtualWeaponCargo] select _add };
+        case "magazine": { [BIS_fnc_removeVirtualMagazineCargo, BIS_fnc_addVirtualMagazineCargo] select _add };
+        case "backpack": { [BIS_fnc_removeVirtualBackpackCargo, BIS_fnc_addVirtualBackpackCargo] select _add };
+        default          { [BIS_fnc_removeVirtualItemCargo, BIS_fnc_addVirtualItemCargo] select _add };
     };
+    [missionNamespace, _cls] call _fnc;
 };
 
 // Stock the shelf for a restricted arsenal open and return the edits to undo on close, as
@@ -360,7 +362,7 @@ DUWS_fnc_arsenal_stock = {
     // ammo. Friendly mags are already there; subtract them so the close removal cannot strip one.
     if (!_trackAmmo) then {
         _ammoList = (missionNamespace getVariable ["opfor_ammobox_magazines", []]) - _friendly;
-        [missionNamespace, _ammoList, true] call BIS_fnc_addVirtualMagazineCargo;
+        [missionNamespace, _ammoList] call BIS_fnc_addVirtualMagazineCargo;
     };
 
     if (duws_log_level >= 4) then {
@@ -393,7 +395,7 @@ DUWS_fnc_arsenal_unstock = {
     // enemy magazines back off, so the shelf never carries stale gear into the next open.
     { _x params ["_cls", "_type"]; [_cls, _type, false] call DUWS_fnc_shelfForeign; } forEach _addedForeign;
     { _x params ["_cls", "_type"]; [_cls, _type, true] call DUWS_fnc_shelfForeign; } forEach _hiddenFriendly;
-    if (count _ammoList > 0) then { [missionNamespace, _ammoList, false] call BIS_fnc_addVirtualMagazineCargo; };
+    if (count _ammoList > 0) then { [missionNamespace, _ammoList] call BIS_fnc_removeVirtualMagazineCargo; };
 
     _excess
 };
