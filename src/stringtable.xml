@@ -14011,16 +14011,16 @@
                 <Spanish>Demasiado cerca de una zona, un pueblo o el CG. Construye más lejos.</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_FOB_OVERRUN_TRAVEL">
-                <Original>%1 is being overrun. Fast travel is closed.</Original>
-                <English>%1 is being overrun. Fast travel is closed.</English>
-                <Chinesesimp>%1 正在被敌军攻占。快速旅行已关闭。</Chinesesimp>
-                <German>%1 wird überrannt. Schnellreise ist gesperrt.</German>
-                <Polish>%1 jest zajmowany przez wroga. Szybka podróż jest zablokowana.</Polish>
-                <Czech>Nepřítel obsazuje %1. Rychlý přesun je uzavřen.</Czech>
-                <Russian>Противник захватывает %1. Быстрое перемещение закрыто.</Russian>
-                <French>%1 est en train d'être envahi. Le voyage rapide est fermé.</French>
-                <Chinese>%1 正在被敵軍攻占。快速旅行已關閉。</Chinese>
-                <Spanish>El enemigo está tomando %1. El viaje rápido está cerrado.</Spanish>
+                <Original>%1 is being overrun. Fast travel is not available.</Original>
+                <English>%1 is being overrun. Fast travel is not available.</English>
+                <Chinesesimp>%1 正在被敌军攻占。快速旅行不可用。</Chinesesimp>
+                <German>%1 wird überrannt. Schnellreise ist nicht verfügbar.</German>
+                <Polish>%1 jest zajmowany przez wroga. Szybka podróż jest niedostępna.</Polish>
+                <Czech>Nepřítel obsazuje %1. Rychlý přesun není k dispozici.</Czech>
+                <Russian>Противник захватывает %1. Быстрое перемещение недоступно.</Russian>
+                <French>%1 est en train d'être envahi. Le voyage rapide est indisponible.</French>
+                <Chinese>%1 正在被敵軍攻占。快速旅行不可用。</Chinese>
+                <Spanish>El enemigo está tomando %1. El viaje rápido no está disponible.</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_RALLY_LOCKED">
                 <Original>New rally point locked for %1 min.</Original>
