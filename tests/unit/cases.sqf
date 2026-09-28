@@ -1900,6 +1900,7 @@ zone_meta_array = [[1, [0, 0, 0], 200]];
 DUWS_fnc_opcom_truckOffers = { params ["", "_v", "_base"]; [[["free", 7], _base, _v * 0.5, _base + 2]] };
 DUWS_fnc_opcom_townsSupplied = { [1] };
 DUWS_fnc_opcom_supplyFull = { false };
+DUWS_fnc_opcom_rapportFull = { false };
 fnc_town_site_key = { params ["_i"]; format ["town_%1", _i] };
 DUWS_fnc_opcom_siteContested = { params ["_k"]; _k isEqualTo "town_2" };
 DUWS_fnc_opcom_townPos = { params ["_i"]; [1000 * _i, 0, 0] };
@@ -1917,6 +1918,10 @@ DUWS_fnc_opcom_truckOffers = { params ["", "_v", "_base"]; [[["free", 7], _base,
 DUWS_fnc_opcom_truckOffers = { [] };
 ["townTargets: no truck is no target", ["reinforce", "test_townList", _townOffer] call DUWS_fnc_opcom_townTargets, []] call fnc_assertEq;
 DUWS_fnc_opcom_truckOffers = { params ["", "_v", "_base"]; [[["free", 7], _base, _v * 0.5, _base + 2]] };
+DUWS_fnc_opcom_rapportFull = { true };
+["townTargets: a full Rapport cap is no Rapport target", ["rapport", "test_townList", _townOffer] call DUWS_fnc_opcom_townTargets, []] call fnc_assertEq;
+["townTargets: a full Rapport cap leaves the other errands", count (["reinforce", "test_townList", _townOffer] call DUWS_fnc_opcom_townTargets), 2] call fnc_assertEq;
+DUWS_fnc_opcom_rapportFull = { false };
 DUWS_fnc_opcom_supplyFull = { true };
 ["townTargets: a full supply cap is no target", ["reinforce", "test_townList", _townOffer] call DUWS_fnc_opcom_townTargets, []] call fnc_assertEq;
 

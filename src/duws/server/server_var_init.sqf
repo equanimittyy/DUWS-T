@@ -796,6 +796,7 @@ OPCOM_CAP_HP_TYPE_PER_ZONE = createHashMapFromArray [
 OPCOM_CAP_UNITS_PER_ZONE = 8;
 OPCOM_CAP_GARRISON = 10;
 OPCOM_CAP_SUPPLY = 10;
+OPCOM_CAP_RAPPORT = 1;
 // Fixed per type: a gun's true range is the faction gun's, known only at fire time.
 OPCOM_MORTAR_REACH = 4000;
 OPCOM_ARTY_REACH = 15000;

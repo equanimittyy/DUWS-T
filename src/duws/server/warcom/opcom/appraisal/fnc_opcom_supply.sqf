@@ -21,6 +21,11 @@ DUWS_fnc_opcom_supplyCount = {
 
 DUWS_fnc_opcom_supplyFull = { (call DUWS_fnc_opcom_supplyCount) >= OPCOM_CAP_SUPPLY };
 
+DUWS_fnc_opcom_rapportFull = {
+    ({ ((_x getOrDefault ["errand", []]) param [0, ""]) isEqualTo "rapport" && {(_x get "status") isNotEqualTo "dead"} }
+        count DUWS_opcom_taskings) >= OPCOM_CAP_RAPPORT
+};
+
 // One supply truck per town at a time, so a second never lands a buy on a garrison the first already filled.
 DUWS_fnc_opcom_townsSupplied = {
     private _busy = [];
