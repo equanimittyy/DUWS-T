@@ -88,7 +88,7 @@ Each disguised player has a meter from 0 to 100 on the server. The monitor updat
 (`fnc_disguise_spotters`):
 
 1. It is alive and within `DISGUISE_SPOT_RANGE` (200 m). Crews of vehicles and static weapons count.
-2. The player is within `DISGUISE_SPOT_CONE` (60°) of its `eyeDirection`.
+2. The player is within `DISGUISE_SPOT_CONE` (85°) of its `eyeDirection`.
 3. `checkVisibility` from its eye to the player's eye is `DISGUISE_SPOT_VIS` (0.5) or more, so
    terrain, walls, smoke and foliage block it. Both vehicles are ignored, because a ray from inside a
    hull hits that hull.
@@ -118,9 +118,10 @@ costs, because a soldier without them reads wrong even where a pilot or an offic
 on foot is never an empty vehicle slot. The floor is capped at 95, so the floor alone never breaks
 cover.
 
-**Decay.** While no unit spots the player, the meter falls 5 per second, down to the floor. While a
-living OPFOR unit is within `DISGUISE_DECAY_NEAR_RANGE` (50 m), crews included, it falls at
-`DISGUISE_DECAY_NEAR_SCALE` (a third of) that rate, whether or not that unit can see the player.
+**Decay.** While no unit spots the player, the meter holds for `DISGUISE_DECAY_DELAY` (5 s) after the
+last spotter loses sight. Then it falls 5 per second, down to the floor. While a living OPFOR unit is
+within `DISGUISE_DECAY_NEAR_RANGE` (50 m), crews included, it falls at `DISGUISE_DECAY_NEAR_SCALE`
+(a third of) that rate, whether or not that unit can see the player.
 
 | Disguise | Kit or ground | Spotters | Time to break |
 |---|---|---|---|

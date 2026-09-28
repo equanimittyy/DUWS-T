@@ -573,7 +573,7 @@ DISGUISE_CIV_SITE_WARN = 100;
 // An OPFOR unit spots a disguised player within this range and cone (degrees off its eye direction),
 // at this checkVisibility or more.
 DISGUISE_SPOT_RANGE = 200;
-DISGUISE_SPOT_CONE = 60;
+DISGUISE_SPOT_CONE = 85;
 DISGUISE_SPOT_VIS = 0.5;
 // Seconds after a shot in which a unit that spots the shooter still breaks cover, so the victims'
 // squad turning round catches a shot fired unseen.
@@ -588,6 +588,9 @@ DISGUISE_PRONE_MULT = 1.3;
 // out of sight beside a patrol does not clear it as fast as walking away.
 DISGUISE_DECAY_NEAR_RANGE = 50;
 DISGUISE_DECAY_NEAR_SCALE = 1/3;
+// Seconds suspicion holds after the last spotter loses sight, so a step behind cover does not start
+// clearing it.
+DISGUISE_DECAY_DELAY = 5;
 
 // The radio-tower amplifiers, global scalars rather than per-town. DUWS_opforRadioLevel is the count of
 // uncleared enemy "RADIO" hardpoints, capped at AOI_OPFOR_TOWER_CAP, recomputed by fnc_hardpoint_stream
