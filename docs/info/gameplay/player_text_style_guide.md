@@ -26,8 +26,9 @@ placeholder of its English line; the order can change, because `format` substitu
 whose text stays English (a callsign, a bare number) gets no language tag, so it falls back to
 `<Original>` and follows later English edits.
 
-**Per-language conventions.** An edit to a language tag repeats that language's row. For a term the
-table does not fix, reuse the rendering other keys already give the same English word, and quote a
+**Per-language conventions.** An edit to a language tag repeats that language's row. A recurring term
+takes its rendering from the [localisation glossary](localisation_glossary.md); any other word
+reuses the rendering other keys already give the same English word. Quote a
 UI label in prose exactly as its own key reads. FOB, CP, AP, HC and CAS stay Latin acronyms in every
 language. `Alpha 1-1` and every "Name N-N" callsign never take a case ending, while an inflected
 language may add one after the intact `Overlord` or `Allseer` (`Overlordovi`).
