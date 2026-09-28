@@ -11,6 +11,7 @@ DUWS_fnc_restoreCheck = {
     if !(_d isEqualType createHashMap) exitWith { "STR_DUWS_T_LOAD_BAD_INPUT" };
     if ((_d getOrDefault ["version", -1]) isNotEqualTo DUWS_saveFormat) exitWith { "STR_DUWS_T_LOAD_BAD_VERSION" };
     if ((_d getOrDefault ["ended", ""]) isEqualTo "lost") exitWith { "STR_DUWS_T_LOAD_LOST" };
+    if ((_d getOrDefault ["ended", ""]) isEqualTo "won") exitWith { "STR_DUWS_T_LOAD_WON" };
     if ((_d getOrDefault ["world", ""]) isNotEqualTo worldName) exitWith { "STR_DUWS_T_LOAD_BAD_WORLD" };
     private _types = [
         ["settings", createHashMap], ["factions", createHashMap], ["hq", []], ["zones", []], ["hardpoints", []]
@@ -118,9 +119,7 @@ DUWS_fnc_restoreGate = {
     };
     private _choice = missionNamespace getVariable ["DUWS_loadChoice", nil];
     if (isNil "_choice") then {
-        private _i = DUWS_saveList findIf {
-            (_x select 2) isEqualTo "" && {((createHashMapFromArray (_x select 1)) getOrDefault ["ended", ""]) isEqualTo ""}
-        };
+        private _i = DUWS_saveList findIf { (_x select 2) isEqualTo "" };
         _choice = if (_i < 0) then { [] } else { [(DUWS_saveList select _i) select 0, false] };
         ["INFO", "SAVE", format ["fork unanswered after %1 s: %2", round (time - _start),
             ["new campaign", format ["loading the newest campaign %1", _choice]] select (_choice isNotEqualTo [])]] call fnc_log;

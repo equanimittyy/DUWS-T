@@ -119,6 +119,7 @@ DUWS_fnc_saveRefusal = {
     params ["_h"];
     if ((_h getOrDefault ["version", -1]) isNotEqualTo DUWS_saveFormat) exitWith { "STR_DUWS_T_LOAD_BAD_VERSION" };
     if ((_h getOrDefault ["ended", ""]) isEqualTo "lost") exitWith { "STR_DUWS_T_LOAD_LOST" };
+    if ((_h getOrDefault ["ended", ""]) isEqualTo "won") exitWith { "STR_DUWS_T_LOAD_WON" };
     if ((_h getOrDefault ["world", ""]) isNotEqualTo worldName) exitWith { "STR_DUWS_T_LOAD_BAD_WORLD" };
     private _groups = _h getOrDefault ["groups", []];
     if ((DUWS_saveInputs findIf { !(_x in _groups) }) >= 0) exitWith { "STR_DUWS_T_LOAD_BAD_INPUT" };

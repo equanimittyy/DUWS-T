@@ -24,9 +24,6 @@ if (_row isNotEqualTo []) then {
 		_h getOrDefault ["held", 0], _h getOrDefault ["zones", 0], _h getOrDefault ["cp", 0],
 		([_h getOrDefault ["blu", ""], _h getOrDefault ["bluSel", ""], Factions_Available_BLUFOR_X] call _factionName) call _plain,
 		([_h getOrDefault ["opf", ""], _h getOrDefault ["opfSel", ""], Factions_Available_OPFOR_X] call _factionName) call _plain];
-	if ((_h getOrDefault ["ended", ""]) isEqualTo "won") then {
-		_text = _text + "<br/><br/>" + localize "STR_DUWS_T_fork_ended_won";
-	};
 	if (_why isNotEqualTo "") then {
 		_text = _text + "<br/><br/>" + format ["<t color='%1'>%2</t>", ["#ff9933", "#ff1111"] select (_why isEqualTo "STR_DUWS_T_LOAD_LOST"), localize _why];
 	} else {
