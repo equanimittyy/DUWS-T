@@ -37,7 +37,7 @@ DUWS_fnc_opcom_freeTaxis = {
 // -> [lift ref, saving, price, Cost], or [] when walking beats every lift. _budget caps the lift's price, so a lift
 // never prices an order the wallet covers out of reach.
 DUWS_fnc_opcom_liftFor = {
-    params ["_src", "_to", "_v", "_pw", "_budget"];
+    params ["_src", "_to", "_v", "_pw", "_budget", ["_halflife", OPCOM_VALUE_HALFLIFE]];
     _src params ["", "_from", "", "_rm", "_flags"];
     if (!("transportable" in _flags) || {([_from, _to] call DUWS_fnc_opcom_cellDist) <= OPCOM_TAXI_MIN_K}) exitWith { [] };
     private _dry = [_from, _to] call DUWS_fnc_opcom_lineDry;
@@ -46,7 +46,7 @@ DUWS_fnc_opcom_liftFor = {
     {
         _x params ["_ref", "_start", "", "_mt", "", "_price", "_stake"];
         if (_price <= _budget && {_mt isEqualTo "rotary" || {_dry && {[_start, _from] call DUWS_fnc_opcom_lineDry}}}) then {
-            private _s = [_v, _from, _rm, _to, _start, _mt] call DUWS_fnc_opcom_taxiSaving;
+            private _s = [_v, _from, _rm, _to, _start, _mt, _halflife] call DUWS_fnc_opcom_taxiSaving;
             private _c = _stake + OPCOM_AP_PER_KM * (_start distance2D _from) / 1000;
             if ((_pw * _s - _c) > _bn) then { _bn = _pw * _s - _c; _best = [_ref, _s, _price, _c] };
         };
@@ -58,12 +58,12 @@ DUWS_fnc_opcom_liftFor = {
 // The saving joins the Value, the lift's price the price and its Cost the Cost. expValue stays the walk's: a Ferry
 // prices the order, not the ride. _wallet is what the lift is priced against, less what a package already spends.
 DUWS_fnc_opcom_liftOffer = {
-    params ["_best", "_to", "_task", "_label", ["_wallet", WARCOM_opfor_ap]];
+    params ["_best", "_to", "_task", "_label", ["_wallet", WARCOM_opfor_ap], ["_halflife", OPCOM_VALUE_HALFLIFE]];
     _best params ["_src", "_v", "_pw", "_c", "_p"];
     private _ref = _src select 0;
     private _name = format ["%1 with %2", _label, [_ref] call DUWS_fnc_opcom_sourceName];
     private _lift = if (_task isEqualTo []) then { [] } else {
-        [_src, _to, _v, _pw, (_wallet - _p) max 0] call DUWS_fnc_opcom_liftFor
+        [_src, _to, _v, _pw, (_wallet - _p) max 0, _halflife] call DUWS_fnc_opcom_liftFor
     };
     if (_lift isEqualTo []) exitWith { [[_ref, _task, _pw * _v, []], _p, _name, _v, _pw, _c] };
     _lift params ["_lref", "_s", "_lp", "_lc"];

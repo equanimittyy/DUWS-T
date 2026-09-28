@@ -27,17 +27,17 @@ DUWS_fnc_opcom_taxiFits = {
 
 // The AP a lift adds to an order: the same Value lands sooner, and the delay discount prices the time it saves.
 DUWS_fnc_opcom_taxiWorth = {
-    params ["_value", "_walk", "_lift"];
+    params ["_value", "_walk", "_lift", ["_halflife", OPCOM_VALUE_HALFLIFE]];
     if (_lift >= _walk) exitWith { 0 };
-    _value * ((2 ^ ((_walk - _lift) / OPCOM_VALUE_HALFLIFE)) - 1)
+    _value * ((2 ^ ((_walk - _lift) / _halflife)) - 1)
 };
 
 // The rider's fields come loose, so the sweep can price an order the pick has not committed yet.
 DUWS_fnc_opcom_taxiSaving = {
-    params ["_value", "_rp", "_riderMove", "_to", "_from", "_moveType"];
+    params ["_value", "_rp", "_riderMove", "_to", "_from", "_moveType", ["_halflife", OPCOM_VALUE_HALFLIFE]];
     private _lift = [(_from distance2D _rp) + (_rp distance2D _to), _moveType] call DUWS_fnc_opcom_moveTicks;
     if (_moveType in ["wheeled", "tracked"]) then { _lift = _lift * OPCOM_ROAD_DETOUR };
-    [_value, [_rp distance2D _to, _riderMove] call DUWS_fnc_opcom_moveTicks, _lift] call DUWS_fnc_opcom_taxiWorth
+    [_value, [_rp distance2D _to, _riderMove] call DUWS_fnc_opcom_moveTicks, _lift, _halflife] call DUWS_fnc_opcom_taxiWorth
 };
 
 // The lift that saves the most, and none when walking beats every hull on hand.

@@ -1836,6 +1836,7 @@ OPCOM_VALUE_HALFLIFE = 360;
 ["taxiWorth: a lift that saves a half-life doubles what the order returns", [10, 720, 360] call DUWS_fnc_opcom_taxiWorth, 10] call fnc_assertClose;
 ["taxiWorth: a lift that saves nothing is worth nothing", [10, 360, 360] call DUWS_fnc_opcom_taxiWorth, 0] call fnc_assertClose;
 ["taxiWorth: a lift slower than the walk is worth nothing", [10, 360, 500] call DUWS_fnc_opcom_taxiWorth, 0] call fnc_assertClose;
+["taxiWorth: a shorter half-life, as a QRF's, prices the same saving higher", [10, 720, 360, 180] call DUWS_fnc_opcom_taxiWorth, 30] call fnc_assertClose;
 ["taxiWorth: a worthless order buys no lift", [0, 720, 60] call DUWS_fnc_opcom_taxiWorth, 0] call fnc_assertClose;
 
 // --- DUWS_fnc_opcom_artySpread / artyReach: a fire mission's pattern and the ground its rounds cover ---
@@ -2048,6 +2049,10 @@ DUWS_fnc_opcom_liftFor = { params ["", "", "", "", "_budget"]; [["free", 5], _bu
 ["liftOffer: a lift is priced against the wallet it is handed, less the rider's price",
     ([[_rider, 10, 1, 6, 10], [5000, 0, 0], ["capture", [5000, 0, 0]], "Attack X", 30] call DUWS_fnc_opcom_liftOffer) select 3,
     30] call fnc_assertEq;
+DUWS_fnc_opcom_liftFor = { params ["", "", "", "", "", ["_h", 0]]; [["free", 5], _h, 0, 0] };
+["liftOffer: a half-life passed in, as a QRF's, reaches the lift's saving",
+    ([[_rider, 10, 1, 6, 10], [5000, 0, 0], ["capture", [5000, 0, 0]], "QRF X", 100, 60] call DUWS_fnc_opcom_liftOffer) select 3,
+    70] call fnc_assertEq;
 DUWS_fnc_opcom_liftFor = { [] };
 
 // --- DUWS_fnc_opcom_attackPackage: the units one pick sends into an attack ---
