@@ -29,3 +29,10 @@ _e set ["lost", { params ["_e"]; !alive (_e get "car") }];
 private _status = "";
 waitUntil { sleep 5; _status = [_id] call fnc_civ_mission_poll; _status != "" };
 [_id, _status] call fnc_civ_mission_finish;
+
+// The car is back with its owner. A lock also bars getting out, so the crew goes first; the lock is sent to
+// where the car is local, which is the last player to drive it, not the server.
+if (_status == "SUCCEEDED") then {
+    { _x remoteExec ["moveOut", _x] } forEach crew _car;
+    [_car, "LOCKED"] remoteExec ["setVehicleLock", _car];
+};

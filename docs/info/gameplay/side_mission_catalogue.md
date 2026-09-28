@@ -539,7 +539,8 @@ running HQ mission's token, which cannot advance while the HQ slot is held. A ci
 advanced it would re-stamp the HQ mission's later claims. The finish writes the same `DUWS_binMe` flag
 that `fnc_mission_cleanup` writes. The camp props and the stolen car are kept under the
 key `civ_mission_<id>`: an empty car is litter to the map sweep, and a mission with no deadline can
-outlast the litter lifetime.
+outlast the litter lifetime. A win returns the car to the giver, so the thread locks it to everyone. A lock
+also stops a player getting out, so the thread first puts out the crew. Any other end leaves the car unlocked.
 
 **The site keeps the fight for the player** (`fnc_civ_mission_site.sqf`). It is 300-1200 m beyond the
 town's edge, outside every zone's radius + 300 m, outside `AOI_HQ_REACH` of the HQ, and 500 m from any
