@@ -37,6 +37,7 @@ language.
 |---|---|---|---|---|
 | `<Chinesesimp>` | 你 | “…” | Full-width punctuation; 。 only where the English ends with a period; a half-width space between a Chinese character and an adjacent Latin word, number or placeholder, none next to full-width punctuation | vehicle 载具, HQ 总部 |
 | `<German>` | du; Overlord to the squad: ihr | „…“ | Decimal comma; `%1 m`; a count or unknown-gender placeholder goes after a colon (`Zerstört: %1`); an English em dash becomes ` – ` | vehicle Fahrzeug, HQ stays HQ, task force Task Force, mortar Mörser |
+| `<Polish>` | ty; Overlord to the squad: plural imperatives | „…” | Decimal comma; `%1 m`; a count or unknown-gender placeholder goes after a colon (`Zniszczono: %1`); no gendered past tense aimed at the player, masculine where it cannot be avoided | vehicle pojazd, HQ stays HQ, town miejscowość, hardpoint punkt oporu |
 
 ## Military-like language
 
