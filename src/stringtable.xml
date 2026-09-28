@@ -2250,6 +2250,22 @@
                 <Original>Base units are already being redeployed.</Original>
                 <English>Base units are already being redeployed.</English>
             </Key>
+            <Key ID="STR_DUWS_T_ZONE_REDEPLOY_ACTION">
+                <Original>Redeploy Gun Crews (2 CP)</Original>
+                <English>Redeploy Gun Crews (2 CP)</English>
+            </Key>
+            <Key ID="STR_DUWS_T_ZONE_REDEPLOY_SUCCESS">
+                <Original>Gun crews have been redeployed.</Original>
+                <English>Gun crews have been redeployed.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_ZONE_REDEPLOY_BUSY">
+                <Original>Gun crews are already being redeployed.</Original>
+                <English>Gun crews are already being redeployed.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_ZONE_REDEPLOY_NO_GARRISON">
+                <Original>This zone has no garrison to man its guns.</Original>
+                <English>This zone has no garrison to man its guns.</English>
+            </Key>
             <Key ID="STR_DUWS_T_check_vehicle_status">
                 <Original>Check Vehicle Status</Original>
                 <English>Check Vehicle Status</English>

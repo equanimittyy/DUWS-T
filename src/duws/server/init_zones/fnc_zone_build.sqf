@@ -42,3 +42,29 @@ DUWS_fnc_zoneBuildSleep = {
     }) >= 0) exitWith {};
     [_key] call fnc_duws_stow;
 };
+
+// Only while the zone's garrison stands, the rule DUWS_fnc_buildCrewSite keeps: the gunners join the garrison roster, and
+// only a standing garrison's roster is collected when the zone streams out or falls.
+DUWS_fnc_zoneRedeploy = {
+    params ["_flg"];
+    private _owner = remoteExecutedOwner;
+    private _key = _flg getVariable ["DUWS_buildSite", ""];
+    if (_key == "" || {!([_key] call fnc_zone_bluforHeld)}) exitWith {};
+    // DUWS_fnc_manStatics sleeps, so a second click in that window would man the same empty guns and charge again.
+    if (_flg getVariable ["DUWS_redeployBusy", false]) exitWith {
+        (localize "STR_DUWS_T_ZONE_REDEPLOY_BUSY") remoteExec ["hint", _owner];
+    };
+    if (([_key] call fnc_site_alive) == 0) exitWith {
+        (localize "STR_DUWS_T_ZONE_REDEPLOY_NO_GARRISON") remoteExec ["hint", _owner];
+    };
+    if (commandpointsblu1 < 2) exitWith {
+        (localize "STR_DUWS_T_e95mc4lv") remoteExec ["hint", _owner];
+    };
+    _flg setVariable ["DUWS_redeployBusy", true];
+    // call, not remoteExec to self, and escalation applied here: the same reason fnc_redeployHQUnits gives.
+    [-([2] call fnc_escalation_cost), "zone_redeploy"] call fnc_cp_adjust;
+    [(DUWS_compositions getOrDefault [_key, []]) + (DUWS_compositions getOrDefault [format ["%1_builds", _key], []]),
+        true, [_key] call fnc_zone_roster] call DUWS_fnc_buildRecrew;
+    _flg setVariable ["DUWS_redeployBusy", false];
+    (localize "STR_DUWS_T_ZONE_REDEPLOY_SUCCESS") remoteExec ["hint", _owner];
+};

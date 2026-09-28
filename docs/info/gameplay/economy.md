@@ -85,7 +85,7 @@ Three properties are load-bearing:
 - **The debit is `call fnc_cp_adjust`, not `remoteExec [..., 2]`.** Even on the server, remoteExec
   queues a scheduled job for a later frame, which would split the test from the debit and reopen the
   gap. The same applies to the server-side purchase paths that never used the handshake —
-  `server/init_hq/fnc_redeployHQUnits.sqf`, `server/supports/fnc_activateBaseRepairStation.sqf`,
+  `server/init_hq/fnc_redeployHQUnits.sqf`, `DUWS_fnc_zoneRedeploy`, `server/supports/fnc_activateBaseRepairStation.sqf`,
   `server/supports/fnc_uav_scanner.sqf`, `fnc_pylon_set_with_cost`, and the AP-only
   `server/missions/fnc_map_readout_buy.sqf`.
 - **The caller blocks, so it must be scheduled.** `waitUntil` throws in unscheduled code. Every
@@ -297,7 +297,7 @@ territory shows no readout.
 | Operatives | `client/operative/fnc_operator_recruit.sqf:20` | 8 (re-deploying a healed one is free) |
 | Mobile HQ | `client/dialog/fnc_MHQ_select.sqf` | 10 |
 | Heli / boat taxi | `supports/taxi/` | fixed |
-| Base repair, HQ and FOB redeploy | `server/supports/fnc_activateBaseRepairStation.sqf`, `server/init_hq/fnc_redeployHQUnits.sqf`, `fnc_redeployFOBUnits.sqf` | 2 / 2 / 2 |
+| Base repair, HQ, FOB and zone redeploy | `server/supports/fnc_activateBaseRepairStation.sqf`, `server/init_hq/fnc_redeployHQUnits.sqf`, `fnc_redeployFOBUnits.sqf`, `server/init_zones/fnc_zone_build.sqf` | 2 / 2 / 2 / 2 |
 | Garrison reinforce / fortify | `server/missions/fnc_map_readout_buy.sqf` | AP 10 / 15, OPCOM's own prices (`OPCOM_AP_REINFORCE` / `OPCOM_AP_FORTIFY`) |
 | Death | `client/client_init.sqf:156,171` | `DUWSMP_CP_death_cost` (0–10), plus the holder's consumable slate |
 | Raise Funds (money) | `server/civ_missions/fnc_civ_mission_give.sqf` | 9-15 `Money_roll`, pooled by the players at the giver; not refunded on a cancel or the giver's death |
@@ -311,7 +311,7 @@ and checked as `(vehiclevarname player) in <list>`:
 | List | Owns |
 |---|---|
 | `game_master` | campaign-level control — the setup flow, side-mission requests (`client/missions/fnc_stratmap.sqf:24`), the global heal |
-| `Squad_Leaders` | everything that spends CP or AP — request menus, radio supports, MHQ, FOB redeploy — plus High Command |
+| `Squad_Leaders` | everything that spends CP or AP — request menus, radio supports, MHQ, FOB and zone redeploy — plus High Command |
 
 `Squad_Leaders` lists every playable slot as shipped, so it restricts nothing today. It exists to be
 trimmed: on a dedicated server, cutting it to the real squad-lead slots restricts all of the above in a

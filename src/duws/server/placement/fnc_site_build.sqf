@@ -5,20 +5,31 @@
 // callers add an allowance and the refund of a clear or of a rejected new build. A destroyed build is lost. Builds are filed under `<siteKey>_builds`,
 // beside the site's own key, so a clear takes them without touching the site's composition.
 
+#include "..\..\shared\includes\action_style.hpp"
+
 #define BUILD_REACH 100
 
 // R3F compiles its cost formula on clients only, and a dedicated server has none.
 DUWS_fnc_buildCost = compile preprocessFile "modules\R3F_LOG\usine_creation\determiner_cout_creation.sqf";
 
-// The factory role is client-local, so it and the Clear action ride one JIP order. A string id, because an object-keyed
-// one would evict another order keyed to the same object (a FOB's actions).
+// The factory role is client-local, so it, the Clear action and a zone flag's redeploy ride one JIP order. A string id,
+// because an object-keyed one would evict another order keyed to the same object (a FOB's actions).
 DUWS_fnc_siteBuildArm = {
     params ["_factory", "_siteKey"];
     _factory setVariable ["DUWS_buildSite", _siteKey, true];
     _factory setVariable ["DUWS_buildKey", format ["%1_builds", _siteKey]];
-    [[_factory], {
-        params ["_factory"];
+    [[_factory, _siteKey], {
+        params ["_factory", "_siteKey"];
         if (!hasInterface || isNull _factory) exitWith {};
+        // Above the R3F gate, since a zone's guns need crews without R3F too. The flag's carry gate is its BLUFOR-held
+        // test (fnc_zone_flag_logistics).
+        if ((_siteKey select [0, 5]) isEqualTo "zone_") then {
+            _factory addAction [ACT_COMMIT("STR_DUWS_T_ZONE_REDEPLOY_ACTION"),
+                { [_this select 0] remoteExec ["DUWS_fnc_zoneRedeploy", 2] },
+                [], 10, false, true, "",
+                "_this == player && {(vehicleVarName _this) in Squad_Leaders} && {!(_target getVariable ['R3F_LOG_disabled', true])}",
+                ACT_REACH];
+        };
         waitUntil { !isNil "R3F_LOG_active" };
         if (!R3F_LOG_active) exitWith {};
         [_factory, 0, west, ["Fortifications", "Static"]] call R3F_LOG_FNCT_usine_init;

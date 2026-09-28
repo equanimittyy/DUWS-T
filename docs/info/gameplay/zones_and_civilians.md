@@ -335,6 +335,12 @@ while a squadmate mans one of them (`DUWS_fnc_zoneBuildSleep`), because a stow w
 `Static` category holds only the statics whose config names it as their `vehicleClass`, so a mod's statics show only
 if the mod uses that category.
 
+**A held zone's flag redeploys its gun crews for 2 CP.** The flag's Redeploy Gun Crews action does the same to the
+zone's prefab guns and its builds together (`DUWS_fnc_zoneRedeploy`, `fnc_zone_build.sqf`). It works only while the
+zone's garrison stands, the rule a placed build already follows: the new gunners join the garrison roster, and only a
+standing garrison's roster is collected when the zone streams out or falls. The action does not need R3F or
+Fortification I.
+
 **R3F moves and sells a manned build.** R3F refuses to move or sell an object with a crew. A build whose only crew is
 friendly AI outside every player's group is the exception (`DUWS_fnc_buildCrewFree`): the Move action and the direct
 sale have the server delete that crew first, and the drop mans the gun again. An enemy gunner, a squadmate or a
