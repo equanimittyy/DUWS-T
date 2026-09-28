@@ -15,8 +15,7 @@ key changes with it in the same edit, under the rules below; a key without langu
 nothing. Retranslating a whole language is a pass of its own
 ([localisation plan](../../plans/localisation_catchup_plan.md)), because the briefings encode
 gameplay numbers a translator has to check against the current English rather than against old
-text. The `<Spanish>` tags still hold pre-rework text — retired callsigns (`Action Squad`, `Overlord 1-1`, `Viper 1-5`) and briefings whose timings and
-reward tags no longer match — until their pass.
+text.
 
 **What a translation keeps from English.** A translation pass fills only the language tags: it never
 changes `<Original>`, `<English>` or the set of `Key ID`s. Callsigns (`Alpha 1-1`, `Overlord`,
@@ -42,6 +41,7 @@ language may add one after the intact `Overlord` or `Allseer` (`Overlordovi`).
 | `<Czech>` (also serves Slovak) | ty; Overlord to the squad: plural imperatives | „…“ | Decimal comma; `%1 m`; a count or unknown-gender placeholder goes after a colon (`Zničeno: %1`); no gendered past tense aimed at the player, masculine where it cannot be avoided | vehicle vozidlo, HQ stays HQ, town obec, hardpoint opěrný bod |
 | `<Russian>` | ты; Overlord to the squad: plural imperatives | «…» | Decimal comma; `%1 м`; a count or unknown-gender placeholder goes after a colon (`Уничтожено: %1`); no gendered past tense aimed at the player; a radio call names the addressee first (`Overlord, это Allseer.`); Overlord and Allseer stay uninflected | vehicle техника, HQ штаб, town населённый пункт, UAV БПЛА |
 | `<French>` | vous, for the player and the squad | « … » | Decimal comma; `%1 m`; an ordinary space before `: ; ! ?` and inside « » (a no-break space may not render in the game font); a count or unknown-gender placeholder goes after a colon (`Détruit : %1`); an English em dash becomes ` – ` | vehicle véhicule, HQ QG, FOB is masculine (un FOB), town localité |
+| `<Spanish>` (Spain) | tú; Overlord to the squad: vosotros | «…» | Decimal comma; `%1 m`; opening ¿ ¡, with ¡…! only where the English has "!"; a count or unknown-gender placeholder goes after a colon (`Destruido: %1`); an English em dash becomes a comma clause or ` – ` | vehicle vehículo, HQ CG, task force fuerza operativa, town pueblo |
 
 ## Military-like language
 
