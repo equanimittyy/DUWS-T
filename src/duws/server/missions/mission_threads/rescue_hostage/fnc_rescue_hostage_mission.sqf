@@ -153,8 +153,8 @@ private _clearIcons = {
 // (arma_engine_gotchas.md). knowsAbout still grades a live sighting, but only for a guard
 // with a current fix -- so breaking contact drains it. A sighting that holds arms the clock for good, and killing
 // the garrison is what frees the hostage.
-[_hostage, _garrison, _ring, _hostageBldg, _VARtaskgeneratedName] spawn {
-    params ["_hostage", "_garrison", "_ring", "_bldg", "_taskId"];
+[_hostage, _garrison, _ring, _hostageBldg, _VARtaskgeneratedName, _markername] spawn {
+    params ["_hostage", "_garrison", "_ring", "_bldg", "_taskId", "_searchMarker"];
     #define CONFIRM   1.5     // knowsAbout for a confirmed ID (engine scale: 0 unknown .. 4 identified)
     #define DET_RANGE 300     // nearTargets query radius: how far a cordon guard's live fix on the player counts
     #define DET_FRESH 5       // engine re-fixes a target's nearTargets age every few seconds, so a tighter gate drops a watched player between refreshes; matches OPCOM_TICK_PERIOD (arma_engine_gotchas.md)
@@ -196,6 +196,7 @@ private _clearIcons = {
             DUWS_float_hostage = _hostage; publicVariable "DUWS_float_hostage";
             // 2D: a below-surface Z sinks the task diamond (arma_engine_gotchas.md).
             [_taskId, PosOfBLUHQ select [0, 2]] call BIS_fnc_taskSetDestination;
+            [_searchMarker] call fnc_missionMarkerClear;
         };
 
         // Clock expired: hand him to the cordon to be shot. Drop his damage clamp so rounds land full, then
