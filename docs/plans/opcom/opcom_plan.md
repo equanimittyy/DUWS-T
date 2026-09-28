@@ -353,7 +353,8 @@ so it moves no faster than a truck delivers.
 - **Delay.** Value that lands later counts for less: Value × 0.5 ^ (ETA ÷ `OPCOM_VALUE_HALFLIFE`, 360 ticks), with
   ETA in ticks from the straight-line distance and the unit's per-cell speed (`DUWS_opcom_speed`). The distance is
   not the route's, since planning a route per candidate would not fit the pick's unscheduled pass. Every action
-  that needs a unit takes the discount from where its source starts; a zone action's ETA is 0.
+  that needs a unit takes the discount from where its source starts; a zone action's ETA is 0. A QRF's sources
+  take `OPCOM_QRF_HALFLIFE` in its place ([§QRF](#qrf-an-attack-on-a-moving-cluster)).
 - **No route-risk discount, no emergency reserve.** A truck's odds en route would read threat, so the risk stays
   with the player as counterplay. A QRF binds free combatants, often ones a Garrison banked at an
   exposed zone, or hires at the open zone nearest the sighting ([§Sourcing](#sourcing-hire-on-demand-phase-4d)).
@@ -733,7 +734,7 @@ alone at `OPCOM_MUSTER_EXPIRY`.
   indexed by the vehicles the attack already binds plus those the package has taken: 2 for the first, then 1.75,
   1.5 and 1.25, and 1 from the fifth on. The boost reorders the package, so a vehicle can join ahead of a rifle
   squad that scores better, and it lifts the package's Value when a boosted vehicle is its weakest member. A QRF
-  takes no boost.
+  takes no boost; its own half-life rewards speed instead ([§QRF](#qrf-an-attack-on-a-moving-cluster)).
 
 - **An attack stages on one bearing measured from the target,** 0° being the bearing to the first unit's start, the
   side the attack comes from, so every bucket starts on the same side of the fight. A rally is a cell centre at least
@@ -818,6 +819,9 @@ time, and no-retreat turns that into defeat in detail.
   It musters on the same bars as any attack, over `OPCOM_QRF_EXPIRY` (6 ticks, 30 s) in place of
   `OPCOM_MUSTER_EXPIRY`. Its open sends a package filled to the ideal bar, so where the sources exist it launches on
   the next tick, and a cluster one unit beats draws a one-unit answer.
+- **A QRF prices arrival on its own half-life.** Its sources take the delay over `OPCOM_QRF_HALFLIFE` (60 ticks,
+  5 min) in place of `OPCOM_VALUE_HALFLIFE`, since a sighting goes stale in `OPCOM_BELIEF_FRESH`. A fast unit
+  outscores a slow one in proportion to the time it saves, so a QRF takes no vehicle boost.
 - **Every unit releases at launch on `intercept`** after the lead sighting. Units arrive in the order of their
   distance: the release does not stagger launches by ETA.
 - **The QRF hunts as one.** Each unit's look on arrival still reads the group nearest it, but the QRF moves only once
@@ -920,7 +924,7 @@ its target and the engine paths it. A group in combat ignores a move waypoint, s
 5.1 lands alone. Every chunk after it reads the pool it changes.
 
 Phase 5 settles in play the band thresholds and their overlap, each role's λ and how often a route is re-planned,
-the longest off-road leg a hull drives without stalling, `OPCOM_MUSTER_EXPIRY`, `OPCOM_QRF_EXPIRY`, how far
+the longest off-road leg a hull drives without stalling, `OPCOM_MUSTER_EXPIRY`, `OPCOM_QRF_EXPIRY`, `OPCOM_QRF_HALFLIFE`, how far
 short of the target a rally has to sit to be safe enough to be worth the extra march (`OPCOM_RALLY_K`),
 `OPCOM_MUSTER_HOLD`, `OPCOM_ATTACK_BREAK`, `OPCOM_ATTACK_COOLDOWN`, how far out a `flank`'s hook waits (`OPCOM_HOOK_K`), `OPCOM_ATTACK_UNITS`, `OPCOM_ATTACK_VEHICLE_BOOST`, `OPCOM_PROBE_SHARE`, `OPCOM_PROBE_FRESH`, `OPCOM_ARTY_CREEP_SHARE` and the creep's box.
 
