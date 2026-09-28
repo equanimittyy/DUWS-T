@@ -384,7 +384,7 @@ class ressourceheader
             y = 20.4 * GUI_GRID_H + GUI_GRID_Y;
             w = 8.5 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
-            action = "[false] spawn fnc_request_support";
+            action = "[false] call fnc_request_support";
             tooltip = "$STR_DUWS_T_dsl9rr00";
         };
         class supportrefundbutton: RscButton
@@ -396,7 +396,7 @@ class ressourceheader
             y = 20.4 * GUI_GRID_H + GUI_GRID_Y;
             w = 8.5 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
-            action = "[true] spawn fnc_request_support";
+            action = "[true] call fnc_request_support";
         };
     };
 };

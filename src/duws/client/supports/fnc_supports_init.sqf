@@ -194,25 +194,29 @@ fnc_support_take = {
 // is unknowable. Whether an id is a stable handle or an index into a compacting array is undocumented
 // too. So the menu is never edited in place: the recorded slate is torn down in descending id order
 // (correct either way) and redrawn from what is held. Silent, or every redraw raises a card per entry.
+// Unscheduled: two scheduled syncs that interleave both tear down the same recorded slate and both
+// redraw, and the redraw left unrecorded stays in the menu as free supports.
 fnc_support_comm_sync = {
 	// Reached through the permanent-support handlers broadcast to everyone, which on a dedicated
 	// server means a machine with no player to hand the item to.
 	if (!hasInterface) exitWith {};
-	private _ids = flatten values (missionNamespace getVariable ["DUWS_support_comm", createHashMap]);
-	_ids sort false;
-	{ [player, _x] call BIS_fnc_removeCommMenuItem } forEach _ids;
-	private _running = missionNamespace getVariable ["DUWS_support_running", createHashMap];
-	private _held = createHashMap;
-	{
-		_x params ["_key", "_kind", "", "_flagVar", "", "_class"];
-		private _n = if (_kind == "CONS") then { [_key, _class] call fnc_support_in_hand } else {
-			[0, 1] select (([_flagVar] call fnc_support_owned) && {!(_class in _running)})
-		};
-		private _entries = [];
-		for "_i" from 1 to _n do { _entries pushBack ([player, _class, nil, nil, ""] call BIS_fnc_addCommMenuItem) };
-		_held set [_class, _entries];
-	} forEach (([] call fnc_support_catalogue) select { (_x select 5) != "" });
-	missionNamespace setVariable ["DUWS_support_comm", _held];
+	isNil {
+		private _ids = flatten values (missionNamespace getVariable ["DUWS_support_comm", createHashMap]);
+		_ids sort false;
+		{ [player, _x] call BIS_fnc_removeCommMenuItem } forEach _ids;
+		private _running = missionNamespace getVariable ["DUWS_support_running", createHashMap];
+		private _held = createHashMap;
+		{
+			_x params ["_key", "_kind", "", "_flagVar", "", "_class"];
+			private _n = if (_kind == "CONS") then { [_key, _class] call fnc_support_in_hand } else {
+				[0, 1] select (([_flagVar] call fnc_support_owned) && {!(_class in _running)})
+			};
+			private _entries = [];
+			for "_i" from 1 to _n do { _entries pushBack ([player, _class, nil, nil, ""] call BIS_fnc_addCommMenuItem) };
+			_held set [_class, _entries];
+		} forEach (([] call fnc_support_catalogue) select { (_x select 5) != "" });
+		missionNamespace setVariable ["DUWS_support_comm", _held];
+	};
 };
 
 // A hand-back (the pick was abandoned before it committed) or the end of the class's run: either way
