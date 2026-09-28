@@ -120,6 +120,17 @@ DUWS_fnc_buildCrew = {
     _roster append (units _grp);
 };
 
+// Dead gunners only: DUWS_fnc_buildCrewClear would also delete a drone's AI crew, which is the drone itself, and an enemy
+// sitting in the gun.
+DUWS_fnc_buildRecrew = {
+    params ["_guns", "_blu", ["_roster", []]];
+    {
+        private _gun = _x;
+        { _gun deleteVehicleCrew _x } forEach ((crew _gun) select { !alive _x });
+    } forEach _guns;
+    [_guns, _blu, _roster] call DUWS_fnc_buildCrew;
+};
+
 // The key, not the site record, tells a zone from a base: a load can restore the bases before the HQ site is registered.
 // A zone's gunner joins its garrison roster so the zone's collect takes him; its wake mans the builds in
 // DUWS_fnc_zoneManStatics, before the garrison stands.

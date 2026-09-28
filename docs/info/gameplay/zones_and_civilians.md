@@ -328,8 +328,8 @@ or `simple_zones_enable`.
 **A built static weapon gets a gunner.** A zone's wake mans its builds with its own guns, for the side that holds
 the zone (`DUWS_fnc_zoneManStatics`). A gun placed while the zone's garrison stands is manned at once, and a base mans
 every built gun when it is placed and when a load restores it (`DUWS_fnc_buildCrewSite`). The 2 CP redeploy of the HQ
-or a FOB deletes the dead build gunners and mans every empty built gun (`fnc_redeployHQUnits.sqf`, `fnc_fortifyFOB.sqf`).
-A living gunner keeps his seat. The gunners are not saved.
+or a FOB deletes the dead build gunners and mans every empty built gun (`DUWS_fnc_buildRecrew`). A living gunner keeps
+his seat. The gunners are not saved.
 A zone's sleep and a FOB's teardown delete the build gunners but not a squadmate. A zone does not stow its builds
 while a squadmate mans one of them (`DUWS_fnc_zoneBuildSleep`), because a stow would delete the gun with its crew. The
 `Static` category holds only the statics whose config names it as their `vehicleClass`, so a mod's statics show only

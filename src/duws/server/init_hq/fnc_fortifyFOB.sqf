@@ -17,15 +17,6 @@ _fob setVariable ["FOB_fortify_busy", true];
 // after another player rebuilds. Server-local: only this machine ever reads them.
 { { deleteVehicle _x } forEach (crew _x); deleteVehicle _x; } forEach (_fob getVariable ["FOB_turrets", []]);
 
-// Refortify only: a load restores the builds and mans them itself (fnc_campaign_restore).
-private _buildKey = _fob getVariable ["DUWS_buildKey", ""];
-if (_refortify) then {
-	{
-		private _gun = _x;
-		{ _gun deleteVehicleCrew _x } forEach ((crew _gun) select { !alive _x });
-	} forEach (DUWS_compositions getOrDefault [_buildKey, []]);
-};
-
 
 playSound "loadgun";
 
@@ -130,7 +121,10 @@ sleep 10;
 	_x enableSimulationGlobal true;
 } forEach _turrets;
 
-if (_refortify) then { [DUWS_compositions getOrDefault [_buildKey, []], true] call DUWS_fnc_buildCrew };
+// Refortify only: a load restores the builds and mans them itself (fnc_campaign_restore).
+if (_refortify) then {
+	[DUWS_compositions getOrDefault [_fob getVariable ["DUWS_buildKey", ""], []], true] call DUWS_fnc_buildRecrew;
+};
 
 sleep 50;
 { _x allowDamage false } forEach _turrets;
