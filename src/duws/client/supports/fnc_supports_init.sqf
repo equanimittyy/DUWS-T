@@ -10,9 +10,11 @@
 // The catalogue: one ordered list, permanent rows first. fnc_duws_help reads it raw for the manual;
 // the menu build and buy/refund handler use the filtered fnc_support_defs below.
 //
-// [key, kind, cost, flag, label, comm item, insurgent-blocked, AP cost]
+// [key, kind, cost, flag, label, comm item, insurgent-blocked, AP cost, cap]
 // Column 8 is the AP half of a dual price (indirect-fire/air-strike rows and the advanced permanent
-// unlocks). Absent (reads as 0 via `param [7, 0]`) elsewhere, which pays CP only.
+// unlocks). Absent (reads as 0 via `param [7, 0]`) on the other permanent rows, which pay CP only;
+// a CONS row without one writes 0 to reach column 9.
+// Column 9 is how many copies of a CONS row one player may hold at once.
 //
 // A support's manual description is keyed by convention, not carried here: STR_DUWS_T_sdesc_<key>;
 // a ladder has one only on its level I row.
@@ -60,28 +62,29 @@ fnc_support_catalogue = {
 		["fort4",     "PERM", 30, "support_fort4_available",       "STR_DUWS_T_fortification_4",      "",           false, 25],
 
 		// Slot only -- the team already paid for Mobile HQ at the permanent row, so this costs 0 CP.
-		["mhq_slot",  "CONS",  0, "support_mobile_HQ_slot_available", "STR_DUWS_T_mhq_slot_row",      "mobile_HQ",  false],
-		["rally",     "CONS",  0, "support_rally_available",       "STR_DUWS_T_RALLY_POINT",          "rally_point",false],
-		["supply",    "CONS",  2, "support_supplydrop_available",  "STR_DUWS_T_5n277nzo",             "ammo",       false],
-		["veh_drop",  "CONS",  2, "support_veh_drop_available",    "STR_DUWS_T_oq3q7yrq",             "veh_drop",   false],
-		["uav",       "CONS",  3, "support_uav_recon_available",   "STR_DUWS_T_892wo8h0",             "uav_recon",  true],
-		["helotaxi",  "CONS",  1, "support_helotaxi_available",    "STR_DUWS_T_witoiij3",             "helo_taxi",  false],
-		["helolift",  "CONS",  2, "support_helolift_available",    "STR_DUWS_T_heloliftbuy",          "helo_lift",  false],
-		["boattaxi",  "CONS",  1, "support_boattaxi_available",    "STR_DUWS_T_3wiovyga",             "boat_taxi",  false],
-		["arty",      "CONS", 15, "support_arty_available",        "STR_DUWS_T_btiiyafy",             "artillery",  true,  15],
-		["mortar",    "CONS",  3, "support_mortar_available",      "STR_DUWS_T_xca5aaxu",             "mortar",     false,  5],
-		["mortar_smoke","CONS",3, "support_mortar_smoke_available","STR_DUWS_T_mortar_smoke_row",     "mortar_smoke",false],
-		["jdam",      "CONS",  5, "support_jdam_available",        "STR_DUWS_T_mbhh2q2e",             "jdam",       true,   8],
+		// Held once: its entry is never spent, so a second copy would only hold a slot.
+		["mhq_slot",  "CONS",  0, "support_mobile_HQ_slot_available", "STR_DUWS_T_mhq_slot_row",      "mobile_HQ",  false,  0, 1],
+		["rally",     "CONS",  0, "support_rally_available",       "STR_DUWS_T_RALLY_POINT",          "rally_point",false,  0, 1],
+		["supply",    "CONS",  2, "support_supplydrop_available",  "STR_DUWS_T_5n277nzo",             "ammo",       false,  0, 2],
+		["veh_drop",  "CONS",  2, "support_veh_drop_available",    "STR_DUWS_T_oq3q7yrq",             "veh_drop",   false,  0, 1],
+		["uav",       "CONS",  3, "support_uav_recon_available",   "STR_DUWS_T_892wo8h0",             "uav_recon",  true,   0, 1],
+		["helotaxi",  "CONS",  1, "support_helotaxi_available",    "STR_DUWS_T_witoiij3",             "helo_taxi",  false,  0, 3],
+		["helolift",  "CONS",  2, "support_helolift_available",    "STR_DUWS_T_heloliftbuy",          "helo_lift",  false,  0, 3],
+		["boattaxi",  "CONS",  1, "support_boattaxi_available",    "STR_DUWS_T_3wiovyga",             "boat_taxi",  false,  0, 3],
+		["arty",      "CONS", 15, "support_arty_available",        "STR_DUWS_T_btiiyafy",             "artillery",  true,  15, 1],
+		["mortar",    "CONS",  3, "support_mortar_available",      "STR_DUWS_T_xca5aaxu",             "mortar",     false,  5, 2],
+		["mortar_smoke","CONS",3, "support_mortar_smoke_available","STR_DUWS_T_mortar_smoke_row",     "mortar_smoke",false,  0, 2],
+		["jdam",      "CONS",  5, "support_jdam_available",        "STR_DUWS_T_mbhh2q2e",             "jdam",       true,   8, 1],
 		// Same warhead as JDAM (identical scripted damage in fnc_arty) but 3 AP cheaper: the discount is
 		// earned by painting and holding the target, where JDAM is fire-and-forget on map coordinates.
-		["laser",     "CONS",  5, "support_laser_available",       "STR_DUWS_T_xja6gemx",             "laser",      true,   5],
-		["cluster",   "CONS", 15, "support_cluster_available",     "STR_DUWS_T_d5qzh6mj",             "cluster",    true,  25],
-		["napalm",    "CONS", 15, "support_napalm_available",      "STR_DUWS_T_owven8ki",             "napalm",     true,  20],
-		["hcAttChop", "CONS", 10, "support_hcAttChop_available",   "STR_DUWS_T_t4jo046q",             "hc_ATTchop", true,  15],
-		["hcCAS",     "CONS", 25, "support_hcCAS_available",       "STR_DUWS_T_6khosjp7",             "hc_CAS",     true,  20],
+		["laser",     "CONS",  5, "support_laser_available",       "STR_DUWS_T_xja6gemx",             "laser",      true,   5, 2],
+		["cluster",   "CONS", 15, "support_cluster_available",     "STR_DUWS_T_d5qzh6mj",             "cluster",    true,  25, 1],
+		["napalm",    "CONS", 15, "support_napalm_available",      "STR_DUWS_T_owven8ki",             "napalm",     true,  20, 1],
+		["hcAttChop", "CONS", 10, "support_hcAttChop_available",   "STR_DUWS_T_t4jo046q",             "hc_ATTchop", true,  15, 1],
+		["hcCAS",     "CONS", 25, "support_hcCAS_available",       "STR_DUWS_T_6khosjp7",             "hc_CAS",     true,  20, 1],
 		// Priced a shade over the 12-CP High Command rifle squad it mirrors -- same headcount, the
 		// premium being the air insertion.
-		["paradrop",  "CONS", 15, "support_paradrop_available",    "STR_DUWS_T_9hmlads9",             "paradrop",   true]
+		["paradrop",  "CONS", 15, "support_paradrop_available",    "STR_DUWS_T_9hmlads9",             "paradrop",   true,   0, 1]
 	]
 };
 
@@ -158,11 +161,16 @@ fnc_support_owned = {
 	missionNamespace getVariable [_flagVar, false]
 };
 
+fnc_support_held = {
+	params ["_key"];
+	count ((missionNamespace getVariable ["DUWS_support_paid", createHashMap]) getOrDefault [_key, []])
+};
+
 // Copies the player can still call or refund. A picked copy that has not committed yet is still paid
 // for and keeps its slot, but its entry is gone from the menu and it cannot be sold.
 fnc_support_in_hand = {
 	params ["_key", "_class"];
-	count ((missionNamespace getVariable ["DUWS_support_paid", createHashMap]) getOrDefault [_key, []])
+	([_key] call fnc_support_held)
 		- ([0, 1] select ((missionNamespace getVariable ["DUWS_support_running", createHashMap]) getOrDefault [_class, false]))
 };
 
@@ -288,10 +296,9 @@ fnc_support_buy = {
 
 	private _insurgent = !isNil "insurgent_mode_enable" && {insurgent_mode_enable};
 	if (_insBlocked && _insurgent) exitWith { hint localize "STR_DUWS_T_inssupport"; false };
-	// Consumables stack, except the Mobile HQ designation: its entry is never spent, so a second copy
-	// would only hold a slot.
-	if ([_flagVar] call fnc_support_owned && {_kind == "PERM" || _key == "mhq_slot"}) exitWith {
-		hint localize "STR_DUWS_T_8c1i4vga"; false
+	if (_kind == "PERM" && {[_flagVar] call fnc_support_owned}) exitWith { hint localize "STR_DUWS_T_8c1i4vga"; false };
+	if (_kind == "CONS" && {([_key] call fnc_support_held) >= (_def select 8)}) exitWith {
+		hint format [localize "STR_DUWS_T_SUPPORT_CAP_FULL", _def select 8]; false
 	};
 	if (_kind == "CONS" && {support_count >= support_max_slots}) exitWith {
 		["info", [localize "STR_DUWS_T_45a8q6tj",

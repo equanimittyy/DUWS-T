@@ -63,8 +63,8 @@ private _rows = [];   // listbox index -> its def, [] for a heading
         // Name plus the shared price bracket (fnc_supports_init.sqf): the CP is read from the
         // catalogue and scaled by escalation, never baked into the label.
         private _label = (localize _labelKey) + ([_cost, _x param [7, 0], _free] call fnc_support_cost_bracket);
-        private _held = count ((missionNamespace getVariable ["DUWS_support_paid", createHashMap]) getOrDefault [_key, []]);
-        if (_held > 0) then { _label = _label + " " + format [localize "STR_DUWS_T_SUPPORT_HELD_TAG", _held] };
+        private _held = [_key] call fnc_support_held;
+        if (_held > 0) then { _label = _label + " " + format [localize "STR_DUWS_T_SUPPORT_HELD_TAG", _held, _x select 8] };
         // The tier tag, appended last. A locked row is greyed below, whatever state colour
         // it would otherwise have carried.
         private _tier = [_key] call fnc_support_tier;

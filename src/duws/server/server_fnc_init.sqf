@@ -195,6 +195,7 @@ publicVariable "fnc_support_cost_bracket";
 publicVariable "DUWS_support_tiers";
 publicVariable "fnc_support_tier";
 publicVariable "fnc_support_owned";
+publicVariable "fnc_support_held";
 publicVariable "fnc_support_in_hand";
 publicVariable "fnc_support_take";
 publicVariable "fnc_support_comm_sync";

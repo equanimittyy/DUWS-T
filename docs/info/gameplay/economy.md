@@ -150,7 +150,7 @@ mechanisms differ in:
 
 | | Permanent (19 rows) | Consumable (18 rows) |
 |---|---|---|
-| Bought for | the whole team, once | the buyer alone, any number of copies |
+| Bought for | the whole team, once | the buyer alone, up to the row's cap (catalogue column 9) |
 | Slot | none | one of `support_max_slots` per copy |
 | Flag | broadcast, and recorded in `DUWS_support_permanent` | client-local, true while a copy is held |
 | Refund | never | 100% of what one copy charged, the latest copy first |

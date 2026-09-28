@@ -4368,8 +4368,12 @@
                 <English>REFUND</English>
             </Key>
             <Key ID="STR_DUWS_T_SUPPORT_HELD_TAG">
-                <Original>x%1</Original>
-                <English>x%1</English>
+                <Original>| %1/%2</Original>
+                <English>| %1/%2</English>
+            </Key>
+            <Key ID="STR_DUWS_T_SUPPORT_CAP_FULL">
+                <Original>You can hold at most %1 of this support.</Original>
+                <English>You can hold at most %1 of this support.</English>
             </Key>
             <Key ID="STR_DUWS_T_SUPPORT_ONE_RUN">
                 <Original>One of these is already under way. Call the next when it ends.</Original>
