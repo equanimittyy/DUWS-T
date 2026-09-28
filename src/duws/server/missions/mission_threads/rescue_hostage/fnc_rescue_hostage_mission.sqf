@@ -36,6 +36,8 @@ private _bestD = 1e9;
 
 private _VARtaskgeneratedName = format ["hostage%1%2", round (_MissionPos select 0), round (_MissionPos select 1)];
 [_requester, "STR_DUWS_T_MISSION_GEN_BUILD"] call fnc_mission_notice;
+// Before any unit spawns: a piece that thaws over a unit flings it, lethally.
+[_hostageBldg, "mission_rescue_hostage", 0] call fnc_furnish_building;
 sleep 1;
 
 // Hostage on the Escort Informant rig (walks once freed, never carried): captive so the guards hold fire,
@@ -67,7 +69,7 @@ _hostage addEventHandler ["HandleDamage", {
 private _garrison = ["garrison:team", getPosATL _hostageBldg, 30, "none", getPosATL _hostageBldg] call DUWS_fnc_zoneSpawnOne;
 if (isNull _garrison) exitWith {
     deleteVehicle _hostage;
-    [24, _requester, "no_garrison"] call fnc_mission_abort;
+    [24, _requester, "no_garrison", "mission_rescue_hostage"] call fnc_mission_abort;
 };
 _hostageBldg setVariable ["DUWS_garrisonedBy", _garrison];
 [_garrison, [_hostageBldg], count units _garrison, "AUTO"] call fnc_spreadIntoBuildings;
@@ -117,12 +119,6 @@ private _markername = [_MissionPos, _radius, _VARtaskgeneratedName, localize "ST
     [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_rescuehostage_brief", 6], ["STR_DUWS_T_actionteam", "STR_DUWS_T_rescuehostage_copy", 0]]
 ] call fnc_mission_present;
 
-// Additive to the cordon's own detection: this slows how fast the guards acquire a careful approach, it
-// does not gate the alarm.
-DUWS_stealth_active = true;
-publicVariable "DUWS_stealth_active";
-[_MissionPos, _radius + 300] remoteExec ["fnc_stealth_layer", 0, "DUWS_stealth_layer_jip"];
-
 // Recruit gated on DUWS_hostage_freed (stamped when the garrison dies), so it can't be used through a wall
 // while the guards are up. Leader check sits in the body, not the condition, so a non-leader is told why it
 // did nothing. Reuses the Escort Informant handler -- it carries no informant-only side effects.
@@ -148,8 +144,6 @@ private _leaveCond = "_target getVariable ['DUWS_hostage_freed', false] && {_thi
 private _clearIcons = {
     deleteMarker _trk;
     DUWS_float_hostage = objNull; publicVariable "DUWS_float_hostage";
-    DUWS_stealth_active = false; publicVariable "DUWS_stealth_active";
-    remoteExec ["", "DUWS_stealth_layer_jip"];
 };
 
 // Guard watcher: one alarm threshold. The whole cordon spots you -- a garrison OR patrol sighting raises the one
@@ -186,14 +180,6 @@ private _clearIcons = {
         } forEach _ring;
     };
 
-    // The approach ends the moment the cordon reacts or the captive is loose, so the coef is handed back
-    // rather than riding units through the firefight. Idempotent: the thread's teardown calls it again.
-    private _endStealth = {
-        DUWS_stealth_active = false;
-        publicVariable "DUWS_stealth_active";
-        remoteExec ["", "DUWS_stealth_layer_jip"];
-    };
-
     private _hintTgt = [0, -2] select isDedicated;
     private _alarmAt = -1;               // in-game time the execution clock expires; -1 = disarmed
     private _confirmSince = -1;          // time the current unbroken sighting began; -1 = no contact
@@ -204,7 +190,6 @@ private _clearIcons = {
             _hostage setCaptive false;
             _hostage setVariable ["DUWS_hostage_freed", true, true];
             call _convergeRing;
-            call _endStealth;
             // Overwrites the execution countdown: this branch stops the loop, so its last "Ns" would otherwise hang frozen in the box.
             [localize "STR_DUWS_T_rescuehostage_captors"] remoteExec ["hint", _hintTgt];
             [localize "STR_DUWS_T_OVERLORD", [localize "STR_DUWS_T_rescuehostage_freed"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
@@ -261,7 +246,6 @@ private _clearIcons = {
 
             if (_confirmSince >= 0 && { time - _confirmSince >= CONFIRM_HOLD }) then {
                 _alarmAt = time + CLOCK_BASE;
-                call _endStealth;
             };
         };
 
@@ -282,13 +266,13 @@ waitUntil {
 
 if (!alive _hostage) exitWith {
     call _clearIcons;
-    [_mission_name, _VARtaskgeneratedName, "FAILED", _MissionPos, _radius, [_markername], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_rescuehostage_lost"], false, "", false, false] call fnc_mission_finish;
+    [_mission_name, _VARtaskgeneratedName, "FAILED", _MissionPos, _radius, [_markername], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_rescuehostage_lost"], false, "mission_rescue_hostage", false, false] call fnc_mission_finish;
 };
 if ([_deadline] call fnc_time_expired) exitWith {
     call _clearIcons;
     if (alive _hostage) then { deleteVehicle _hostage };   // unclaimed, so the token sweep never takes him
     // _line empty + _notify true: speak the shared "out of time" call, since a missed deadline is exactly that.
-    [_mission_name, _VARtaskgeneratedName, "FAILED", _MissionPos, _radius, [_markername], [], false, "", false, true] call fnc_mission_finish;
+    [_mission_name, _VARtaskgeneratedName, "FAILED", _MissionPos, _radius, [_markername], [], false, "mission_rescue_hostage", false, true] call fnc_mission_finish;
 };
 
 // Win: peel him off the player's group so a rescued NPC never rides the roster. Leave Group turns MOVE off, so
@@ -313,4 +297,4 @@ if (_townIdx >= 0) then { [_townIdx, DUWS_curReward select 2, "rescue_hostage_su
     };
     if (!isNull _h) then { deleteVehicle _h };
 };
-[_mission_name, _VARtaskgeneratedName, "SUCCEEDED", _MissionPos, _radius, [_markername], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_rescuehostage_home"], true, "", false, false] call fnc_mission_finish;
+[_mission_name, _VARtaskgeneratedName, "SUCCEEDED", _MissionPos, _radius, [_markername], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_rescuehostage_home"], true, "mission_rescue_hostage", false, false] call fnc_mission_finish;
