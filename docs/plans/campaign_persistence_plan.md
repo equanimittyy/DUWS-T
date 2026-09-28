@@ -1063,10 +1063,10 @@ Three counters reset with them and are meant to. `econ_tick` numbers the 30-minu
 the server's payout caps read it. `WARCOM_opfor_lastIncome` holds OPFOR's last payout, which OPCOM
 divides by the period and adds to its drip to read an income rate, so a restored campaign reads
 the drip alone until its first payout lands — what the commander does at the start of every campaign
-anyway ([`opcom_plan.md`](opcom/opcom_plan.md#gate-and-the-savings-goal)). `DUWS_lastMissionStartDate`
-stamps the last side mission and gates the next one for three hours
-(`shared/functions/fnc_mission_gate_left.sqf:15`), and it resets with the mission it was stamped for:
-a restore drops live missions, so the wait goes with them rather than being served for a mission the
+anyway ([`opcom_plan.md`](opcom/opcom_plan.md#gate-and-the-savings-goal)). `DUWS_missionStartDates`
+stamps the last side-mission starts and allows two in any three hours
+(`shared/functions/fnc_mission_gate_left.sqf:18`), and it resets with the missions it was stamped for:
+a restore drops live missions, so the wait goes with them rather than being served for missions the
 player no longer has.
 
 Composition streaming adds nothing here. Its stow records are built when a composition leaves the
