@@ -467,6 +467,9 @@ The debug harness spends outside the pick and is not capped.
 
 - **Supply trucks sit outside the unit cap.** The supply cap bounds the trucks in flight. If the trucks counted, a
   full roster would stop every supply action.
+- **Rapport rests after a delivery.** When a Rapport delivers, a global cooldown rolled from `OPCOM_RAPPORT_COOLDOWN`
+  (60–360 ticks, 5–30 min) starts, and no Rapport is offered until it ends (`DUWS_opcom_rapportReadyTick`). A
+  courier that dies sets no cooldown.
 - **The garrison cap is a zone's.** Only a zone homes an OPCOM unit: a town is taken by a unit that guards it, never
   one that garrisons it ([§Attack](#attack-phase-5)).
 - **The hardpoint caps scale with the campaign's zone count,** because the seeded hardpoints count and the seed
@@ -1255,7 +1258,8 @@ restore clears before it replays them, and why belief is not among them — is
 [`campaign_persistence_plan.md` §The commander](../campaign_persistence_plan.md#the-commander).
 
 - The snapshot carries the archetype, the taskings with `DUWS_opcom_taskSeq`, the attacks with
-  `DUWS_opcom_attackSeq`, the attack cooldown (`DUWS_opcom_attackReadyTick`), the tick, `DUWS_opcom_hqKnown`, the
+  `DUWS_opcom_attackSeq`, the attack cooldown (`DUWS_opcom_attackReadyTick`), the Rapport cooldown
+  (`DUWS_opcom_rapportReadyTick`), the tick, `DUWS_opcom_hqKnown`, the
   mine variants and `DUWS_hpOpcomSeq`.
 - The save clears a tasking's live half: `grp` and `ferryPad` go to `""`, `status` to `virtual`, and a live group's
   strength and position are read into the record the way a stow reads them (`DUWS_fnc_campaignTaskings`). A

@@ -618,6 +618,7 @@ snapshot carries for it, and the contract they answer to is this section's; the 
 | Mine variants | outcome | `DUWS_opcom_mineVariants`, with `DUWS_hpOpcomSeq` beside it |
 | Attacks | outcome | `DUWS_opcom_attacks`, one hashmap per attack, with `DUWS_opcom_attackSeq` beside it, and the `boundTo` key on the taskings they own |
 | Attack cooldown | outcome | `DUWS_opcom_attackReadyTick`, the tick the next assault or flank may open at |
+| Rapport cooldown | outcome | `DUWS_opcom_rapportReadyTick`, the tick the next Rapport may set off at |
 
 **A tasking is already serialisable, and that is deliberate.** A record holds numbers, strings and arrays
 only, and `grp` is a live group's netId rather than a handle
