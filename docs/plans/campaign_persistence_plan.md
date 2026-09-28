@@ -277,7 +277,7 @@ correct for a fresh campaign, and each is resolved in the design below.
 | Campaign settings are set *and* broadcast by a client | `client/dialog/fnc_process_campaign_menu.sqf:480-515`, `fnc_process_enviro_menu.sqf:88-194` | A restore that only assigns them server-side leaves every client on defaults |
 | Arsenal contents are resolved at boot from whatever mods are loaded | `server/arsenal/fnc_create_ammo_lists.sqf` | Storing the resolved classnames pins the campaign to that mod set |
 | Hardpoints are sited in a generation phase after zone build-out and stored in `DUWS_hardpoints` ([`info/hardpoints.md`](../info/gameplay/hardpoints.md#siting)) | `server/warcom/fnc_init_OPFOR_WARCOM.sqf:52-96` | Replaying generation re-rolls every hardpoint position and orphans its cleared state |
-| `fnc_opcom_belief_init` assigns `DUWS_opcom_tick` 0 and `DUWS_opcom_hqKnown` false at boot | `server/warcom/opcom/belief/fnc_opcom_belief_init.sqf:12,14` | Every commit hold and staleness stamp is a count against that tick, so a restored clock reset to 0 holds units for hours and hides an HQ the commander had found |
+| `fnc_opcom_belief_init` assigns `DUWS_opcom_tick` 0, `DUWS_opcom_hqKnown` false and `DUWS_opcom_fobsKnown` empty at boot | `server/warcom/opcom/belief/fnc_opcom_belief_init.sqf:12,13,15` | Every commit hold and staleness stamp is a count against that tick, so a restored clock reset to 0 holds units for hours and hides an HQ or a FOB the commander had found |
 | A tasking's `grp` is a live group's netId, and the ferry binds a carry by tasking id | `server/warcom/opcom/taskings/taskings/fnc_opcom_tasking_init.sqf` | Restoring a record unchanged points it at a group that no longer exists, and a carry bound at the write holds a rider that was never spawned |
 
 One thing that looks like a blocker and is not: `fnc_fob_server` takes a `_fob_owner` object
@@ -614,7 +614,7 @@ snapshot carries for it, and the contract they answer to is this section's; the 
 |---|---|---|
 | Archetype | input | `DUWS_opcom_archetype`, fed back before the loop and never re-rolled |
 | Taskings | outcome | `DUWS_opcom_taskings`, one hashmap per unit, with `DUWS_opcom_taskSeq` beside it |
-| Clock and flags | outcome | `DUWS_opcom_tick` and `DUWS_opcom_hqKnown` |
+| Clock and flags | outcome | `DUWS_opcom_tick`, `DUWS_opcom_hqKnown`, and `DUWS_opcom_fobsKnown` with `fobKeys` beside it |
 | Mine variants | outcome | `DUWS_opcom_mineVariants`, with `DUWS_hpOpcomSeq` beside it |
 | Attacks | outcome | `DUWS_opcom_attacks`, one hashmap per attack, with `DUWS_opcom_attackSeq` beside it, and the `boundTo` key on the taskings they own |
 | Attack cooldown | outcome | `DUWS_opcom_attackReadyTick`, the tick the next assault or flank may open at |
@@ -648,6 +648,12 @@ standing unit already holds.
 cooldown are all tick counts, so the restore sets `DUWS_opcom_tick` and `DUWS_opcom_hqKnown` inside the OPCOM
 thread, after `fnc_opcom_belief_init` and the tasking init have run and before the first tick. Both inits
 assign them unconditionally, so a restore that ran earlier would be undone.
+
+**A FOB's key does not survive a load, so the commander's hold on one is re-keyed.** A FOB's site key carries the
+building's netId, which the rebuild renews. The snapshot writes `fobKeys` row for row with `fobs`. The OPCOM
+restore waits until `DUWS_fnc_restoreBases` has rebuilt the FOBs, maps each saved key to the FOB that stands within
+5 m of its row, and re-keys `DUWS_opcom_fobsKnown`, each attack's `target` and each tasking's `targetZone`. A key
+with no FOB is dropped from the found list, and an attack on it closes on its next step.
 
 **A minefield's variant lives outside the hardpoint registry.** `DUWS_opcom_mineVariants` maps a field's key to
 `AT` or `AP` because the registry row carries no variant, and the build mix and the caps weigh the two apart, so a
@@ -1022,7 +1028,7 @@ function runs unchanged.
 | `fnc_init_OPFOR_WARCOM` (`:205`) | Runs, with the locator bypassed as above |
 | `fnc_escalation` (`fnc_init_OPFOR_WARCOM.sqf:63`) | Runs the census, then the snapshot restores `escalation_destroyed` |
 | `fnc_intro_heli` (`:433`) | **Skipped**: the players land at the HQ the way a player joining a running campaign does |
-| OPCOM's thread (`fnc_opcom_perception_run`) | Runs its inits, then the snapshot restores the commander's keys before the first tick |
+| OPCOM's thread (`fnc_opcom_perception_run`) | Runs its inits, waits for the FOBs to stand, then the snapshot restores the commander's keys before the first tick |
 
 FOBs restore the same way: call `fnc_fob_server` per saved position — silently, and with the saved
 name — rather than reimplementing what it builds. They are built one at a time, because

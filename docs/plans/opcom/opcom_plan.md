@@ -194,7 +194,7 @@ magnitude; above that the best candidate takes most of the probability, and a hi
 | Standalone hardpoint Build | one action per unlocked standalone type, its target the band cell the siting pass picks by cover Value ([§Asset siting](#asset-siting)) |
 | Tower / OP / mortar / battery Build | one action each, under the type's cap, target the band cell the siting pass picks by the type's own rule ([§Asset siting](#asset-siting)) |
 | Minefield | one action per variant (AT, AP), target the band cell the siting pass picks by traffic, a belt 150 m deep and 500 m to 1.5 km long |
-| Attack assault, Attack flank | while no assault or flank is open and the attack cooldown has ended, each BLUFOR-held zone, each town they have garrisoned and the HQ once found (`DUWS_opcom_hqKnown`) while its officer lives and BLUFOR hold no zone; and each attack of the row's kind still in buildup that needs more units; flank only below band 2 and from the target's own landmass, and a source across water only as infantry ([§Attack](#attack-phase-5)) |
+| Attack assault, Attack flank | while no assault or flank is open and the attack cooldown has ended, each BLUFOR-held zone, each town they have garrisoned, the HQ once found (`DUWS_opcom_hqKnown`) while its officer lives and BLUFOR hold no zone, and each FOB once found (`DUWS_opcom_fobsKnown`) that a capture at its centre takes, so not one inside a held zone or a garrisoned town; and each attack of the row's kind still in buildup that needs more units; flank only below band 2 and from the target's own landmass, and a source across water only as infantry ([§Attack](#attack-phase-5)) |
 | Attack QRF | each cluster of BLUFOR sightings inside OPFOR's area of influence with no QRF on it, and each QRF still in buildup that needs more units ([§QRF](#qrf-an-attack-on-a-moving-cluster)) |
 | Patrol | each of `OPCOM_PATROL_SAMPLES` (3) sampled stale cells, one unit apiece, taken by the recon or land combatant, free or hired, that scores best |
 | Probe | each assault or flank target whose 3×3 block reads stale and has no probe already on it, and that an Attack can source or a buildup stages for, one unit apiece, sourced from Patrol's rows |
@@ -216,13 +216,15 @@ so it moves no faster than a truck delivers.
 
 - **Worth** is a holding's fixed AP figure. A zone's is `_points`, its radius ÷ 10 (35–50 at the default radii). A
   town's is its level `civ_town_ap` (1–5, the figure its income pays) × a tunable 5, so 5–25 and always below a
-  zone. The found HQ's is `OPCOM_HQ_WORTH` (50), the top of a zone's range.
+  zone. The found HQ's is `OPCOM_HQ_WORTH` (50), the top of a zone's range. A found FOB's is `OPCOM_FOB_WORTH` (40),
+  the middle of a zone's range.
 - **Exposure** (0–1) is how close the holding sits to BLUFOR-held ground: 1 within 5 km, falling in a straight line
   to 0.2 at 10 km. OPCOM knows every zone and town owner for free, so exposure moves only when ground changes hands.
   OPCOM holds the player HQ's position from the start behind a hidden flag, and a hidden HQ counts toward nothing;
-  the first BLUFOR sighting within 2 cells of it flips the flag for good, checked once in
+  the first sighting of a group with a unit on the HQ's infantry roster flips the flag for good, checked in
   `fnc_opcom_belief_upsert`. Until the first capture or that reveal, exposure sits at its floor everywhere and
-  OPCOM defends evenly.
+  OPCOM defends evenly. A FOB counts toward exposure from the moment it stands. It is found the same way, by a
+  sighting of its own garrison, into `DUWS_opcom_fobsKnown`, and only a found FOB is an attack target.
 - **Gain** (0–1) is the share of the job a partial action finishes: the force a purchase adds ÷ the force the
   holding fields at full strength **on its own current tier**, or 3/10 for Rapport, whose −3 step is three tenths
   of a flip. Measured against the top tier instead, a small zone's refill read as a few percent of a zone it will
@@ -808,7 +810,11 @@ alone at `OPCOM_MUSTER_EXPIRY`.
   ground instead of garrisoning into it, because the clear took the tier with it and left no pool to home to.
   The **HQ** is attacked on a town's terms: no virtual shortcut, and no pool for OPFOR to home to. It never changes
   hands, so it falls with its officer (`hq_blu1`), and every attacker then guards where it stands, inside the radius
-  or short of it. **QRF** (`intercept`) — at the sighting's last known position the unit
+  or short of it. A **FOB** has no pool for OPFOR to home to either, so its attackers end the same way. It falls when
+  overrun: an attacker, live or virtual, that has stood inside its radius for `DUWS_captureHold` with no BLUFOR in
+  the ring destroys the building, and `fnc_fob_destroyed` withdraws the respawn, the marker and the site. The hold
+  restarts while any BLUFOR stand in the ring. A capture resolves its target zones first, then garrisoned towns,
+  then the nearest base (`DUWS_fnc_opcom_captureKey`). **QRF** (`intercept`) — at the sighting's last known position the unit
   reads truth within its own K: nothing there, it drops to `guard` in place; BLUFOR there, it fights them live and
   guards once none remain, until its QRF moves on to another group ([§QRF](#qrf-an-attack-on-a-moving-cluster)). It
   never returns to garrison. **Probe** — the target's 3×3 block reads fresher than
@@ -1259,13 +1265,16 @@ restore clears before it replays them, and why belief is not among them — is
 
 - The snapshot carries the archetype, the taskings with `DUWS_opcom_taskSeq`, the attacks with
   `DUWS_opcom_attackSeq`, the attack cooldown (`DUWS_opcom_attackReadyTick`), the Rapport cooldown
-  (`DUWS_opcom_rapportReadyTick`), the tick, `DUWS_opcom_hqKnown`, the
+  (`DUWS_opcom_rapportReadyTick`), the tick, `DUWS_opcom_hqKnown`, `DUWS_opcom_fobsKnown` with `fobKeys`, the
   mine variants and `DUWS_hpOpcomSeq`.
 - The save clears a tasking's live half: `grp` and `ferryPad` go to `""`, `status` to `virtual`, and a live group's
   strength and position are read into the record the way a stow reads them (`DUWS_fnc_campaignTaskings`). A
   boarding rider keeps its frozen strength, and a bound rider keeps its route.
-- The restore runs inside the OPCOM thread, after `fnc_opcom_belief_init`, `fnc_opcom_grid_init` and
-  `fnc_opcom_tasking_init` and before the first tick (`DUWS_fnc_restoreOpcom`). A `spawnClass` the loaded mods no
+- The restore runs inside the OPCOM thread, after `fnc_opcom_belief_init`, `fnc_opcom_grid_init`,
+  `fnc_opcom_tasking_init` and the restored FOBs, and before the first tick (`DUWS_fnc_restoreOpcom`). A FOB's site
+  key carries a netId that a load renews, so each saved key in `fobKeys` maps to the FOB rebuilt within 5 m of its
+  row in `fobs`, and the found FOBs, each attack's `target` and each tasking's `targetZone` take the new key. A
+  `spawnClass` the loaded mods no
   longer define is redrawn from its token; a token the faction cannot field drops the tasking and its id leaves
   every attack role. Each carry resumes on the virtual ferry step. A pickup starts over, a drop the save cut off
   plays out again from the carry, and a rider whose lift did not come back is unbound.
