@@ -15,8 +15,7 @@ key changes with it in the same edit, under the rules below; a key without langu
 nothing. Retranslating a whole language is a pass of its own
 ([localisation plan](../../plans/localisation_catchup_plan.md)), because the briefings encode
 gameplay numbers a translator has to check against the current English rather than against old
-text. The `<Spanish>` and the few `<Chinese>` (Traditional) tags still hold pre-rework text —
-retired callsigns (`Action Squad`, `Overlord 1-1`, `Viper 1-5`) and briefings whose timings and
+text. The `<Spanish>` tags still hold pre-rework text — retired callsigns (`Action Squad`, `Overlord 1-1`, `Viper 1-5`) and briefings whose timings and
 reward tags no longer match — until their pass.
 
 **What a translation keeps from English.** A translation pass fills only the language tags: it never
@@ -37,6 +36,7 @@ language may add one after the intact `Overlord` or `Allseer` (`Overlordovi`).
 | Tag | Address | Quotes | Punctuation and numbers | Fixed terms |
 |---|---|---|---|---|
 | `<Chinesesimp>` | 你 | “…” | Full-width punctuation; 。 only where the English ends with a period; a half-width space between a Chinese character and an adjacent Latin word, number or placeholder, none next to full-width punctuation | vehicle 载具, HQ 总部 |
+| `<Chinese>` (Traditional, Taiwan usage) | 你 | 「…」 | As `<Chinesesimp>`; m is 公尺 | vehicle 載具, HQ 總部, menu 選單, tank 戰車, artillery 砲 |
 | `<German>` | du; Overlord to the squad: ihr | „…“ | Decimal comma; `%1 m`; a count or unknown-gender placeholder goes after a colon (`Zerstört: %1`); an English em dash becomes ` – ` | vehicle Fahrzeug, HQ stays HQ, task force Task Force, mortar Mörser |
 | `<Polish>` | ty; Overlord to the squad: plural imperatives | „…” | Decimal comma; `%1 m`; a count or unknown-gender placeholder goes after a colon (`Zniszczono: %1`); no gendered past tense aimed at the player, masculine where it cannot be avoided | vehicle pojazd, HQ stays HQ, town miejscowość, hardpoint punkt oporu |
 | `<Czech>` (also serves Slovak) | ty; Overlord to the squad: plural imperatives | „…“ | Decimal comma; `%1 m`; a count or unknown-gender placeholder goes after a colon (`Zničeno: %1`); no gendered past tense aimed at the player, masculine where it cannot be avoided | vehicle vozidlo, HQ stays HQ, town obec, hardpoint opěrný bod |
