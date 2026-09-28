@@ -138,7 +138,8 @@ which composition the zone fields; strength is how much of that is left.** Weigh
 the roll is skewed to the top: most zones are the full objective and a low roll is the occasional
 soft one worth taking early.
 
-`DUWS_zoneSpawnTiers` holds one composition per tier, **absolute rather than cumulative** — a row is
+`DUWS_zoneSpawnTiers` (OPFOR) and `DUWS_zoneSpawnTiersBlu` (BLUFOR) each hold one composition per tier,
+**absolute rather than cumulative** — a row is
 the whole garrison, so what a tier IV zone is reads off one line instead of being assembled from
 four. Tier reaches only the units a zone spawns alongside itself; the prefab, the fortification
 scatter and their crews are not part of it.
@@ -146,7 +147,8 @@ scatter and their crews are not part of it.
 **Tier moves the whole fight, dug-in slots included.** A repeated entry is how a tier fields two of
 something; nothing about the *ground* multiplies a row afterwards, and the one thing that does — the
 campaign's enemy multiplier — scales whole cards and applies to every zone alike. The dug-in slots,
-`garrison:garrison_element`, climb from none at tier I to three at tier IV, so only a heavier zone digs in.
+`garrison:garrison_element`, climb from none at tier I to four at tier IV on OPFOR's rows and three on
+BLUFOR's, so only a heavier zone digs in.
 `fnc_zone_tier_roll` refuses to roll twice, and tests for a missing tier rather than a positive one, so a
 stored 0 never re-rolls. `fnc_createzone` is re-entrant by design — `zone_meta_array`
 exists so a zone can be rebuilt through it — and a rebuild that re-rolled would change what the ground
@@ -158,7 +160,7 @@ the strength it had rather than silently halving.
 raises the tier by one, clamped at IV whatever the zone rolled, and re-stamps the full potential; the
 zone's hardpoint cap rises with it (`fnc_hardpoint_zone_cap`). The buy fields only a tenth of the tokens
 the new tier adds, rounded up, and files the rest as lost (`DUWS_fnc_garrisonBuyTier`), so the commander
-must reinforce to field the whole tier. At multiplier 1 a step adds at most six tokens, so a fortify
+must reinforce to field the whole tier. At multiplier 1 a step adds at most seven tokens, so a fortify
 fields one of them until a reinforcement buys the rest back.
 `fnc_zone_garrison_reinforce` buys back one `0.3` step through the shared ledger
 (`DUWS_fnc_garrisonReinforce`, the step a town takes). On a standing garrison both re-stand it
@@ -194,7 +196,7 @@ A zone is described by two arrays that never meet in source, and the tier reache
 
 | | Holds | Tiered | Where |
 |---|---|---|---|
-| Composition | one entry per A3 group, `posture:token` | yes, a row per tier | `DUWS_zoneSpawnTiers` |
+| Composition | one entry per A3 group, `posture:token` | yes, a row per tier | `DUWS_zoneSpawnTiers`, `DUWS_zoneSpawnTiersBlu` |
 | Prefab | one row per object — sandbags, wire, bunkers, towers and the guns alike | no, drawn by weighted roll at zone creation (`fnc_createzone.sqf:130-140`) | the Eden composition each `init_zones/prefabs/modern/fnc_modern_*.sqf` reads (`duws_zone_*` in `src/duws/compositions/`) |
 
 **A prefab object cannot carry a posture, because a posture is an order and there is no group to
@@ -513,10 +515,13 @@ appraise them as neutral.
 | Tier | Fields | Reached by |
 |---|---|---|
 | 0 | — | not OPFOR ground |
-| I | A patrol, a team, a car | reputation `<= -10` |
-| II | The above heavier, plus an APC and a dug-in element | purchase |
-| III | The above heavier, plus a wide-patrol team, two weapons teams and a second dug-in element | purchase |
-| IV | The above heavier, plus a lone IFV and more wide-patrol teams | purchase |
+| I | Patrols, a team, a weapons team, a car | reputation `<= -10` |
+| II | The above heavier, plus a sniper pair, an APC and a dug-in element | purchase |
+| III | The above heavier, with wide-patrol teams, a second APC and a second dug-in element | purchase |
+| IV | The above, plus a lone IFV and more building-occupying units | purchase |
+
+A BLUFOR town fields a thinner set of rows: no sniper pair, one patrol fewer at every tier, a weapons team
+only from tier III, and at most two dug-in elements and one APC.
 
 A purchased tier arrives mostly owed. `fnc_town_garrison_fortify` raises the tier by one, never from
 tier 0, and files all but a tenth of the tokens the raise adds, rounded up, as lost
@@ -526,7 +531,7 @@ multiplier copy, so below multiplier 2 a town buy fields one new token until
 written through `fnc_town_garrison_setTier`, and fields whole. On a standing garrison the garrison
 thread re-stands the town at the new tier on its next tick.
 
-The compositions live as data in `DUWS_townSpawnTiers`, in the token vocabulary
+The compositions live as data in `DUWS_townSpawnTiers` and `DUWS_townSpawnTiersBlu`, in the token vocabulary
 `DUWS_fnc_zoneSpawnOne` already understands — the same spawner the zone compositions use, so a town
 garrison inherits faction auto-detection for free.
 
@@ -559,8 +564,8 @@ thread rather than in the commander's appraisal: a purchase made while the playe
 otherwise still pop its men in the moment they walked back.
 
 **It is units only — no static emplacements and no prefab**, because built defences are what make a
-zone an objective and a town must not compete with one. Its dug-in squads hold buildings instead: two
-at tier IV, one fewer than a tier IV zone.
+zone an objective and a town must not compete with one. Its dug-in squads hold buildings instead, one
+fewer at tier IV than a tier IV zone of the same side.
 
 **Clearing destroys the purchase, not the ownership.** The tier files back down to I rather than to
 0 — the town is still enemy ground, and what was beaten is the commander's spending, not the enemy's
@@ -817,9 +822,8 @@ more usefully — **which of them cannot be moved alone.**
 **Couplings that fail quietly.**
 
 - **The OPFOR cap seed sits at the break line.** A site OPFOR have just taken keeps a tenth of its
-  tier I tokens, rounded up. For a zone at multiplier 2 or 3, and a town at multiplier 3, that is at or
-  under the `0.15` line; a zone at multiplier 1 keeps one token of five, and a town at multiplier 1 or 2
-  keeps one of three or of six, both above it. A site under the line reads beaten from its first raise, and only
+  tier I tokens, rounded up, which is at or under the `0.15` line at every multiplier except a tier I
+  town at multiplier 1 (one token of five). Such a site reads beaten from its first raise, and only
   the count over the ring holds it until the commander reinforces. Moving either number changes that
   for every capture at once.
 - **`CLEAR_REP` decides the clear count non-obviously.** The band is inclusive at `-10`, so `+10` takes
@@ -829,7 +833,7 @@ more usefully — **which of them cannot be moved alone.**
   deadline further out than the hold as one a previous session wrote. Add a longer hold without
   moving that bound and a genuine deadline gets discarded as stale.
 
-**A figure that is arithmetic rather than balance.** A zone's tier IV row lands on twenty-two groups,
+**A figure that is arithmetic rather than balance.** OPFOR's tier IV zone row lands on twenty-seven groups,
 which at full garrison density is also the site's group ceiling — raising it raises what every tier IV zone on the map costs
 the server, not just the one in front of the player.
 
@@ -841,7 +845,7 @@ and building one is the player's job and their expense.
 
 A bought tier fields a tenth of what it adds and owes the rest, so the first buy stands a thin tier I
 that climbs by **30 % per reinforcement** — the same two sinks and the same ledger the enemy commander
-spends on. The garrison itself is the same model: the same tier rows, raised through BLUFOR's hulls and
+spends on. The garrison itself is the same model on its own weaker tier rows, raised through BLUFOR's hulls and
 their own Army Power rungs, streaming and wearing down exactly as the enemy's does
 ([`garrison_and_reserves.md`](garrison_and_reserves.md#whose-garrison-it-is)).
 

@@ -55,8 +55,18 @@ fnc_civ_repAt = {
 
 // posture:team tokens DUWS_fnc_zoneSpawnOne reads. Each row is the whole garrison for that tier (absolute,
 // like the zone set), so a tier buy raises DUWS_fnc_spawnDiff of the rows rather than stacking a second garrison; armour caps at one IFV so a town stays a garrison, not a zone.
-// --DUWS-UNITCOMP BEGIN name="Town tiers" kind=composition rowname="Tier %1" row="tier I..IV"--
+// --DUWS-UNITCOMP BEGIN name="OPFOR town tiers" kind=composition rowname="Tier %1" row="tier I..IV"--
 DUWS_townSpawnTiers = [
+	["widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "closepatrol:wp_team", "widepatrol:car"],
+	["widepatrol:sniper_element", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "closepatrol:wp_team", "widepatrol:car", "widepatrol:car", "closepatrol:apc", "garrison:garrison_element"],
+	["widepatrol:sniper_element", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "widepatrol:team", "closepatrol:wp_team", "widepatrol:wp_team", "widepatrol:car", "widepatrol:car", "closepatrol:apc", "closepatrol:apc", "garrison:garrison_element", "garrison:garrison_element"],
+	["widepatrol:sniper_element", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "widepatrol:team", "widepatrol:team", "closepatrol:wp_team", "widepatrol:wp_team", "widepatrol:wp_team", "widepatrol:car", "widepatrol:car", "closepatrol:apc", "closepatrol:apc", "closepatrol:ifv", "garrison:garrison_element", "garrison:garrison_element", "garrison:garrison_element"]
+];
+// --DUWS-UNITCOMP END--
+
+// Kept weaker than OPFOR's row at every tier.
+// --DUWS-UNITCOMP BEGIN name="BLUFOR town tiers" kind=composition rowname="Tier %1" row="tier I..IV"--
+DUWS_townSpawnTiersBlu = [
 	["widepatrol:patrol", "closepatrol:team", "widepatrol:car"],
 	["widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "widepatrol:car", "widepatrol:car", "closepatrol:apc", "garrison:garrison_element"],
 	["widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "widepatrol:team", "closepatrol:wp_team", "widepatrol:wp_team", "widepatrol:car", "widepatrol:car", "closepatrol:apc", "garrison:garrison_element", "garrison:garrison_element"],
@@ -65,11 +75,10 @@ DUWS_townSpawnTiers = [
 // --DUWS-UNITCOMP END--
 
 // Filtered before any derive, so a token the side can't field isn't counted into full and later chased by refill.
-// One table for both armies, as the zone tiers are: a town the player holds garrisons it off the same rows.
 DUWS_fnc_townSpawnList = {
 	params ["_tier", ["_side", "OPF"]];
 	if (_tier < 1) exitWith { [] };
-	[DUWS_townSpawnTiers select (_tier - 1), _side] call DUWS_fnc_spawnFilter
+	[([DUWS_townSpawnTiers, DUWS_townSpawnTiersBlu] select (_side == "BLU")) select (_tier - 1), _side] call DUWS_fnc_spawnFilter
 };
 
 // Reputation writes tier 1 for OPFOR alone (see fnc_civ_garrison); every step above it, and all of BLUFOR's,

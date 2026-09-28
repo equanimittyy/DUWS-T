@@ -377,7 +377,7 @@ opfor_HELI_X = "cls_heli";
 TEST_Heavy = 1;
 TEST_Air = 1;
 WARCOM_opfor_ap = 200;
-// The BLUFOR half, on the same token names and rungs -- what lets one tier row raise either army.
+// The BLUFOR half, on the same token names and rungs -- what lets one token resolve for either army.
 DUWS_spawnVehiclesBlu = [
     ["car",  "blufor_CAR_X",  "", 0],
     ["apc",  "blufor_APC_X",  "", 0],
@@ -389,6 +389,7 @@ blufor_TANK_X = "blu_tank";
 WARCOM_blufor_ap_earned = 200;
 DUWS_zoneSpawnTiers = [["patrol"], ["patrol", "car"], ["patrol", "apc"],
     ["patrol", "team", "car", "apc", "heli"]];
+DUWS_zoneSpawnTiersBlu = [["patrol"], ["car"], ["patrol", "car"], ["patrol", "car", "apc"]];
 
 // --- fnc_faction_pick: one classname per spawn, drawn from the detected pool ---
 // The pool is what detection found; the global is a stable representative for the two hundred-odd
@@ -512,11 +513,10 @@ TEST_Air = 1;
 ["zoneSpawnList: tier 0 fields nothing",
     ([0] call DUWS_fnc_zoneSpawnList), []] call fnc_assertEq;
 
-// The same rows raised for the other army, resolved through its own hulls.
 ["tokenClass: a token resolves to the asking side's hull",
     (["apc", "BLU"] call DUWS_fnc_tokenClass), "blu_apc"] call fnc_assertEq;
-["zoneSpawnList: a tier raised for BLUFOR is the same row",
-    ([2, "BLU"] call DUWS_fnc_zoneSpawnList), ["patrol", "car"]] call fnc_assertEq;
+["zoneSpawnList: BLUFOR raise their own rows, not OPFOR's",
+    ([2, "BLU"] call DUWS_fnc_zoneSpawnList), ["car"]] call fnc_assertEq;
 // Each side's rungs are its own counter: BLUFOR's earned Army Power unlocks BLUFOR's armour.
 WARCOM_blufor_ap_earned = 40;
 ["tokenClass: a BLUFOR token below its rung is locked on BLUFOR's counter",

@@ -20,8 +20,18 @@
 //
 // Tier I has no garrison (dug-in) slots -- balance choice, so the lightest zone stays all mobile and
 // only the heavier ones dig in.
-// --DUWS-UNITCOMP BEGIN name="Zone tiers" kind=composition rowname="Tier %1" row="tier I..IV"--
+// --DUWS-UNITCOMP BEGIN name="OPFOR zone tiers" kind=composition rowname="Tier %1" row="tier I..IV"--
 DUWS_zoneSpawnTiers = [
+    ["widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "closepatrol:team", "closepatrol:wp_team", "widepatrol:car"],
+    ["widepatrol:sniper_element", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "closepatrol:team", "closepatrol:wp_team", "closepatrol:wp_team", "widepatrol:car", "widepatrol:car", "closepatrol:apc", "garrison:garrison_element", "garrison:garrison_element"],
+    ["widepatrol:sniper_element", "widepatrol:sniper_element", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "closepatrol:team", "widepatrol:team", "closepatrol:wp_team", "closepatrol:wp_team", "widepatrol:wp_team", "widepatrol:car", "widepatrol:car", "closepatrol:apc", "closepatrol:ifv", "closepatrol:tank", "garrison:garrison_element", "garrison:garrison_element", "garrison:garrison_element"],
+    ["widepatrol:sniper_element", "widepatrol:sniper_element", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "closepatrol:team", "widepatrol:team", "widepatrol:team", "closepatrol:wp_team", "closepatrol:wp_team", "widepatrol:wp_team", "widepatrol:wp_team", "widepatrol:car", "widepatrol:car", "widepatrol:car", "closepatrol:apc", "closepatrol:ifv", "closepatrol:ifv", "closepatrol:tank", "closepatrol:tank", "widepatrol:attackheli", "garrison:garrison_element", "garrison:garrison_element", "garrison:garrison_element", "garrison:garrison_element"]
+];
+// --DUWS-UNITCOMP END--
+
+// Kept weaker than OPFOR's row at every tier.
+// --DUWS-UNITCOMP BEGIN name="BLUFOR zone tiers" kind=composition rowname="Tier %1" row="tier I..IV"--
+DUWS_zoneSpawnTiersBlu = [
     ["widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "closepatrol:wp_team", "widepatrol:car"],
     ["widepatrol:sniper_element", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "closepatrol:wp_team", "closepatrol:wp_team", "widepatrol:car", "widepatrol:car", "closepatrol:apc", "garrison:garrison_element"],
     ["widepatrol:sniper_element", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "widepatrol:team", "closepatrol:wp_team", "closepatrol:wp_team", "widepatrol:wp_team", "widepatrol:car", "widepatrol:car", "closepatrol:apc", "closepatrol:ifv", "closepatrol:tank", "garrison:garrison_element", "garrison:garrison_element"],
@@ -38,8 +48,9 @@ DUWS_zoneSpawnTiers = [
 DUWS_fnc_zoneSpawnList = {
     params ["_tier", ["_side", "OPF"]];
     if (_tier < 1) exitWith { [] };
-    private _t = ((round _tier) min (count DUWS_zoneSpawnTiers)) - 1;
-    [DUWS_zoneSpawnTiers select _t, _side] call DUWS_fnc_spawnFilter
+    private _rows = [DUWS_zoneSpawnTiers, DUWS_zoneSpawnTiersBlu] select (_side == "BLU");
+    private _t = ((round _tier) min (count _rows)) - 1;
+    [_rows select _t, _side] call DUWS_fnc_spawnFilter
 };
 
 // Dropped, not substituted: substituting was never a choice, only an `if` leaking -- an air slot

@@ -10,7 +10,7 @@ private _key = if (_isZone) then { [_id] call fnc_zone_key } else { [_id] call f
 if (([_key] call DUWS_fnc_garrisonSideOf) isNotEqualTo "BLU") exitWith { [] };
 
 private _tier = if (_isZone) then { [_key] call fnc_zone_tier } else { [_id] call fnc_town_garrison_tierAt };
-private _top = count ([DUWS_townSpawnTiers, DUWS_zoneSpawnTiers] select _isZone);
+private _top = count ([DUWS_townSpawnTiersBlu, DUWS_zoneSpawnTiersBlu] select _isZone);
 
 [
 	// Nil until OPCOM's loop starts, a few seconds after WARCOM init.

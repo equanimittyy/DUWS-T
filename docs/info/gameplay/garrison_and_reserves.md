@@ -9,9 +9,9 @@ that model; where it and the source (`src/duws/server`) disagree, the source win
 A garrison is a **site**: the shared `fnc_site_*` store (key, pos, radius, roster) that zones and
 towns both register in. A site raises a composition, gets ground down by the same player, and
 comes back at what was left, not what it started with — one model, whichever kind of ground holds
-it. The only differences are which tier table it draws from (`DUWS_zoneSpawnTiers`,
-`src/duws/server/init_zones/fnc_zone_spawn_sizes.sqf:24`, vs `DUWS_townSpawnTiers`,
-`src/duws/server/civilian/fnc_civ_state_init.sqf:59`) and what happens once it's beaten: a zone flips
+it. The only differences are which tier tables it draws from (`DUWS_zoneSpawnTiers` and
+`DUWS_zoneSpawnTiersBlu`, `src/duws/server/init_zones/fnc_zone_spawn_sizes.sqf:24`, vs `DUWS_townSpawnTiers`
+and `DUWS_townSpawnTiersBlu`, `src/duws/server/civilian/fnc_civ_state_init.sqf:59`) and what happens once it's beaten: a zone flips
 to BLUFOR, a town is cleared back toward neutral and bought up again by the commander.
 
 ## Whose garrison it is
@@ -29,13 +29,14 @@ BLUFOR ground carrying no garrison. A sighted group on a live BLUFOR garrison's 
 adds nothing to the force grid, because the site's deposit already counts it
 (`src/duws/server/warcom/opcom/belief/fnc_opcom_grid_sources.sqf`).
 
-Both sides field the **same tier rows**. A token resolves through the asking side's vehicle table
-(`DUWS_spawnVehicles` / `DUWS_spawnVehiclesBlu`) and its own earned Army Power, so one row raises either
-army out of its own hulls. Both tables are fenced, and the composition lint fails a vehicle token only
-one of them answers — the other side would otherwise resolve the token to its own bare name and hand
+Each side fields **its own tier rows**, and BLUFOR's are kept weaker than OPFOR's at every tier.
+`DUWS_fnc_zoneSpawnList` and `DUWS_fnc_townSpawnList` pick the table by side. Both sides share one token
+vocabulary: a token resolves through the asking side's vehicle table (`DUWS_spawnVehicles` /
+`DUWS_spawnVehiclesBlu`) and its own earned Army Power. Both vehicle tables are fenced, and the composition
+lint fails a vehicle token only one of them answers — the other side would otherwise resolve the token to its own bare name and hand
 `createVehicle` a class that does not exist.
 
-What differs is how a garrison comes to exist, and it is the one asymmetry in the model:
+The other difference is how a garrison comes to exist:
 
 | | OPFOR | BLUFOR |
 |---|---|---|
