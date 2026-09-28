@@ -1,13 +1,12 @@
 // Locality: server. What each group holds: docs/plans/campaign_persistence_plan.md#the-snapshot.
 if (!isServer) exitWith {};
 
-// Seconds; 0 leaves only the manual, last-disconnect and mission-end writes. The host's, never the snapshot's.
+// Seconds; 0 leaves only the manual and mission-end writes. The host's, never the snapshot's.
 DUWS_autosaveInterval = ["DUWS_AutosaveInterval", 900] call BIS_fnc_getParamValue;
 
 // Humans only: a headless client is in allPlayers, and one alone would hold the campaign open with nobody playing.
 DUWS_fnc_humanCount = {
-    params [["_exceptUID", ""]];
-    { getPlayerUID _x isNotEqualTo _exceptUID } count (allPlayers - entities "HeadlessClient_F")
+    count (allPlayers - entities "HeadlessClient_F")
 };
 
 // Day 1 is the date boot sets (server/server_init.sqf).
@@ -194,7 +193,7 @@ DUWS_fnc_campaignHeader = {
     ]
 };
 
-// Called, never spawned: the last-disconnect write runs in the frame the mission may end in. Unscheduled inside,
+// Called, never spawned: the mission-end write runs in the frame the mission ends in. Unscheduled inside,
 // so no other script can move a pool between the reads that make one snapshot.
 DUWS_fnc_campaignSave = {
     params [["_reason", ""]];

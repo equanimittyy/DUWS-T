@@ -355,9 +355,6 @@ if (isServer) then {
         private _kills = playerKillCount getOrDefault [_uid, 0];
         departedKillCP = departedKillCP + (floor (_kills / kill_cp_kills)) * kill_cp_award;
         playerKillCount deleteAt _uid;
-        // Inline: on a default dedicated server the mission ends in the frame the last player leaves, so a
-        // spawned save may never run. The leaver can still be in allPlayers here, so it is excluded by UID.
-        if (([_uid] call DUWS_fnc_humanCount) == 0) then { ["last player left"] call DUWS_fnc_campaignSave };
     }];
 
     addMissionEventHandler ["Ended", { ["mission end"] call DUWS_fnc_campaignSave }];
