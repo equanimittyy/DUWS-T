@@ -10,7 +10,9 @@
 if (!hasInterface) exitWith {};
 
 private _travel = {
-    params ["_pos", "_label", ["_rally", objNull]];
+    params ["_pos", "_label", ["_rally", objNull], ["_fob", objNull]];
+    // Any BLUFOR in the ring restarts OPFOR's overrun hold, and a teleport would buy that for free.
+    if (_fob getVariable ["DUWS_overrunHold", false]) exitWith { hint format [localize "STR_DUWS_T_FOB_OVERRUN_TRAVEL", _label] };
     // Scheduled thread: the fade below sleeps, and this fires from an unscheduled UI button handler.
     [_pos, _label, _rally] spawn {
         params ["_pos", "_label", "_rally"];
@@ -52,7 +54,7 @@ if (enable_fast_travel) then {
     {
         _x params ["_name", "_i"];
         private _label = format ["FOB %1", _name];
-        _entries pushBack [_label, _travel, [getPos (Array_of_FOBS select _i), _label]];
+        _entries pushBack [_label, _travel, [getPos (Array_of_FOBS select _i), _label, objNull, Array_of_FOBS select _i]];
     } forEach _fobs;
 };
 

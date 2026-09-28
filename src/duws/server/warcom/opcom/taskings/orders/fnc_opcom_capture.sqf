@@ -113,26 +113,45 @@ DUWS_fnc_opcom_captureEnd = {
     false
 };
 
+DUWS_opcom_fobHoldSince = createHashMap;
+
+// Once per tick after the task step, which sets each attacker's inZone. A FOB falls, live or virtual alike, once an
+// attacker has stood inside for DUWS_captureHold with no BLUFOR in the ring; the hold restarts while any stand there.
+// fnc_fob_destroyed withdraws the rest once the building is down. A running hold is broadcast on the building, so fast
+// travel cannot put a player in the ring to restart it.
+DUWS_fnc_opcom_fobOverrun = {
+    {
+        private _fob = _x;
+        private _key = _fob getVariable ["DUWS_siteKey", ""];
+        private _site = [_key] call fnc_site_at;
+        private _held = alive _fob
+            && {(DUWS_opcom_taskings findIf {
+                (_x getOrDefault ["targetZone", ""]) isEqualTo _key && {_x getOrDefault ["inZone", false]}
+                    && {!((_x get "status") in ["dead", "done"])}
+            }) >= 0}
+            && {([_site get "pos", _site get "radius", west, true] call fnc_side_count_at) == 0};
+        if (_held) then {
+            private _since = DUWS_opcom_fobHoldSince getOrDefault [_key, time];
+            DUWS_opcom_fobHoldSince set [_key, _since];
+            if (time - _since >= DUWS_captureHold) then {
+                _fob setDamage 1;
+                _held = false;
+                ["INFO", "OPCOM", format ["capture: FOB %1 overrun", Array_of_FOBname select _forEachIndex]] call fnc_log;
+            };
+        };
+        if (!_held) then { DUWS_opcom_fobHoldSince deleteAt _key };
+        if ((_fob getVariable ["DUWS_overrunHold", false]) isNotEqualTo _held) then { _fob setVariable ["DUWS_overrunHold", _held, true] };
+    } forEach Array_of_FOBS;
+};
+
 DUWS_fnc_opcom_stepCapture = {
     params ["_t", "_ctx"];
     _ctx params ["_pos", "_grp", "_live"];
     private _zk = _t get "targetZone";
     if (!([_zk] call DUWS_fnc_opcom_captureHolds)) exitWith { [_t, _pos, _grp] call DUWS_fnc_opcom_captureEnd };
     private _entered = [_t, _pos] call DUWS_fnc_opcom_captureEnters;
-    // A FOB falls, live or virtual alike, once its attacker has stood inside for DUWS_captureHold with no BLUFOR in the
-    // ring. The hold restarts while any stand there, so a player who respawns at the FOB still holds it.
-    // fnc_fob_destroyed withdraws the rest once the building is down.
-    if ((_zk select [0, 4]) isEqualTo "FOB_") exitWith {
-        if (_t get "inZone") then {
-            private _site = [_zk] call fnc_site_at;
-            if (([_site get "pos", _site get "radius", west, true] call fnc_side_count_at) > 0) exitWith { _t set ["inZoneAt", time] };
-            if (time - (_t get "inZoneAt") >= DUWS_captureHold) then {
-                { if ((_x getVariable ["DUWS_siteKey", ""]) isEqualTo _zk) then { _x setDamage 1 } } forEach Array_of_FOBS;
-                ["INFO", "OPCOM", format ["capture: tasking %1 overran %2", _t get "id", _zk]] call fnc_log;
-            };
-        };
-        false
-    };
+    // A FOB falls to all its attackers at once (DUWS_fnc_opcom_fobOverrun).
+    if ((_zk select [0, 4]) isEqualTo "FOB_") exitWith { false };
     // Below is the virtual attacker's stand-in for a fight that never renders; a live one takes the ground by winning it.
     if (_live) exitWith { false };
     private _town = [_zk] call DUWS_fnc_opcom_captureTown;

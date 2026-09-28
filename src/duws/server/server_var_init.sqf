@@ -136,6 +136,13 @@ DUWS_streamProfiles = createHashMapFromArray [
     ["base",       [  0,  10, false, false, 2]]
 ];
 
+// A FOB is a fast-travel destination, so one inside a streaming ring would land players past the approach every
+// presence test assumes (zones_and_civilians.md). The request runs on a client, which holds no site store:
+// [zone buffer, town buffer, HQ ring].
+DUWS_fobKeepOut = [(DUWS_streamProfiles get "zone") select 0, (DUWS_streamProfiles get "town_gar") select 0,
+    base_garrison_sleep_range + ((DUWS_streamProfiles get "base") select 0)];
+publicVariable "DUWS_fobKeepOut";
+
 // Seconds a capture's conditions must hold unbroken before the ground changes hands. One number for
 // DUWS_fnc_siteTaken and OPCOM's virtual retake, so the rule a player learns is the same everywhere.
 DUWS_captureHold = 20;

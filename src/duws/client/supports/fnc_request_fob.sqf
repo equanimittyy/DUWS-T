@@ -12,6 +12,15 @@ if ([_position] call fnc_pos_near_enemy) exitWith {
   ["fob_support"] call fnc_support_comm_add;
 };
 
+DUWS_fobKeepOut params ["_zoneBuffer", "_townBuffer", "_hqRing"];
+if ((zone_meta_array findIf { (_position distance2D (_x select 1)) < (_x select 2) + _zoneBuffer }) >= 0
+  || {((missionNamespace getVariable ["duws_town_circles", []]) findIf { (_position distance2D (_x select 0)) < (_x select 1) + _townBuffer }) >= 0}
+  || {(_position distance2D PosOfBLUHQ) < _hqRing}) exitWith {
+  hint localize "STR_DUWS_T_FOB_TOO_CLOSE_SITE";
+  sleep 15;
+  ["fob_support"] call fnc_support_comm_add;
+};
+
 // Advisory only -- it saves a player with no CP the 10 s site survey below. The charge
 // itself is the server's call, once a site has been cleared.
 if (commandpointsblu1 < _cost) exitWith {

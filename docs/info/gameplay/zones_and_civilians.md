@@ -935,7 +935,10 @@ unit never has to arrive.
 **That generalises into the one thing that would break these guards.** Every presence test here
 assumes the player *approaches* — that they cross the ring from outside before they reach the middle.
 Any instant insertion defeats that assumption, and fast travel is the mechanic that does it. The HQ
-and the FOBs are safe because neither streams.
+and the FOBs are safe because neither streams. A FOB is also refused inside the streaming ring of any
+zone, town or the HQ, which is the site radius plus the buffer its occupants stream on
+(`DUWS_fobKeepOut`, checked in `client/supports/fnc_request_fob.sqf`), so no fast-travel destination
+stands inside a ring that streams.
 
 The rally point is the one destination that can stand anywhere, so it is the one that can land inside
 a zone or a town radius. What bounds it is the rally's own clearance rule rather than a latch: the

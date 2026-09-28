@@ -51,6 +51,7 @@ while {true} do {
         "grid" call _enter;      call fnc_opcom_grid_rebuild;
         // Task step after the rebuild, so it reads the grid this tick just refreshed.
         "taskstep" call _enter;  call fnc_opcom_task_step;
+        "fobs" call _enter;      call DUWS_fnc_opcom_fobOverrun;
         "ferries" call _enter;   call DUWS_fnc_opcom_ferryDispatch;
         "attacks" call _enter;   call DUWS_fnc_opcom_attackStep;
         "need" call _enter;      call DUWS_fnc_opcom_needRefresh;
