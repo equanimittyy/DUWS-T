@@ -93,8 +93,8 @@ Instead, fan out on disjoint data and merge once. Each language is one pass:
    name + English source text`, unescaped. Container name gives tone/context (e.g.
    terse map marker vs. full manual prose). Also keep every key's English as a
    baseline for the merge.
-2. **Glossary and conventions (one Sonnet agent).** Starting from an earlier pass's
-   term list, it writes the language's glossary (mechanic nouns, support names, radio
+2. **Glossary and conventions (one Sonnet agent).** Starting from the
+   [localisation glossary](../info/gameplay/localisation_glossary.md), it writes the language's glossary (mechanic nouns, support names, radio
    procedure words, UI verbs, a keep-or-translate decision per acronym, and an
    inflection stem the checker can match) and a short conventions sheet (address
    form, quotes, spacing, numbers, count and gender constructions). The main thread
@@ -126,6 +126,7 @@ untouched.
 ## Files touched
 
 - `src/stringtable.xml` — all translation tags land here.
+- `docs/info/gameplay/localisation_glossary.md` — the new language's column of fixed terms.
 - `docs/info/gameplay/player_text_style_guide.md` — the rule that every tag tracks
   English, and each language's address, punctuation, spacing and term conventions.
 - This plan doc — reference only; not shipped.
