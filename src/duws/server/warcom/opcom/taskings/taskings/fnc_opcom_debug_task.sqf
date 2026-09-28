@@ -97,7 +97,7 @@ switch (_verb) do {
             ["WARN", "OPCOMDBG", format ["fire: %1 is still firing its last mission", _a]] call fnc_log; 0
         };
         _c params ["_rounds", "_shape"];
-        { _x setVariable ["DUWS_opcomReadyTick", 0] } forEach ([_a] call DUWS_fnc_opcom_batteryPieces);
+        DUWS_opcom_batteryReadyTick deleteAt _a;
         [_a, _b, _rounds, _shape] call DUWS_fnc_opcom_fireMission
     };
     case "zone": {

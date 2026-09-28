@@ -688,7 +688,7 @@ OPCOM_ARTY_LETHAL = createHashMapFromArray [["MORTAR", 20], ["ARTY", 30]];
 OPCOM_ARTY_HQ_CLEAR = 100;
 // Seconds before the first round lands that the telegraph goes out.
 OPCOM_ARTY_WARN = 20;
-// Ticks a gun rests after it fires, so a full wallet cannot keep a battery shelling without pause.
+// Ticks a battery rests after a fire mission, so a full wallet cannot keep it shelling without pause.
 OPCOM_ARTY_COOLDOWN = 360;   // 1800s @ 5s tick
 
 // An interceptor's reveal in Chebyshev grid cells, taken once it stands in the cell it was sent to: a guaranteed

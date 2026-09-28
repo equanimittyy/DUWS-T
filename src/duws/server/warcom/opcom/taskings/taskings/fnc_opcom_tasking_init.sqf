@@ -11,6 +11,8 @@ DUWS_opcom_attacks = [];
 DUWS_opcom_attackSeq = 0;
 // A tick, not a duration: DUWS_opcom_tick is saved.
 DUWS_opcom_attackReadyTick = 0;
+// Not saved: a load starts every battery ready.
+DUWS_opcom_batteryReadyTick = createHashMap;
 
 // The one buyable-unit table (docs/plans/opcom/opcom_plan.md): row -> [composition, flags]. Bare tokens resolve
 // to the "none" posture, so the unit takes OPCOM's order, not a standing circuit. No price column -- OPCOM_AP_UNIT

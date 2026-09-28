@@ -1,7 +1,7 @@
 // Locality: server, [] call'd at load. The Arty actions: what is worth shelling and with what pattern
 // (opcom_plan.md §Indirect-fire hardpoints). The mission itself is fnc_opcom_fires, which fires what it is handed. AP
-// is the ammunition -- the guns rest empty and are loaded per mission -- so the wallet and each gun's cooldown are all
-// that limit how often they speak.
+// is the ammunition -- the guns rest empty and are loaded per mission -- so the wallet and each battery's cooldown are
+// all that limit how often they speak.
 if (!isServer) exitWith {};
 
 // Never aimed at the player HQ, and never onto OPFOR's own zone, which is full of its garrison. Re-read immediately

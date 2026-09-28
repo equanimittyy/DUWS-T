@@ -24,13 +24,11 @@ DUWS_fnc_opcom_batteryPieces = {
     }
 };
 
-// The stamp rides the piece, which is safe only because MORTAR and ARTY never stream. A gun with no live gunner is out
-// of the fight, so it must not hold a mission to its reach.
+// A gun with no live gunner is out of the fight, so it must not hold a mission to its reach.
 DUWS_fnc_opcom_batteryReady = {
     params ["_key"];
-    ([_key] call DUWS_fnc_opcom_batteryPieces) select {
-        DUWS_opcom_tick >= (_x getVariable ["DUWS_opcomReadyTick", 0]) && {alive (gunner _x)}
-    }
+    if (DUWS_opcom_tick < (DUWS_opcom_batteryReadyTick getOrDefault [_key, 0])) exitWith { [] };
+    ([_key] call DUWS_fnc_opcom_batteryPieces) select { alive (gunner _x) }
 };
 
 DUWS_fnc_opcom_batteryUnload = {
@@ -81,7 +79,7 @@ DUWS_fnc_opcom_fireAim = {
 // doArtilleryFire puts every round of one order on one point, so each aim point is its own one-round order.
 // A round not away inside OPCOM_ARTY_ROUND_SECS is written off, so a dead crew never leaves the gun loaded.
 DUWS_fnc_opcom_gunFire = {
-    params ["_gun", "_mag", "_pts", "_delay", "_jitter", "_price"];
+    params ["_key", "_gun", "_mag", "_pts", "_delay", "_jitter", "_price", "_rest"];
     private _old = _gun getVariable ["DUWS_opcomFireEH", -1];
     if (_old >= 0) then { _gun removeEventHandler ["Fired", _old] };
     _gun setVariable ["DUWS_opcomFired", 0];
@@ -91,8 +89,8 @@ DUWS_fnc_opcom_gunFire = {
         _g setVariable ["DUWS_opcomShotAt", time];
         _g setVehicleAmmo 1;
     }]];
-    [_gun, _mag, _pts, _delay, _jitter, _price] spawn {
-        params ["_gun", "_mag", "_pts", "_delay", "_jitter", "_price"];
+    [_key, _gun, _mag, _pts, _delay, _jitter, _price, _rest] spawn {
+        params ["_key", "_gun", "_mag", "_pts", "_delay", "_jitter", "_price", "_rest"];
         sleep _delay;
         {
             if (!alive _gun || {!alive (gunner _gun)}) exitWith {};
@@ -104,14 +102,18 @@ DUWS_fnc_opcom_gunFire = {
             _gun doArtilleryFire [_x, _mag, 1];
             waitUntil { sleep 0.5; !alive _gun || {(_gun getVariable ["DUWS_opcomFired", 0]) > _before} || {time > _deadline} };
         } forEach _pts;
-        if (!alive _gun) exitWith {};
         private _fired = _gun getVariable ["DUWS_opcomFired", 0];
+        private _unfired = count _pts - _fired;
+        if (_unfired > 0) then {
+            DUWS_opcom_batteryReadyTick set [_key, (DUWS_opcom_batteryReadyTick getOrDefault [_key, 0]) - _unfired * _rest];
+        };
+        if (!alive _gun) exitWith {};
         _gun removeEventHandler ["Fired", _gun getVariable ["DUWS_opcomFireEH", -1]];
         _gun setVariable ["DUWS_opcomFireEH", -1];
         _gun setVehicleAmmo 0;
         [["INFO", "WARN"] select (_fired < count _pts), "OPCOM", format ["arty: %1 put %2/%3 rounds down, empty again",
             typeOf _gun, _fired, count _pts]] call fnc_log;
-        private _refund = (count _pts - _fired) * _price;
+        private _refund = _unfired * _price;
         if (_refund > 0) then { ["OPF", _refund, "opcom_arty_refund"] call fnc_ap_adjust };
     };
 };
@@ -175,6 +177,8 @@ DUWS_fnc_opcom_fireMission = {
         _steps = _rows;
         _rounds = _rows * _perRow;
     };
+    DUWS_opcom_batteryReadyTick set [_key, DUWS_opcom_tick + OPCOM_ARTY_COOLDOWN];
+    private _rest = OPCOM_ARTY_COOLDOWN / (_rounds * count _guns);
     // One walk for the whole battery, so the pattern wanders as one rather than each gun scattering alone.
     private _drift = [];
     private _dx = 0;
@@ -193,8 +197,8 @@ DUWS_fnc_opcom_fireMission = {
         for "_k" from 0 to _rounds - 1 do {
             _pts pushBack ([_pt, _shape, _g, count _guns, _k, _drift, [0, OPCOM_ARTY_ROCKET_SCATTER] select _rocket] call DUWS_fnc_opcom_fireAim);
         };
-        [_gun, _m, _pts, OPCOM_ARTY_STAGGER * _g, [OPCOM_ARTY_JITTER, OPCOM_ARTY_ROCKET_JITTER] select _rocket, _price] call DUWS_fnc_opcom_gunFire;
-        _gun setVariable ["DUWS_opcomReadyTick", DUWS_opcom_tick + OPCOM_ARTY_COOLDOWN];
+        [_key, _gun, _m, _pts, OPCOM_ARTY_STAGGER * _g, [OPCOM_ARTY_JITTER, OPCOM_ARTY_ROCKET_JITTER] select _rocket, _price, _rest]
+            call DUWS_fnc_opcom_gunFire;
     } forEach _guns;
     ["INFO", "OPCOM", format ["arty: %1 fires %2 gun(s) x %3 rounds of %4 (%5), %6 at %7", _key, count _guns, _rounds,
         (_guns select 0) select 1, (_guns select 0) select 2, _shape, _pt apply { round _x }]] call fnc_log;
