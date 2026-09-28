@@ -2036,8 +2036,8 @@
                 <English>%1 placed.</English>
             </Key>
             <Key ID="STR_DUWS_T_flag_placement_failed">
-                <Original>Flagpole placement failed. It must be within 50 meters of the zone center.</Original>
-                <English>Flagpole placement failed. It must be within 50 meters of the zone center.</English>
+                <Original>Flagpole placement failed. It must be within 100 meters of the zone center.</Original>
+                <English>Flagpole placement failed. It must be within 100 meters of the zone center.</English>
             </Key>
             <Key ID="STR_DUWS_T_zonebuild_placement_failed">
                 <Original>Fortification placement failed. It must be within 100 meters of the center of its zone, HQ or FOB.</Original>

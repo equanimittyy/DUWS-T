@@ -400,7 +400,7 @@ Then the server checks the position where the carrier set the object down, not a
 (`DUWS_fnc_carryDropped`). The server thaws the object under a 2 s damage guard and tells the carrier that the object
 is placed. It mans a built gun only after the guard ends.
 
-**A build must stay within 100 m of its site's centre, and a zone's flag within 50 m.** If a drop is out of reach,
+**A build and a zone's flag must stay within 100 m of the site's centre.** If a drop is out of reach,
 the server moves the object back to its last good position and tells the carrier. A new build and a build unloaded
 from a vehicle both start as a carry, so the one check covers creation, unloading and moving. A new build that is
 dropped out of reach has no good position, because R3F creates it high in the sky before the carry. So the server

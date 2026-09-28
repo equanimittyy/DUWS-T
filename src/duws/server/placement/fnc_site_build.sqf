@@ -8,7 +8,6 @@
 #include "..\..\shared\includes\action_style.hpp"
 
 #define BUILD_REACH 100
-#define FLAG_TETHER 50
 
 // R3F compiles its cost formula on clients only, and a dedicated server has none.
 DUWS_fnc_buildCost = compile preprocessFile "modules\R3F_LOG\usine_creation\determiner_cout_creation.sqf";
@@ -180,8 +179,8 @@ DUWS_fnc_carryThaw = {
 };
 
 // R3F reports every carried object after its drop (deplacer.sqf), still frozen where the carry set it down, so the check
-// reads the pose the carrier chose. A site's build must stay within reach of its site and a zone's flag within its
-// tether, and the builder vehicle's builds stay out of every base ring, so only a base's own budget fortifies it.
+// reads the pose the carrier chose. A site's build and a zone's flag must stay within reach of the site, and the builder
+// vehicle's builds out of every base ring, so only a base's own budget fortifies it.
 DUWS_fnc_carryDropped = {
     params ["_obj"];
     // A depot vehicle is thawed by its own placement (fnc_depot_place_finish).
@@ -192,7 +191,7 @@ DUWS_fnc_carryDropped = {
     private _flag = _obj isKindOf "FlagCarrierCore";
     private _bad = switch (true) do {
         case _bldv: { [getPosATL _obj] call DUWS_fnc_inBaseRing };
-        case (_site != ""): { (_obj distance2D (([_site] call fnc_site_at) get "pos")) > ([BUILD_REACH, FLAG_TETHER] select _flag) };
+        case (_site != ""): { (_obj distance2D (([_site] call fnc_site_at) get "pos")) > BUILD_REACH };
         default { false };
     };
     private _msg = switch (true) do {
