@@ -142,13 +142,13 @@ time to spare. The snapshot and the flush both `call`, inside the disconnect han
 them: the leaver can still be in `allPlayers` when it fires, so the test excludes the UID the
 handler was handed.
 
-**A campaign that has ended is written, and must then never be auto-loaded.**
+**A campaign that has ended is written, and must then never be loaded.**
 `server/misc/fnc_capture_zones_task.sqf:87` ends the mission on total victory, which fires the
 `Ended` trigger above; the load screen's timeout reloads the newest snapshot on the next unattended
 start, and that campaign's win condition is true on its first evaluation — so the server ends and
 restarts into it again, indefinitely, with nobody able to play. Both endings go in the snapshot
-header. The index labels a won campaign and the timeout passes over it; a player can still pick it
-deliberately. A lost campaign is refused on the load screen and on import, because a loss is final.
+header, and an ended campaign, won or lost, is refused on the load screen and on import. A loss is
+final, and a won campaign that a player picks would end again on the first check.
 The header reads `lost` from the moment `campaign_lost` is set, not from the later end write, so a
 player who quits on the loss card does not leave a live save behind.
 
