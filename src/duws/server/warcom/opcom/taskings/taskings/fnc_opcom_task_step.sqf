@@ -1,5 +1,5 @@
 // Locality: server. The tasking phase of the perception loop, one pass per tick after the grid rebuild:
-// movement, streaming, status and healing (no scoring -- Phase 4 adds what to commit). Off the isNil scoring
+// movement, streaming, status and healing (no scoring). Off the isNil scoring
 // block, since a route search may yield.
 //
 // Per tasking: refresh -> step -> ferry -> stream. The first two come from DUWS_opcom_orders (fnc_opcom_orders.sqf);
@@ -13,8 +13,10 @@ if (isNil "DUWS_opcom_taskings") exitWith {};
 private _w = DUWS_opcom_grid_w;
 
 // A streaming read of true positions, never belief: a player's AI squad or a headless client's group draws a fight too.
+// Players count whatever their side or captive state, so a disguised player still streams units in.
 private _blufor = allPlayers select { alive _x };
-{ private _l = leader _x; if (alive _l) then { _blufor pushBackUnique _l } } forEach (allGroups select { side _x == west });
+// A captive leader (a held hostage, a downed pilot) draws no fight, since OPFOR holds fire on it.
+{ private _l = leader _x; if (alive _l && {!captive _l}) then { _blufor pushBackUnique _l } } forEach (allGroups select { side _x == west });
 private _bcells = [];
 { private _ci = [getPosASL _x] call DUWS_fnc_opcom_w2c; _bcells pushBackUnique [_ci mod _w, floor (_ci / _w)] } forEach _blufor;
 
