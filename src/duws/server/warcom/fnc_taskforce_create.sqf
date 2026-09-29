@@ -1,7 +1,8 @@
-// Locality: server only (remoteExec target 2). Caller: client/dialog/fnc_giveHC.sqf.
+// Locality: server only. Callers: client/dialog/fnc_giveHC.sqf (remoteExec target 2), the PlayerDisconnected handler in server/server_init.sqf.
 if (!isServer) exitWith {};
 params ["_group"];
 if (isNull _group) exitWith {};
+_group setVariable ["DUWS_hcCommander", nil];
 
 // A yellow-team squad is local to the giver; the campaign owns it now, so it must outlive their session.
 if (!local _group) then { _group setGroupOwner 2; };

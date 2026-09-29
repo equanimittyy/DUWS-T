@@ -44,11 +44,7 @@ if (count _spec > 0) then {
 	if (_isVehicle) then { _group addVehicle (vehicle leader _group); };
 };
 
-// Register for the disconnect handler, keyed by the buyer's unit variable name.
-private _var = format ["%1HC", vehiclevarname _caller];
-private _HCgroups = missionNamespace getVariable [_var, []];
-_HCgroups pushBack _group;
-missionNamespace setVariable [_var, _HCgroups, true];
+_group setVariable ["DUWS_hcCommander", getPlayerUID _caller];
 
 [[_group], {
 	params ["_group"];

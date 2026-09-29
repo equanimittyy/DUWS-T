@@ -94,16 +94,11 @@ if (count _vestClasses == 0) then { _vestClasses = ["V_TacVest_blk"] };
 
 { [_x] call fnc_rearmUnit; } forEach _units;
 
-private _playerName = vehiclevarname _caller;
-private _var = format["%1HC", _playerName];
-private _HCgroups = missionNamespace getVariable [_var, []];
-
 DUWS_number_partisan = (missionNamespace getVariable ["DUWS_number_partisan", 0]) + 1;
 missionNamespace setVariable ["DUWS_number_partisan", DUWS_number_partisan];
 _group setGroupId [format ["Partisans %1", DUWS_number_partisan]];
 
-_HCgroups pushBack _group;
-missionNamespace setVariable [_var, _HCgroups, true];
+_group setVariable ["DUWS_hcCommander", getPlayerUID _caller];
 
 [[_group], {
     params ["_group"];

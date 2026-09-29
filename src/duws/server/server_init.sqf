@@ -357,6 +357,14 @@ if (isServer) then {
         playerKillCount deleteAt _uid;
     }];
 
+    addMissionEventHandler ["PlayerDisconnected", {
+        params ["", "_uid"];
+        if (_uid isEqualTo "") exitWith {};
+        {
+            if ((_x getVariable ["DUWS_hcCommander", ""]) isEqualTo _uid) then { [_x] call fnc_taskforce_create };
+        } forEach allGroups;
+    }];
+
     addMissionEventHandler ["Ended", { ["mission end"] call DUWS_fnc_campaignSave }];
     addMissionEventHandler ["MPEnded", { ["mission end"] call DUWS_fnc_campaignSave }];
 

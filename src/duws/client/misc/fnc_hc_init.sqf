@@ -15,6 +15,3 @@ _HC_sub_module = _grplogic createUnit ["HighCommandsubordinate",[0,0,0] , [], 0,
 _grplogic deleteGroupWhenEmpty true;
 _HC_sub_module synchronizeObjectsAdd [_HC_module];
 missionNamespace setVariable [_var, _HC_sub_module, true];
-
-_var = format["%1HC", _playerName];
-missionNamespace setVariable [_var, [], true];

@@ -11,5 +11,6 @@ if (count _selectedGroup>1) exitWith {hint localize "STR_DUWS_T_dzkot1hm"};
 _group = _selectedGroup select 0;
 
 player hcRemoveGroup _group;   // removes from High Command only, not the group itself
+_group setVariable ["DUWS_hcCommander", nil, true];
 
 hint localize "STR_DUWS_T_gj4ue2bf";
