@@ -519,9 +519,10 @@ DUWS_zoneGroupCeiling = 130;
 // rather than one-in-one-out.
 DUWS_zoneReinforceFrac = 0.5;
 
-// The floor distance a reinforcement spawns from the nearest player, in metres. Flat, not
-// zone-relative, so it reads the same at a 50 m base and a 1300 m island -- a radius-relative distance
-// would drop reserves a kilometre out of the island and on top of the player in the base.
+// The floor distance, in metres, a garrison group spawns from every player: a reserve wave, and each group a zone or
+// town raise places. No larger than the streaming ring's margin, or a raise woken by a player at the ring's edge could
+// place nothing. Flat, not zone-relative, so it reads the same at a 50 m base and a 1300 m island -- a radius-relative
+// distance would drop reserves a kilometre out of the island and on top of the player in the base.
 DUWS_zoneReserveSpawnDist = 400;
 
 // How far beyond the zone radius, or a Protect Informant hold ring, a reserve wave stands up, in metres.
@@ -665,6 +666,13 @@ OPCOM_DEVIRT_BUFFER = 2;
 // How far a streamed-in tasking spawns from its banked point, a hull onto ground it fits on (fnc_opcom_stream): taskings
 // that march together bank one point and would otherwise spawn in one heap. Tight, so it stands near the leg it reached.
 OPCOM_DEVIRT_SPREAD_R = 100;
+
+// A streamed-in tasking stands OPCOM_DEVIRT_MIN_DIST (m) or more from every player, and out of the sight of each one
+// within OPCOM_DEVIRT_SIGHT_RANGE (m), past which a player cannot pick out a unit appearing. To find such a spot it may
+// move up to OPCOM_DEVIRT_WALK (m) off its banked point, away from the players (DUWS_fnc_opcom_devirtSpot). Tune.
+OPCOM_DEVIRT_MIN_DIST = 500;
+OPCOM_DEVIRT_SIGHT_RANGE = 1000;
+OPCOM_DEVIRT_WALK = 1000;
 
 // Seconds one round may take before it is written off and its AP refunded (fnc_opcom_fires).
 OPCOM_ARTY_ROUND_SECS = 10;

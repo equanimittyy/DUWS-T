@@ -5,8 +5,9 @@
 // ordered identically here despite spawning very differently.
 // _anchors is hqpatrol's alone (the points that posture walks); every other posture is radial off
 // _centre. It's an argument, not derived, because only the caller knows which towers, gates or
-// corners its circuit is meant to visit.
-params ["_group", "_posture", "_centre", "_radius", ["_anchors", []]];
+// corners its circuit is meant to visit. _floor (m): a garrison skips buildings that near a player, since its men
+// are set into them at once, in view.
+params ["_group", "_posture", "_centre", "_radius", ["_anchors", []], ["_floor", 0]];
 if (isNull _group) exitWith {};
 
 // SAFE is set once here, not per branch, so a new posture can't forget it. The engine promotes a
@@ -134,17 +135,20 @@ switch (_posture) do {
         // Positions are checked lazily alongside the claim, so the lookup is only paid until one
         // candidate matches. A prefab/mod can shape a bunker prop with no interior positions --
         // fnc_spreadIntoBuildings would silently strand the squad there and burn the slot.
+        private _players = if (_floor > 0) then { (call BIS_fnc_listPlayers) select { alive _x } } else { [] };
         private _i = _candidates findIf {
-            isNull (_x getVariable ["DUWS_garrisonedBy", grpNull])
-            && {count ([_x] call BIS_fnc_buildingPositions) > 0}
+            private _b = _x;
+            isNull (_b getVariable ["DUWS_garrisonedBy", grpNull])
+            && {(_players findIf { (_x distance2D _b) < _floor }) < 0}
+            && {count ([_b] call BIS_fnc_buildingPositions) > 0}
         };
 
         if (_i < 0) then {
             // Nothing left to hold: sent to patrol rather than left standing, since a squad with no
             // building is a squad with no orders.
             // Logged with the candidate count because bare ground and every candidate refused look
-            // identical in play -- zero means bare ground, non-zero means the claim or positions test
-            // took them all.
+            // identical in play -- zero means bare ground, non-zero means the claim, the player floor or
+            // the positions test took them all.
             ["INFO", "ZONES", format ["%1 found no free post; %2 candidates within %3 m",
                 groupId _group, count _candidates, GARRISON_REACH]] call fnc_log;
             [_group, selectRandom ["closepatrol", "widepatrol"], _centre, _radius]

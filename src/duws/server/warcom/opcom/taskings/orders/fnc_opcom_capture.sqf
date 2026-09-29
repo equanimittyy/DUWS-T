@@ -128,6 +128,8 @@ DUWS_fnc_opcom_fobOverrun = {
             && {(DUWS_opcom_taskings findIf {
                 (_x getOrDefault ["targetZone", ""]) isEqualTo _key && {_x getOrDefault ["inZone", false]}
                     && {!((_x get "status") in ["dead", "done"])}
+                    // A virtual one with BLUFOR within K is still waiting to render.
+                    && {(_x get "grp") isNotEqualTo "" || {(_x getOrDefault ["nearTicks", 0]) == 0}}
             }) >= 0}
             && {([_site get "pos", _site get "radius", west, true] call fnc_side_count_at) == 0};
         if (_held) then {
@@ -170,9 +172,10 @@ DUWS_fnc_opcom_stepCapture = {
     // hands only by having its garrison cleared, and one without a garrison was never a target. Nor has the HQ,
     // which falls only with its officer.
     if (_town >= 0 || {_zk isEqualTo "HQ"} || {([_zk] call fnc_zone_tier) > 0}) exitWith { false };
-    // No BLUFOR count: any within K would have rendered the attacker, so its stored force outnumbers nobody. It still
-    // holds for DUWS_captureHold, the rule a live attacker meets through the trigger's timeout.
-    if ((_t get "inZone") && {(_t get "effForce") > 0} && {time - (_t get "inZoneAt") >= DUWS_captureHold}) then {
+    // No BLUFOR count: nearTicks 0 means none within K, so its stored force outnumbers nobody; while any are, it waits
+    // to render. It still holds for DUWS_captureHold, the rule a live attacker meets through the trigger's timeout.
+    if ((_t get "inZone") && {(_t getOrDefault ["nearTicks", 0]) == 0} && {(_t get "effForce") > 0}
+        && {time - (_t get "inZoneAt") >= DUWS_captureHold}) then {
         private _zpos = ([_zk] call fnc_site_at) get "pos";
         private _trg = missionNamespace getVariable [format ["trigger_%1_%2", floor abs (_zpos select 0), floor abs (_zpos select 1)], objNull];
         if (!isNull _trg) then { call compile ((triggerStatements _trg) select 1) };

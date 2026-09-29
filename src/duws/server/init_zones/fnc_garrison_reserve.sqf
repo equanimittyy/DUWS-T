@@ -87,8 +87,10 @@ DUWS_fnc_garrisonLeftoverSweep = {
 DUWS_fnc_garrisonReservePos = {
     params ["_center", "_radius", ["_side", "OPF"]];
     private _reach = _radius + DUWS_streamArrivalMargin;
-    private _players = (call BIS_fnc_listPlayers) select { alive _x && {(_x distance2D _center) < _reach} };
-    if (_players isEqualTo []) then { _players = (call BIS_fnc_listPlayers) select { alive _x } };
+    // Every player keeps the floor, a team on the far side included; only those at the objective aim the anti-flank.
+    private _all = (call BIS_fnc_listPlayers) select { alive _x };
+    private _players = _all select { (_x distance2D _center) < _reach };
+    if (_players isEqualTo []) then { _players = _all };
 
     // Anti-flank: the reserve spawns opposite the players' centroid bearing, so it
     // meets them head-on rather than flanking from behind their axis of approach.
@@ -125,7 +127,7 @@ DUWS_fnc_garrisonReservePos = {
         // Snapped before the checks so they judge the point the wave actually spawns on: a road segment can
         // sit closer to the players than the raw candidate.
         _p = [_p] call DUWS_fnc_reserveRoadSnap;
-        if (surfaceIsWater _p || {(_players findIf { (_p distance2D _x) < DUWS_zoneReserveSpawnDist }) >= 0}) exitWith { [] };
+        if (surfaceIsWater _p || {(_all findIf { (_p distance2D _x) < DUWS_zoneReserveSpawnDist }) >= 0}) exitWith { [] };
         [_reach, _p]
     };
 
@@ -160,8 +162,10 @@ DUWS_fnc_garrisonReservePos = {
     if (_best isNotEqualTo []) exitWith { _best };
     if (_short isNotEqualTo []) exitWith { _short select 1 };
 
-    // Never [], which the spawners read as "drop it in the objective band".
-    _center getPos [[_center, _dist, _antiDir] call DUWS_fnc_reserveLandReach, _antiDir]
+    // [] holds the wave; it must never reach a spawner, which reads [] as "drop it in the objective band".
+    private _last = _center getPos [[_center, _dist, _antiDir] call DUWS_fnc_reserveLandReach, _antiDir];
+    if ((_all findIf { (_last distance2D _x) < DUWS_zoneReserveSpawnDist }) >= 0) exitWith { [] };
+    _last
 };
 
 // Reserve rides trucks, so a wave needs drivable ground. Sorted explicitly -- nearRoads' own order
@@ -182,13 +186,18 @@ DUWS_fnc_reserveLandReach = {
 
 // Lead point is pushed _i gaps back along the outbound bearing so the tail runs away from the objective,
 // never toward it. Good spacing outranks landing exactly on a road (two vehicles on one point brew up on
-// spawn), and neither outranks staying out of the sea. Bounded retries, then the lead point -- land by
-// construction.
+// spawn), and neither outranks staying out of the sea or off the players. Bounded retries, then the lead
+// point -- land by construction, and clear of the players by the refill loop's check.
 DUWS_fnc_reserveConvoySlot = {
     params ["_lead", "_dir", "_i"];
+    private _players = (call BIS_fnc_listPlayers) select { alive _x };
     // Read straight off the world with nearestObjects -- the same clear-ground test civilian cars settle
     // on -- rather than a private list, so a concurrent wave's trucks and ambient civ traffic count too.
-    private _fnc_clear = { (nearestObjects [_this, ["LandVehicle"], DUWS_reserveConvoyGap]) isEqualTo [] };
+    private _fnc_clear = {
+        private _p = _this;
+        (nearestObjects [_p, ["LandVehicle"], DUWS_reserveConvoyGap]) isEqualTo []
+        && {(_players findIf { (_p distance2D _x) < DUWS_zoneReserveSpawnDist }) < 0}
+    };
     private _out = [];
     private _step = _i;
     private _tries = 0;
@@ -214,16 +223,11 @@ DUWS_fnc_reserveConvoySlot = {
     _out
 };
 
-// _wave's lead point and bearing are chosen once, on the first call, and reused so every vehicle in the
-// wave lines up off the same lead instead of re-picking and stacking. _wave/_slots are the caller's own
-// arrays, mutated in place (SQF arrays pass by reference) -- wave state lives in the refill loop, not here.
+// _wave is the lead point and bearing the refill loop chose once for the wave, so every vehicle lines up
+// off the same lead instead of re-picking and stacking. _slots is the caller's own array, mutated in place
+// (SQF arrays pass by reference) -- wave state lives in the refill loop, not here.
 DUWS_fnc_reserveWaveSlot = {
-    params ["_center", "_radius", "_wave", "_slots", ["_side", "OPF"]];
-    if (_wave isEqualTo []) then {
-        private _lead = [_center, _radius, _side] call DUWS_fnc_garrisonReservePos;
-        _wave set [0, _lead];
-        _wave set [1, _center getDir _lead];
-    };
+    params ["_wave", "_slots"];
     private _pos = [_wave select 0, _wave select 1, count _slots] call DUWS_fnc_reserveConvoySlot;
     _slots pushBack _pos;
     _pos
@@ -491,7 +495,15 @@ DUWS_fnc_garrisonReserveRefillOne = {
         // only once AP/settings resolve its class; unfieldable tokens wait in the pool rather than block
         // the wave.
         private _fieldable = _pool select { ([_x, _side] call DUWS_fnc_tokenClass) != "" };
-        if (_fieldable isEqualTo []) then { _spent = true } else {
+        // Before a token is taken, so a wave with no clear lead stops with its tokens still pooled.
+        if (_wave isEqualTo [] && {_fieldable isNotEqualTo []}) then {
+            private _lead = [_center, _radius, _side] call DUWS_fnc_garrisonReservePos;
+            if (_lead isNotEqualTo []) then { _wave append [_lead, _center getDir _lead] };
+        };
+        if (_fieldable isEqualTo [] || {_wave isEqualTo []}
+            || {((call BIS_fnc_listPlayers) findIf { alive _x && {(_x distance2D (_wave select 0)) < DUWS_zoneReserveSpawnDist} }) >= 0}) then {
+            _spent = true
+        } else {
             // Located fresh at delete time, not by the index the list above carried -- a concurrent
             // refill may have taken this token since, so a value now gone from the pool is skipped
             // rather than shifting the delete onto the wrong slot.
@@ -501,7 +513,7 @@ DUWS_fnc_garrisonReserveRefillOne = {
                 private _men = [_tok] call DUWS_fnc_tokenMenCount;
                 if (_men == 0) then {
                     // A vehicle or bare-class token owes no infantry men: it drives itself in, unbatched.
-                    private _pos = [_center, _radius, _wave, _slots, _side] call DUWS_fnc_reserveWaveSlot;
+                    private _pos = [_wave, _slots] call DUWS_fnc_reserveWaveSlot;
                     private _grp = [_tok, _center, _radius, "hunt", _pos, _side] call DUWS_fnc_zoneSpawnOne;
                     [_key, _grp, _roster] call DUWS_fnc_garrisonReserveCommit;
                 } else {
@@ -512,7 +524,7 @@ DUWS_fnc_garrisonReserveRefillOne = {
                         _truck = objNull; _drv = grpNull; _aboard = []; _used = 0; _cap = 0; _trkPos = [];
                     };
                     if (isNull _truck) then {
-                        private _pos = [_center, _radius, _wave, _slots, _side] call DUWS_fnc_reserveWaveSlot;
+                        private _pos = [_wave, _slots] call DUWS_fnc_reserveWaveSlot;
                         private _made = [_pos, _center, _side] call DUWS_fnc_garrisonReserveTruckSpawn;
                         if (_made isNotEqualTo []) then {
                             _made params ["_mt", "_md", "_mc"];
@@ -527,7 +539,7 @@ DUWS_fnc_garrisonReserveRefillOne = {
                             deleteVehicle _truck;
                             _truck = objNull; _drv = grpNull; _cap = 0; _trkPos = [];
                         };
-                        private _pos = [_center, _radius, _wave, _slots, _side] call DUWS_fnc_reserveWaveSlot;
+                        private _pos = [_wave, _slots] call DUWS_fnc_reserveWaveSlot;
                         private _grp = [_tok, _center, _radius, "hunt", _pos, _side] call DUWS_fnc_zoneSpawnOne;
                         [_key, _grp, _roster] call DUWS_fnc_garrisonReserveCommit;
                     } else {

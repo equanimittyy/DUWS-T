@@ -15,7 +15,7 @@
 // _spawnPos is the reserve path's, as in fnc_spawn_team: a reinforcement vehicle is placed on the
 // point the pass chose. It reaches ground vehicles only -- air still enters from off the map, since a
 // reserve gunship makes no sense parked on the far ridge at zero altitude.
-params ["_class", "_patrolCenter", "_radius", ["_posture", "closepatrol"], ["_spawnPos", []], ["_side", "opfor"]];
+params ["_class", "_patrolCenter", "_radius", ["_posture", "closepatrol"], ["_spawnPos", []], ["_side", "opfor"], ["_floor", 0]];
 if (_class == "") exitWith { grpNull };
 
 // _side ("opfor"/"blufor") sets the engine side and the crew skill, and defaults to opfor so the
@@ -45,9 +45,16 @@ private _vehpos = if (_isAir) then {
             _minR = (_band select 0) * _radius;
             _maxR = (_band select 1) * _radius;
         };
-        [_patrolCenter, _maxR, _minR, 15, 0.5] call fnc_safe_pos
+        private _players = if (_floor > 0) then { (call BIS_fnc_listPlayers) select { alive _x } } else { [] };
+        private _p = [];
+        for "_i" from 1 to 8 do {
+            private _c = [_patrolCenter, _maxR, _minR, 15, 0.5] call fnc_safe_pos;
+            if ((_players findIf { (_x distance2D _c) < _floor }) < 0) exitWith { _p = _c };
+        };
+        _p
     }
 };
+if (_vehpos isEqualTo []) exitWith { grpNull };
 
 private _created = [_vehpos, 0, _class, _army] call BIS_fnc_spawnVehicle;
 private _veh = _created select 0;

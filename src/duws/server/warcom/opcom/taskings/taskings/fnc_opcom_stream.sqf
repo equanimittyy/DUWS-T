@@ -108,24 +108,52 @@ DUWS_fnc_opcom_reOrderLive = {
     [_grp, _order, _t get "target", [_t, getPosASL (leader _grp)] call DUWS_fnc_opcom_routeVia] call DUWS_fnc_opcom_applyOrder;
 };
 
-// OPCOM's own spawn: air must spawn flying at the tasking's point, not flown in from off-map like the zone spawner.
-DUWS_fnc_opcom_spawnComp = {
-    params ["_token", "_pos", ["_class", ""], ["_dir", 0], ["_spread", false]];
-    if !(([_token] call DUWS_fnc_teamRow) isEqualTo []) exitWith {
-        private _at = _pos;
-        if (_spread) then {
-            for "_i" from 1 to 16 do {
-                private _p = _pos getPos [random OPCOM_DEVIRT_SPREAD_R, random 360];
-                if !(surfaceIsWater _p) exitWith { _at = [_p select 0, _p select 1, _pos select 2] };
-            };
+// -> [x, y] a de-virt may stand on, or [] for none this tick. The unit or a player can close several hundred metres
+// over the de-virt debounce, so the spot is judged now, against every player. An aircraft, seen above any cover,
+// keeps the whole sight range off. _class "" is a team.
+DUWS_fnc_opcom_devirtSpot = {
+    params ["_pos", "_class", "_dir", "_walk"];
+    private _air = _class isKindOf "Air";
+    private _boat = _class isKindOf "Ship";
+    // A hull spawned into another detonates both.
+    private _fits = switch (true) do {
+        case (_air): { { true } };
+        case (_class isEqualTo ""): { { !surfaceIsWater _this } };
+        default { { (surfaceIsWater _this) isEqualTo _boat && {[_class, _this, _dir] call fnc_vehicle_spot_clear} } };
+    };
+    private _players = (call BIS_fnc_listPlayers) select { alive _x };
+    private _floor = [OPCOM_DEVIRT_MIN_DIST, OPCOM_DEVIRT_SIGHT_RANGE] select _air;
+    private _cands = [];
+    for "_i" from 1 to 16 do { _cands pushBack (_pos getPos [random OPCOM_DEVIRT_SPREAD_R, random 360]) };
+    _cands pushBack _pos;
+    if (_walk > 0 && {_players isNotEqualTo []}) then {
+        private _near = _players select 0;
+        { if ((_x distance2D _pos) < (_near distance2D _pos)) then { _near = _x } } forEach _players;
+        private _away = _near getDir _pos;
+        for "_d" from 200 to _walk step 200 do {
+            { _cands pushBack (_pos getPos [_d, _away + _x]) } forEach [0, 45, -45, 90, -90, 135, -135, 180];
         };
-        private _g = [_token, _at, 100, "none", _at] call fnc_spawn_team;
+    };
+    private _i = _cands findIf {
+        private _p = _x;
+        (_players findIf { (_x distance2D _p) < _floor }) < 0
+        && {_p call _fits}
+        && {_air || {(_players findIf { (_x distance2D _p) < OPCOM_DEVIRT_SIGHT_RANGE && {[_p, _x] call fnc_duws_posSeenBy} }) < 0}}
+    };
+    if (_i < 0) exitWith { [] };
+    private _spot = _cands select _i;
+    [_spot select 0, _spot select 1]
+};
+
+// OPCOM's own spawn, on the point it is handed: air must spawn flying there, not flown in from off-map like the zone spawner.
+DUWS_fnc_opcom_spawnComp = {
+    params ["_token", "_pos", "_class"];
+    if !(([_token] call DUWS_fnc_teamRow) isEqualTo []) exitWith {
+        private _g = [_token, _pos, 100, "none", _pos] call fnc_spawn_team;
         // Posture "none" drops the team on one point; scatter <20 m so it still reads as one group in the stream radius.
-        { _x setPos (_at getPos [4 + random 12, random 360]) } forEach units _g;
+        { _x setPos (_pos getPos [4 + random 12, random 360]) } forEach units _g;
         _g
     };
-    // Empty only for a record raised before spawnClass existed (hot-reloaded campaign): draw fresh.
-    if (_class isEqualTo "") then { _class = [_token] call DUWS_fnc_tokenClass };
     if (_class isEqualTo "") exitWith {
         ["WARN", "OPCOM", format ["spawn: token %1 resolves to no class for this faction", _token]] call fnc_log;
         grpNull
@@ -133,18 +161,8 @@ DUWS_fnc_opcom_spawnComp = {
     if !(_class isKindOf "Air") exitWith {
         // pos is banked ASL (grid frame); spawnVehicle reads a 3D z as ATL, so pass 2D or the hull floats.
         private _g = [_pos select 0, _pos select 1];
-        // Taskings banked on one point de-virt onto it together, and a hull spawned into another detonates both.
-        private _boat = _class isKindOf "Ship";
-        private _spot = [];
-        for "_i" from 0 to 15 do {
-            private _p = if (_i == 0 && {!_spread}) then { _g } else { _g getPos [random OPCOM_DEVIRT_SPREAD_R, random 360] };
-            if ((surfaceIsWater _p) isEqualTo _boat && {[_class, _p, _dir] call fnc_vehicle_spot_clear}) exitWith {
-                _spot = [_p select 0, _p select 1];
-            };
-        };
-        if (_spot isEqualTo []) then { grpNull } else { [_class, _g, 100, "none", _spot] call fnc_spawn_vehicle }
+        [_class, _g, 100, "none", _g] call fnc_spawn_vehicle
     };
-    if (_spread) then { _pos = _pos getPos [random OPCOM_DEVIRT_SPREAD_R, random 360] };
     private _created = [[_pos select 0, _pos select 1, OPCOM_AIR_SPAWN_ALT], 0, _class, EAST] call BIS_fnc_spawnVehicle;
     _created params ["_veh", "_crew", "_grp"];
     if (isNull _grp || {_crew isEqualTo []}) exitWith {
@@ -175,7 +193,21 @@ DUWS_fnc_opcom_deVirt = {
     private _pos = _t get "pos";
     private _tgt = _t get "target";
     private _dir = if (_tgt isEqualTo []) then { 0 } else { _pos getDir _tgt };
-    private _grp = [_token, _pos, _t getOrDefault ["spawnClass", ""], _dir, _spread] call DUWS_fnc_opcom_spawnComp;
+    private _class = "";
+    if (([_token] call DUWS_fnc_teamRow) isEqualTo []) then {
+        // Empty only for a record raised before spawnClass existed (hot-reloaded campaign): draw fresh.
+        _class = _t getOrDefault ["spawnClass", ""];
+        if (_class isEqualTo "") then { _class = [_token] call DUWS_fnc_tokenClass };
+    };
+    if (_spread) then {
+        // A bound rider boards at its shore pickup, so it is never walked off it.
+        private _walk = [OPCOM_DEVIRT_WALK, 0] select ((_t getOrDefault ["ridingOn", -1]) >= 0);
+        private _spot = [_pos, _class, _dir, _walk] call DUWS_fnc_opcom_devirtSpot;
+        _pos = if (_spot isEqualTo []) then { [] } else { [_spot select 0, _spot select 1, _pos select 2] };
+    };
+    // No clear spot: it stays virtual, and the stream stage retries next tick.
+    if (_pos isEqualTo []) exitWith { false };
+    private _grp = [_token, _pos, _class] call DUWS_fnc_opcom_spawnComp;
     if (isNull _grp) exitWith {
         ["ERROR", "OPCOM", format ["de-virt spawn failed for tasking %1 token %2", _t get "id", _token]] call fnc_log;
         false

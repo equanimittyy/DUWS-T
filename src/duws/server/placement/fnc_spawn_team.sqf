@@ -23,7 +23,9 @@
 // spawns in its band off the centre.
 // _anchors passes straight through to fnc_apply_posture: the fixed points an hqpatrol walks. Defaults
 // empty, so a caller that names none gets the same team it always did.
-params ["_team", "_center", "_radius", ["_posture", "closepatrol"], ["_spawnPos", []], ["_side", "opfor"], ["_anchors", []]];
+// _floor (m, 0 = none) keeps the band point and a garrison's building that far off every player; a band with no clear
+// point after a few draws raises nothing (grpNull).
+params ["_team", "_center", "_radius", ["_posture", "closepatrol"], ["_spawnPos", []], ["_side", "opfor"], ["_anchors", []], ["_floor", 0]];
 
 // grpNull rather than an empty group: DUWS_fnc_raiseGarrison already drops nulls, and a group with
 // no men would sit on the zone roster forever holding the capture test open.
@@ -47,8 +49,15 @@ private _position = if (_spawnPos isNotEqualTo []) then { _spawnPos } else {
         _minR = (_band select 0) * _radius;
         _maxR = (_band select 1) * _radius;
     };
-    [_center, _maxR, _minR, 5, 0.5] call fnc_safe_pos
+    private _players = if (_floor > 0) then { (call BIS_fnc_listPlayers) select { alive _x } } else { [] };
+    private _p = [];
+    for "_i" from 1 to 8 do {
+        private _c = [_center, _maxR, _minR, 5, 0.5] call fnc_safe_pos;
+        if ((_players findIf { (_x distance2D _c) < _floor }) < 0) exitWith { _p = _c };
+    };
+    _p
 };
+if (_position isEqualTo []) exitWith { grpNull };
 private _army = [EAST, WEST] select (_side isEqualTo "blufor");
 private _skill = missionNamespace getVariable [format ["%1_ai_skill", _side], opfor_ai_skill];
 private _group = [_position, _army, _men, [], [], _skill] call BIS_fnc_spawnGroup;
@@ -58,6 +67,6 @@ _group deleteGroupWhenEmpty true;
 // fights alongside should not drop lootable gear on death.
 if (_side isEqualTo "opfor") then { { [_x] call fnc_addRandomLoot } forEach units _group; };
 
-[_group, _posture, _center, _radius, _anchors] call fnc_apply_posture;
+[_group, _posture, _center, _radius, _anchors, _floor] call fnc_apply_posture;
 
 _group

@@ -134,7 +134,8 @@ DUWS_fnc_raiseGarrison = {
     params ["_tokens", "_pos", "_radius", ["_side", "OPF"]];
     private _grps = [];
     {
-        private _grp = [_x, _pos, _radius, "", [], _side] call DUWS_fnc_zoneSpawnOne;
+        // A player driving in reaches the band during the stagger; a group with no clear point is refunded as a reserve wave.
+        private _grp = [_x, _pos, _radius, "", [], _side, DUWS_zoneReserveSpawnDist] call DUWS_fnc_zoneSpawnOne;
         if (!isNull _grp) then { _grps pushBack _grp };
         if (_forEachIndex < (count _tokens) - 1) then { sleep 2 };
     } forEach _tokens;
@@ -276,7 +277,7 @@ DUWS_fnc_classAA = { (_this call DUWS_fnc_classArms) params ["_g", "_m", "_a"]; 
 // alone -- a reserve rides "hunt" orders regardless of its pool token's own posture, and spawns where
 // the pass chose on the zone's far side rather than in the token's own radius band.
 DUWS_fnc_zoneSpawnOne = {
-    params ["_token", "_pos", "_size", ["_postureOverride", ""], ["_spawnPos", []], ["_side", "OPF"]];
+    params ["_token", "_pos", "_size", ["_postureOverride", ""], ["_spawnPos", []], ["_side", "OPF"], ["_floor", 0]];
     // The token layer spells a side "OPF"/"BLU" and the placers "opfor"/"blufor"; one boundary, here.
     private _army = ["opfor", "blufor"] select (_side isEqualTo "BLU");
     private _posture = [_token] call DUWS_fnc_tokenPosture;
@@ -285,14 +286,14 @@ DUWS_fnc_zoneSpawnOne = {
     if (_postureOverride != "") then { _posture = _postureOverride };
     private _grp = grpNull;
     if !(([_token] call DUWS_fnc_teamRow) isEqualTo []) then {
-        _grp = [_token, _pos, _size, _posture, _spawnPos, _army] call fnc_spawn_team;
+        _grp = [_token, _pos, _size, _posture, _spawnPos, _army, [], _floor] call fnc_spawn_team;
     } else {
         private _class = [_token, _side] call DUWS_fnc_tokenClass;
         if (_class == "") exitWith {
             ["WARN", "ZONES", format ["%1 cannot be fielded here and was not filtered out", _token]] call fnc_log;
             grpNull
         };
-        _grp = [_class, _pos, _size, _posture, _spawnPos, _army] call fnc_spawn_vehicle;
+        _grp = [_class, _pos, _size, _posture, _spawnPos, _army, _floor] call fnc_spawn_vehicle;
     };
     // The source token rides the group so the killed handler can record which composition entry died
     // (DUWS_fnc_garrisonReserveWatch reads it back). A group that failed to field exited above, so a
