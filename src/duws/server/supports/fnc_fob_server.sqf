@@ -115,7 +115,7 @@ publicVariable "Array_of_FOBpos";
 ["INFO", "SUPPORT", format ["FOB '%1' built at %2, %3 now standing",
 	_fobname, _foundPickupPos, count Array_of_FOBS]] call fnc_log;
 
-_spawnPos = [west, _fob] call BIS_fnc_addRespawnPosition;
+_spawnPos = [west, _fob, format ["3. FOB %1", _fobname]] call BIS_fnc_addRespawnPosition;
 
 [_fob,_markerstr, _spawnPos, _fobname, getPos _fob] spawn fnc_fob_destroyed;
 

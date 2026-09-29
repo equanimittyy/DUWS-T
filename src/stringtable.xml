@@ -14574,6 +14574,18 @@
                 <French>QG mobile</French>
                 <Chinese>機動總部</Chinese>
             </Key>
+            <Key ID="STR_DUWS_T_RESPAWN_MAIN_HQ">
+                <Original>Main HQ</Original>
+                <English>Main HQ</English>
+                <Chinesesimp>主总部</Chinesesimp>
+                <Chinese>主總部</Chinese>
+                <German>Haupt-HQ</German>
+                <Polish>Główne HQ</Polish>
+                <Czech>Hlavní HQ</Czech>
+                <Russian>Главный штаб</Russian>
+                <French>QG principal</French>
+                <Spanish>CG principal</Spanish>
+            </Key>
             <Key ID="STR_DUWS_T_ooi6w4yh">
                 <German>Mobiles HQ bestimmen</German>
                 <Spanish>Designar CG móvil</Spanish>

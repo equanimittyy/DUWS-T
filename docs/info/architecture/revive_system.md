@@ -26,6 +26,15 @@ The killhouse entries stand on open ground at the HQ, because a respawn position
 course does not land the player on it. [`onPlayerRespawn.sqf`](../../../src/onPlayerRespawn.sqf) moves a
 player who arrives on one of them up to that entrance.
 
+The respawn menu sorts its entries by name, so each label starts with a number that fixes its place:
+
+| Entry | Label | Set in |
+| --- | --- | --- |
+| HQ | `1. Main HQ` | [`fnc_BluHQinit.sqf`](../../../src/duws/server/init_hq/fnc_BluHQinit.sqf) (text of the `respawn_west` marker) |
+| Deployed MHQ | `2. Mobile HQ` | [`fnc_MHQ_deploy.sqf`](../../../src/duws/server/dialog/fnc_MHQ_deploy.sqf) |
+| Each FOB | `3. FOB <name>` | [`fnc_fob_server.sqf`](../../../src/duws/server/supports/fnc_fob_server.sqf) |
+| Killhouse entrances | `4. Killhouse A`, `5. Killhouse B` | [`fnc_createKillhouse.sqf`](../../../src/duws/server/killhouse/fnc_createKillhouse.sqf) |
+
 A respawned player starts naked: [`onPlayerRespawn.sqf`](../../../src/onPlayerRespawn.sqf) sets an empty
 loadout, because the engine otherwise dresses the new unit in its class kit. The dead body keeps the old
 kit. The Full and Hybrid arsenal modes keep the startup kit free to draw again. The Limited mode draws it

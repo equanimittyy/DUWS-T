@@ -377,6 +377,8 @@ private _respawnPos = [
     (getPosWorld _medTent select 2) + (-2.02112)
 ];
 "respawn_west" setMarkerPos _respawnPos;
+// The respawn menu sorts its entries by name, so each label's number fixes its place (revive_system.md).
+"respawn_west" setMarkerText ("1. " + localize "STR_DUWS_T_RESPAWN_MAIN_HQ");
 
 if (!isNull _repairDepot) then { missionNamespace setVariable ["HQ_repairDepot_netId", netId _repairDepot, true]; };
 if (!isNull _helipad) then { missionNamespace setVariable ["HQ_helipad_netId", netId _helipad, true]; };

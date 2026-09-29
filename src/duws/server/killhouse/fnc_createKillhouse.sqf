@@ -65,7 +65,7 @@ if (!isNull _flagBlueking) then {
     _tpA set [2, (getPosWorld _flagBlueking select 2) + (-1.04517)];
     missionNamespace setVariable ["killhouse_tpA", _tpA, true];
     private _anchorA = [(PosOfBLUHQ select 0) + 12, (PosOfBLUHQ select 1) + 5.7, 0];
-    [west, _anchorA, localize "STR_DUWS_KILLHOUSE_TELEPORT_A"] call BIS_fnc_addRespawnPosition;
+    [west, _anchorA, "4. " + localize "STR_DUWS_KILLHOUSE_TELEPORT_A"] call BIS_fnc_addRespawnPosition;
     _respawns pushBack [_anchorA, _tpA];
 };
 if (!isNull _flagRedstone) then {
@@ -73,7 +73,7 @@ if (!isNull _flagRedstone) then {
     _tpB set [2, (getPosWorld _flagRedstone select 2) + (-1.05688)];
     missionNamespace setVariable ["killhouse_tpB", _tpB, true];
     private _anchorB = [(PosOfBLUHQ select 0) + 20, (PosOfBLUHQ select 1) + 6.2, 0];
-    [west, _anchorB, localize "STR_DUWS_KILLHOUSE_TELEPORT_B"] call BIS_fnc_addRespawnPosition;
+    [west, _anchorB, "5. " + localize "STR_DUWS_KILLHOUSE_TELEPORT_B"] call BIS_fnc_addRespawnPosition;
     _respawns pushBack [_anchorB, _tpB];
 };
 missionNamespace setVariable ["killhouse_respawns", _respawns, true];
