@@ -147,12 +147,25 @@ DUWS_fnc_opcom_attackPackage = {
         ["_halflife", OPCOM_VALUE_HALFLIFE], ["_ride", false]];
     _buckets = +_buckets;
     private _rows = _offers apply { [_x, _value, _to, true, 0, 0, _base, _halflife] call DUWS_fnc_opcom_sourceRow };
+    // Ranked on the walk, a far squad lost to every hull though its member rides. The saving is a fixed factor on the
+    // Value, so a remix keeps it.
+    private _lifts = _rows apply {
+        _x params ["_src", "_v", "_pw", "", "_p"];
+        private _l = [_src, _to, _v, _pw, (WARCOM_opfor_ap - _p) max 0, _halflife] call DUWS_fnc_opcom_liftFor;
+        if (_l isEqualTo []) then { [1, 0] } else { [1 + (_l select 1) / _v, _l select 3] }
+    };
+    private _fnc_rankScore = {
+        params ["_i"];
+        (_rows select _i) params ["", "_v", "_pw", "_c"];
+        (_lifts select _i) params ["_k", "_lc"];
+        [_v * _k, _pw, _c + _lc] call DUWS_fnc_opcom_score
+    };
     // Infantry and vehicles ranked apart: the boost scales every vehicle's score alike, so only the two heads need
     // comparing again after each vehicle taken.
     private _ranks = [[], []];
     {
         (_ranks select !(((_x select 0) select 3) isEqualTo "inf")) pushBack
-            [[_x select 1, _x select 2, _x select 3] call DUWS_fnc_opcom_score, _forEachIndex];
+            [[_forEachIndex] call _fnc_rankScore, _forEachIndex];
     } forEach _rows;
     { _x sort false } forEach _ranks;
     private _all = +_ranks;
@@ -165,7 +178,7 @@ DUWS_fnc_opcom_attackPackage = {
                 private _ref = (_r select 0) select 0;
                 if ((_ref select 0) isEqualTo "hire") then {
                     _r set [1, (_unmixed select (_x select 1)) * ([_ref select 1, _taken] call DUWS_fnc_opcom_packageMix)];
-                    _x set [0, [_r select 1, _r select 2, _r select 3] call DUWS_fnc_opcom_score];
+                    _x set [0, [_x select 1] call _fnc_rankScore];
                 };
             } forEach _x;
             _x sort false;
