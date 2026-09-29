@@ -111,7 +111,7 @@ has to name its Cost past it: a Garrison rests and a Probe observes.
   is 1, a static MG 2, and a static GMG, AT or AA gun 4. A hardpoint or a zone's centre statics therefore weigh their
   guns on top of their garrison, so `r` reads a dug-in site above its headcount. Infantry in cover counts 1 a man,
   and no posture factor is planned: a higher bar only makes attacks fewer and larger. A sighted player adds
-  `OPCOM_PLAYER_WORTH` (3) to their group's firepower, because a player can turn a fight that headcount says is lost.
+  `OPCOM_PLAYER_WORTH` (1) to their group's firepower, because a player can turn a fight that headcount says is lost.
 - **The band** reads the same `r` to gate *how* an offensive runs (`≥2` assault; `0.5–2` assault or flank; `<0.5`
   hold). Every offensive then musters before it launches
   ([§Commitment](#commitment-orders-are-sticky)). `P(win)` (whether) and the band (how) are two jobs off one `r`. The
