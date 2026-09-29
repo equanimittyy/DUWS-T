@@ -189,6 +189,12 @@ more, and `fnc_support_consume` removes that copy and its recorded charge, so a 
 left to refund. Only two calls charge again: a FOB deploy (10 CP) and a vehicle drop (the
 vehicle's own price, from `DUWS_fnc_vehPrice`).
 
+**A High Command aircraft whose caller leaves is the one used copy that refunds.** The sortie script
+runs on the caller's machine and ends with their session. The server then flies the aircraft off the
+map, starts the usual team-wide cooldown, and pays back the recorded charge in both currencies
+(`server/supports/fnc_hcair_recall.sqf`). There is no refund if the aircraft was shot down, or if its
+station time had already ended and it was flying home.
+
 **One run per support at a time, per player.** Each held copy is its own entry in the 0-8 menu.
 `fnc_support_comm_used` refuses a pick while another copy of the same class is still running, and
 redraws the menu from the held copies
@@ -238,6 +244,7 @@ a cheaper way to liquidate a slate, which inverts what the death penalty is for.
 | Killhouse training | `server/killhouse/fnc_createKillhouse.sqf:306-307` | +1 for clearing 10 targets, or +3 for clearing 20 challenge enemies, once per run |
 | Rare-zombie kill (WBK) | `server/civilian/fnc_civ_handler_wbk.sqf:359` | +10, or +30 for the Goliath |
 | Support refund | `client/supports/fnc_supports_init.sqf` | the recorded charge in full; `support_death_refund` of the slate when its holder dies |
+| High Command aircraft recall | `server/supports/fnc_hcair_recall.sqf` | the recorded charge in full, CP and AP, when the caller leaves before the aircraft's station time ends |
 
 **A zone's worth is one figure now, not two.** `_points` (the worth) rides the capture triggers —
 `fnc_createzone.sqf:280` → `fnc_captured.sqf` → `fnc_opfor_cap.sqf` → `fnc_blufor_cap.sqf` — as

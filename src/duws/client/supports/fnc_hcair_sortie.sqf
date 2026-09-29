@@ -23,7 +23,7 @@ if !([_claimType, _commItem, _busyKey, _cdKey] call fnc_hcair_claim_request) exi
 
 // Claim granted -> the support is spent. Consumed here, not at menu pick, so a request the guard above
 // refused (in service or on cooldown) is handed back to the player unspent.
-[_commItem] call fnc_support_consume;
+private _paid = [_commItem] call fnc_support_consume;
 
 [localize "STR_DUWS_T_actionteam", localize _reqLine, "", name player] remoteExec ["fnc_duws_dialogue", 0];
 
@@ -39,11 +39,15 @@ _group deleteGroupWhenEmpty true;
 if (_spinUp) then { sleep 1 };
 _vehicle = vehicle (leader _group);
 if (_spinUp) then { _vehicle engineOn true };
-// Ferry in high; dropped on-station at handover, raised again on egress below.
+// Ferry in high; dropped on-station at handover, raised again on egress.
 if (_ferryH > 0) then { _vehicle flyInHeight _ferryH };
 
 missionNamespace setVariable [_curVehVar, _vehicle];
 missionNamespace setVariable [_activeVar, true];
+
+// This script dies with the caller's session, so the server recalls a tagged aircraft when its caller leaves.
+private _sortie = [getPlayerUID player, _paid, _vehicle, _offmap, _egressH, _claimType, _cooldown];
+_group setVariable ["DUWS_hcairSortie", _sortie, true];
 
 // Killed handles a shoot-down; Deleted handles a despawn with the crew still alive. Both only flip the
 // per-sortie flags -- the terminal tail below owns the cooldown, on every path. Names are baked in here
@@ -105,17 +109,10 @@ if (alive _vehicle && (missionNamespace getVariable [_activeVar, false]) && {_ve
 		[localize _onStaSpeaker, localize _rtbLine] remoteExec ["fnc_duws_dialogue", 0];
 		// Cleared before egress: it is leaving under orders, so a shoot-down now is not a "casdown".
 		missionNamespace setVariable [_activeVar, false];
-		{ _x setCaptive true } forEach units _group;
-		_vehicle setCaptive true;
-		_group setBehaviour "CARELESS";
-		if (_egressH > 0) then { _vehicle flyInHeight _egressH };
-		while { count waypoints _group > 0 } do { deleteWaypoint [_group, 0] };
-		private _wpOut = _group addWaypoint [_offmap, 0];
-		_wpOut setWaypointType "MOVE";
-		_wpOut setWaypointSpeed "FULL";
-		// Grace cap so a damaged or blocked aircraft that never clears the map still cleans up.
-		private _grace = time + 60;
-		waitUntil { sleep 3; !alive _vehicle || _vehicle distance _offmap < 800 || time > _grace };
+		// Its station time is used up, so a caller who leaves from here on gets nothing back.
+		_sortie set [1, []];
+		_group setVariable ["DUWS_hcairSortie", _sortie, true];
+		[_group, _vehicle, _offmap, _egressH] call fnc_hcair_egress;
 	};
 };
 

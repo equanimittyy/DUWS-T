@@ -767,6 +767,7 @@ publicVariable "fnc_intelAnalysis";
 fnc_support_perm_grant = compile preprocessFileLineNumbers "duws\server\supports\fnc_support_perm_grant.sqf";
 fnc_fob_server = compile preprocessFileLineNumbers "duws\server\supports\fnc_fob_server.sqf";publicVariable "fnc_fob_server";
 fnc_uav_scanner = compile preprocessFileLineNumbers "duws\server\supports\fnc_uav_scanner.sqf";publicVariable "fnc_uav_scanner";
+fnc_hcair_recall = compile preprocessFileLineNumbers "duws\server\supports\fnc_hcair_recall.sqf";
 fnc_sitrep_support = compile preprocessFileLineNumbers "duws\server\supports\fnc_sitrep_support.sqf";publicVariable "fnc_sitrep_support";
 // Not broadcast: fnc_helolift only ever remoteExecs these to target 2, which resolves the
 // name on the server, and every one of them needs the helo group local to run at all.
@@ -1056,6 +1057,7 @@ fnc_spawn_delivery_transport = compile preprocessFileLineNumbers "duws\client\su
 fnc_paradrop = compile preprocessFileLineNumbers "duws\client\supports\fnc_paradrop.sqf";publicVariable "fnc_paradrop";
 fnc_request_fob = compile preprocessFileLineNumbers "duws\client\supports\fnc_request_fob.sqf";publicVariable "fnc_request_fob";
 fnc_hcair_sortie = compile preprocessFileLineNumbers "duws\client\supports\fnc_hcair_sortie.sqf";publicVariable "fnc_hcair_sortie";
+fnc_hcair_egress = compile preprocessFileLineNumbers "duws\client\supports\fnc_hcair_egress.sqf";publicVariable "fnc_hcair_egress";
 fnc_request_hcATTchop = compile preprocessFileLineNumbers "duws\client\supports\fnc_request_hcATTchop.sqf";publicVariable "fnc_request_hcATTchop";
 fnc_request_hcCAS = compile preprocessFileLineNumbers "duws\client\supports\fnc_request_hcCAS.sqf";publicVariable "fnc_request_hcCAS";
 fnc_veh_drop = compile preprocessFileLineNumbers "duws\client\supports\fnc_veh_drop.sqf";publicVariable "fnc_veh_drop";

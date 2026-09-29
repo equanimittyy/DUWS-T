@@ -232,12 +232,15 @@ fnc_support_comm_add = {
 fnc_support_consume = {
 	params [["_class", ""]];
 	private _def = ([] call fnc_support_defs) select { (_x select 5) == _class };
-	if (count _def == 0) exitWith {};
+	if (count _def == 0) exitWith { [] };
 	(_def select 0) params ["_key", "_kind", "", "_flagVar"];
-	if (_kind != "CONS" || {(([_key, _flagVar] call fnc_support_take) isEqualTo [])}) exitWith {};
+	if (_kind != "CONS") exitWith { [] };
+	private _charge = [_key, _flagVar] call fnc_support_take;
+	if (_charge isEqualTo []) exitWith { [] };
 	private _running = missionNamespace getVariable ["DUWS_support_running", createHashMap];
 	if (_class in _running) then { _running set [_class, false] };
 	[] call fnc_support_comm_sync;
+	_charge
 };
 
 // Called only from the comm-menu expressions (shared/includes/supports_radio_modern.hpp) -- the one

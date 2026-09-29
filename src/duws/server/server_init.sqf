@@ -362,6 +362,11 @@ if (isServer) then {
         if (_uid isEqualTo "") exitWith {};
         {
             if ((_x getVariable ["DUWS_hcCommander", ""]) isEqualTo _uid) then { [_x] call fnc_taskforce_create };
+            private _sortie = _x getVariable ["DUWS_hcairSortie", []];
+            if ((_sortie param [0, ""]) isEqualTo _uid) then {
+                _x setVariable ["DUWS_hcairSortie", nil];
+                [_x, _sortie] spawn fnc_hcair_recall;
+            };
         } forEach allGroups;
     }];
 
