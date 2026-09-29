@@ -307,6 +307,8 @@ if (!isNull _barrier) then {
     }];
 };
 
+// By handle for the save: a supply drop landing at HQ is the same class.
+DUWS_hqCrate = _supplyCrate;
 if (!isNull _supplyCrate) then {
     clearMagazineCargoGlobal _supplyCrate;
     clearWeaponCargoGlobal _supplyCrate;

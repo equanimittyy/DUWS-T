@@ -151,12 +151,41 @@ DUWS_fnc_saveReopen = {
     [missionNamespace getVariable ["DUWS_loadChoice", []]] call DUWS_fnc_restoreAnswer;
 };
 
+DUWS_fnc_restoreKnown = {
+    params ["_c"];
+    isClass (configFile >> "CfgWeapons" >> _c) || {isClass (configFile >> "CfgMagazines" >> _c)}
+        || {isClass (configFile >> "CfgVehicles" >> _c)} || {isClass (configFile >> "CfgGlasses" >> _c)}
+};
+
+// Containers match by class, not order: two copies of a class are interchangeable until they are filled.
+DUWS_fnc_restoreCargo = {
+    params ["_box", "_cargo"];
+    _cargo params ["_weapons", "_mags", "_items", "_packs", "_nested"];
+    clearWeaponCargoGlobal _box;
+    clearMagazineCargoGlobal _box;
+    clearItemCargoGlobal _box;
+    clearBackpackCargoGlobal _box;
+    private _known = { ((flatten [_this]) select { _x isEqualType "" && {_x != ""} }) findIf { !([_x] call DUWS_fnc_restoreKnown) } < 0 };
+    private _dropped = 0;
+    { if (_x call _known) then { _box addWeaponWithAttachmentsCargoGlobal [_x, 1] } else { _dropped = _dropped + 1 } } forEach _weapons;
+    { if (_x call _known) then { _box addMagazineAmmoCargo [_x select 0, 1, _x select 1] } else { _dropped = _dropped + 1 } } forEach _mags;
+    { if (_x call _known) then { _box addItemCargoGlobal [_x, 1] } else { _dropped = _dropped + 1 } } forEach _items;
+    { if (_x call _known) then { _box addBackpackCargoGlobal [_x, 1] } else { _dropped = _dropped + 1 } } forEach _packs;
+    DUWS_restoreDropped set ["crate", (DUWS_restoreDropped get "crate") + _dropped];
+    private _free = everyContainer _box;
+    {
+        _x params ["_class", "_contents"];
+        private _i = _free findIf { (_x select 0) isEqualTo _class };
+        if (_i >= 0) then { [(_free deleteAt _i) select 1, _contents] call DUWS_fnc_restoreCargo };
+    } forEach _nested;
+};
+
 DUWS_fnc_restoreApply = {
     params ["_id", "_d"];
     DUWS_restore = _d;
     DUWS_restoring = true;
     DUWS_campaignLoaded = true;
-    DUWS_restoreDropped = createHashMapFromArray [["units", 0], ["vehicles", 0], ["gear", 0]];
+    DUWS_restoreDropped = createHashMapFromArray [["units", 0], ["vehicles", 0], ["gear", 0], ["crate", 0]];
     DUWS_restorePending = ["bases", "opcom"];
     DUWS_dialogueMuted = true;
     publicVariable "DUWS_dialogueMuted";
@@ -209,11 +238,7 @@ DUWS_fnc_restoreApply = {
     private _garage = (_d getOrDefault ["garage", []]) select { isClass (configFile >> "CfgVehicles" >> (_x param [0, ""])) };
     DUWS_restoreDropped set ["vehicles", count (_d getOrDefault ["garage", []]) - count _garage];
     DUWS_garage_stored = _garage; publicVariable "DUWS_garage_stored";
-    private _pool = (_d getOrDefault ["capturedPool", []]) select {
-        private _c = _x param [0, ""];
-        isClass (configFile >> "CfgWeapons" >> _c) || {isClass (configFile >> "CfgMagazines" >> _c)}
-            || {isClass (configFile >> "CfgVehicles" >> _c)} || {isClass (configFile >> "CfgGlasses" >> _c)}
-    };
+    private _pool = (_d getOrDefault ["capturedPool", []]) select { [_x param [0, ""]] call DUWS_fnc_restoreKnown };
     DUWS_restoreDropped set ["gear", count (_d getOrDefault ["capturedPool", []]) - count _pool];
     DUWS_capturedPool = _pool; publicVariable "DUWS_capturedPool";
     DUWS_limitedSeeded = _d getOrDefault ["seeded", []];
@@ -416,6 +441,7 @@ DUWS_fnc_restoreBases = {
             _factory setVariable ["R3F_LOG_CF_credits", _credits, true];
         };
     } forEach (DUWS_restore getOrDefault ["baseBuilds", []]);
+    if ("hqCrate" in DUWS_restore) then { [DUWS_hqCrate, DUWS_restore get "hqCrate"] call DUWS_fnc_restoreCargo };
 
     private _fnc_spawnSpec = {
         params ["_spec", "_pos", "_dir"];
@@ -577,7 +603,7 @@ DUWS_fnc_restoreFinish = {
     private _lost = values DUWS_restoreDropped;
     if ((_lost findIf { _x > 0 }) >= 0) then {
         [format [localize "STR_DUWS_T_LOAD_DROPPED", DUWS_restoreDropped get "units", DUWS_restoreDropped get "vehicles",
-            DUWS_restoreDropped get "gear"]] remoteExec ["hint", [0,-2] select isDedicated];
+            DUWS_restoreDropped get "gear", DUWS_restoreDropped get "crate"]] remoteExec ["hint", [0,-2] select isDedicated];
     };
     ["INFO", "SAVE", format ["restore of campaign %1 complete, not restored: %2", DUWS_campaignID, DUWS_restoreDropped]] call fnc_log;
 };

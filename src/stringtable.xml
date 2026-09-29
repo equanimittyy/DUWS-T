@@ -2704,16 +2704,16 @@
                 <Spanish>Esta campaña se ganó</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_LOAD_DROPPED">
-                <Original>Campaign loaded.\n\nNot restored:\n%1 enemy units\n%2 vehicles\n%3 captured gear types</Original>
-                <English>Campaign loaded.\n\nNot restored:\n%1 enemy units\n%2 vehicles\n%3 captured gear types</English>
-                <Chinesesimp>战役已加载。\n\n未恢复：\n%1 个敌方单位\n%2 辆载具\n%3 种缴获装备类型</Chinesesimp>
-                <German>Kampagne geladen.\n\nNicht wiederhergestellt:\n%1 Feindeinheiten\n%2 Fahrzeuge\n%3 erbeutete Ausrüstungstypen</German>
-                <Polish>Kampania wczytana.\n\nNie przywrócono:\n%1 jednostek wroga\n%2 pojazdów\n%3 typów zdobytego sprzętu</Polish>
-                <Czech>Kampaň načtena.\n\nNeobnoveno:\n%1 nepřátelských jednotek\n%2 vozidel\n%3 typů ukořistěné výbavy</Czech>
-                <Russian>Кампания загружена.\n\nНе восстановлено:\n%1 юнитов противника\n%2 машин\n%3 видов захваченного снаряжения</Russian>
-                <French>Campagne chargée.\n\nNon restaurés :\n%1 unités ennemies\n%2 véhicules\n%3 types d'équipement capturé</French>
-                <Chinese>戰役已載入。\n\n未還原：\n%1 個敵方單位\n%2 輛載具\n%3 種繳獲裝備類型</Chinese>
-                <Spanish>Campaña cargada.\n\nNo restaurado:\n%1 unidades enemigas\n%2 vehículos\n%3 tipos de equipo capturado</Spanish>
+                <Original>Campaign loaded.\n\nNot restored:\n%1 enemy units\n%2 vehicles\n%3 captured gear types\n%4 items from the arsenal crate</Original>
+                <English>Campaign loaded.\n\nNot restored:\n%1 enemy units\n%2 vehicles\n%3 captured gear types\n%4 items from the arsenal crate</English>
+                <Chinesesimp>战役已加载。\n\n未恢复：\n%1 个敌方单位\n%2 辆载具\n%3 种缴获装备类型\n%4 件军械库箱内物品</Chinesesimp>
+                <German>Kampagne geladen.\n\nNicht wiederhergestellt:\n%1 Feindeinheiten\n%2 Fahrzeuge\n%3 erbeutete Ausrüstungstypen\n%4 Gegenstände aus der Arsenalkiste</German>
+                <Polish>Kampania wczytana.\n\nNie przywrócono:\n%1 jednostek wroga\n%2 pojazdów\n%3 typów zdobytego sprzętu\n%4 przedmiotów ze skrzyni arsenału</Polish>
+                <Czech>Kampaň načtena.\n\nNeobnoveno:\n%1 nepřátelských jednotek\n%2 vozidel\n%3 typů ukořistěné výbavy\n%4 předmětů z bedny arzenálu</Czech>
+                <Russian>Кампания загружена.\n\nНе восстановлено:\n%1 юнитов противника\n%2 машин\n%3 видов захваченного снаряжения\n%4 предметов из ящика арсенала</Russian>
+                <French>Campagne chargée.\n\nNon restaurés :\n%1 unités ennemies\n%2 véhicules\n%3 types d'équipement capturé\n%4 objets de la caisse d'arsenal</French>
+                <Chinese>戰役已載入。\n\n未還原：\n%1 個敵方單位\n%2 輛載具\n%3 種繳獲裝備類型\n%4 件軍械庫箱內物品</Chinese>
+                <Spanish>Campaña cargada.\n\nNo restaurado:\n%1 unidades enemigas\n%2 vehículos\n%3 tipos de equipo capturado\n%4 objetos del cajón de arsenal</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_ref5pt72">
                 <German>LEGE DIE UMGEBUNGSPARAMETER FEST</German>

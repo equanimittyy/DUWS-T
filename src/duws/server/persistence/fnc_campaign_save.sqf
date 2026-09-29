@@ -52,6 +52,14 @@ DUWS_fnc_campaignBelts = {
     } select { (_x select 1) isNotEqualTo [] }
 };
 
+// Per piece, not the garage's per-class counts, so a weapon keeps its attachments and a magazine its rounds. The
+// cargo commands see one level, so each stored container carries its own.
+DUWS_fnc_campaignCargo = {
+    params ["_box"];
+    [weaponsItemsCargo _box, magazinesAmmoCargo _box, itemCargo _box, backpackCargo _box,
+        (everyContainer _box) apply { [_x select 0, [_x select 1] call DUWS_fnc_campaignCargo] }]
+};
+
 DUWS_fnc_campaignSnapshot = {
     private _s = createHashMap;
     _s set ["version", DUWS_saveFormat];
@@ -144,6 +152,8 @@ DUWS_fnc_campaignSnapshot = {
     ]];
 
     _s set ["garage", DUWS_garage_stored];
+    // Null once a game master deletes it; a load then keeps the opening stock.
+    if (!isNull DUWS_hqCrate) then { _s set ["hqCrate", [DUWS_hqCrate] call DUWS_fnc_campaignCargo] };
     private _lockout = ((missionNamespace getVariable ["MHQ_lockout_until", 0]) - time) max 0;
     _s set ["mhq", if (!isNil "MHQ1" && {alive MHQ1}) then {
         [[MHQ1] call DUWS_fnc_vehSpecCapture, missionNamespace getVariable ["MHQ_deployed", false], getPosATL MHQ1, getDir MHQ1, _lockout]
