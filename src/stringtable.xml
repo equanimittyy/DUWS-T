@@ -14046,6 +14046,18 @@
                 <Chinese>新集結點已鎖定 %1 分鐘。</Chinese>
                 <Spanish>Nuevo punto de reunión bloqueado durante %1 min.</Spanish>
             </Key>
+            <Key ID="STR_DUWS_T_RALLY_ENEMY_NEAR">
+                <Original>Cannot place a rally point with enemies within %1 m.</Original>
+                <English>Cannot place a rally point with enemies within %1 m.</English>
+                <Chinesesimp>%1 米内有敌人时无法设立集结点。</Chinesesimp>
+                <German>Sammelpunkt nicht möglich, solange Feinde näher als %1 m sind.</German>
+                <Polish>Nie można wyznaczyć punktu zbiórki, gdy wrogowie są bliżej niż %1 m.</Polish>
+                <Czech>Nelze umístit shromažďovací bod, dokud jsou nepřátelé blíže než %1 m.</Czech>
+                <Russian>Невозможно установить точку сбора, пока враг ближе %1 м.</Russian>
+                <French>Impossible de placer un point de ralliement tant que des ennemis sont à moins de %1 m.</French>
+                <Chinese>%1 米內有敵人時無法設立集結點。</Chinese>
+                <Spanish>No puedes establecer un punto de reunión mientras haya enemigos a menos de %1 m.</Spanish>
+            </Key>
             <Key ID="STR_DUWS_T_veh_drop_nosel">
                 <German>Zuerst ein Fahrzeug auswählen.</German>
                 <Spanish>Selecciona antes un vehículo.</Spanish>

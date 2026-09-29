@@ -942,7 +942,7 @@ stands inside a ring that streams.
 
 The rally point is the one destination that can stand anywhere, so it is the one that can land inside
 a zone or a town radius. What bounds it is the rally's own clearance rule rather than a latch: the
-flag is deleted as soon as a hostile is within 200 m of it
+flag is refused, and later deleted, whenever a hostile is within 100 m of it
 ([`fnc_rally_init.sqf`](../../../src/duws/server/supports/fnc_rally_init.sqf)), so a rally cannot stand
 where a woken garrison already rendered, and a garrison that streams in behind a traveller does so from
 at least that far off. The latch is deliberately *not* re-armed on arrival: holding the garrison down

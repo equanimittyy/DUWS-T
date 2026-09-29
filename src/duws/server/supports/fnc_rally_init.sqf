@@ -2,8 +2,8 @@
 // reaches fnc_rally_place with remoteExec [..., 2].
 //
 // One rally point stands at a time. The comm item defers its consume to here, so a placement the
-// lockout refuses hands the item back instead of spending it. The placement is the whole run, so a
-// spent one releases the caller's next copy at once.
+// lockout or a nearby hostile refuses hands the item back instead of spending it. The placement is the
+// whole run, so a spent one releases the caller's next copy at once.
 //
 // The flag is a fast-travel destination, not a respawn position: the trip is taken deliberately from
 // a base, so the player arrives kitted and with their squad instead of naked off a death.
@@ -11,7 +11,7 @@ if (!isServer) exitWith {};
 
 #define RALLY_TRAVELS 10
 #define RALLY_LOCKOUT 600
-#define RALLY_CLEAR_RADIUS 200
+#define RALLY_CLEAR_RADIUS 100
 
 DUWS_rally_tent = objNull;
 DUWS_rally_travels = 0;
@@ -25,10 +25,22 @@ fnc_rally_remove = {
     deleteMarker "duws_rally";
 };
 
+fnc_rally_hostileNear = {
+    params ["_center"];
+    (_center nearEntities [["CAManBase", "LandVehicle"], RALLY_CLEAR_RADIUS])
+        findIf { alive _x && {((side _x) getFriend west) < 0.6} } >= 0
+};
+
 fnc_rally_place = {
     params ["_caller"];
     if (time < DUWS_rally_unlockAt) exitWith {
         [format [localize "STR_DUWS_T_RALLY_LOCKED", ceil ((DUWS_rally_unlockAt - time) / 60)]] remoteExec ["hint", _caller];
+        ["rally_point"] remoteExec ["fnc_support_comm_add", _caller];
+    };
+    // Far enough ahead that the tent's hull does not spawn on top of the player who placed it.
+    private _pos = _caller getRelPos [4, 0];
+    if ([_pos] call fnc_rally_hostileNear) exitWith {
+        [format [localize "STR_DUWS_T_RALLY_ENEMY_NEAR", RALLY_CLEAR_RADIUS]] remoteExec ["hint", _caller];
         ["rally_point"] remoteExec ["fnc_support_comm_add", _caller];
     };
     ["rally_point"] remoteExec ["fnc_support_consume", _caller];
@@ -36,8 +48,6 @@ fnc_rally_place = {
     DUWS_rally_unlockAt = time + RALLY_LOCKOUT;
     [] call fnc_rally_remove;
 
-    // Far enough ahead that the tent's hull does not spawn on top of the player who placed it.
-    private _pos = _caller getRelPos [4, 0];
     private _tent = createVehicle ["Land_TentA_F", _pos, [], 0, "CAN_COLLIDE"];
     _tent setDir getDir _caller;
     DUWS_rally_tent = _tent; publicVariable "DUWS_rally_tent";
@@ -58,8 +68,7 @@ fnc_rally_place = {
         params ["_tent", "_id"];
         waitUntil {
             sleep 5;
-            isNull _tent || {(_tent nearEntities [["CAManBase", "LandVehicle"], RALLY_CLEAR_RADIUS])
-                findIf { alive _x && {((side _x) getFriend west) < 0.6} } >= 0}
+            isNull _tent || {[_tent] call fnc_rally_hostileNear}
         };
         if (_id != DUWS_rally_id) exitWith {};
         // A live tent here means the loop broke on the enemy test, not on the rally already being gone.
