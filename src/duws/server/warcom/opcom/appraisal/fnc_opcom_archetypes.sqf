@@ -16,8 +16,7 @@ DUWS_opcom_archetype = "balanced";
 DUWS_opcom_archetypes = createHashMapFromArray [
     ["balanced", createHashMapFromArray [
         ["actionWeight", createHashMapFromArray [
-            // The score has no urgency term, so a QRF that only matches a buy's score would lose a sighting that moves on.
-            ["bank", 1], ["attack_assault", 1], ["attack_flank", 1], ["attack_qrf", 1.1], ["patrol", 1], ["probe", 1], ["garrison", 1],
+            ["bank", 1], ["attack_assault", 1], ["attack_flank", 1], ["attack_qrf", 1], ["patrol", 1], ["probe", 1], ["garrison", 1],
             ["rapport", 0.9], ["arty_saturate", 1], ["arty_creeping", 1], ["zone_reinforce", 1], ["zone_fortify", 1],
             ["town_reinforce", 0.9], ["town_fortify", 0.9],
             ["build", 1], ["radio_build", 1], ["op_build", 1], ["mortar_build", 1], ["arty_build", 1]
