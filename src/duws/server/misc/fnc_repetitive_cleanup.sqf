@@ -214,7 +214,7 @@ while {true} do {
                 // Checked last: it is the only test that walks a list, and by here everything
                 // else has already agreed the object should go. Intact vehicles only, so a
                 // player can park anything driveable at a base and keep it.
-                private _parked = alive _obj && {_obj isKindOf "AllVehicles"}
+                private _parked = alive _obj && {_obj isKindOf "AllVehicles"} && {!(_obj isKindOf "ParachuteBase")}
                     && {(_bases findIf {_obj distance _x < DUWS_base_keep_radius}) >= 0};
                 if (_parked) then {
                     _tracked = _tracked + 1;
