@@ -274,6 +274,41 @@ _destMarker setMarkerType "mil_end";
 _destMarker setMarkerColor "ColorEAST";
 _destMarker setMarkerText "Destination";
 
+// Allseer's running track: a symbol on each column from the start, then re-laid at a rolled cadence -- a
+// periodic fix, not continuous tracking, so the intercept stays the player's. _trackMarkers is index-aligned
+// with _groups, "" until placed; the peeled HVT car gets its own marker (below).
+private _trackMarkers = ["", "", ""];
+private _fixTracks = {
+    // cv_lead is unset until the drive starts, and a jammed hull's cv_lead may be a corpse (leadership migrates
+    // on death before the drive loop re-pins it), so fall back to the first live drivable hull. Marker commands
+    // are global from server.
+    {
+        private _grp = _x;
+        private _i   = _forEachIndex;
+        private _lead = _grp getVariable ["cv_lead", objNull];
+        if (isNull _lead || {!alive _lead}) then {
+            _lead = objNull;
+            { private _v = vehicle _x; if (_v != _x && {alive _v} && {canMove _v}) exitWith { _lead = _v } } forEach units _grp;
+        };
+        private _mn = _trackMarkers select _i;
+        if (isNull _lead) then {
+            if (_mn != "") then { deleteMarker _mn; _trackMarkers set [_i, ""] };
+        } else {
+            if (_mn == "") then {
+                _mn = format ["hvtconvoytrk_%1_%2", _taskId, _i];
+                deleteMarker _mn;   // a reused mission name can collide with a prior run's leftover
+                createMarker [_mn, getPosATL _lead];
+                _mn setMarkerType "o_motor_inf";
+                _mn setMarkerColor "ColorEAST";
+                _mn setMarkerText "Convoy";
+                _trackMarkers set [_i, _mn];
+            };
+            _mn setMarkerPos (getPosATL _lead);
+        };
+    } forEach _groups;
+};
+call _fixTracks;
+
 // Departure gate: columns hold until BLUFOR enters the search radius or the hold timer runs out, whichever
 // comes first, so they never sit forever waiting for the player. Then ordered out together via their own mid-route points, so the three take separate roads in.
 private _holdMax = linearConversion [_holdNearDist, _holdFarDist, _MissionPos distance2D _destPos, _holdNear, _holdFar, true];
@@ -315,10 +350,7 @@ private _split = false;
 private _viaMarkers = [];
 private _revealAt = time + (30 + round random 30);
 private _revealed = false;
-// Allseer's running track: at a rolled cadence, jumps a symbol onto each column -- a periodic fix, not
-// continuous tracking, so the intercept stays the player's. _trackMarkers is index-aligned with _groups, "" until placed; the peeled HVT car gets its own marker (below).
 private _nextReportAt  = time + (120 + round random 60);
-private _trackMarkers  = ["", "", ""];
 private _hvtMarker     = "";
 waitUntil {
     if (_outcome != "") exitWith { true };
@@ -339,33 +371,8 @@ waitUntil {
         } forEach _vias;
         [localize "STR_DUWS_T_ALLSEER", localize "STR_DUWS_T_hvtmidpoint"] remoteExec ["fnc_duws_dialogue", 0];
     };
-    // Symbol tracks the column's lead (cv_lead); a jammed hull's cv_lead may be a corpse (leadership migrates
-    // on death before the drive loop re-pins it), so fall back to the first live drivable hull. Marker commands are global from server.
     if (time > _nextReportAt) then {
-        {
-            private _grp = _x;
-            private _i   = _forEachIndex;
-            private _lead = _grp getVariable ["cv_lead", objNull];
-            if (isNull _lead || {!alive _lead}) then {
-                _lead = objNull;
-                { private _v = vehicle _x; if (_v != _x && {alive _v} && {canMove _v}) exitWith { _lead = _v } } forEach units _grp;
-            };
-            private _mn = _trackMarkers select _i;
-            if (isNull _lead) then {
-                if (_mn != "") then { deleteMarker _mn; _trackMarkers set [_i, ""] };
-            } else {
-                if (_mn == "") then {
-                    _mn = format ["hvtconvoytrk_%1_%2", _taskId, _i];
-                    deleteMarker _mn;   // a reused mission name can collide with a prior run's leftover
-                    createMarker [_mn, getPosATL _lead];
-                    _mn setMarkerType "o_motor_inf";
-                    _mn setMarkerColor "ColorEAST";
-                    _mn setMarkerText "Convoy";
-                    _trackMarkers set [_i, _mn];
-                };
-                _mn setMarkerPos (getPosATL _lead);
-            };
-        } forEach _groups;
+        call _fixTracks;
         if (_split && {_hvtMarker != ""} && {alive _car}) then { _hvtMarker setMarkerPos (getPosATL _car) };
         [localize "STR_DUWS_T_ALLSEER", localize "STR_DUWS_T_hvttrack"] remoteExec ["fnc_duws_dialogue", 0];
         _nextReportAt = time + (120 + round random 60);
