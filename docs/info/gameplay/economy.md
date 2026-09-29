@@ -245,6 +245,7 @@ a cheaper way to liquidate a slate, which inverts what the death penalty is for.
 | Rare-zombie kill (WBK) | `server/civilian/fnc_civ_handler_wbk.sqf:359` | +10, or +30 for the Goliath |
 | Support refund | `client/supports/fnc_supports_init.sqf` | the recorded charge in full; `support_death_refund` of the slate when its holder dies |
 | High Command aircraft recall | `server/supports/fnc_hcair_recall.sqf` | the recorded charge in full, CP and AP, when the caller leaves before the aircraft's station time ends |
+| Leaderless squadmate | `server/misc/fnc_repetitive_cleanup.sqf` | the CP charged to hire it (`DUWS_hireCP`: HQ-requested units and operatives deployed from Ready), when the cleanup sweep deletes it alive after its squad leader left with no human left in the squad; paradrop troopers, PMC hires and recruited civilians carry no price |
 
 **A zone's worth is one figure now, not two.** `_points` (the worth) rides the capture triggers —
 `fnc_createzone.sqf:280` → `fnc_captured.sqf` → `fnc_opfor_cap.sqf` → `fnc_blufor_cap.sqf` — as

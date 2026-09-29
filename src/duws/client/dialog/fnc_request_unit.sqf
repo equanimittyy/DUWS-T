@@ -15,11 +15,12 @@ _unitType = (["UNIT"] call fnc_faction_rqst_list) param [_index - 2, []];
 if (_unitType isEqualTo []) exitWith {hint localize "STR_DUWS_T_9607znvh"};
 
 if !(["CP", _unitType select 2] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_e95mc4lv"};
+_paid = duws_last_charge;
 
 hint format [localize "STR_DUWS_T_PURCHASED_UNIT", [configFile >> "CfgVehicles" >> (_unitType select 0)] call BIS_fnc_displayName];
 ctrlSetText [1000, format["%1",commandpointsblu1]];
 _group = group player ;
-(_unitType select 0) createUnit [_spawnpos, _group, "if (player_fatigue == 0) then {this enablefatigue false};", _skill, "private"];
+(_unitType select 0) createUnit [_spawnpos, _group, format ["this setVariable ['DUWS_hireCP', %1, true]; if (player_fatigue == 0) then {this enablefatigue false};", _paid], _skill, "private"];
 {
 	_x allowDamage false;
 } forEach (units _group);

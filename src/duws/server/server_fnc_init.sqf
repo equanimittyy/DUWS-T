@@ -596,6 +596,7 @@ fnc_hirePMC = compile preprocessFileLineNumbers "duws\server\misc\fnc_hirePMC.sq
 publicVariable "fnc_hirePMC";
 // Not broadcast: server-only, so an accidental client call fails loud.
 fnc_HCsquad_spawn = compile preprocessFileLineNumbers "duws\server\misc\fnc_HCsquad_spawn.sqf";
+fnc_squad_leaderLeft = compile preprocessFileLineNumbers "duws\server\misc\fnc_squad_leaderLeft.sqf";
 
 // =========================================================================================================
 // server/missions

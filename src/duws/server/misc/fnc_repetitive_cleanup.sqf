@@ -258,8 +258,11 @@ while {true} do {
                 && {(units group _unit) findIf {isPlayer _x} < 0}
                 && {!(_unit in _rides)}
                 && {(crew _unit) findIf {alive _x && {_x call _engaged}} < 0}) then {
-                if (_unit isKindOf "CAManBase") then { deleteVehicle _unit }
-                    else { deleteVehicleCrew _unit; deleteVehicle _unit };
+                if (_unit isKindOf "CAManBase") then {
+                    private _refund = _unit getVariable ["DUWS_hireCP", 0];
+                    if (_refund > 0) then { [_refund, "leaderless squadmate"] call fnc_cp_adjust };
+                    deleteVehicle _unit
+                } else { deleteVehicleCrew _unit; deleteVehicle _unit };
                 _binned = _binned + 1;
             } else {
                 _tracked = _tracked + 1;

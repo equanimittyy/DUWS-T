@@ -137,7 +137,7 @@ problem. It mostly is not — locality has to be judged per site:
 |---|---|---|
 | `server/dialog/fnc_MHQ_deploy.sqf` | server, via target 2 | correct |
 | `client/dialog/fnc_request_squad.sqf` High Command path | server, `server/misc/fnc_HCsquad_spawn.sqf` | correct; campaign assets must outlive one player's session |
-| `client/dialog/fnc_request_unit.sqf`, `fnc_request_unit_fob.sqf` | client, `createUnit` into `group player` | correct by design — a player's AI subordinates belong on the commanding machine |
+| `client/dialog/fnc_request_unit.sqf` | client, `createUnit` into `group player` | correct by design — a player's AI subordinates belong on the commanding machine |
 | `client/operative/fnc_operator_recruit.sqf` | client, then `joinSilent (group player)` | same |
 | `client/dialog/fnc_request_vehicle.sqf` | server, `fnc_depot_carry_spawn` (`server/supports/fnc_garage_init.sqf`) via target 2 | correct |
 | `server/init_hq/fnc_fortifyFOB.sqf`, `fnc_guardsFOB.sqf` | server, on build and on rebuild alike | correct |
@@ -145,6 +145,12 @@ problem. It mostly is not — locality has to be judged per site:
 The distinction that matters: a group the player *commands* belongs on the commanding machine, because
 that is where orders originate. A group the campaign *owns* belongs on the server, because it must survive
 that player disconnecting.
+
+A commanded squad does not pass to the campaign when its leader leaves. A human who is still in the squad
+takes command of its AI (`server/misc/fnc_squad_leaderLeft.sqf`, from the `HandleDisconnect` handler in
+`server/server_init.sqf`). If no human is left in the squad, the AI get the `DUWS_binMe` flag, and the
+cleanup sweep refunds the hire price of each one that is still alive when it deletes it. A mission escort
+gets no flag, because its mission reads a deleted escort as a dead one.
 
 FOB defences are campaign property by that test, so both spawn functions are server-only. The one redeploy
 scroll action still runs on the acting player, but it keeps only the sound and an advisory affordability

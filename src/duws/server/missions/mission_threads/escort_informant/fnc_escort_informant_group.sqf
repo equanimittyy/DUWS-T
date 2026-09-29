@@ -8,6 +8,7 @@ if (isNull _inf || { !alive _inf } || { isNull _caller }) exitWith {};
 
 if (_join) then {
     [_inf] joinSilent (group _caller);
+    _inf setVariable ["DUWS_escort", true];
     _inf enableAI "MOVE";
     _inf setUnitPos "AUTO";
 } else {

@@ -370,6 +370,16 @@ if (isServer) then {
         } forEach allGroups;
     }];
 
+    // PlayerDisconnected carries no unit, and the leaver's group is needed to find their squad.
+    addMissionEventHandler ["HandleDisconnect", {
+        params ["_unit"];
+        private _group = group _unit;
+        if (leader _group isEqualTo _unit && {(units _group - [_unit]) findIf { !isPlayer _x } >= 0}) then {
+            [_group, _unit] spawn fnc_squad_leaderLeft;
+        };
+        false
+    }];
+
     addMissionEventHandler ["Ended", { ["mission end"] call DUWS_fnc_campaignSave }];
     addMissionEventHandler ["MPEnded", { ["mission end"] call DUWS_fnc_campaignSave }];
 

@@ -18,6 +18,7 @@ _selected_soldier_class = _selected_soldier select 10;
 // Re-deploying a healed operative is free, so only "Ready" costs CP. The guard must stay at top
 // level: nested in a switch case, exitWith leaves only the case and the operative deploys unpaid.
 if (_selected_soldier_status == "Ready" && {!(["CP", 8] call fnc_pool_spend)}) exitWith {hint localize "STR_DUWS_T_e95mc4lv"};
+_paid = [0, duws_last_charge] select (_selected_soldier_status == "Ready");
 
 // The operative menu opens only from the request menu, so its context names the base.
 // respawn_west stands at the HQ rest tent (fnc_BluHQinit).
@@ -32,6 +33,7 @@ if (!ais_ace_shutDown && {(["Revive", 1] call BIS_fnc_getParamValue) != 0}) then
 };
 
 addswitchableUnit _soldier;
+_soldier setVariable ["DUWS_hireCP", _paid, true];
 
 if (player_fatigue == 0) then {_soldier enablefatigue false;};
 
