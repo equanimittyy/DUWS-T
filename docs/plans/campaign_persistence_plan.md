@@ -6,7 +6,7 @@ the **existing** builders rather than through a second construction path.
 
 Live units are not persisted. Zones, the HQ and FOBs are rebuilt and re-garrisoned from scratch;
 what carries over is campaign state — pools, zone ownership, placement, reputation, unlocks, and the
-vehicles the team put in the garage.
+vehicles the team garaged or parked at a base.
 
 **Shipped.** The store, the snapshot, the fork screen, the restore hooks, the four save triggers, the
 idle gate and the reconciliation pass are built. The code under `src/duws/server/persistence/` is the
@@ -771,7 +771,7 @@ classes alone.
 so a campaign reloaded with it flipped either finds its magazine counts meaningless or starts counting
 rounds it never counted. It is in the settings group for the reason the mode is.
 
-## Vehicles: the garage
+## Vehicles: the garage and the bases
 
 Vehicles persist because the garage already turns them into data. `DUWS_garage_stored` is an array of
 specs written by `fnc_garage_store` and read back by the depot's retrieve path
@@ -786,12 +786,28 @@ stored vehicle is not an object until a player retrieves it.
 | Garage | outcome | `DUWS_garage_stored`: per vehicle its class, textures, pylon loadout, per-hitpoint and overall damage, fuel, the four cargo lists and one ammo fraction |
 | MHQ | outcome | the designated vehicle's spec, whether it was deployed, and where |
 | Builder | outcome | the captured builder vehicle's spec and where it stands |
+| Parked | outcome | per vehicle inside a base's keep ring: its spec, ATL position and direction |
 
-**A vehicle parked in the world is not saved; a garaged one is.** That is the trade, and it is the
-right one. The capture and apply pair is already written and is exercised every time a player uses the
-depot, and the garage's own capacity ladder bounds it, so persistence needs no radius constant, no
-per-anchor cap, no cull, and no filter to keep a FOB's turret ring out of a collection sweep. What it
-costs is a habit: a player who wants a vehicle to survive a restart garages it first.
+**A vehicle parked at a base is saved; one elsewhere in the world is not.** The base is the ring the
+cleanup sweep spares: `DUWS_base_keep_radius` around the HQ, each FOB and the MHQ, tested by
+`fnc_in_base_keep`. A vehicle that the sweep keeps for the rest of the session therefore also survives
+a restart. `DUWS_fnc_campaignParked` reads each vehicle to a spec with `DUWS_fnc_vehSpecCapture`, and
+`DUWS_fnc_restoreBases` spawns the vehicles after the builds. The garage's capacity ladder does not
+bound the vehicles that survive a restart. It bounds only the vehicles that a player can store out of
+reach of an attack on the base.
+
+A vehicle inside the ring is not saved in these cases:
+
+| Vehicle | Reason |
+|---|---|
+| The MHQ, or the captured builder vehicle | Each has its own key |
+| A static weapon | A base's statics are builds, which have their own keys, or HQ guns, which the HQ rebuilds |
+| A parachute | It is litter |
+| A vehicle with the `persistent` flag | It belongs to a composition or to a live mission |
+| A vehicle with `DUWS_binMe`, or with a `DUWS_missionOwner` token | Its teardown deletes it |
+| A town's parked car that is still on the town's crowd roster | The town streams it back, so a saved copy adds one car at each load |
+| An attached vehicle, a vehicle-in-vehicle cargo, or a vehicle 1 m or more above the surface | At its saved position, it would spawn inside its carrier or fall |
+| A vehicle with a living AI crew member outside the players' groups | It is an enemy, a civilian, a High Command squad or a UAV, and a restore brings back no crew |
 
 **The garage's capacity is a permanent support, so the caps restore with the unlocks.**
 `DUWS_fnc_garageCaps` reads the highest owned level's row off `DUWS_garage_tiers`, and ownership is a
@@ -1053,8 +1069,9 @@ garrisons and composition props both spawn and despawn on player distance
 player approaches — the same code path a fresh campaign uses.
 
 Player-scoped state goes with them: loadouts, per-player cooldowns, any per-player record of what a
-player bought, and an unconverted kill tally. So does a vehicle left parked in the world rather than
-garaged ([§Vehicles](#vehicles-the-garage)). The snapshot is keyed to no player at all.
+player bought, and an unconverted kill tally. So does a vehicle left outside a base rather than parked
+at one or garaged ([§Vehicles](#vehicles-the-garage-and-the-bases)). The snapshot is keyed to no player
+at all.
 
 Session-scoped locks go with them and must come back clear: the per-support fire-mission locks, the
 per-FOB rebuild busy flags, `Mission_available`, and the JIP queue entries. A lock restored as held
@@ -1108,9 +1125,9 @@ is already the price tables the economies buy from, so this is a walk and a sum,
 
 **What the pass refunds.** A recruit in a player's squad or in a player's High Command group, at its
 request price scaled by health, and an OPCOM build still siting, at the refund its delivery carries.
-An OPCOM tasking needs no refund, because it restores as data. A vehicle left parked gets none: the
-garage is how a vehicle survives a restart, and a refund for any vehicle in the world would pay for
-captured ones.
+An OPCOM tasking needs no refund, because it restores as data. A vehicle gets none: parking it at a
+base or garaging it is how a vehicle survives a restart, and a refund for any vehicle in the world
+would pay for captured ones.
 
 **The refund lands in the snapshot's pools, never in the live ones.** The pass runs on a repeating
 timer for the life of the campaign, so a refund applied through `fnc_ap_adjust` pays for the same
