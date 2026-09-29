@@ -224,7 +224,8 @@ so it moves no faster than a truck delivers.
   the first sighting of a group with a unit on the HQ's infantry roster flips the flag for good, checked in
   `fnc_opcom_belief_upsert`. Until the first capture or that reveal, exposure sits at its floor everywhere and
   OPCOM defends evenly. A FOB counts toward exposure from the moment it stands. It is found the same way, by a
-  sighting of its own garrison, into `DUWS_opcom_fobsKnown`, and only a found FOB is an attack target.
+  sighting of its own garrison, into `DUWS_opcom_fobsKnown`, and only a found FOB is an attack target. A found base's
+  map marker text gains " (discovered)" (`fnc_baseMarkDiscovered`), and a load applies it again from the saved flags.
 - **Gain** (0–1) is the share of the job a partial action finishes: the force a purchase adds ÷ the force the
   holding fields at full strength **on its own current tier**, or 3/10 for Rapport, whose −3 step is three tenths
   of a flip. Measured against the top tier instead, a small zone's refill read as a few percent of a zone it will
