@@ -56,7 +56,7 @@ DUWS_opcom_speed = createHashMapFromArray [
 
 // Streaming reach in cells (Chebyshev): de-virt within K of a player. Wider for faster types so a spawn beats contact.
 DUWS_opcom_streamK = createHashMapFromArray [
-    ["inf", 1], ["wheeled", 2], ["tracked", 2], ["rotary", 3], ["fixed", 4], ["boat", 2]
+    ["inf", 2], ["wheeled", 2], ["tracked", 2], ["rotary", 3], ["fixed", 4], ["boat", 2]
 ];
 
 DUWS_opcom_moveWater = createHashMapFromArray [
