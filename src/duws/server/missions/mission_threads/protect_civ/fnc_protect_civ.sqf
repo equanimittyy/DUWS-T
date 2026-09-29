@@ -196,7 +196,7 @@ private _leanDispatch = {
         uiSleep 1;
         !alive _truck || { !alive (driver _truck) } || { !canMove _truck }
         || { damage _truck > 0.8 } || { (_truck distance2D _debusPos) < 40 }
-        || { diag_tickTime - _rideStart > 180 }
+        || { diag_tickTime - _rideStart > DUWS_reserveMaxRide }
     };
     for "_i" from ((count (waypoints _drv)) - 1) to 0 step -1 do { deleteWaypoint [_drv, _i] };
     {
@@ -222,8 +222,16 @@ private _claim = compile format ["[_this, %1] call fnc_mission_claim", _token];
 // wave up on one anti-flank side; a defense wants surrounding, so each element comes from its own bearing.
 private _bearingPos = {
     params ["_center"];
-    private _raw = _center getPos [RADIUS + DUWS_zoneReserveSpawnDist, random 360];
-    private _safe = [_raw, 200, 0, 8, 0.5] call fnc_safe_pos;
+    private _dist = RADIUS + DUWS_zoneReserveSpawnRing;
+    private _start = random 360;
+    private _bestDir = _start;
+    private _bestReach = -1;
+    {
+        private _reach = [_center, _dist, _start + _x] call DUWS_fnc_reserveLandReach;
+        if (_reach > _bestReach) then { _bestReach = _reach; _bestDir = _start + _x };
+        if (_reach >= _dist) exitWith {};
+    } forEach [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330];
+    private _safe = [_center getPos [_bestReach, _bestDir], 200, 0, 8, 0.5] call fnc_safe_pos;
     [_safe] call DUWS_fnc_reserveRoadSnap
 };
 

@@ -145,7 +145,7 @@ an upgrade starts every garrison fresh.
 ## Recording a loss
 
 `DUWS_fnc_garrisonReserveWatch {key, grps}`
-(`src/duws/server/init_zones/fnc_garrison_reserve.sqf:235`) tags each unit with its group's source
+(`src/duws/server/init_zones/fnc_garrison_reserve.sqf:234`) tags each unit with its group's source
 token — stamped on the group at raise by `DUWS_fnc_zoneSpawnOne`
 (`src/duws/server/init_zones/fnc_zone_spawn_sizes.sqf:259`) — and hangs a `Killed` handler on it.
 The handler checks that the whole group is down (`{alive _x} count units (group _unit) == 0`)
@@ -155,7 +155,7 @@ handler also fires the event-refill trigger (below).
 
 A zone or town raise hangs the watch only after it places every group, so a group that dies during
 the raise has no handler to record it. `DUWS_fnc_garrisonRefundUnplaced {key, tokens, grps}`
-(`src/duws/server/init_zones/fnc_garrison_reserve.sqf:260`) runs between the raise and the watch. It
+(`src/duws/server/init_zones/fnc_garrison_reserve.sqf:259`) runs between the raise and the watch. It
 returns the token of each group with no living man, and of each token that raised no group, to the
 pool, and the refill pass fields it again. Such a death comes from the placement (for example, a
 vehicle that spawns on a slope), not from a fight, so it does not cost the garrison a token. Without
@@ -191,7 +191,7 @@ the player's own squads and recruits included.
 
 ## The refill pass
 
-`DUWS_fnc_garrisonReservePass` (`src/duws/server/init_zones/fnc_garrison_reserve.sqf:575`) walks
+`DUWS_fnc_garrisonReservePass` (`src/duws/server/init_zones/fnc_garrison_reserve.sqf:574`) walks
 every site on `DUWS_garrisonSites` that is held and has a non-empty pool — with no BLUFOR-presence
 gate, the same as the event trigger below, so a site refills whether or not it is being fought;
 sorts the candidates by player count present, most-crowded first; and spawns

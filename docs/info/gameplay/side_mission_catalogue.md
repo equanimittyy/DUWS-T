@@ -312,8 +312,8 @@ value.
 player reaches the informant, fortifies the building from a limited R3F supply crate through a fixed
 prep window (skippable via a confirmed action), then holds scaling OPFOR waves long enough for him to
 survive. Waves fill toward a budget that tracks BLUFOR headcount, on a deep dip or a 5-minute
-heartbeat -- infantry trucked to a debus short of the ring, up to rand(2-4) combat vehicles driving in
-from the far side. Leaving the ring empty of BLUFOR for 20 continuous seconds abandons him, counting
+heartbeat -- each element from its own bearing, 1 km beyond the ring (nearer only where every bearing
+meets the sea); infantry trucked to a debus short of the ring, up to rand(2-4) combat vehicles driving in. Leaving the ring empty of BLUFOR for 20 continuous seconds abandons him, counting
 as a kill. Prep starts on first player arrival (the deadline is only the never-engaged backstop). Win:
 informant alive when the defend window elapses, plus +3 REP to the nearest town. In play-testing; the
 thread (`fnc_protect_civ.sqf`) carries the tunables, and the AIS opt-out it needs is in

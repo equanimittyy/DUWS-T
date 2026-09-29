@@ -524,8 +524,8 @@ DUWS_zoneReinforceFrac = 0.5;
 // would drop reserves a kilometre out of the island and on top of the player in the base.
 DUWS_zoneReserveSpawnDist = 400;
 
-// How far beyond the zone radius a reserve wave stands up, in metres. Kept apart from the player floor
-// above so a spawn walked in off the sea may still stand inside this ring.
+// How far beyond the zone radius, or a Protect Informant hold ring, a reserve wave stands up, in metres.
+// Kept apart from the player floor above so a spawn walked in off the sea may still stand inside this ring.
 DUWS_zoneReserveSpawnRing = 1000;
 
 // How far to look for a road around a chosen far-side spawn point, in metres -- a reserve wave rides

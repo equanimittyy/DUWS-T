@@ -117,17 +117,9 @@ DUWS_fnc_garrisonReservePos = {
 
     private _dist = _radius + DUWS_zoneReserveSpawnRing;
 
-    // Zone centres are land, so the walk always ends ashore.
-    private _fnc_landReach = {
-        params ["_dir"];
-        private _reach = _dist;
-        while { _reach > 0 && {surfaceIsWater (_center getPos [_reach, _dir])} } do { _reach = (_reach - 25) max 0 };
-        _reach
-    };
-
     private _fnc_cand = {
         params ["_bearing"];
-        private _reach = [_antiDir + _bearing] call _fnc_landReach;
+        private _reach = [_center, _dist, _antiDir + _bearing] call DUWS_fnc_reserveLandReach;
         private _p = [_center getPos [_reach, _antiDir + _bearing], 200, 0, 8, 0.5, []] call fnc_safe_pos;
         if (_p isEqualTo []) exitWith { [] };
         // Snapped before the checks so they judge the point the wave actually spawns on: a road segment can
@@ -169,7 +161,7 @@ DUWS_fnc_garrisonReservePos = {
     if (_short isNotEqualTo []) exitWith { _short select 1 };
 
     // Never [], which the spawners read as "drop it in the objective band".
-    _center getPos [[_antiDir] call _fnc_landReach, _antiDir]
+    _center getPos [[_center, _dist, _antiDir] call DUWS_fnc_reserveLandReach, _antiDir]
 };
 
 // Reserve rides trucks, so a wave needs drivable ground. Sorted explicitly -- nearRoads' own order
@@ -179,6 +171,13 @@ DUWS_fnc_reserveRoadSnap = {
     private _roads = _pos nearRoads DUWS_zoneReserveRoadSearch;
     if (_roads isEqualTo []) exitWith { _pos };
     getPosATL (([_roads, [], { _pos distance2D _x }, "ASCEND"] call BIS_fnc_sortBy) select 0)
+};
+
+// A site centre is land, so the walk always ends ashore.
+DUWS_fnc_reserveLandReach = {
+    params ["_center", "_dist", "_dir"];
+    while { _dist > 0 && {surfaceIsWater (_center getPos [_dist, _dir])} } do { _dist = (_dist - 25) max 0 };
+    _dist
 };
 
 // Lead point is pushed _i gaps back along the outbound bearing so the tail runs away from the objective,
