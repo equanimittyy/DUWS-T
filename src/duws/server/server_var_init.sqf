@@ -784,8 +784,6 @@ OPCOM_AP_PER_KM = 0.5;
 OPCOM_AP_RAPPORT = 5;
 // The reputation a delivered Rapport takes off its town, of the 10 that flip it.
 OPCOM_RAPPORT_STEP = 3;
-// How long no Rapport sets off after one delivers, rolled between the two. Tune.
-OPCOM_RAPPORT_COOLDOWN = [60, 360];   // ticks; 5-30 min @ 5s tick
 // Asset hardpoints are flat-priced: what they are worth is reach, eyes or fire missions, not the force they field.
 OPCOM_AP_TOWER = 15;
 OPCOM_AP_OP = 8;
@@ -812,12 +810,18 @@ OPCOM_CAP_HP_PER_ZONE = 12;
 OPCOM_CAP_HP_TYPE_PER_ZONE = createHashMapFromArray [
     ["AT", 2], ["AA", 2], ["GMG", 1], ["OP", 2], ["MINEFIELD_AT", 1], ["MINEFIELD_AP", 2]
 ];
-// Supply trucks sit outside the unit cap: OPCOM_CAP_SUPPLY bounds them, and counting them would let a full
+// Supply trucks sit outside the unit cap: OPCOM_SUPPLY_CLASS bounds them, and counting them would let a full
 // roster stall every supply buy.
 OPCOM_CAP_UNITS_PER_ZONE = 8;
 OPCOM_CAP_GARRISON = 10;
-OPCOM_CAP_SUPPLY = 10;
-OPCOM_CAP_RAPPORT = 1;
+// One truck of a class drives at a time, and none of that class sets off for OPCOM_SUPPLY_COOLDOWN after one delivers,
+// rolled between the two. Keyed by errand, and by build type where the type overrides its errand's class. Tune.
+OPCOM_SUPPLY_CLASS = createHashMapFromArray [
+    ["reinforce", "reinforce"], ["fortify", "reinforce"], ["rapport", "rapport"],
+    ["build", "hardpoint"], ["mine", "hardpoint"],
+    ["RADIO", "asset"], ["OP", "asset"], ["MORTAR", "asset"], ["ARTY", "asset"]
+];
+OPCOM_SUPPLY_COOLDOWN = [60, 360];   // ticks; 5-30 min @ 5s tick
 // Fixed per type: a gun's true range is the faction gun's, known only at fire time.
 OPCOM_MORTAR_REACH = 4000;
 OPCOM_ARTY_REACH = 15000;

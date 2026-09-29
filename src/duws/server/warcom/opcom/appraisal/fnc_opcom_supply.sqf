@@ -19,11 +19,20 @@ DUWS_fnc_opcom_supplyCount = {
     { (_x getOrDefault ["errand", []]) isNotEqualTo [] && {(_x get "status") isNotEqualTo "dead"} } count DUWS_opcom_taskings
 };
 
-DUWS_fnc_opcom_supplyFull = { (call DUWS_fnc_opcom_supplyCount) >= OPCOM_CAP_SUPPLY };
+DUWS_fnc_opcom_supplyClass = {
+    params ["_kind", ["_type", ""]];
+    OPCOM_SUPPLY_CLASS getOrDefault [_type, OPCOM_SUPPLY_CLASS getOrDefault [_kind, ""]]
+};
 
-DUWS_fnc_opcom_rapportFull = {
-    ({ ((_x getOrDefault ["errand", []]) param [0, ""]) isEqualTo "rapport" && {(_x get "status") isNotEqualTo "dead"} }
-        count DUWS_opcom_taskings) >= OPCOM_CAP_RAPPORT
+// -> true if a truck may set off on a _kind errand carrying _type.
+DUWS_fnc_opcom_supplyOpen = {
+    params ["_kind", ["_type", ""]];
+    private _class = [_kind, _type] call DUWS_fnc_opcom_supplyClass;
+    DUWS_opcom_tick >= (DUWS_opcom_supplyReadyTick getOrDefault [_class, 0])
+        && {(DUWS_opcom_taskings findIf {
+            (_x getOrDefault ["errand", []]) params [["_k", ""], "", ["_spec", ""]];
+            ([_k, _spec] call DUWS_fnc_opcom_supplyClass) isEqualTo _class && {(_x get "status") isNotEqualTo "dead"}
+        }) < 0}
 };
 
 // One supply truck per town at a time, so a second never lands a buy on a garrison the first already filled.

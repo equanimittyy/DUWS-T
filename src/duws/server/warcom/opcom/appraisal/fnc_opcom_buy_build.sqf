@@ -30,7 +30,7 @@ DUWS_fnc_opcom_zoneBuildTargets = {
 
 DUWS_fnc_opcom_standaloneBuildTargets = {
     params ["_type"];
-    if !([_type] call DUWS_fnc_opcom_hpOpen) exitWith { [] };
+    if !([_type] call DUWS_fnc_opcom_hpOpen && {["build", _type] call DUWS_fnc_opcom_supplyOpen}) exitWith { [] };
     private _site = ["STANDALONE"] call DUWS_fnc_opcom_siteFor;
     if (_site isEqualTo []) exitWith { [] };
     _site params ["_at", "_v"];
@@ -41,7 +41,7 @@ DUWS_fnc_opcom_standaloneBuildTargets = {
 
 DUWS_fnc_opcom_assetTargets = {
     params ["_type"];
-    if !([_type] call DUWS_fnc_opcom_hpOpen) exitWith { [] };
+    if !([_type] call DUWS_fnc_opcom_hpOpen && {["build", _type] call DUWS_fnc_opcom_supplyOpen}) exitWith { [] };
     private _site = [_type] call DUWS_fnc_opcom_siteFor;
     if (_site isEqualTo []) exitWith { [] };
     _site params ["_at", "_v"];
@@ -55,7 +55,7 @@ DUWS_fnc_opcom_assetTargets = {
 DUWS_fnc_opcom_mineBuildTargets = {
     params ["_variant"];
     private _mixKey = format ["MINEFIELD_%1", _variant];
-    if !(["MINEFIELD", _mixKey] call DUWS_fnc_opcom_hpOpen) exitWith { [] };
+    if !(["MINEFIELD", _mixKey] call DUWS_fnc_opcom_hpOpen && {["mine"] call DUWS_fnc_opcom_supplyOpen}) exitWith { [] };
     private _site = ["MINE"] call DUWS_fnc_opcom_siteFor;
     if (_site isEqualTo []) exitWith { [] };
     _site params ["_at", "_v"];

@@ -78,9 +78,8 @@ DUWS_fnc_opcom_siteAll = {
     _computed
 };
 
-// -> [point, Value], or [] with no site or the supply cap full.
+// -> [point, Value], or [] with no site.
 DUWS_fnc_opcom_siteFor = {
     params ["_key"];
-    if (call DUWS_fnc_opcom_supplyFull) exitWith { [] };
     DUWS_opcom_sites getOrDefault [_key, []]
 };

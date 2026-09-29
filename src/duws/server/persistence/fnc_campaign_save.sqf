@@ -161,7 +161,7 @@ DUWS_fnc_campaignSnapshot = {
         ["taskings", call DUWS_fnc_campaignTaskings], ["taskSeq", missionNamespace getVariable ["DUWS_opcom_taskSeq", 0]],
         ["attacks", missionNamespace getVariable ["DUWS_opcom_attacks", []]], ["attackSeq", missionNamespace getVariable ["DUWS_opcom_attackSeq", 0]],
         ["attackReadyTick", missionNamespace getVariable ["DUWS_opcom_attackReadyTick", 0]],
-        ["rapportReadyTick", missionNamespace getVariable ["DUWS_opcom_rapportReadyTick", 0]],
+        ["supplyReadyTick", missionNamespace getVariable ["DUWS_opcom_supplyReadyTick", createHashMap]],
         ["tick", missionNamespace getVariable ["DUWS_opcom_tick", 0]], ["hqKnown", missionNamespace getVariable ["DUWS_opcom_hqKnown", false]],
         ["fobsKnown", missionNamespace getVariable ["DUWS_opcom_fobsKnown", []]],
         // Row for row with "fobs": a load renews the netId in a FOB's site key, so the restore re-keys by position.

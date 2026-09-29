@@ -96,15 +96,16 @@ DUWS_fnc_opcom_deliver = {
     params ["_t"];
     (_t get "errand") params [["_kind", ""], "_arg", ["_spec", ""], ["_refund", 0]];
     ["INFO", "OPCOM", format ["deliver: tasking %1 lands %2 at %3", _t get "id", _t get "errand", _t get "target"]] call fnc_log;
+    private _class = [_kind, _spec] call DUWS_fnc_opcom_supplyClass;
+    OPCOM_SUPPLY_COOLDOWN params ["_min", "_max"];
+    private _n = _min + floor random (_max - _min + 1);
+    DUWS_opcom_supplyReadyTick set [_class, DUWS_opcom_tick + _n];
+    ["INFO", "OPCOM", format ["deliver: no %1 truck for %2 ticks", _class, _n]] call fnc_log;
     switch (_kind) do {
         case "reinforce": { [_arg, "opcom_reinforce"] call fnc_town_garrison_reinforce };
         case "fortify": { [_arg, "opcom_fortify"] call fnc_town_garrison_fortify };
         case "rapport": {
             [_arg, -OPCOM_RAPPORT_STEP, "opcom_rapport", true] call fnc_town_rep_adjust;
-            OPCOM_RAPPORT_COOLDOWN params ["_min", "_max"];
-            private _n = _min + floor random (_max - _min + 1);
-            DUWS_opcom_rapportReadyTick = DUWS_opcom_tick + _n;
-            ["INFO", "OPCOM", format ["deliver: no Rapport for %1 ticks", _n]] call fnc_log;
             if ((missionNamespace getVariable ["civ_visible", []]) param [_arg, true]) then {
                 [localize "STR_DUWS_T_ALLSEER", format [localize "STR_DUWS_T_OPCOM_RAPPORT_DELIVERED", [_arg] call DUWS_fnc_opcom_townLabel]]
                     remoteExec ["fnc_duws_dialogue", 0];
