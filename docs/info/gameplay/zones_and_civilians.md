@@ -914,8 +914,8 @@ which on BLUFOR ground would leave an assault walking into an empty site and tak
 rendered. A site declaring `enemyAware` also wakes, while its ground is BLUFOR's, for an attacker inside
 the ring — including a virtual OPCOM one, which stands on no unit list and would otherwise be invisible
 to it (`fnc_site_hostileNear`, the one place that question is answered). That wake is also what renders
-the attacker: `fnc_opcom_task_step` renders a tasking within K of any live WEST group with a non-captive
-leader, so the garrison standing up is what brings the fight into the world.
+the attacker: `fnc_opcom_task_step` renders a tasking within K of the leader of any WEST group with a living,
+non-captive member, so the garrison standing up is what brings the fight into the world.
 
 The narrowing is the friendly half. On ground BLUFOR hold, presence counts **players only** — a garrison
 the player built is friendly AI standing inside its own ring, so the AI arm of `fnc_duws_bluforNear`
