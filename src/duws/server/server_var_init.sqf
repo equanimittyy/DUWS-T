@@ -1029,6 +1029,10 @@ DUWS_intel_contact_life = 600;
 // once from the actual zone count (fnc_WARCOM_init), so income grows as sqrt(zones) above the reference
 // size rather than linearly. 1 until WARCOM init sets it.
 DUWS_econ_throttle = 1;
+// The share of OPFOR's 30-minute payout (town and zone AP) that also climbs its tier; the rest is wallet only. OPFOR
+// opens on every zone, so with the whole payout on its tier it climbs from hour zero on ground it never fought for.
+// BLUFOR's zone trickle credits its tier in full, because it pays only for ground the player took.
+DUWS_opfor_payout_tier = 0.5;
 
 // OPCOM ticks per 1 AP of drip to OPFOR while it holds every zone, on top of the 30-minute payout. The payout
 // lands as one lump that the commander spends within a minute, so without a drip it can only bank or move free

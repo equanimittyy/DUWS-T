@@ -62,8 +62,9 @@ private _towns = [];
 // Every passive faucet is scaled by the same shared campaign-size throttle (DUWS_econ_throttle)
 // and rounded once, after scaling, so no fraction reaches a pool writer. Town income routes per
 // side (BLUFOR CP, OPFOR AP); the zone trickle pays both sides AP for the ground each holds, on
-// that one throttle. OPFOR carries no per-side income handicap -- it opens holding every zone, but
-// that head start is answered by the BLUFOR capture bounty (below), not by penalising its faucet.
+// that one throttle. OPFOR's wallet carries no per-side income handicap -- it opens holding every
+// zone, but that head start is answered on the tier, by the BLUFOR capture bounty and
+// DUWS_opfor_payout_tier, not by penalising its faucet.
 private _bluCP    = round (_bluTownWorth * DUWS_econ_throttle);
 private _opfTownAP = round (_opfTownWorth * DUWS_econ_throttle);
 private _bluZoneAP = round (zoneundercontrolblu * zone_ap_trickle * DUWS_econ_throttle);
@@ -76,12 +77,8 @@ WARCOM_opfor_lastIncome = _opfAP;
 // Called inline rather than remoteExec'd to self: this tick is server-side, and call lands the
 // credit this frame where remoteExec [...,2] queues it for the next.
 if (_bluCP > 0)     then { [_bluCP, "civ_town_income"] call fnc_cp_adjust };
-// The 4th arg is the tier-crediting portion, and each side credits the whole of what it earns:
-// BLUFOR its zone trickle, OPFOR all of town + zone. OPFOR's zone income does front-load
-// its tier from the ground it starts on -- the BLUFOR capture bounty (zone_first_capture_ap) is
-// what balances that, climbing the player's own tier as they take the same ground.
 if (_bluZoneAP > 0) then { ["BLU", _bluZoneAP, "zone_trickle", _bluZoneAP] call fnc_ap_adjust };
-if (_opfAP > 0)     then { ["OPF", _opfAP, "opfor_income", _opfAP] call fnc_ap_adjust };
+if (_opfAP > 0)     then { ["OPF", _opfAP, "opfor_income", round (_opfAP * DUWS_opfor_payout_tier)] call fnc_ap_adjust };
 
 // Pays and notifies each player its own kill award; deliberately absent from the territory
 // hint below. Naming attrition there would advertise kill farming as an income route.
