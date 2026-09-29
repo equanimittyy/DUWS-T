@@ -12,13 +12,13 @@ is what varies: a generic mission is *reach the marker and kill/destroy the thin
 different classnames and counts. A hand-made mission changes the verb — and the change lives in the
 scripts around the objective (siting, behaviour, win condition, teardown), not in a bigger garrison.
 
-Complexity is not the goal; a challenge is. The sniper hunt spawns two men and no vehicles, yet plays
+Complexity is not the goal; a challenge is. The sniper hunt spawns two to six men and no vehicles, yet plays
 nothing like the others: the problem is *finding* elite marksmen who are hidden, hard to spot, and
 quick to kill you. Small mission, real problem.
 
 | Mission | The problem it poses | The script that makes it | Thread |
 |---|---|---|---|
-| Hunt Sniper Team | find two hidden elite marksmen on open ground | elevation+LOS perch search, sub-skills forced to 1, prone overwatch that flushes on approach or hit | `mission_threads/target_sniper/` |
+| Hunt Sniper Team | find 1-3 hidden pairs of elite marksmen on open ground | elevation+LOS perch search, sub-skills forced to 1, prone overwatch that flushes on approach or hit | `mission_threads/target_sniper/` |
 | Eliminate High-Value Target | spot which of three armed convoys hides the target and stop it before it reaches a zone | three divergent road approaches, one unarmed car among armed escorts, race-to-zone monitor | `mission_threads/target_hvt/` |
 | Deny Enemy Armor | reach a broken-down MBT before its repair-crew convoy, or intercept on the road | inbound repair convoy, distance-scaled repair timer, tank left unclaimed as the player's prize | `mission_threads/deny_armor/` |
 | Destroy Vehicle Patrol | break a roving vehicle column that stays speed-limited until first blood | tier-rolled 3-vehicle road loop, LIMITED speed until a hit lifts it, tier-scaled reward | `mission_threads/target_armor/` |
