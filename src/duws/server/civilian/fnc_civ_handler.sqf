@@ -3,9 +3,10 @@
     Registers every town's civilian crowd as an occupant of its site and hands the clock to the
     shared poller. No params. Returns once the hooks are in place.
 
-    What is left here is the crowd's own three answers -- when it may exist, what it fills with, and
-    how it is collected. Everything else is the question every site asks, so the poll interval, the
-    two-sample confirm, the grace period and the presence test are fnc_site_poller's.
+    What is left here is the crowd's own four answers -- when it may exist, what it fills with, how
+    it follows the players, and how it is collected. Everything else is the question every site
+    asks, so the poll interval, the two-sample confirm, the grace period and the presence test are
+    fnc_site_poller's.
 
     RAVAGE and WBK keep the older trigger-driven handlers.
 */
@@ -51,7 +52,8 @@ missionNamespace setVariable ["CIV_KILLED_HANDLER", {
 // every other town. Nothing from this scope reaches it -- spawn breaks the scope chain -- so it
 // reads the town's own state back out of the mission namespace.
 private _fnc_fill = {
-    params ["_locIndex", "_centerPos", "_radius"];
+    params ["_locIndex", "_centerPos", "_radius", "_o"];
+    private _wake = _o get "wakes";
 
     // Surveyed once at campaign generation and kept for the rest of the mission: the terrain sweep
     // behind it is the heaviest engine call in the civilian system, too costly to repeat per town
@@ -97,6 +99,14 @@ private _fnc_fill = {
     if (duws_log_level >= 4) then {
         ["DEBUG", "CIV", format ["Town %1 filled with %2 of a target %3", _locIndex, count _groups, _target]] call fnc_log;
     };
+
+    // The wake count ends this loop when the town sleeps and wakes again between two passes, which
+    // the awake flag alone reads as the same visit.
+    while { true } do {
+        sleep (5 + random 25);
+        if (!(_o get "awake") || {(_o get "wakes") != _wake}) exitWith {};
+        [_locIndex, _centerPos, _radius] call fnc_civ_follow;
+    };
 };
 
 private _centres = _locations apply { getPos _x };
@@ -132,8 +142,9 @@ private _fnc_wake = {
     private _i = _o get "townIndex";
     missionNamespace setVariable [format ["civ_spawned_%1", _i], true];
     [_i] call fnc_civ_town_reveal;
+    _o set ["wakes", (_o getOrDefault ["wakes", 0]) + 1];
     private _site = [_key] call fnc_site_at;
-    [_i, _site get "pos", _site get "radius"] spawn (missionNamespace getVariable "DUWS_civ_fill");
+    [_i, _site get "pos", _site get "radius", _o] spawn (missionNamespace getVariable "DUWS_civ_fill");
 };
 
 // Reached through the mission namespace because the hook runs from the poller's scope, not this one.

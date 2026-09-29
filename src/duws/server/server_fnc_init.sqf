@@ -373,6 +373,7 @@ fnc_civ_spawnCar = compile preprocessFileLineNumbers "duws\server\civilian\fnc_c
 fnc_civ_loopRoute = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_loopRoute.sqf";
 fnc_civ_traffic = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_traffic.sqf";
 fnc_civ_recycle = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_recycle.sqf";
+fnc_civ_follow = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_follow.sqf";
 fnc_civ_pickHiddenRoad = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_pickHiddenRoad.sqf";
 // Only fnc_civ_request and fnc_civ_bribe_answer are reached from a client, but
 // the rest are broadcast too so a headless client running civilian logic resolves them.

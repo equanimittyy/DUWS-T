@@ -1030,21 +1030,29 @@ from and re-spawned them nearer. The ceiling was not one of those answers and st
 still run on all of it (`fnc_civ_handler_ravage.sqf`, `fnc_civ_handler_wbk.sqf`), which is why
 `fnc_civ_recycle.sqf` is still in the tree.
 
-### A crowd walks the roadside
+### A crowd follows the players
 
-Every civilian in a town walks, and none of them stands still (`server/civilian/fnc_civ_wp_Tomata.sqf`).
-The route starts at the nearest road within 100 m of the civilian and follows connected road segments
-for 75–225 m, then comes back. The walker keeps to one side of the direction of travel, so the outbound
-leg is on one side of the street and the return leg is on the other.
+Every civilian in a town walks a short circuit near the point where it spawned
+(`server/civilian/fnc_civ_wp_Tomata.sqf`): two or three points within 60 m, then back to the start.
+The waypoints have no timeout, because a pause at each point reads as a civilian who idles. The
+circuit is session state: a fill, a conversation and a panic calm-down each draw a new one.
 
-There is one waypoint per road segment, because the foot pathfinder takes the shortest line between two
-waypoints and sends a walker through yards and between houses. Each waypoint sits half the road's width
-from the centreline. A knee-height ray from the centreline pulls the waypoint in to 1 m short of a wall,
-fence or house. Bridges and points over water are left out.
+While a town is awake, its fill thread runs `server/civilian/fnc_civ_follow.sqf` every 5–30 s. The
+pass takes up to three of the civilians furthest from every player, deletes them and creates a new
+civilian near a random player in the town for each one. The first waypoint of a new civilian is
+5–15 m past that player on the line from the spawn point, so the walker crosses the player's path.
 
-The waypoints have no timeout, because a pause at each point reads as a civilian who idles. A civilian
-with no road in reach walks a short circuit on open ground instead. The route is session state: a fill,
-a conversation and a panic calm-down each draw a new one.
+| Rule | Value |
+|---|---|
+| Who draws the crowd | Players inside the town's radius |
+| Despawn | More than 50 m from every player, and out of the sight of every player within 600 m |
+| Spawn | 50–100 m from the chosen player, more than 50 m from every player, and out of the sight of every player within 600 m |
+| Never taken | A hostile, or a civilian that is stopped, panicked, arrested, surrendered or waiting on an answer |
+
+The sight test is `fnc_duws_posSeenBy`, the same line-of-sight test as the reserve wave. It ignores
+which way the player faces, because a player turns faster than a pass runs. The pass finds the spawn
+point before it deletes anyone, so a town with no hidden ground near the player keeps its crowd. A new
+walker starts outside the 50 m line, so a later pass can take it again before it reaches the player.
 
 ### Ordering
 
