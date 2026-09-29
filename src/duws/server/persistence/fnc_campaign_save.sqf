@@ -62,12 +62,14 @@ DUWS_fnc_campaignCargo = {
 
 // What the cleanup sweep keeps at a base (fnc_in_base_keep), less what something else owns or rebuilds: the MHQ and
 // the builder have their own keys, a persistent object belongs to its composition or mission, a flagged or
-// mission-owned one is deleted by its teardown, and a town's parked car streams back with its town.
+// mission-owned one is deleted by its teardown, a town's parked car streams back with its town, and a task force's
+// vehicle restores with its task force, crewed or not.
 DUWS_fnc_campaignParked = {
     private _mhq = missionNamespace getVariable ["MHQ1", objNull];
+    private _tfHulls = flatten ((missionNamespace getVariable ["DUWS_taskforces", []]) apply { (units (_x select 0)) apply { assignedVehicle _x } });
     (vehicles select {
         alive _x && {_x isKindOf "AllVehicles"} && {!(_x isKindOf "StaticWeapon")} && {!(_x isKindOf "ParachuteBase")}
-        && {_x != _mhq} && {!(_x getVariable ["persistent", false])} && {!(_x getVariable ["DUWS_binMe", false])}
+        && {_x != _mhq} && {!(_x in _tfHulls)} && {!(_x getVariable ["persistent", false])} && {!(_x getVariable ["DUWS_binMe", false])}
         && {(_x getVariable ["DUWS_missionOwner", -1]) < 0}
         && {!(_x in (missionNamespace getVariable [[_x getVariable ["DUWS_civCarKey", ""], "crowd"] call fnc_site_roster_var, []]))}
         // Restored at this spot, a loaded, towed or airborne vehicle would spawn inside its carrier or fall.
@@ -76,6 +78,26 @@ DUWS_fnc_campaignParked = {
         && {((crew _x) findIf { alive _x && {((units group _x) findIf { isPlayer _x }) < 0} }) < 0}
         && {[getPosATL _x] call fnc_in_base_keep}
     }) apply { [[_x] call DUWS_fnc_vehSpecCapture, getPosATL _x, getDir _x] }
+};
+
+// Men and hulls rather than the group, which does not outlive the session. No objective: the tick derives it again.
+DUWS_fnc_campaignTaskforces = {
+    ((missionNamespace getVariable ["DUWS_taskforces", []]) select { !isNull (_x select 0) }) apply {
+        _x params ["_group", "", "_tfName"];
+        private _men = (units _group) select { alive _x };
+        private _hulls = [];
+        {
+            { if (alive _x && {!(_x isKindOf "CAManBase")}) then { _hulls pushBackUnique _x } } forEach [assignedVehicle _x, vehicle _x];
+        } forEach _men;
+        [_tfName, _hulls apply { [[_x] call DUWS_fnc_vehSpecCapture, getPosATL _x, getDir _x] }, _men apply {
+            private _man = _x;
+            private _veh = vehicle _man;
+            private _seat = if (_veh isEqualTo _man) then { [] } else {
+                (((fullCrew _veh) select { (_x select 0) isEqualTo _man }) apply { [_hulls find _veh, _x select 1, _x select 2, _x select 3] }) param [0, []]
+            };
+            [typeOf _man, getUnitLoadout _man, damage _man, skill _man, getPosASL _man, _seat]
+        }]
+    }
 };
 
 DUWS_fnc_campaignSnapshot = {
@@ -171,6 +193,7 @@ DUWS_fnc_campaignSnapshot = {
 
     _s set ["garage", DUWS_garage_stored];
     _s set ["parked", call DUWS_fnc_campaignParked];
+    _s set ["taskforces", call DUWS_fnc_campaignTaskforces];
     // Null once a game master deletes it; a load then keeps the opening stock.
     if (!isNull DUWS_hqCrate) then { _s set ["hqCrate", [DUWS_hqCrate] call DUWS_fnc_campaignCargo] };
     private _lockout = ((missionNamespace getVariable ["MHQ_lockout_until", 0]) - time) max 0;
@@ -246,9 +269,9 @@ DUWS_fnc_campaignSave = {
         _p set [2, (_p select 2) + _opfAp];
         private _json = toJSON _s;
         _done = [DUWS_campaignID, _json, [_s] call DUWS_fnc_campaignHeader] call DUWS_fnc_saveCommit;
-        ["INFO", "SAVE", format ["%1 save of campaign %2: %3 zones, %4 held, %5 garaged, %6 parked, %7 taskings, %8 bytes, refunds %9 CP %10 AP %11 OPF AP",
+        ["INFO", "SAVE", format ["%1 save of campaign %2: %3 zones, %4 held, %5 garaged, %6 parked, %7 taskings, %8 task forces, %9 bytes, refunds %10 CP %11 AP %12 OPF AP",
             _reason, DUWS_campaignID, count (_s get "zones"), count (_s get "held"), count (_s get "garage"), count (_s get "parked"),
-            count ((_s get "opcom") get "taskings"), count _json, _cp, _bluAp, _opfAp]] call fnc_log;
+            count ((_s get "opcom") get "taskings"), count (_s get "taskforces"), count _json, _cp, _bluAp, _opfAp]] call fnc_log;
     };
     if (DUWS_autosaveInterval > 0) then { DUWS_saveDue = time + DUWS_autosaveInterval };
     _done

@@ -490,7 +490,40 @@ DUWS_fnc_restoreBases = {
         };
     } forEach (DUWS_restore getOrDefault ["builds", []]);
     { _x call _fnc_spawnSpec } forEach (DUWS_restore getOrDefault ["parked", []]);
+    [_fnc_spawnSpec] call DUWS_fnc_restoreTaskforces;
     ["bases"] call DUWS_fnc_restoreStepDone;
+};
+
+// A dropped man is logged, not counted: the load hint's unit count is of enemy units.
+DUWS_fnc_restoreTaskforces = {
+    params ["_fnc_spawnSpec"];
+    {
+        _x params ["_tfName", "_hulls", "_men"];
+        private _vehs = _hulls apply { _x call _fnc_spawnSpec };
+        private _group = createGroup [west, true];
+        {
+            _x params ["_class", "_loadout", "_damage", "_skill", "_pos", "_seat"];
+            if (isClass (configFile >> "CfgVehicles" >> _class)) then {
+                private _man = _group createUnit [_class, ASLToAGL _pos, [], 0, "CAN_COLLIDE"];
+                _man setUnitLoadout _loadout;
+                _man setDamage _damage;
+                _man setSkill _skill;
+                _seat params [["_hull", -1], ["_role", ""], ["_cargo", -1], ["_turret", []]];
+                private _veh = if (_hull < 0) then { objNull } else { _vehs select _hull };
+                if (!isNull _veh) then {
+                    switch (toLower _role) do {
+                        case "driver": { _man moveInDriver _veh };
+                        case "cargo": { _man moveInCargo [_veh, _cargo] };
+                        default { _man moveInTurret [_veh, _turret] };
+                    };
+                };
+            } else {
+                ["WARN", "SAVE", format ["task force %1: %2 is not loaded, dropped", _tfName, _class]] call fnc_log;
+            };
+        } forEach _men;
+        { if (!isNull _x) then { _group addVehicle _x } } forEach _vehs;
+        if (units _group isEqualTo []) then { deleteGroup _group } else { [_group, _tfName] call fnc_taskforce_create };
+    } forEach (DUWS_restore getOrDefault ["taskforces", []]);
 };
 
 // After fnc_WARCOM_init's seed, which would derive the tiers from a wallet since spent down.

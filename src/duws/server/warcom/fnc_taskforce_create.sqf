@@ -1,6 +1,7 @@
-// Locality: server only. Callers: client/dialog/fnc_giveHC.sqf (remoteExec target 2), the PlayerDisconnected handler in server/server_init.sqf.
+// Locality: server only. Callers: client/dialog/fnc_giveHC.sqf (remoteExec target 2), the PlayerDisconnected handler in
+// server/server_init.sqf, and DUWS_fnc_restoreTaskforces with the saved name.
 if (!isServer) exitWith {};
-params ["_group"];
+params ["_group", ["_tfName", ""]];
 if (isNull _group) exitWith {};
 _group setVariable ["DUWS_hcCommander", nil];
 
@@ -8,7 +9,7 @@ _group setVariable ["DUWS_hcCommander", nil];
 if (!local _group) then { _group setGroupOwner 2; };
 
 private _oldName = groupId _group;
-private _tfName = [1] call fnc_random_name;
+if (_tfName isEqualTo "") then { _tfName = [1] call fnc_random_name };
 private _label = format ["TF %1", _tfName];
 _group setGroupIdGlobal [_label];
 
