@@ -733,16 +733,18 @@ alone at `OPCOM_MUSTER_EXPIRY`.
   any odds. Past that, a join comes only while the muster is short of the ideal bar, and goes to the bucket with the
   least force, so the frontage and the sides fill evenly. The ideal bar, not the bucket count, is what sizes an
   attack.
-- **One pick sends a package.** An open or a join sends the best sources in score order until the bound force meets
-  the ideal bar, the attack holds `OPCOM_ATTACK_UNITS`, or the wallet runs out (`DUWS_fnc_opcom_attackPackage`,
+- **One pick sends a package.** An open or a join sends the best sources in score order until the bound force meets the
+  ideal bar, the attack holds `OPCOM_ATTACK_UNITS`, or the wallet runs out (`DUWS_fnc_opcom_attackPackage`,
   `appraisal/fnc_opcom_sources.sqf`). One unit per pick left a muster to trickle in over picks that the rest of the
-  action list competes for, and a QRF's window closed first. A hire row is raised again while the wallet and the unit
-  cap allow, and each hire the package takes counts toward the `recruitMix` roster before the next source is scored
-  (`DUWS_fnc_opcom_packageMix`); a free unit serves once, as a member or as another member's lift. Each unit stages
-  at the bucket `DUWS_fnc_opcom_joinBucket` would name for it. The package scores as one candidate: its Value is its
-  weakest member's, since the attack goes only once its last unit is in, its `P(win)` is the whole package's, and its
-  price and Cost are the members' sums. A member that cannot be raised or routed is refunded before the pick charges
-  the rest. With nothing affordable the best source is offered alone, so the pick can save toward it.
+  action list competes for, and a QRF's window closed first. A `transportable` source ranks with the lift
+  `DUWS_fnc_opcom_liftFor` gives it to the target: the lift's saving on its Value and the lift's Cost on its Cost. A
+  hire row is raised again while the wallet and the unit cap allow, and each hire the package takes counts toward the
+  `recruitMix` roster before the next source is scored (`DUWS_fnc_opcom_packageMix`); a free unit serves once, as a
+  member or as another member's lift. Each unit stages at the bucket `DUWS_fnc_opcom_joinBucket` would name for it. The
+  package scores as one candidate: its Value is its weakest member's, since the attack goes only once its last unit is
+  in, its `P(win)` is the whole package's, and its price and Cost are the members' sums. A member that cannot be raised
+  or routed is refunded before the pick charges the rest. With nothing affordable the best source is offered alone, so
+  the pick can save toward it.
 - **An assault or flank wants vehicles.** In its package a vehicle's Value is scaled by `OPCOM_ATTACK_VEHICLE_BOOST`,
   indexed by the vehicles the attack already binds plus those the package has taken: 2 for the first, then 1.75,
   1.5 and 1.25, and 1 from the fifth on. The boost reorders the package, so a vehicle can join ahead of a rifle
