@@ -681,7 +681,7 @@ falls below `OPCOM_ATTACK_BREAK` → **fail** (every survivor to `guard` where i
 new attack); else test the current state's transition, and each side bucket's wait and close. A unit a hand order
 takes over from the debug page counts as lost. **One assault or flank runs at a time.** The attack sweep offers
 no new one while one is in buildup or execution. When one ends, however it ends, a global cooldown rolled from
-`OPCOM_ATTACK_COOLDOWN` (240–720 ticks, 20–60 min) starts, and the sweep offers no new one until the cooldown ends
+`OPCOM_ATTACK_COOLDOWN` (360–720 ticks, 30–60 min) starts, and the sweep offers no new one until the cooldown ends
 (`DUWS_opcom_attackReadyTick`, `DUWS_fnc_opcom_attackClose`). Joins to the open one are still offered. A QRF is
 outside the cap and sets no cooldown, because its target is a sighting. The
 runner sequences the states; the route and streaming machinery moves the units. There is no planner: a new way to attack is a new entry of roles rather than a new subsystem.
