@@ -32,6 +32,7 @@ if (!DUWS_opcom_hqKnown && {private _roster = ["HQ", "infantry"] call fnc_site_r
     DUWS_opcom_hqKnown = true;
     ["INFO", "OPCOM", "player HQ revealed by a sighting of its garrison"] call fnc_log;
     ["hq_exposed"] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
+    [str blu_hq_markername] call fnc_baseMarkDiscovered;
 };
 // A FOB is found the same way, and only a found one is an attack target.
 {
@@ -41,5 +42,6 @@ if (!DUWS_opcom_hqKnown && {private _roster = ["HQ", "infantry"] call fnc_site_r
         private _name = Array_of_FOBname select _forEachIndex;
         ["INFO", "OPCOM", format ["FOB %1 revealed by a sighting of its garrison", _name]] call fnc_log;
         ["fob_exposed", [_name]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
+        [_x getVariable "DUWS_marker"] call fnc_baseMarkDiscovered;
     };
 } forEach Array_of_FOBS;

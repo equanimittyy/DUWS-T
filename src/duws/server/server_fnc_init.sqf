@@ -567,6 +567,7 @@ publicVariable "DUWS_fnc_buildContested";
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_zone_build.sqf";
 // Not broadcast: it creates a global marker, so exactly one machine may run it.
 fnc_baseRangeMarker = compile preprocessFileLineNumbers "duws\server\misc\fnc_baseRangeMarker.sqf";
+fnc_baseMarkDiscovered = compile preprocessFileLineNumbers "duws\server\misc\fnc_baseMarkDiscovered.sqf";
 // Not broadcast: it decides which players a base appearing is visible to, which only the server can.
 fnc_baseFade = compile preprocessFileLineNumbers "duws\server\misc\fnc_baseFade.sqf";
 fnc_side_count_at = compile preprocessFileLineNumbers "duws\server\misc\fnc_side_count_at.sqf";

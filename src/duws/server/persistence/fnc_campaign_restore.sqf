@@ -558,6 +558,8 @@ DUWS_fnc_restoreOpcom = {
         if (_i >= 0) then { _rekey set [_x, (Array_of_FOBS select _i) getVariable ["DUWS_siteKey", ""]] };
     } forEach (_o getOrDefault ["fobKeys", []]);
     DUWS_opcom_fobsKnown = ((_o getOrDefault ["fobsKnown", []]) select { _x in _rekey }) apply { _rekey get _x };
+    if (DUWS_opcom_hqKnown) then { [str blu_hq_markername] call fnc_baseMarkDiscovered };
+    { if ((_x getVariable ["DUWS_siteKey", ""]) in DUWS_opcom_fobsKnown) then { [_x getVariable "DUWS_marker"] call fnc_baseMarkDiscovered } } forEach Array_of_FOBS;
     { if ((_x get "target") in _rekey) then { _x set ["target", _rekey get (_x get "target")] } } forEach DUWS_opcom_attacks;
     {
         if ((_x getOrDefault ["targetZone", ""]) in _rekey) then { _x set ["targetZone", _rekey get (_x get "targetZone")] };

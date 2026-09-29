@@ -67,6 +67,7 @@ if (count _fadePlayers > 0) then {
 // The same key fnc_fortifyFOB files its turret ring under.
 private _fobKey = format ["FOB_%1", netId _fob];
 _fob setVariable ["DUWS_siteKey", _fobKey];
+_fob setVariable ["DUWS_marker", _markerstr];
 [_fobKey, _foundPickupPos, base_garrison_sleep_range, "freeze"] call fnc_site_register;
 [_fob, _fobKey] call DUWS_fnc_baseBuildArm;
 // Woken by players or by hostiles. A garrison that cannot be woken by an attacker is a garrison
