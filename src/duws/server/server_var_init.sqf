@@ -730,7 +730,7 @@ OPCOM_AIR_SPAWN_ALT = 150;
 // Additive firepower premium per human in a sighted BLUFOR group: the group's hardware is priced in full
 // (fnc_opcom_sense), then each human aboard adds this on top -- a player is more dangerous than the same
 // vehicle or rifle in AI hands, so a crewed or carried player weighs heavier on the grid. Tune.
-OPCOM_PLAYER_WORTH = 3;
+OPCOM_PLAYER_WORTH = 1;
 
 // How far an OPFOR observer's knowledge query reaches in the sighting sweep. A bound on nearTargets, not a
 // detection-range model: the engine returns only targets the observer actually knows about, so this just
