@@ -145,7 +145,7 @@ an upgrade starts every garrison fresh.
 ## Recording a loss
 
 `DUWS_fnc_garrisonReserveWatch {key, grps}`
-(`src/duws/server/init_zones/fnc_garrison_reserve.sqf:222`) tags each unit with its group's source
+(`src/duws/server/init_zones/fnc_garrison_reserve.sqf:235`) tags each unit with its group's source
 token — stamped on the group at raise by `DUWS_fnc_zoneSpawnOne`
 (`src/duws/server/init_zones/fnc_zone_spawn_sizes.sqf:259`) — and hangs a `Killed` handler on it.
 The handler checks that the whole group is down (`{alive _x} count units (group _unit) == 0`)
@@ -155,7 +155,7 @@ handler also fires the event-refill trigger (below).
 
 A zone or town raise hangs the watch only after it places every group, so a group that dies during
 the raise has no handler to record it. `DUWS_fnc_garrisonRefundUnplaced {key, tokens, grps}`
-(`src/duws/server/init_zones/fnc_garrison_reserve.sqf:254`) runs between the raise and the watch. It
+(`src/duws/server/init_zones/fnc_garrison_reserve.sqf:260`) runs between the raise and the watch. It
 returns the token of each group with no living man, and of each token that raised no group, to the
 pool, and the refill pass fields it again. Such a death comes from the placement (for example, a
 vehicle that spawns on a slope), not from a fight, so it does not cost the garrison a token. Without
@@ -191,7 +191,7 @@ the player's own squads and recruits included.
 
 ## The refill pass
 
-`DUWS_fnc_garrisonReservePass` (`src/duws/server/init_zones/fnc_garrison_reserve.sqf:551`) walks
+`DUWS_fnc_garrisonReservePass` (`src/duws/server/init_zones/fnc_garrison_reserve.sqf:575`) walks
 every site on `DUWS_garrisonSites` that is held and has a non-empty pool — with no BLUFOR-presence
 gate, the same as the event trigger below, so a site refills whether or not it is being fought;
 sorts the candidates by player count present, most-crowded first; and spawns
@@ -215,32 +215,36 @@ the pool to the ground without changing that total; only a wipe does.
 ## Placement: keeping a wave off the player's back
 
 `DUWS_fnc_garrisonReservePos {center, radius, side}`
-(`src/duws/server/init_zones/fnc_garrison_reserve.sqf:89`) chooses where a wave stands up, in
-priority order over a flat distance floor, so a player never watches a squad appear and never gets
-flanked from their own approach direction:
+(`src/duws/server/init_zones/fnc_garrison_reserve.sqf:87`) chooses where a wave stands up, in
+priority order, so a player never watches a squad appear and is not flanked from their own approach
+direction:
 
-1. **Opposite the player approach (non-negotiable).** The spawn bearing is `-bluDir`, where
+1. **Full distance.** The wave stands up `DUWS_zoneReserveSpawnRing` (1000 m,
+   `src/duws/server/server_var_init.sqf:529`) beyond the site radius. It stands closer only when no
+   bearing on the whole circle gives a usable point at that distance.
+2. **Opposite the player approach.** The spawn bearing is `-bluDir`, where
    `bluDir` is the site-centre-to-player-centroid direction — reserves come from the far side and
-   meet the advance head-on, never from behind it.
-2. **Nudged toward the nearest other zone the side holds (soft).** The bearing bends up to 50 degrees
+   meet the advance head-on. This rule yields only to distance.
+3. **Nudged toward the nearest other zone the side holds (soft).** The bearing bends up to 50 degrees
    toward a neighbouring zone so a wave reads as coming from friendly ground, clamped so it can
    never fight the anti-flank rule.
-3. **Preferably out of sight (best-effort).** A handful of candidate points along the bearing are
-   tried with `BIS_fnc_findSafePos`; the one fewest players have line of sight to wins. Not a hard
-   gate — a widened fallback runs if every candidate on the preferred arc is bad ground (most often
-   a far side facing open water).
+4. **Preferably out of sight (best-effort).** Five candidate points on the preferred arc (0, ±30 and
+   ±60 degrees off the bearing) are tried with `BIS_fnc_findSafePos`; of those at full distance, the
+   one fewest players have line of sight to wins. When none is at full distance, the rest of the
+   circle (±90 to 180 degrees) is tried, and its first full-distance point wins.
 
-Distance is a flat floor, `DUWS_zoneReserveSpawnDist` (400 m,
-`src/duws/server/server_var_init.sqf:467`), measured from the nearest player rather than scaled to
-the site radius — a radius-relative distance would drop a wave a kilometre off a small island and
-on top of the player at a large base.
+A bearing whose full-distance point is in the sea steps in toward the site centre, 25 m at a time,
+until it is on land. Such a walked-in point is the last pick: it is taken only when no bearing
+reaches full distance, and then the farthest one wins.
 
-A candidate is rejected when it is in the water or within the floor of a player. Candidates come
-from `fnc_safe_pos`, so a failed search is rejected rather than taken as a point
-([`arma_engine_gotchas.md`](../architecture/arma_engine_gotchas.md)). The search runs on a ring at `radius + 400` m first. When no bearing passes
-(for example, players ring the site), it runs again on a ring at `radius + 800` m. When that ring
-also fails, the wave spawns at `radius + 800` m on the spawn bearing, with no player or sight test,
-walked in toward the site centre until it is on land.
+A candidate is rejected when it is in the water after the road snap, or within the player floor of a
+player. The floor, `DUWS_zoneReserveSpawnDist` (400 m, `src/duws/server/server_var_init.sqf:525`),
+is measured from the nearest player rather than scaled to the site radius — a radius-relative floor
+would drop a wave a kilometre off a small island and on top of the player at a large base. It is
+separate from the ring so a walked-in point can still stand inside the ring. Candidates come from
+`fnc_safe_pos`, so a failed search is rejected rather than taken as a point
+([`arma_engine_gotchas.md`](../architecture/arma_engine_gotchas.md)). When every bearing fails, the
+wave spawns on the spawn bearing, stepped in to land the same way, with no player or sight test.
 
 **Line-of-sight cost.** `lineIntersectsSurfaces` is a raycast, expensive only when run per-frame
 across many units. Here it runs at spawn time only — a handful of candidates times the players

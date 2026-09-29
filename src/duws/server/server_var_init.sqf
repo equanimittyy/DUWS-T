@@ -524,6 +524,10 @@ DUWS_zoneReinforceFrac = 0.5;
 // would drop reserves a kilometre out of the island and on top of the player in the base.
 DUWS_zoneReserveSpawnDist = 400;
 
+// How far beyond the zone radius a reserve wave stands up, in metres. Kept apart from the player floor
+// above so a spawn walked in off the sea may still stand inside this ring.
+DUWS_zoneReserveSpawnRing = 1000;
+
 // How far to look for a road around a chosen far-side spawn point, in metres -- a reserve wave rides
 // trucks, so it must stand up on drivable ground. Wide enough to find a road off most approaches, tight
 // enough to stay near the anti-flank bearing. No road in range leaves the off-road point.
@@ -562,8 +566,8 @@ DUWS_reserveDebusDamageBail = 0.6;
 
 // The hard ride ceiling, in seconds. A mobility kill is caught by canMove, but a truck that still moves
 // yet is wedged or circling an unreachable debus point would carry the squad forever; this dumps them
-// out to finish on foot. Generous, so a normal few-hundred-metre ride never trips it.
-DUWS_reserveMaxRide = 150;
+// out to finish on foot. Generous, so a normal ride in from the spawn ring never trips it.
+DUWS_reserveMaxRide = 300;
 
 // The live hardpoint registry, one row per standing emplacement: [key, pos, type, side, zoneKey].
 // fnc_hardpoint_register appends and republishes; clearance deletes the row, so a cleared hardpoint
