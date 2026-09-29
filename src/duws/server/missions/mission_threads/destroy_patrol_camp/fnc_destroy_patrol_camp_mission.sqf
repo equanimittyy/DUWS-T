@@ -18,9 +18,9 @@ private _build = {
     private _tries = 0;
     while { count _campCentres < _campCount && _tries < 80 } do {
         _tries = _tries + 1;
-        private _p = [_randomPos, _radius - 120, 120, 8, 0.4, []] call fnc_safe_pos;
+        private _p = [_randomPos, _radius - 120, 0, 8, 0.4, []] call fnc_safe_pos;
         if (_p isEqualTo []) then { continue };
-        if (_campCentres findIf { (_x distance2D _p) < 400 } >= 0) then { continue };
+        if (_campCentres findIf { (_x distance2D _p) < 200 } >= 0) then { continue };
         if (count (_p nearRoads 300) > 0) then { continue };
         private _trees = count nearestTerrainObjects [_p, ["TREE", "SMALL TREE"], _campTreeRadius, false, true];
         if (_trees < (if (_tries < 55) then { _campTreeDense } else { _campTreeMin })) then { continue };
@@ -139,8 +139,8 @@ private _done = { ({alive _x} count _this) == 0 };
 
 if (!([18, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exitWith {};
 
-private _radius = 1000;
-// Offer only fires where the mission radius (1000 m) holds forest; each camp finds its own treed seat in it.
+private _radius = 600;
+// Offer only fires where the mission radius holds forest; each camp finds its own treed seat in it.
 private _randomPos = _MissionPos;
 private _targetpos = _MissionPos;
 
