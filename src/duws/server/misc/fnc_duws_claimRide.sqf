@@ -7,4 +7,7 @@ params ["_unit", "_veh"];
 if (isNull _veh || {_veh isKindOf "ParachuteBase"} || {_veh isKindOf "StaticWeapon"}) exitWith {};
 private _drv = driver _veh;
 if (alive _drv && {(units group _drv) findIf {isPlayer _x} < 0}) exitWith {};
-DUWS_playerRides set [getPlayerUID _unit, _veh];
+private _uid = getPlayerUID _unit;
+// The sweep keeps a flagged vehicle's deadline through use, so the ride left behind would already be expired.
+(DUWS_playerRides getOrDefault [_uid, objNull]) setVariable ["DUWS_binAt", nil];
+DUWS_playerRides set [_uid, _veh];

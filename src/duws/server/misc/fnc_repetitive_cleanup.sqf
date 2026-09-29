@@ -64,6 +64,7 @@ addMissionEventHandler ["BuildingChanged", {
 
 addMissionEventHandler ["PlayerDisconnected", {
     params ["", "_uid"];
+    (DUWS_playerRides getOrDefault [_uid, objNull]) setVariable ["DUWS_binAt", nil];
     DUWS_playerRides deleteAt _uid;
 }];
 
