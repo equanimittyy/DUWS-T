@@ -34,16 +34,16 @@ private _build = {
         private _cand = _randomPos getPos [_radius * (0.4 + random 0.3), _ang];
         // Keep every anchor out of the sea -- a water anchor drowns the patrol: drop road segments over
         // water (coastal snaps, bridges); road-less fallback is fnc_safe_pos.
-        private _roads = (_cand nearRoads 400) select { !surfaceIsWater (getPosATL _x) };
+        private _roads = (_cand nearRoads (_radius * 0.25)) select { !surfaceIsWater (getPosATL _x) };
         _pts pushBack (if (_roads isEqualTo []) then {
-            [_cand, 200, 0, 5] call fnc_safe_pos
+            [_cand, _radius * 0.25, 0, 5] call fnc_safe_pos
         } else {
             getPosATL (selectRandom _roads)
         });
     };
     // Clamp a snap that lands past _radius back to centre: a bad road/findSafePos snap could seat the
     // column on BLUFOR HQ, whose garrison wipes it on spawn and auto-completes the mission. Real points
-    // sit at 0.4-0.7 * _radius, well inside this bound.
+    // sit at 0.4-0.7 * _radius plus a quarter-radius snap, inside this bound.
     {
         if ((_x distance2D _randomPos) > _radius) then { _pts set [_forEachIndex, _randomPos] };
     } forEach _pts;

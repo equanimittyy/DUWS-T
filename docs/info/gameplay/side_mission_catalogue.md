@@ -327,7 +327,7 @@ the cost, less the object's damage.
 
 ### Destroy Air Asset
 
-`mission_threads/destroy_air/`. A moving-target intercept: a lone OPFOR gunship loiters over a 5 km ring
+`mission_threads/destroy_air/`. A moving-target intercept: a lone OPFOR gunship loiters over a 2 km ring
 and the player has to bring it down. Which airframe spawns is whatever the side can field -- a jet once
 it has reached the Air tier (AP 600), else the attack helicopter earned at Armor (AP 350).
 `fnc_destroy_air_site` gates the offer on the Armor tier *and* the AttackHeli campaign toggle, so a

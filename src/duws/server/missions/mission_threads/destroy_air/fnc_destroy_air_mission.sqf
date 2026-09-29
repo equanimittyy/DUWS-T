@@ -4,7 +4,7 @@ private _requester = remoteExecutedOwner;
 
 if (!([19, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exitWith {};
 
-private _radius = 5000;
+private _radius = 2000;
 // Trust the offer: the loiter circuit is drawn around it; the aircraft flies in from off-map anyway.
 private _randomPos = _MissionPos;
 private _targetpos = _MissionPos;

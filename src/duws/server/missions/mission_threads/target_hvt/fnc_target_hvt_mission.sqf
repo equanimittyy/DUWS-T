@@ -15,7 +15,7 @@ private _destPos = _dest select 0;
 private _destName = _dest select 1;
 
 // Convoys start spread on separate roads and fork at a mid-route point, so the player cannot cover all three.
-private _spawnR    = 700;
+private _spawnR    = 400;   // plus the 250 m fallback settle, stays inside _radius so every start sits in the search ellipse
 private _viaSpread = 1200;
 private _viaCone   = 45;
 private _startCone = 40;
@@ -245,7 +245,7 @@ sleep 6;
 
 // Search ellipse over the convoy start cluster (where the player is sent), with a fixed marker per start --
 // one-shot, since nothing tracks the convoys live, or there would be no hunt.
-private _radius = 1500;
+private _radius = 800;
 private _marker = [_MissionPos, _radius] call fnc_missionMarkerData;
 private _startMarkers = [];
 {

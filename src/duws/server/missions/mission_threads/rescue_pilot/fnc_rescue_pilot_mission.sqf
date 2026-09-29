@@ -17,7 +17,7 @@ if (isNil "DUWS_fnc_addCarryAction") then {
 private _patrolTokens  = ["recon", "recon", "team", "wp_team", "patrol", "patrol"];
 private _vehicleTokens = ["car", "car", "ifv", "ifv"];
 
-_radius = 1000;
+_radius = 600;
 _deadline = DUWS_curDeadlineAt;
 _speaker  = localize "STR_DUWS_T_OVERLORD";
 _speaker1 = localize "STR_DUWS_T_pilot_downed";
@@ -97,15 +97,16 @@ publicVariable "currentMissionPilot";
 // releases the claim so his despawn tail owns him.
 [_pilot] call fnc_mission_claim;
 
-// Enemy patrols ringed around the crash so no patrol's circuit reaches the 300 m exclusion: a sub-centre sits
-// _footRing/_vehRing out from the heli and fnc_apply_posture walks widepatrol within radius*0.9 of it, so the
-// nearest a leg comes to the pilot is (ring - 0.9*_patrolArgR). Collected as _enemyGroups so the whole set can
-// be re-tasked onto the crash the moment the player reaches him (below). A path in transit between two clear
-// legs can still clip the bubble -- AI pathing is free -- but no patrol is stationed or circuits inside it.
+// Enemy patrols ringed around the crash so every circuit stays between the 200 m exclusion and the edge of
+// _radius: a sub-centre sits _footRing/_vehRing out from the heli and fnc_apply_posture walks widepatrol within
+// radius*0.9 of it, so a leg spans ring -/+ 0.9*_patrolArgR from the pilot. Collected as _enemyGroups so the
+// whole set can be re-tasked onto the crash the moment the player reaches him (below). A path in transit
+// between two clear legs can still clip the bubble -- AI pathing is free -- but no patrol is stationed or
+// circuits inside it.
 private _enemyGroups = [];
-private _patrolArgR = 200;
-private _footRing = 550;
-private _vehRing  = 650;
+private _patrolArgR = 120;
+private _footRing = 330;
+private _vehRing  = 390;
 
 {
     private _ang = 360 * _forEachIndex / (count _patrolTokens);
