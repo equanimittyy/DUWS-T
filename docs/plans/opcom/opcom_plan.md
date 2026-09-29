@@ -1188,8 +1188,8 @@ alone picks the type ([§Value](#value)), because a per-type weight would fight 
 no weight of its own: it scores inside the action that sends it, under that action's weight, and the `recruitMix`
 alone leans on its row. A tower, OP, mortar or battery build keeps its own weight and stays out of the mix, so its
 weight sets how soon it builds. The table is relative: weighting every action alike changes no pick, so 1 is the
-baseline. Balanced weighs every action at 1 except `attack_qrf`, at 1.1, and the town errands (`rapport`,
-`town_reinforce`, `town_fortify`), at 0.9. 7.1 builds the setting.
+baseline. Balanced weighs every action at 1 except the town errands (`rapport`, `town_reinforce`, `town_fortify`),
+at 0.9. 7.1 builds the setting.
 
 | Archetype | Weights toward | Attack lean |
 |---|---|---|
