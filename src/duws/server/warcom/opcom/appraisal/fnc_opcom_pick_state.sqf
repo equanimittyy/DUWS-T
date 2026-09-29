@@ -5,7 +5,7 @@ if (!isServer) exitWith {};
 DUWS_opcom_aiMode = "weighted";
 DUWS_opcom_pickOnce = "";
 // Carried as a debt, so a rate below 1 picks once every few ticks.
-DUWS_opcom_picksPerTick = 1;
+DUWS_opcom_picksPerTick = 0.5;
 DUWS_opcom_pickDebt = 0;
 DUWS_opcom_aiEvents = [];
 DUWS_opcom_aiSeq = 0;

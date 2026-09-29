@@ -908,8 +908,8 @@ OPCOM_PWIN_FLOOR = 0.3;
 // last arrival, and at EXPIRY it goes wherever its units stand, so a player who keeps reinforcing cannot hold it
 // forever. Either timeout abandons it under OPCOM_ATTACK_BREAK instead, which would fail it on its first step. The bars
 // sit below an attacker's usual 3:1 because a sighted player already counts as 1 + OPCOM_PLAYER_WORTH. Tune.
-OPCOM_MUSTER_IDEAL = 1.5;
-OPCOM_MUSTER_MIN = 0.75;
+OPCOM_MUSTER_IDEAL = 1.2;
+OPCOM_MUSTER_MIN = 0.6;
 OPCOM_MUSTER_STAGED = 60;        // ticks; 5 min @ 5s tick
 OPCOM_MUSTER_EXPIRY = 360;       // ticks; 30 min @ 5s tick
 // A QRF's muster window: its target moves, so it goes on what it has by then. Tune.
@@ -920,7 +920,7 @@ OPCOM_QRF_HALFLIFE = 60;         // ticks; 5 min @ 5s tick
 // walk in follows the sighting as it moves. Tune.
 OPCOM_QRF_DROP_K = 2;
 // Below this ratio of force to believed BLUFOR force an offensive holds rather than musters.
-OPCOM_MUSTER_HOLD = 0.5;
+OPCOM_MUSTER_HOLD = 0.4;
 // An attack under way fails below this ratio, on the muster bars' scale. Tune.
 OPCOM_ATTACK_BREAK = 0.2;
 // How long no assault or flank opens anywhere after one ends, rolled between the two. Tune.
