@@ -150,7 +150,8 @@ A commanded squad does not pass to the campaign when its leader leaves. A human 
 takes command of its AI (`server/misc/fnc_squad_leaderLeft.sqf`, from the `HandleDisconnect` handler in
 `server/server_init.sqf`). If no human is left in the squad, the AI get the `DUWS_binMe` flag, and the
 cleanup sweep refunds the hire price of each one that is still alive when it deletes it. A mission escort
-gets no flag, because its mission reads a deleted escort as a dead one.
+gets no flag, because its mission reads a deleted escort as a dead one. It gets the Leave Group state
+instead, so it holds where it stands until another leader recruits it.
 
 FOB defences are campaign property by that test, so both spawn functions are server-only. The one redeploy
 scroll action still runs on the acting player, but it keeps only the sound and an advisory affordability

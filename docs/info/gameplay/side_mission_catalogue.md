@@ -353,7 +353,8 @@ escort to the surveyed town is contested. A group leader recruits him with a "Jo
 "Leave Group" undoes it); the leader gate is in the action body, not its condition, so a non-leader still
 sees the action and is told why it did nothing. Join/Leave route through `fnc_escort_informant_group`,
 which toggles only `MOVE` (follow when in the group, hold-where-dropped when out) and never touches
-`PATH`, keeping his pathing usable. Win: informant alive within 50 m of the town. Fail: informant dead,
+`PATH`, keeping his pathing usable. If his squad leader disconnects and no human is left in the squad,
+`fnc_squad_leaderLeft` runs the leave for him, so another leader can recruit him. Win: informant alive within 50 m of the town. Fail: informant dead,
 or the deadline. The win polls `alive`/`distance2D` itself, so it stays off the one-shot spine.
 
 **Siting and the delivery town.** `surveyKind "town"` with **no** site finder -- it inherits

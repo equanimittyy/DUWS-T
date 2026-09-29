@@ -11,5 +11,7 @@ if (_humans isNotEqualTo []) exitWith {
 	[_group, _humans select 0] remoteExec ["selectLeader", groupOwner _group];
 };
 
-// An escort stays for its mission: a deleted escort reads as a dead one and fails it.
-{ _x setVariable ["DUWS_binMe", true] } forEach ((units _group) select { !(_x getVariable ["DUWS_escort", false]) });
+// An escort is never binned: its mission reads a deleted escort as a dead one and fails.
+private _escorts = (units _group) select { _x getVariable ["DUWS_escort", false] };
+{ [_x, objNull, false] call fnc_escort_informant_group } forEach _escorts;
+{ _x setVariable ["DUWS_binMe", true] } forEach (units _group - _escorts);
