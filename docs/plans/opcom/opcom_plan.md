@@ -82,8 +82,8 @@ best, and pick one by weighted random (`selectRandomWeighted`, the `fnc_createzo
 lookahead. The pick pass runs each row inside `isNil { }` (unscheduled, no `sleep`) and enumerates every row with no
 deadline: a deadline would hide the cost, not remove it, and a pass cut short biases the draw toward the rows enumerated
 first. The rows run in slices of about 10 ms with a frame between, so the longest frame the pass holds is about one row.
-The pick executes after it in scheduled space, because an order plans a route and the router may yield. One pick a
-tick by default (1 pick per tick); the difficulty setting changes the rate ([§OPCOM debug page and overlay](#opcom-debug-page-and-overlay)). The action list (`fnc_opcom_actions`) holds each
+The pick executes after it in scheduled space, because an order plans a route and the router may yield. One pick every
+second tick by default (0.5 picks per tick); the difficulty setting changes the rate ([§OPCOM debug page and overlay](#opcom-debug-page-and-overlay)). The action list (`fnc_opcom_actions`) holds each
 action's id, targets, gate, price, execute, weight key, Value and Cost.
 
 `random` mode, switched on from the Debug menu's OPCOM page, is the unscored control it was built as: it draws an
@@ -438,7 +438,7 @@ hardpoint is built or cleared or ground changes hands, and need also moves with 
   zone. An action past one of OPCOM's caps drops too ([§Caps](#caps)). The random draw drops any action the wallet
   cannot cover.
   An offensive that does not muster drops below `OPCOM_PWIN_FLOOR` at commit. An Attack musters, so its source drops
-  only below `OPCOM_MUSTER_HOLD` (0.5:1), and the minimum bar is its floor at launch
+  only below `OPCOM_MUSTER_HOLD` (0.4:1), and the minimum bar is its floor at launch
   ([§Commitment](#commitment-orders-are-sticky)).
 - **An unaffordable action is still scored.** When the top scorer is unaffordable and its ETA,
   `(price − wallet) ÷ income rate`, is inside `OPCOM_SAVE_HORIZON`, it is the savings goal and OPCOM banks that
@@ -605,17 +605,17 @@ commit + the order's re-issue span, the earliest tick the pick may draw the unit
 - **An attack musters, then launches as one wave** (Phase 5). A muster is what buildup does: it binds
   force across ticks at a safe rally short of the target, one cell a bucket, then advances all together — it never dribbles units into contact,
   which no-retreat would turn into defeat in detail. It sends for units until its bound force reaches the archetype's
-  **ideal** ratio over believed BLUFOR force at the target (1.5:1 baseline), and launches the tick every unit it holds
-  stands on its rally at the archetype's **minimum** (0.75:1 baseline) or better. Short of the minimum, it waits
+  **ideal** ratio over believed BLUFOR force at the target (1.2:1 baseline), and launches the tick every unit it holds
+  stands on its rally at the archetype's **minimum** (0.6:1 baseline) or better. Short of the minimum, it waits
   `OPCOM_MUSTER_STAGED` (60 ticks, 5 min) after the last unit arrives for one more to join, and a unit sent to join
   restarts that wait. At `OPCOM_MUSTER_EXPIRY` (360 ticks, 30 min) it launches wherever its units stand, so a player
   who keeps reinforcing cannot hold it forever. Either timeout abandons it instead when it holds less than
   `OPCOM_ATTACK_BREAK`, the bar it would fail on at its first step, and its units return to rest. The baseline sits below an attacker's usual 3:1
-  because a sighted player already counts as 1 + `OPCOM_PLAYER_WORTH`, so a believed 1.5:1 is already a hard fight
+  because a sighted player already counts as 1 + `OPCOM_PLAYER_WORTH`, so a believed 1.2:1 is already a hard fight
   for the players, and a 3:1 wave is one they can only survive. Both bars read believed force, so a mid-muster
   reinforcement raises them, and a Probe that refreshes the target moves them to whatever is actually there
   ([§Value](#value)). An attack in buildup commits below the odds it launches at, so the minimum bar is its floor
-  at launch and `OPCOM_MUSTER_HOLD` (0.5:1) its floor at commit. Buildup is also how a force-short attack waits for
+  at launch and `OPCOM_MUSTER_HOLD` (0.4:1) its floor at commit. Buildup is also how a force-short attack waits for
   units: an attack short of the ideal bar stays a target of its row, and a later pick sends it more from free units
   and hires ([§Sourcing](#sourcing-hire-on-demand-phase-4d)). A QRF launches at the ideal bar, or at the minimum
   once `OPCOM_QRF_EXPIRY` runs out, where its units stand ([§QRF](#qrf-an-attack-on-a-moving-cluster)).
@@ -1211,7 +1211,7 @@ no mix.
 Beyond its weights and mixes, an archetype sets the commander's patience: the muster ideal, minimum and expiry,
 `OPCOM_SAVE_HORIZON` and `OPCOM_VALUE_HALFLIFE`. A patient, strategic commander musters and saves longer for a
 properly executed attack; a flexible, aggressive one launches sooner at lesser odds. The Balanced baseline (a
-1.5:1 muster ideal, a 0.75:1 minimum) is what Phase 5 musters against, and it applies until 7.2 builds the rest.
+1.2:1 muster ideal, a 0.6:1 minimum) is what Phase 5 musters against, and it applies until 7.2 builds the rest.
 
 | Chunk | Builds |
 |---|---|
