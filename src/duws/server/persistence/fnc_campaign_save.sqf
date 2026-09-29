@@ -60,6 +60,24 @@ DUWS_fnc_campaignCargo = {
         (everyContainer _box) apply { [_x select 0, [_x select 1] call DUWS_fnc_campaignCargo] }]
 };
 
+// What the cleanup sweep keeps at a base (fnc_in_base_keep), less what something else owns or rebuilds: the MHQ and
+// the builder have their own keys, a persistent object belongs to its composition or mission, a flagged or
+// mission-owned one is deleted by its teardown, and a town's parked car streams back with its town.
+DUWS_fnc_campaignParked = {
+    private _mhq = missionNamespace getVariable ["MHQ1", objNull];
+    (vehicles select {
+        alive _x && {_x isKindOf "AllVehicles"} && {!(_x isKindOf "StaticWeapon")} && {!(_x isKindOf "ParachuteBase")}
+        && {_x != _mhq} && {!(_x getVariable ["persistent", false])} && {!(_x getVariable ["DUWS_binMe", false])}
+        && {(_x getVariable ["DUWS_missionOwner", -1]) < 0}
+        && {!(_x in (missionNamespace getVariable [[_x getVariable ["DUWS_civCarKey", ""], "crowd"] call fnc_site_roster_var, []]))}
+        // Restored at this spot, a loaded, towed or airborne vehicle would spawn inside its carrier or fall.
+        && {isNull attachedTo _x} && {isNull isVehicleCargo _x} && {((getPos _x) select 2) < 1}
+        // A restore brings back no crew, and an AI crew outside the players' groups is not the team's.
+        && {((crew _x) findIf { alive _x && {((units group _x) findIf { isPlayer _x }) < 0} }) < 0}
+        && {[getPosATL _x] call fnc_in_base_keep}
+    }) apply { [[_x] call DUWS_fnc_vehSpecCapture, getPosATL _x, getDir _x] }
+};
+
 DUWS_fnc_campaignSnapshot = {
     private _s = createHashMap;
     _s set ["version", DUWS_saveFormat];
@@ -152,6 +170,7 @@ DUWS_fnc_campaignSnapshot = {
     ]];
 
     _s set ["garage", DUWS_garage_stored];
+    _s set ["parked", call DUWS_fnc_campaignParked];
     // Null once a game master deletes it; a load then keeps the opening stock.
     if (!isNull DUWS_hqCrate) then { _s set ["hqCrate", [DUWS_hqCrate] call DUWS_fnc_campaignCargo] };
     private _lockout = ((missionNamespace getVariable ["MHQ_lockout_until", 0]) - time) max 0;
@@ -227,8 +246,8 @@ DUWS_fnc_campaignSave = {
         _p set [2, (_p select 2) + _opfAp];
         private _json = toJSON _s;
         _done = [DUWS_campaignID, _json, [_s] call DUWS_fnc_campaignHeader] call DUWS_fnc_saveCommit;
-        ["INFO", "SAVE", format ["%1 save of campaign %2: %3 zones, %4 held, %5 garaged, %6 taskings, %7 bytes, refunds %8 CP %9 AP %10 OPF AP",
-            _reason, DUWS_campaignID, count (_s get "zones"), count (_s get "held"), count (_s get "garage"),
+        ["INFO", "SAVE", format ["%1 save of campaign %2: %3 zones, %4 held, %5 garaged, %6 parked, %7 taskings, %8 bytes, refunds %9 CP %10 AP %11 OPF AP",
+            _reason, DUWS_campaignID, count (_s get "zones"), count (_s get "held"), count (_s get "garage"), count (_s get "parked"),
             count ((_s get "opcom") get "taskings"), count _json, _cp, _bluAp, _opfAp]] call fnc_log;
     };
     if (DUWS_autosaveInterval > 0) then { DUWS_saveDue = time + DUWS_autosaveInterval };

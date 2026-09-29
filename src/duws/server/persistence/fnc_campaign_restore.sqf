@@ -489,6 +489,7 @@ DUWS_fnc_restoreBases = {
             DUWS_builds pushBack _obj;
         };
     } forEach (DUWS_restore getOrDefault ["builds", []]);
+    { _x call _fnc_spawnSpec } forEach (DUWS_restore getOrDefault ["parked", []]);
     ["bases"] call DUWS_fnc_restoreStepDone;
 };
 

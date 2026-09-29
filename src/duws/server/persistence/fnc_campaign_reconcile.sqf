@@ -1,7 +1,7 @@
 // Locality: server. What live state cost that a restore does not bring back, as [CP, BLUFOR AP, OPFOR AP], for the
 // snapshot's pools only: this runs at every write, so a refund through fnc_cp_adjust would pay for the same live
-// squad again at each interval. An OPCOM tasking restores as data and needs none; a parked vehicle gets none,
-// since the garage is how a vehicle survives a restart.
+// squad again at each interval. An OPCOM tasking restores as data and needs none; a vehicle gets none, since
+// parking it at a base or storing it in the garage is how it survives a restart.
 if (!isServer) exitWith {};
 
 DUWS_fnc_campaignReconcile = {
