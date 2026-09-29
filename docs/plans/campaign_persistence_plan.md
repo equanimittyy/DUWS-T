@@ -680,6 +680,7 @@ restore with the settings group, not here.
 |---|---|---|
 | Support unlocks | input | `DUWS_support_permanent`, the team's permanent unlocks in purchase order |
 | Reveal | outcome | positions of revealed zones and revealed towns |
+| Arsenal crate | outcome | the contents of the arsenal crate at the HQ, piece by piece, with the contents of each stored uniform, vest and backpack |
 
 **Nothing per-player is saved.** No loadouts, no per-player cooldowns, and no per-player record of
 what a player bought. Consumable unlocks were already out for exactly this reason — they are
@@ -690,6 +691,15 @@ the per-player "restored yet" flag, stripping a loadout saved while dead, and th
 order in
 [`campaign_save_format.md`](../info/architecture/campaign_save_format.md#per-player-data) are all
 unbuilt here.
+
+**The arsenal crate at the HQ is team storage, so its contents are saved.** The crate is to gear what
+the garage is to vehicles: a player who wants gear to survive a restart stores it in the crate first.
+The save records each piece, not the garage's per-class counts, so a weapon keeps its attachments and
+its loaded magazine, a magazine keeps its rounds, and a stored uniform, vest or backpack keeps its
+contents. `Money_roll` is a magazine, so money in the crate is saved with the rest. `fnc_bluHQinit`
+builds the crate with its opening stock, and `DUWS_fnc_restoreBases` replaces that stock with the saved
+contents. A piece that names a class no loaded mod defines is dropped, and the load hint counts it. A
+save taken after a game master deleted the crate has no crate key, so a load keeps the opening stock.
 
 **Permanent unlocks are team state, so one array carries them.** `DUWS_support_permanent` holds them
 in purchase order and each client keeps the individual flags as its fast path, so restore replays the
@@ -819,9 +829,9 @@ the object — restore has to reverse-engineer what was built from what is stand
 buildable is a new special case.
 
 **Shop money.** The vendor registry itself is built and restored ([§World and placement](#world-and-placement)).
-Shop money has no entry and is lost: it is the carried `Money_roll` item, and no player gear is saved
-([§The team](#the-team)). Whether a player's cash wants a team-level or per-player key of its own is the
-vendor work's question, not this plan's.
+Carried shop money is lost: it is the `Money_roll` item, and no player gear is saved
+([§The team](#the-team)). Money stored in the arsenal crate at the HQ is saved with the crate. Whether
+carried cash wants a per-player key of its own is the vendor work's question, not this plan's.
 
 **Anything with a cooldown or a timer.** Store the remaining duration. See the `diag_tickTime`
 rule above.
@@ -1024,7 +1034,7 @@ function runs unchanged.
 | Setup gates, `chosen_hq_placement` / `createzone_server` (`:161,166`) | Pre-satisfied by the gate |
 | Faction init (`:60-156`) | Runs — classnames must be re-resolved against whatever mods are loaded now. Then `fnc_faction_edits_apply` applies the saved faction list edits over the new pools. The restore has to publish the result itself: the loop that broadcasts every schema key and the request-menu catalogue is the setup loop this gate skips, and no faction file runs on a client to fill the gap |
 | `fnc_create_ammo_lists` (`:189`) | Runs — the friendly class list re-resolves against the loaded mods. In Limited its pool seed covers only the classes the campaign never seeded ([§The arsenal](#the-arsenal-the-shelf-is-rebuilt-the-pool-is-stored)) |
-| `fnc_bluHQinit` (`:192`) | Runs, from the saved `PosOfBLUHQ`. It rebuilds the whole HQ deterministically, which is why persisting one position is enough. The officer spawns alive, so a saved officer death applies after this step |
+| `fnc_bluHQinit` (`:192`) | Runs, from the saved `PosOfBLUHQ`. It rebuilds the whole HQ deterministically, which is why persisting one position is enough. The officer spawns alive, so a saved officer death applies after this step. The arsenal crate gets its opening stock, which `DUWS_fnc_restoreBases` replaces with the saved contents |
 | `fnc_init_OPFOR_WARCOM` (`:205`) | Runs, with the locator bypassed as above |
 | `fnc_escalation` (`fnc_init_OPFOR_WARCOM.sqf:63`) | Runs the census, then the snapshot restores `escalation_destroyed` |
 | `fnc_intro_heli` (`:433`) | **Skipped**: the players land at the HQ the way a player joining a running campaign does |
@@ -1116,6 +1126,7 @@ refund attached to the one restore that consumes it.
 | `server/persistence/fnc_campaign_save.sqf` | The snapshot, its header, the save itself and the autosave loop |
 | `server/persistence/fnc_campaign_reconcile.sqf` | The refunds the save adds to the snapshot's pools |
 | `server/persistence/fnc_campaign_restore.sqf` | The gate, the apply, and every restore hook below |
+| `server/init_hq/fnc_BluHQinit.sqf` | Keeps the arsenal crate's handle, `DUWS_hqCrate`, for the save and the restore |
 | `server/persistence/fnc_autoSave.sqf` | The SITREP save, and the carry to the caller's profile |
 | `server/server_init.sqf` | The gate after `serverinit_complete`; one faction resolution for both paths; the saved date; the mission-end writes |
 | `server/warcom/fnc_init_OPFOR_WARCOM.sqf` | Zone and hardpoint replay in place of the locator and generation; the world outcomes before the site poller; escalation after the census; the economy period counted only while a human is on |
