@@ -4,9 +4,10 @@ Make a campaign survive the session it was played in. The mission writes a data-
 an external store and, on the next start, rebuilds the world by feeding that snapshot back through
 the **existing** builders rather than through a second construction path.
 
-Live units are not persisted. Zones, the HQ and FOBs are rebuilt and re-garrisoned from scratch;
-what carries over is campaign state — pools, zone ownership, placement, reputation, unlocks, and the
-vehicles the team garaged or parked at a base.
+Live units are not persisted, except the task forces that the team handed to Overlord. Zones, the HQ
+and FOBs are rebuilt and re-garrisoned from scratch; what carries over is campaign state — pools, zone
+ownership, placement, reputation, unlocks, the vehicles the team garaged or parked at a base, and the
+task forces.
 
 **Shipped.** The store, the snapshot, the fork screen, the restore hooks, the four save triggers, the
 idle gate and the reconciliation pass are built. The code under `src/duws/server/persistence/` is the
@@ -681,6 +682,7 @@ restore with the settings group, not here.
 | Support unlocks | input | `DUWS_support_permanent`, the team's permanent unlocks in purchase order |
 | Reveal | outcome | positions of revealed zones and revealed towns |
 | Arsenal crate | outcome | the contents of the arsenal crate at the HQ, piece by piece, with the contents of each stored uniform, vest and backpack |
+| Task forces | outcome | each task force's name, its men (class, loadout, damage, skill, position and seat) and its vehicles (the garage's vehicle spec, position and direction) |
 
 **Nothing per-player is saved.** No loadouts, no per-player cooldowns, and no per-player record of
 what a player bought. Consumable unlocks were already out for exactly this reason — they are
@@ -731,6 +733,18 @@ hardpoint's own registry row and comes back with it ([§The enemy](#the-enemy)).
 shared arrays and the markers they drive are global, so there is no per-player reveal to persist.
 Making reveal personal is a design change to the intel system, not a persistence feature, and it
 would mean per-player markers everywhere.
+
+**Task forces are the one kind of live AI that the save keeps.** A task force is a squad that the
+team paid for and handed to Overlord, or that a leaving player's High Command left behind. Nothing
+else brings it back, and the reconciliation pass does not refund it
+([§What live state costs](#what-live-state-costs-and-who-pays-it-back)), so a restart without it
+would lose the team's investment. The save records the men and the vehicles, not the group, because a
+group does not outlive the session. `DUWS_fnc_restoreTaskforces` rebuilds each task force where it
+stood, with each man's loadout, damage and seat, and then registers the group through
+`fnc_taskforce_create` under its saved name. The objective is not saved: the task-force tick derives
+it from the map again, so the load gives the same order. A man or a vehicle whose class no loaded mod
+defines is dropped. The load hint counts a dropped vehicle; a dropped man is logged, because the hint's
+unit count is of enemy units.
 
 ### The arsenal: the shelf is rebuilt, the pool is stored
 
@@ -807,7 +821,8 @@ A vehicle inside the ring is not saved in these cases:
 | A vehicle with `DUWS_binMe`, or with a `DUWS_missionOwner` token | Its teardown deletes it |
 | A town's parked car that is still on the town's crowd roster | The town streams it back, so a saved copy adds one car at each load |
 | An attached vehicle, a vehicle-in-vehicle cargo, or a vehicle 1 m or more above the surface | At its saved position, it would spawn inside its carrier or fall |
-| A vehicle with a living AI crew member outside the players' groups | It is an enemy, a civilian, a High Command squad or a UAV, and a restore brings back no crew |
+| A vehicle with a living AI crew member outside the players' groups | It is an enemy, a civilian, a High Command squad, a task force or a UAV, and a restore brings back no crew |
+| A vehicle assigned to a task force, crewed or not | It restores with its task force, so a saved copy adds one vehicle at each load |
 
 **The garage's capacity is a permanent support, so the caps restore with the unlocks.**
 `DUWS_fnc_garageCaps` reads the highest owned level's row off `DUWS_garage_tiers`, and ownership is a
@@ -1059,11 +1074,12 @@ function runs unchanged.
 FOBs restore the same way: call `fnc_fob_server` per saved position — silently, and with the saved
 name — rather than reimplementing what it builds. They are built one at a time, because
 `fnc_fob_server` appends to three index-parallel registries across a suspension. Vehicles are
-spawned last, after every anchor is standing.
+spawned last, after every anchor is standing, and the task forces after the vehicles.
 
 ## What is deliberately not saved
 
-Live AI, spawned garrisons, active side missions, in-flight support, and the JIP task queue. Zone
+Live AI except the task forces ([§The team](#the-team)), spawned garrisons, active side missions,
+in-flight support, and the JIP task queue. Zone
 garrisons and composition props both spawn and despawn on player distance
 (`server/misc/fnc_site_stream_init.sqf`), so a restored campaign regenerates them the first time a
 player approaches — the same code path a fresh campaign uses.
@@ -1125,7 +1141,7 @@ is already the price tables the economies buy from, so this is a walk and a sum,
 
 **What the pass refunds.** A recruit in a player's squad or in a player's High Command group, at its
 request price scaled by health, and an OPCOM build still siting, at the refund its delivery carries.
-An OPCOM tasking needs no refund, because it restores as data. A vehicle gets none: parking it at a
+An OPCOM tasking and a task force need no refund, because both restore. A vehicle gets none: parking it at a
 base or garaging it is how a vehicle survives a restart, and a refund for any vehicle in the world
 would pay for captured ones.
 
