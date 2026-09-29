@@ -35,8 +35,8 @@ fnc_cp_adjust = {
 // The Army Power tier ladder. A side's tier is how many rungs its EARNED counter has crossed -- a one-way
 // ratchet (earned only ever rises; spending never touches it), so a spent-down wallet cannot drop the tier.
 // Capability sites read the earned counter directly; this integer is only the readout/save summary.
-// Five tiers, steepening past tier 2 against OPFOR's ~107 AP/hr from six zones at the ~7 s OPCOM ticks seen in play,
-// a tenth of its drip included (motorised ~0.6 h to jets ~5.6 h).
+// Five tiers, steepening past tier 2 against OPFOR's ~87 AP/hr from six zones at the ~7 s OPCOM ticks seen in play,
+// a tenth of its drip included (motorised ~0.7 h to jets ~6.9 h).
 DUWS_ap_tier_rungs = [60, 150, 350, 600]; publicVariable "DUWS_ap_tier_rungs";
 // Tier 1 (infantry) is the floor at earned 0, so the tier is one plus the rungs crossed, ranging 1-5.
 DUWS_fnc_ap_tier = {

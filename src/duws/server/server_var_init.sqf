@@ -1027,7 +1027,7 @@ DUWS_intel_contact_life = 600;
 
 // Campaign-size throttle on every passive faucet (zone AP trickle, town income, both sides). Computed
 // once from the actual zone count (fnc_WARCOM_init), so income grows as sqrt(zones) above the reference
-// size rather than linearly. 1 until WARCOM init sets it, so the default six-zone campaign is unthrottled.
+// size rather than linearly. 1 until WARCOM init sets it.
 DUWS_econ_throttle = 1;
 
 // OPCOM ticks per 1 AP of drip to OPFOR while it holds every zone, on top of the 30-minute payout. The payout

@@ -286,9 +286,9 @@ up to 90 AP per 30 minutes, and it stops while no human is connected, as the tic
 the wallet only, OPFOR's tier would ride on the 30-minute payout alone. If it all credited
 `WARCOM_opfor_ap_earned`, OPFOR would reach jets in under half the time the rungs were tuned for.
 `OPCOM_AP_DRIP_TIER` (0.1) of each drip AP also credits the earned counter, scaled by
-`DUWS_econ_throttle` as the payout's tier credit is, so a campaign past six zones does not climb faster
-than a six-zone one. On six zones held, OPFOR's tier income is about 107 AP per hour at the ~7 s
-ticks seen in play, which reaches armour in about 3.3 hours and jets in about 5.6.
+`DUWS_econ_throttle` as the payout's tier credit is, so a campaign past four zones does not climb faster
+than a four-zone one. On six zones held, OPFOR's tier income is about 87 AP per hour at the ~7 s
+ticks seen in play, which reaches armour in about 4.0 hours and jets in about 6.9.
 
 **Half of the drip follows the ground.** `DUWS_fnc_opcom_dripRate` (`fnc_economy_init.sqf`) keeps
 `OPCOM_AP_DRIP_FLOOR` (0.5) of the full rate whatever OPFOR holds, and scales the rest by the share of

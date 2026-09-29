@@ -36,7 +36,7 @@ publicVariable "WARCOM_createdZones";
 // Campaign-size income throttle from the ACTUAL zone count (gen can fall short of zones_number): factor 1
 // at or below the reference size, above it income grows as sqrt(zones) so 4x zones pay 2x -- a high
 // zones_number can't hand everyone a bigger war chest. k tunes the curve (1 flat, 0 linear).
-private _REF_ZONES = 6;
+private _REF_ZONES = 4;
 private _k = 0.5;
 DUWS_econ_throttle = (_REF_ZONES / ((count WARCOM_createdZones) max _REF_ZONES)) ^ _k;
 ["INFO", "ECON", format ["econ throttle %1 for %2 zones", DUWS_econ_throttle, count WARCOM_createdZones]] call fnc_log;
