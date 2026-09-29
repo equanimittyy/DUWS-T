@@ -463,16 +463,15 @@ The debug harness spends outside the pick and is not capped.
 |---|---|---|
 | `OPCOM_CAP_UNITS_PER_ZONE` (8) × zones | every hire source except a truck | every OPCOM unit alive except the supply trucks |
 | `OPCOM_CAP_GARRISON` (10) | a Garrison's zone | the combatants homed at that zone, the set its reserve pool fields |
-| `OPCOM_CAP_SUPPLY` (10) | every supply action | the trucks out on an errand |
-| `OPCOM_CAP_RAPPORT` (1) | Rapport | the trucks out on a Rapport run |
+| `OPCOM_SUPPLY_CLASS` (1 a class) | every supply action of the class | the trucks out on an errand of the class: town Reinforce and Fortify share one class, Rapport has its own, a standalone hardpoint and a Minefield share one, and a tower, OP, mortar or battery build has its own |
 | `OPCOM_CAP_HP_PER_ZONE` (12) × zones | every Build and Minefield | every standing OPFOR hardpoint of every type, towers, OPs and guns included, seeded ones included, and every build still siting or on its truck |
 | per type × zones | a Build or Minefield of that type | the same, by type, and by variant for a minefield ([§What the commander builds](#what-the-commander-builds)) |
 
-- **Supply trucks sit outside the unit cap.** The supply cap bounds the trucks in flight. If the trucks counted, a
+- **Supply trucks sit outside the unit cap.** The class cap bounds the trucks in flight. If the trucks counted, a
   full roster would stop every supply action.
-- **Rapport rests after a delivery.** When a Rapport delivers, a global cooldown rolled from `OPCOM_RAPPORT_COOLDOWN`
-  (60–360 ticks, 5–30 min) starts, and no Rapport is offered until it ends (`DUWS_opcom_rapportReadyTick`). A
-  courier that dies sets no cooldown.
+- **A supply class rests after a delivery.** When a truck delivers, a cooldown rolled from `OPCOM_SUPPLY_COOLDOWN`
+  (60–360 ticks, 5–30 min) starts on its class, and no action of that class is offered until it ends
+  (`DUWS_opcom_supplyReadyTick`). A truck that dies sets no cooldown.
 - **The garrison cap is a zone's.** Only a zone homes an OPCOM unit: a town is taken by a unit that guards it, never
   one that garrisons it ([§Attack](#attack-phase-5)).
 - **The hardpoint caps scale with the campaign's zone count,** because the seeded hardpoints count and the seed
@@ -1033,7 +1032,7 @@ zone) and OPFOR's zone and town income of roughly 40–80 AP per 30 min (`fnc_zo
 arrival, behind four actions: Rapport, standalone Build, and *town* Reinforce / Fortify
 ([§Shipped](#shipped-the-substrate-the-loop-drives)). The action takes a free truck, or hires one and tasks it in the same commit,
 whichever source scores better ([§Sourcing](#sourcing-hire-on-demand-phase-4d)). A town takes one supply truck at a time: while one drives to it, no supply action
-targets it. At most `OPCOM_CAP_SUPPLY` (10) trucks are out on an errand at once ([§Caps](#caps)). The AP is paid at commit but the result lands only when the *specific* bound truck
+targets it. One truck of each supply class is out on an errand at a time, and a class rests after each delivery ([§Caps](#caps)). The AP is paid at commit but the result lands only when the *specific* bound truck
 arrives — **kill it en route and the order fails, no refund** (interdiction is the counterplay). **Arrival is the
 only test**: the contest gate keeps OPCOM from ordering a buy into a fight, but a truck already driving is never
 recalled, so a town that turns contested behind it still takes the delivery. A Reinforce landing there returns its
@@ -1268,8 +1267,8 @@ restore clears before it replays them, and why belief is not among them — is
 [`campaign_persistence_plan.md` §The commander](../campaign_persistence_plan.md#the-commander).
 
 - The snapshot carries the archetype, the taskings with `DUWS_opcom_taskSeq`, the attacks with
-  `DUWS_opcom_attackSeq`, the attack cooldown (`DUWS_opcom_attackReadyTick`), the Rapport cooldown
-  (`DUWS_opcom_rapportReadyTick`), the tick, `DUWS_opcom_hqKnown`, `DUWS_opcom_fobsKnown` with `fobKeys`, the
+  `DUWS_opcom_attackSeq`, the attack cooldown (`DUWS_opcom_attackReadyTick`), the supply cooldowns
+  (`DUWS_opcom_supplyReadyTick`), the tick, `DUWS_opcom_hqKnown`, `DUWS_opcom_fobsKnown` with `fobKeys`, the
   mine variants and `DUWS_hpOpcomSeq`.
 - The save clears a tasking's live half: `grp` and `ferryPad` go to `""`, `status` to `virtual`, and a live group's
   strength and position are read into the record the way a stow reads them (`DUWS_fnc_campaignTaskings`). A
