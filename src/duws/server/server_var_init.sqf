@@ -928,7 +928,7 @@ OPCOM_MUSTER_HOLD = 0.4;
 // An attack under way fails below this ratio, on the muster bars' scale. Tune.
 OPCOM_ATTACK_BREAK = 0.2;
 // How long no assault or flank opens anywhere after one ends, rolled between the two. Tune.
-OPCOM_ATTACK_COOLDOWN = [240, 720];   // ticks; 20-60 min @ 5s tick
+OPCOM_ATTACK_COOLDOWN = [360, 720];   // ticks; 30-60 min @ 5s tick
 // The cells across an assault's staging line, a bucket of units each.
 OPCOM_ASSAULT_CELLS = 3;
 // The most units one attack binds across all its buckets. Tune.
