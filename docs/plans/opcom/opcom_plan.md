@@ -57,6 +57,12 @@ New work holds to:
 - **Belief, never truth.** The commander plans against belief; only the sensors read live player state.
 - **The engine resolves every fight**, and `P(win)` never dices one.
 - **State** is numbers, strings and arrays only, and every time counts in ticks off `DUWS_opcom_tick`.
+- **A unit streams in out of sight.** A de-virt stands `OPCOM_DEVIRT_MIN_DIST` (500 m) or more from every player, and
+  out of the sight of each one within `OPCOM_DEVIRT_SIGHT_RANGE` (1000 m); an aircraft stands the whole sight range
+  off. It tries the spread around its banked point, then points up to `OPCOM_DEVIRT_WALK` (1000 m) out, fanned away
+  from the nearest player; a bound ferry rider keeps to the spread, so it stays at its pickup
+  (`DUWS_fnc_opcom_devirtSpot`, `taskings/taskings/fnc_opcom_stream.sqf`). With no such spot it stays virtual and asks
+  again next tick. While BLUFOR within its K hold it virtual, it takes no zone and overruns no FOB.
 - **A lift is the commander's call, not the rider's.** A unit stopped at a water leg takes a ferry, a boat or a
   helicopter, the tick one is free or affordable (`fnc_opcom_ferry.sqf`), and a land-taxi — a truck, a car, an APC, an
   IFV or a transport helicopter — is sourced with the order it carries, when its set-down point lies more than
@@ -803,7 +809,7 @@ alone at `OPCOM_MUSTER_EXPIRY`.
   (`DUWS_fnc_siteTaken`): an OPFOR unit inside the radius, the zone's BLUFOR garrison beaten, tier 0 (none built)
   counting as beaten, and OPFOR outnumbering BLUFOR over the streaming ring, all for `DUWS_captureHold`. A live fight flips through the retake
   trigger; a virtual attacker flips it on the OPCOM tick against stored state once it has held the radius for
-  `DUWS_captureHold`, **and only at tier 0** — a zone the player has garrisoned has to be beaten, and the site
+  `DUWS_captureHold` with no BLUFOR within its K, **and only at tier 0** — a zone the player has garrisoned has to be beaten, and the site
   poller standing those men up is what renders the attacker to fight them. OPCOM sends that attack's contact
   report itself. The attacker garrisons the zone once it is virtual.
   A **town** is attacked on the same terms with one difference: it changes hands only by having its garrison
@@ -814,7 +820,7 @@ alone at `OPCOM_MUSTER_EXPIRY`.
   hands, so it falls with its officer (`hq_blu1`), and every attacker then guards where it stands, inside the radius
   or short of it. A **FOB** has no pool for OPFOR to home to either, so its attackers end the same way. It falls when
   overrun: an attacker, live or virtual, that has stood inside its radius for `DUWS_captureHold` with no BLUFOR in
-  the ring destroys the building, and `fnc_fob_destroyed` withdraws the respawn, the marker and the site. The hold
+  the ring destroys the building (a virtual one only with no BLUFOR within its K), and `fnc_fob_destroyed` withdraws the respawn, the marker and the site. The hold
   runs per FOB, once a tick after the task step (`DUWS_fnc_opcom_fobOverrun`), and restarts while any BLUFOR stand
   in the ring. While it runs, `DUWS_overrunHold` on the building closes fast travel to that FOB. A capture resolves its target zones first, then garrisoned towns,
   then the nearest base (`DUWS_fnc_opcom_captureKey`). **QRF** (`intercept`) — at the sighting's last known position the unit
