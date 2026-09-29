@@ -7,6 +7,7 @@ params ["_player", "_kind"];
 private _civ = _kind isEqualTo "civ";
 private _flag = ["DUWS_enemyDisguised", "DUWS_disguised"] select _civ;
 private _stampVar = ["DUWS_enemyDisguise_blownAt", "DUWS_disguise_blownAt"] select _civ;
+// An OPFOR uniform is a target to bandits, not a cover, so they break the enemy disguise on sight instead of judging it.
 private _watchSides = [[east], [east, resistance]] select _civ;
 private _warningKeys = [
     "STR_DUWS_T_DISGUISE_WARNING_1", "STR_DUWS_T_DISGUISE_WARNING_2", "STR_DUWS_T_DISGUISE_WARNING_3",
@@ -86,6 +87,10 @@ while {alive _player && {_player getVariable [_flag, false]}} do {
 
     if (_seen && {_inBand} && {[getPosATL _player, 0] call fnc_disguise_atEnemySite}) exitWith {
         ["STR_DUWS_T_DISGUISE_BROKEN_SITE", true] call _fnc_break;
+    };
+
+    if (!_civ && {(_spotters findIf { side group _x == resistance }) >= 0}) exitWith {
+        ["STR_DUWS_T_ENEMY_DISGUISE_BROKEN_BANDIT", true] call _fnc_break;
     };
 
     private _rate = 1;

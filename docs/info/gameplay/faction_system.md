@@ -329,7 +329,7 @@ WBK zombies also spawn on INDEPENDENT (`server/civilian/fnc_civ_handler_wbk.sqf:
 zombies never fight each other. A zone's enemy trigger counts EAST only
 (`server/init_zones/fnc_createzone.sqf:155`), so bandits neither hold a zone nor block its capture.
 
-Bandits watch a civilian disguise like OPFOR
+Bandits watch a civilian disguise like OPFOR and break an enemy disguise on sight
 ([`disguise.md`](disguise.md#bandits)).
 
 ## Adding a faction

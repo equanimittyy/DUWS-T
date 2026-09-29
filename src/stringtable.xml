@@ -6929,6 +6929,18 @@
                 <Chinese>攻擊時被目睹。</Chinese>
                 <Spanish>Te vieron atacando.</Spanish>
             </Key>
+            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_BROKEN_BANDIT">
+                <Original>Spotted by bandits.</Original>
+                <English>Spotted by bandits.</English>
+                <Chinesesimp>被强盗发现。</Chinesesimp>
+                <German>Von Banditen entdeckt.</German>
+                <Polish>Zauważony przez bandytów.</Polish>
+                <Czech>Spatřen bandity.</Czech>
+                <Russian>Тебя заметили бандиты.</Russian>
+                <French>Repéré par des bandits.</French>
+                <Chinese>被強盜發現。</Chinese>
+                <Spanish>Te vieron unos bandidos.</Spanish>
+            </Key>
             <Key ID="STR_DUWS_T_ENEMY_DISGUISE_ENDED_UNIFORM">
                 <Original>Disguise off: You are no longer in an enemy uniform.</Original>
                 <English>Disguise off: You are no longer in an enemy uniform.</English>

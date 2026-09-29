@@ -1,9 +1,9 @@
 The player has two disguises. The civilian disguise makes OPFOR and bandits ignore the player while
 the player looks like a civilian. The enemy disguise makes OPFOR ignore the player while the player
-wears a looted OPFOR uniform. Both set the player captive on the server, which is the only reliable
-"do not shoot" switch in the engine, and one monitor sets it back when cover breaks. The player starts
-either one from the disguise panel (`client/dialog/fnc_disguise_menu.sqf`). Paths are relative to
-`src/duws/`.
+wears a looted OPFOR uniform, until a bandit sees the player ([Bandits](#bandits)). Both set the
+player captive on the server, which is the only reliable "do not shoot" switch in the engine, and one
+monitor sets it back when cover breaks. The player starts either one from the disguise panel
+(`client/dialog/fnc_disguise_menu.sqf`). Paths are relative to `src/duws/`.
 
 | Part | File |
 |---|---|
@@ -35,7 +35,7 @@ Each activation refuses on the first check that fails, in this order.
 | Cover was blown less than 600 s ago | `STR_DUWS_T_DISGUISE_COOLDOWN_FMT` |
 | `CIV_PRESENCE` is `NONE`, `RAVAGE` or `WBK` | `STR_DUWS_T_DISGUISE_CANT_ZOMBIE` |
 | A disguise monitor still runs for the player | `STR_DUWS_T_DISGUISE_CANT_OTHER` |
-| An OPFOR unit hunts or spots the player | `STR_DUWS_T_DISGUISE_CANT_HUNTED` |
+| An OPFOR unit or a bandit hunts or spots the player | `STR_DUWS_T_DISGUISE_CANT_HUNTED` |
 | The OPFOR kit scan has not finished | `STR_DUWS_T_ENEMY_DISGUISE_CANT_NOKIT` |
 | The player does not wear an OPFOR uniform | `STR_DUWS_T_ENEMY_DISGUISE_CANT_UNIFORM` |
 
@@ -62,8 +62,8 @@ A vest, headgear or backpack has no side in config. It passes when the slot is e
 long after contact ends. The gate cannot be shorter than 5 s, because the engine re-fixes a watched
 target only every few seconds
 ([gotchas](../architecture/arma_engine_gotchas.md#knowsabout-is-a-decaying-knowledge-scalar-not-a-current-visibility-flag)).
-The civilian activation calls it with OPFOR and bandits, the enemy activation with OPFOR only. The
-monitor does not call it, because a 5 s fix is too slow for a 0.5 s meter.
+Both activations call it with OPFOR and bandits; the monitor does not, because a 5 s fix is too slow
+for a 0.5 s meter.
 
 ## OPCOM sensing
 
@@ -148,6 +148,7 @@ The monitor checks these every 0.5 s. Each break stamps the cooldown.
 | Suspicion | Both | the meter reaches 100 while a unit spots the player |
 | Site | Civilian | a unit spots the player within a site ring |
 | Attack | Both | a unit spots the player at a shot, throw or placed charge, or within `DISGUISE_FIRE_WINDOW` (5 s) after it |
+| Bandit | Enemy | a bandit spots the player |
 | Kit | Civilian | `fnc_disguise_civFault` returns a fault |
 
 The enemy disguise ends without a stamp when the player wears a uniform that is not in the OPFOR
@@ -186,6 +187,12 @@ town reputation does not affect the disguise.
 
 Bandits ([`faction_system.md`](faction_system.md#bandits)) watch the civilian disguise the same way as
 OPFOR. They count in the activation checks, the meter, the decay and every break.
+
+An OPFOR uniform is a target to a bandit, not a cover. The first bandit that spots a player in the
+enemy disguise ([spotting](#the-suspicion-meter)) breaks cover at once and stamps the cooldown. Captive
+ends, so the bandits then engage the player. A bandit that hunts or spots the player also refuses the
+activation, so the disguise cannot start and break on its first tick. Bandits do not raise the enemy
+meter or slow its decay.
 
 ## The OPFOR kit
 
