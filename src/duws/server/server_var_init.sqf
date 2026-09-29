@@ -1031,7 +1031,7 @@ OPCOM_AP_DRIP_TICKS = 2;
 OPCOM_AP_DRIP_FLOOR = 0.5;
 // The share of the drip that also climbs OPFOR's tier, scaled by DUWS_econ_throttle like the payout's. The rest is
 // wallet only: the drip is most of what OPCOM earns, and all of it would reach jets in under half the tuned time.
-OPCOM_AP_DRIP_TIER = 0.25;
+OPCOM_AP_DRIP_TIER = 0.1;
 
 insurgent_mode_enable = false; publicVariable "insurgent_mode_enable";
 
