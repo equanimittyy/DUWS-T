@@ -484,7 +484,7 @@ the job, and at their feet if it does not fit (`fnc_loot_grant`) — for Raise F
 met the target. A reporter who has left the session is paid at the giver's feet instead. The reputation goes to the giver's town (`fnc_town_rep_adjust`). A cancel ends the mission with no pay
 and no other cost, except that money given to Raise Funds is not refunded.
 
-**The offer is a flat 75 %, not the reaction curve** (`fnc_civ_mission_request.sqf`). A hostile town is
+**The offer is a flat 90 %, not the reaction curve** (`fnc_civ_mission_request.sqf`). A hostile town is
 where the player most needs the reputation that a mission pays, and the curve offers nothing at -20. A
 full cap is a refusal, and like every refusal it spends the civilian.
 

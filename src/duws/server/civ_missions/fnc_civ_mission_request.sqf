@@ -6,7 +6,7 @@
 //   _row    "WORK" | "CANCEL"
 //   _force  debug only: skips the roll and the cap.
 #define CIV_MISSION_CAP 3
-#define CIV_MISSION_OFFER_CHANCE 0.75
+#define CIV_MISSION_OFFER_CHANCE 0.9
 if (!isServer) exitWith {};
 params ["_civ", "_caller", ["_row", "WORK"], ["_force", false]];
 if (isNull _civ || {isNull _caller} || {!alive _civ}) exitWith {};
