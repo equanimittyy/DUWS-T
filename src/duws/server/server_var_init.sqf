@@ -591,8 +591,8 @@ AOI_TOWN_REACH  = 2000;   // added to a banded town's civ_radius
 // Server-only, like every DISGUISE_* value, so none is broadcast.
 DISGUISE_CIV_HP_RING = 50;
 DISGUISE_CIV_SITE_WARN = 100;
-// An OPFOR unit spots a disguised player within this range and cone (degrees off its eye direction),
-// at this checkVisibility or more.
+// An OPFOR unit or a bandit spots a disguised player within this range and cone (degrees off its eye
+// direction), at this checkVisibility or more.
 DISGUISE_SPOT_RANGE = 200;
 DISGUISE_SPOT_CONE = 85;
 DISGUISE_SPOT_VIS = 0.5;
@@ -605,7 +605,7 @@ DISGUISE_ENEMY_RATE = 0.5;
 DISGUISE_BODY_MULT = 4;
 DISGUISE_CROUCH_MULT = 1.1;
 DISGUISE_PRONE_MULT = 1.3;
-// Unseen suspicion falls at this share of its rate while a living OPFOR unit is this near, so ducking
+// Unseen suspicion falls at this share of its rate while a living observer is this near, so ducking
 // out of sight beside a patrol does not clear it as fast as walking away.
 DISGUISE_DECAY_NEAR_RANGE = 50;
 DISGUISE_DECAY_NEAR_SCALE = 1/3;

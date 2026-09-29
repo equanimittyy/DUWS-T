@@ -15,7 +15,7 @@ if (_cooldownRemaining > 0) exitWith {
 };
 if (CIV_PRESENCE in ["NONE", "RAVAGE", "WBK"]) exitWith { ["STR_DUWS_T_DISGUISE_CANT_ZOMBIE"] call _fnc_refuse };
 if (_player getVariable ["DUWS_disguise_monitorRunning", false]) exitWith { ["STR_DUWS_T_DISGUISE_CANT_OTHER"] call _fnc_refuse };
-if ([_player] call fnc_disguise_hunted || {([_player] call fnc_disguise_spotters) isNotEqualTo []}) exitWith {
+if ([_player, [east]] call fnc_disguise_hunted || {([_player, [east]] call fnc_disguise_spotters) isNotEqualTo []}) exitWith {
     ["STR_DUWS_T_DISGUISE_CANT_HUNTED"] call _fnc_refuse;
 };
 if (isNil "DUWS_enemyKit") exitWith { ["STR_DUWS_T_ENEMY_DISGUISE_CANT_NOKIT"] call _fnc_refuse };

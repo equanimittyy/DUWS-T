@@ -7,6 +7,7 @@ params ["_player", "_kind"];
 private _civ = _kind isEqualTo "civ";
 private _flag = ["DUWS_enemyDisguised", "DUWS_disguised"] select _civ;
 private _stampVar = ["DUWS_enemyDisguise_blownAt", "DUWS_disguise_blownAt"] select _civ;
+private _watchSides = [[east], [east, resistance]] select _civ;
 private _warningKeys = [
     "STR_DUWS_T_DISGUISE_WARNING_1", "STR_DUWS_T_DISGUISE_WARNING_2", "STR_DUWS_T_DISGUISE_WARNING_3",
     "STR_DUWS_T_DISGUISE_WARNING_4", "STR_DUWS_T_DISGUISE_WARNING_5", "STR_DUWS_T_DISGUISE_WARNING_6",
@@ -74,7 +75,9 @@ while {alive _player && {_player getVariable [_flag, false]}} do {
     };
     if (_stop) exitWith {};
 
-    private _dists = [_player] call fnc_disguise_spotters;
+    private _spotters = [_player, [east, resistance]] call fnc_disguise_spotters;
+    private _watchers = _spotters select { side group _x in _watchSides };
+    private _dists = _watchers apply { (eyePos _x) vectorDistance (eyePos _player) };
     private _seen = _dists isNotEqualTo [];
 
     if (_seen && {_now - (_player getVariable ["DUWS_disguise_firedAt", -1e6]) <= DISGUISE_FIRE_WINDOW}) exitWith {
@@ -101,7 +104,7 @@ while {alive _player && {_player getVariable [_flag, false]}} do {
             _decayScale = 0;
         } else {
             if (((_player nearEntities [["AllVehicles"], DISGUISE_DECAY_NEAR_RANGE]) findIf {
-                ((crew _x) findIf { alive _x && {side group _x == east} }) >= 0
+                ((crew _x) findIf { alive _x && {side group _x in _watchSides} }) >= 0
             }) >= 0) then { _decayScale = DISGUISE_DECAY_NEAR_SCALE };
         };
     };
@@ -111,7 +114,7 @@ while {alive _player && {_player getVariable [_flag, false]}} do {
     if (_seen && {_meter >= 100}) exitWith {
         ["STR_DUWS_T_DISGUISE_BROKEN_SUSPICION", true] call _fnc_break;
     };
-    if (_civ && {_prev < 50} && {_meter >= 50}) then {
+    if (_civ && {_prev < 50} && {_meter >= 50} && {(_watchers findIf { side group _x == east }) >= 0}) then {
         [localize "STR_DUWS_T_DISGUISE_OPFOR_SPEAKER", localize (selectRandom _warningKeys)] remoteExec ["fnc_duws_dialogue", _player];
     };
     // Only the owner reads the meter, and only a new bar segment changes what it draws; a public

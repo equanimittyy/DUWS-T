@@ -1,8 +1,9 @@
-The player has two disguises. The civilian disguise makes OPFOR ignore the player while the player
-looks like a civilian. The enemy disguise does the same while the player wears a looted OPFOR
-uniform. Both set the player captive on the server, which is the only reliable "do not shoot" switch
-in the engine, and one monitor sets it back when cover breaks. The player starts either one from the
-disguise panel (`client/dialog/fnc_disguise_menu.sqf`). Paths are relative to `src/duws/`.
+The player has two disguises. The civilian disguise makes OPFOR and bandits ignore the player while
+the player looks like a civilian. The enemy disguise makes OPFOR ignore the player while the player
+wears a looted OPFOR uniform. Both set the player captive on the server, which is the only reliable
+"do not shoot" switch in the engine, and one monitor sets it back when cover breaks. The player starts
+either one from the disguise panel (`client/dialog/fnc_disguise_menu.sqf`). Paths are relative to
+`src/duws/`.
 
 | Part | File |
 |---|---|
@@ -23,8 +24,8 @@ Each activation refuses on the first check that fails, in this order.
 |---|---|
 | Cover was blown less than 300 s ago | `STR_DUWS_T_DISGUISE_COOLDOWN_FMT` |
 | A disguise monitor still runs for the player | `STR_DUWS_T_DISGUISE_CANT_OTHER` |
-| An OPFOR unit hunts the player (`fnc_disguise_hunted`) or spots the player | `STR_DUWS_T_DISGUISE_CANT_HUNTED` |
-| A living OPFOR soldier is within `50 + random 30` m | `STR_DUWS_T_DISGUISE_CANT_ENEMY_NEAR` |
+| An OPFOR unit or a bandit hunts the player (`fnc_disguise_hunted`) or spots the player | `STR_DUWS_T_DISGUISE_CANT_HUNTED` |
+| A living OPFOR soldier or bandit is within `50 + random 30` m | `STR_DUWS_T_DISGUISE_CANT_ENEMY_NEAR` |
 | The player is within a site ring (below) | `STR_DUWS_T_DISGUISE_CANT_SITE` |
 | `CIV_PRESENCE` is `NONE`, `RAVAGE` or `WBK` | `STR_DUWS_T_DISGUISE_CANT_NOCIV`, `STR_DUWS_T_DISGUISE_CANT_ZOMBIE` |
 | The kit fails a civilian rule | `STR_DUWS_T_DISGUISE_CANT_<fault>` |
@@ -55,13 +56,14 @@ A vest, headgear or backpack has no side in config. It passes when the slot is e
 
 ## The hunted test
 
-`server/disguise/fnc_disguise_hunted.sqf` returns true when a living OPFOR unit within 300 m, crews
-included, has a `nearTargets` fix on the player that is 5 s old or less. It does not read
+`server/disguise/fnc_disguise_hunted.sqf` returns true when a living unit of the given sides within
+300 m, crews included, has a `nearTargets` fix on the player that is 5 s old or less. It does not read
 `knowsAbout`, because that value is side-wide and decays over minutes, so it reads a player as hunted
 long after contact ends. The gate cannot be shorter than 5 s, because the engine re-fixes a watched
 target only every few seconds
 ([gotchas](../architecture/arma_engine_gotchas.md#knowsabout-is-a-decaying-knowledge-scalar-not-a-current-visibility-flag)).
-Both activations call it; the monitor does not, because a 5 s fix is too slow for a 0.5 s meter.
+The civilian activation calls it with OPFOR and bandits, the enemy activation with OPFOR only. The
+monitor does not call it, because a 5 s fix is too slow for a 0.5 s meter.
 
 ## OPCOM sensing
 
@@ -84,7 +86,8 @@ stays and decays like that of any group that nobody sees.
 
 Each disguised player has a meter from 0 to 100 on the server. The monitor updates it every 0.5 s.
 
-**Spotting.** An OPFOR unit spots the player when all three of these are true
+**Spotting.** The observers are OPFOR and bandits for the civilian disguise, and OPFOR for the enemy
+disguise. An observer spots the player when all three of these are true
 (`fnc_disguise_spotters`):
 
 1. It is alive and within `DISGUISE_SPOT_RANGE` (200 m). Crews of vehicles and static weapons count.
@@ -119,7 +122,7 @@ on foot is never an empty vehicle slot. The floor is capped at 95, so the floor 
 cover.
 
 **Decay.** While no unit spots the player, the meter holds for `DISGUISE_DECAY_DELAY` (5 s) after the
-last spotter loses sight. Then it falls 5 per second, down to the floor. While a living OPFOR unit is
+last spotter loses sight. Then it falls 5 per second, down to the floor. While a living observer is
 within `DISGUISE_DECAY_NEAR_RANGE` (50 m), crews included, it falls at `DISGUISE_DECAY_NEAR_SCALE`
 (a third of) that rate, whether or not that unit can see the player.
 
@@ -159,8 +162,9 @@ that tick would get no monitor.
 A `FiredMan` handler only stamps the time of the shot. The monitor decides at the next tick, because
 only a unit that spots the player breaks cover.
 
-When the meter passes 50, a civilian hears one of the `STR_DUWS_T_DISGUISE_WARNING_*` lines from an
-OPFOR speaker.
+When the meter passes 50 while an OPFOR unit spots the player, a civilian hears one of the
+`STR_DUWS_T_DISGUISE_WARNING_*` lines from an OPFOR speaker. A bandit gives no warning, because the
+lines are a soldier's.
 
 ### Enemy sites
 
@@ -177,6 +181,11 @@ shows one hint, and the player gets the hint again only after leaving the band a
 Revealed and hidden sites count alike. A hidden site streams in live and visible, and a player who
 comes near reveals it anyway. An OPFOR-held town is in neither registry, so it is safe ground, and
 town reputation does not affect the disguise.
+
+## Bandits
+
+Bandits ([`faction_system.md`](faction_system.md#bandits)) watch the civilian disguise the same way as
+OPFOR. They count in the activation checks, the meter, the decay and every break.
 
 ## The OPFOR kit
 

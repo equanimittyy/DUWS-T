@@ -52,7 +52,7 @@ fnc_disguise_civFault = {
 
 fnc_disguise_enemyNear = {
     params ["_player", "_radius"];
-    ((_player nearEntities [["CAManBase"], _radius]) findIf { side _x == EAST && alive _x }) >= 0
+    ((_player nearEntities [["CAManBase"], _radius]) findIf { side _x in [east, resistance] && alive _x }) >= 0
 };
 
 // Every OPFOR site, revealed or not: a hidden site streams in live, and a player who comes near reveals
@@ -101,7 +101,7 @@ if (_cooldownRemaining > 0) exitWith {
 if (_player getVariable ["DUWS_disguise_monitorRunning", false]) exitWith {
     [_player, "STR_DUWS_T_DISGUISE_CANT_OTHER"] call fnc_disguise_hintFail;
 };
-if ([_player] call fnc_disguise_hunted || {([_player] call fnc_disguise_spotters) isNotEqualTo []}) exitWith {
+if ([_player, [east, resistance]] call fnc_disguise_hunted || {([_player, [east, resistance]] call fnc_disguise_spotters) isNotEqualTo []}) exitWith {
     [_player, "STR_DUWS_T_DISGUISE_CANT_HUNTED"] call fnc_disguise_hintFail;
 };
 if ([_player, 50 + random 30] call fnc_disguise_enemyNear) exitWith {
