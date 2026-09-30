@@ -270,6 +270,8 @@ array `ALiVE_orbatCreator_loadout`. CFP uses this export. The other config entri
 bare weapons, only the loaded magazines, and empty containers. The export also writes an init handler
 that applies the array 0.4 s or more after the spawn, unless the unit has the variable
 `ALiVE_OverrideLoadout`. The handler is plain SQF, so the faction does not need ALiVE at run time.
+The campaign restore sets that variable on each task-force man before it applies his saved loadout
+(`server/persistence/fnc_campaign_restore.sqf`), so a load keeps the saved kit.
 
 Thus a spawned unit wears the full kit, but `getUnitLoadout` on its class gives the bare kit.
 `shared/faction_lib/fnc_faction_class_loadout.sqf` gives the array when the class has one, and

@@ -505,6 +505,8 @@ DUWS_fnc_restoreTaskforces = {
             _x params ["_class", "_loadout", "_damage", "_skill", "_pos", "_seat"];
             if (isClass (configFile >> "CfgVehicles" >> _class)) then {
                 private _man = _group createUnit [_class, ASLToAGL _pos, [], 0, "CAN_COLLIDE"];
+                // Else an ALiVE ORBAT Creator class's init handler overwrites the saved kit 0.4 s after spawn.
+                _man setVariable ["ALiVE_OverrideLoadout", true];
                 _man setUnitLoadout _loadout;
                 _man setDamage _damage;
                 _man setSkill _skill;
