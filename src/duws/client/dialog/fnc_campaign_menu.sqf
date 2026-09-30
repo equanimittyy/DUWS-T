@@ -114,8 +114,8 @@
   [2108, _defBluAp] call _setDefault;
 
   // OPFOR starting tier -- same ladder.
-  [2109, "0", "0"] call _addOpt;
-  private _defOpAp = [2109, format ["60 (%1)", localize "STR_DUWS_T_tiername2"], "60"] call _addOpt;
+  private _defOpAp = [2109, "0", "0"] call _addOpt;
+  [2109, format ["60 (%1)", localize "STR_DUWS_T_tiername2"], "60"] call _addOpt;
   [2109, format ["150 (%1)", localize "STR_DUWS_T_tiername3"], "150"] call _addOpt;
   [2109, format ["350 (%1)", localize "STR_DUWS_T_tiername4"], "350"] call _addOpt;
   [2109, format ["600 (%1)", localize "STR_DUWS_T_tiername5"], "600"] call _addOpt;
