@@ -201,7 +201,7 @@ magnitude; above that the best candidate takes most of the probability, and a hi
 | Tower / OP / mortar / battery Build | one action each, under the type's cap, target the band cell the siting pass picks by the type's own rule ([§Asset siting](#asset-siting)) |
 | Minefield | one action per variant (AT, AP), target the band cell the siting pass picks by traffic, a belt 150 m deep and 500 m to 1.5 km long |
 | Attack assault, Attack flank | while no assault or flank is open and the attack cooldown has ended, each BLUFOR-held zone, each town they have garrisoned, the HQ once found (`DUWS_opcom_hqKnown`) while its officer lives, BLUFOR hold no zone, OPFOR stand at Armour or above (`WARCOM_opfor_tier` 4) and BLUFOR at Mechanised or above (`WARCOM_blufor_tier` 3), and each FOB once found (`DUWS_opcom_fobsKnown`) that a capture at its centre takes, so not one inside a held zone or a garrisoned town; and each attack of the row's kind still in buildup that needs more units; flank only below band 2 and from the target's own landmass, and a source across water only as infantry ([§Attack](#attack-phase-5)) |
-| Attack QRF | each cluster of BLUFOR sightings inside OPFOR's area of influence with no QRF on it, and each QRF still in buildup that needs more units ([§QRF](#qrf-an-attack-on-a-moving-cluster)) |
+| Attack QRF | each cluster of BLUFOR sightings inside OPFOR's area of influence with no QRF on it and no local defense at the ideal bar, and each QRF still in buildup that needs more units ([§QRF](#qrf-an-attack-on-a-moving-cluster)) |
 | Patrol | each of `OPCOM_PATROL_SAMPLES` (3) sampled stale cells, one unit apiece, taken by the recon or land combatant, free or hired, that scores best |
 | Probe | each assault or flank target whose 3×3 block reads stale and has no probe already on it, and that an Attack can source or a buildup stages for, one unit apiece, sourced from Patrol's rows |
 | Garrison | each open zone under the garrison cap ([§Caps](#caps)), taken by the combatant, free or hired, healthy or worn, that scores best |
@@ -719,7 +719,7 @@ to know all of them.
 |---|---|---|---|
 | `attack_assault` | every band from 0.5 | `attacker` in 1–3 buckets on a 3×1 line, one per cell | every bucket at once — one wave, never a dribble |
 | `attack_flank` | band 0.5–2, a dry rally and a dry jump-off on some side | `fix` at the centre of a 3×1 line, `maneuver` in 1–2 buckets beside it | every bucket at launch; each `maneuver` hooks to its jump-off and closes once `fix` reads `engaged`, is lost or has ended its fight |
-| `attack_qrf` | a sighting cluster with no QRF on it | `attacker` in 1 bucket, with no rally | at once, on `intercept` |
+| `attack_qrf` | a sighting cluster with no QRF on it and no local defense at the ideal bar | `attacker` in 1 bucket, with no rally | at once, on `intercept` |
 
 Each row's roles are an entry of `DUWS_opcom_attackRoles` (`taskings/actions/fnc_opcom_attack.sqf`), keyed by the record's
 kind, `assault` or `flank`. A QRF's one bucket is written by its sweep (`DUWS_fnc_opcom_qrfSweep`), since it has no
@@ -840,6 +840,9 @@ time, and no-retreat turns that into defeat in detail.
   muster bars already read (`DUWS_fnc_opcom_qrfSweep`, `appraisal/fnc_opcom_commit.sqf`). The strongest sighting
   keys the record, and the attack follows it each tick (`DUWS_fnc_opcom_qrfFollow`). A lead that is no longer
   believed drops a QRF still in buildup. A sighting within a cell of a standing QRF draws no second one.
+- **Local defense at the ideal bar draws no QRF.** The sweep opens none where the lead sighting's 3×3 block reads
+  OPFOR's own force at `OPCOM_MUSTER_IDEAL` or better against the block's BLUFOR force, and no weaker sighting within
+  a cell of that lead opens one either. A QRF already open keeps its muster and its joins.
 - **A QRF musters where its units stand.** A rally about a target that moves is stale before the units reach it.
   It musters on the same bars as any attack, over `OPCOM_QRF_EXPIRY` (6 ticks, 30 s) in place of
   `OPCOM_MUSTER_EXPIRY`. Its open sends a package filled to the ideal bar, so where the sources exist it launches on
@@ -970,7 +973,7 @@ appraisal already bought ([§Sourcing](#sourcing-hire-on-demand-phase-4d)). Spen
 | Action | Target | Sink | Taskings |
 |---|---|---|---|
 | Attack | a BLU-held zone | tasking-spawn | 1–N (assault or flank) |
-| QRF | a cluster of BLUFOR sightings inside OPFOR's area of influence | tasking-spawn | 1–N |
+| QRF | a cluster of BLUFOR sightings inside OPFOR's area of influence that local defense does not hold at the ideal bar | tasking-spawn | 1–N |
 | Rapport | a town above −20 and at or below 0 inside OPFOR's area of influence (needs `supply`) | tasking-spawn | 1 courier |
 | Reinforce | an own depleted zone / town garrison | strength purchase | 0 zone / 1 truck town |
 | Patrol | a recon's or a land combatant's line over stale valuable cells | tasking-spawn | 1 |
