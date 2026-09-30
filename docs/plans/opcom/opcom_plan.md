@@ -470,7 +470,7 @@ The debug harness spends outside the pick and is not capped.
 | Cap | Drops | Counts |
 |---|---|---|
 | `OPCOM_CAP_UNITS_PER_ZONE` (8) × zones | every hire source except a truck | every OPCOM unit alive except the supply trucks |
-| `OPCOM_CAP_GARRISON` (10) | a Garrison's zone | the combatants homed at that zone, the set its reserve pool fields |
+| `OPCOM_CAP_GARRISON` (2) | a Garrison's zone | the combatants homed at that zone, the set its reserve pool fields |
 | `OPCOM_SUPPLY_CLASS` (1 a class) | every supply action of the class | the trucks out on an errand of the class: town Reinforce and Fortify share one class, Rapport has its own, a standalone hardpoint and a Minefield share one, and a tower, OP, mortar or battery build has its own |
 | `OPCOM_CAP_HP_PER_ZONE` (12) × zones | every Build and Minefield | every standing OPFOR hardpoint of every type, towers, OPs and guns included, seeded ones included, and every build still siting or on its truck |
 | per type × zones | a Build or Minefield of that type | the same, by type, and by variant for a minefield ([§What the commander builds](#what-the-commander-builds)) |
