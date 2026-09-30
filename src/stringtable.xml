@@ -4583,6 +4583,18 @@
                 <French>Parcours annulé. Aucune récompense accordée.</French>
                 <Spanish>Carrera cancelada. No se han concedido recompensas.</Spanish>
             </Key>
+            <Key ID="STR_DUWS_KILLHOUSE_RUN_BUSY">
+                <Original>A run is already in progress. Clear the Range to end it.</Original>
+                <English>A run is already in progress. Clear the Range to end it.</English>
+                <Chinesesimp>已有训练正在进行。清空靶场即可结束该训练。</Chinesesimp>
+                <Chinese>已有訓練正在進行。清空靶場即可結束該訓練。</Chinese>
+                <German>Ein Lauf ist bereits im Gange. Räume den Schießstand, um ihn zu beenden.</German>
+                <Polish>Przebieg już trwa. Wyczyść strzelnicę, aby go zakończyć.</Polish>
+                <Czech>Běh už probíhá. Pro jeho ukončení vyčisti střelnici.</Czech>
+                <Russian>Забег уже идёт. Очисти полигон, чтобы его завершить.</Russian>
+                <French>Un parcours est déjà lancé. Nettoyez le stand pour y mettre fin.</French>
+                <Spanish>Ya hay una carrera en marcha. Limpia el campo de tiro para terminarla.</Spanish>
+            </Key>
             <Key ID="STR_DUWS_KILLHOUSE_TELEPORT_A">
                 <Original>Killhouse A</Original>
                 <English>Killhouse A</English>

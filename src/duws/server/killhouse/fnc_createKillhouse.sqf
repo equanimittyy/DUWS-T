@@ -153,12 +153,9 @@ killhouse_srv_clear_all = {
 // tick. Holding the script handle to terminate would be the obvious alternative, but SCRIPT has no serialized form and the mission namespace is written into save games.
 killhouse_srv_end_run = {
     if (!isServer) exitWith {};
-    params [["_announce", true]];
     if !(missionNamespace getVariable ["killhouse_run_active", false]) exitWith {};
     missionNamespace setVariable ["killhouse_run_active", false];
-    if (_announce) then {
-        [localize "STR_DUWS_KILLHOUSE_TRAINING_CANCELLED"] call killhouse_srv_hint;
-    };
+    [localize "STR_DUWS_KILLHOUSE_TRAINING_CANCELLED"] call killhouse_srv_hint;
 };
 
 killhouse_srv_spawn_contacts = {
@@ -233,7 +230,19 @@ killhouse_srv_start_run = {
     private _allSlots = missionNamespace getVariable "killhouse_targetData";
     if (isNil "_allSlots") exitWith {};
 
-    [false] call killhouse_srv_end_run;   // silent: a new run supersedes, it does not cancel
+    // Unscheduled, since a remoteExec'd body runs scheduled: a second start landing while this one is suspended mid-spawn would put two runs' contacts in the course.
+    // A new id with the flag, or a cancelled run's thread still asleep counts this run as its own and pays it twice; a number so it serializes into a save.
+    private _runId = 0;
+    isNil {
+        if !(missionNamespace getVariable ["killhouse_run_active", false]) then {
+            missionNamespace setVariable ["killhouse_run_active", true];
+            _runId = (missionNamespace getVariable ["killhouse_run_id", 0]) + 1;
+            missionNamespace setVariable ["killhouse_run_id", _runId];
+        };
+    };
+    if (_runId == 0) exitWith {
+        (localize "STR_DUWS_KILLHOUSE_RUN_BUSY") remoteExec ["hint", remoteExecutedOwner];
+    };
     call killhouse_srv_clear_all;
 
     private _centerX = missionNamespace getVariable "killhouse_centerX";
@@ -260,14 +269,8 @@ killhouse_srv_start_run = {
     _slots = _slots select [0, [killhouse_total_challenge, killhouse_total_training] select (_mode == "TRAINING")];
     private _total = count _slots;
     // Without this a run with no usable row would read as "none alive" on the first pass and pay the reward for a run that never happened.
-    if (_total < 1) exitWith {};
+    if (_total < 1) exitWith { missionNamespace setVariable ["killhouse_run_active", false]; };
 
-    // Supersede token: clearing the active flag alone does not stop the outgoing thread, which can
-    // wake from its sleep after this function sets the flag back true, count the new run as its own
-    // and pay it twice. Each run captures its own id and stops once it is no longer current; a number so it still serializes into a save.
-    private _runId = (missionNamespace getVariable ["killhouse_run_id", 0]) + 1;
-    missionNamespace setVariable ["killhouse_run_id", _runId];
-    missionNamespace setVariable ["killhouse_run_active", true];
     call killhouse_srv_bell;
     [_mode, _slots] call killhouse_srv_spawn_contacts;
 
@@ -328,7 +331,7 @@ publicVariable "killhouse_srv_spawn_enemies";
 
 killhouse_srv_cleanup = {
     if (!isServer) exitWith {};
-    [true] call killhouse_srv_end_run;
+    call killhouse_srv_end_run;
     call killhouse_srv_clear_all;
     [localize "STR_DUWS_T_CLEANUP_DONE"] call killhouse_srv_hint;
 };
