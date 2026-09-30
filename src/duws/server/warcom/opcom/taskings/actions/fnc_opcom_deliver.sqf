@@ -96,11 +96,6 @@ DUWS_fnc_opcom_deliver = {
     params ["_t"];
     (_t get "errand") params [["_kind", ""], "_arg", ["_spec", ""], ["_refund", 0]];
     ["INFO", "OPCOM", format ["deliver: tasking %1 lands %2 at %3", _t get "id", _t get "errand", _t get "target"]] call fnc_log;
-    private _class = [_kind, _spec] call DUWS_fnc_opcom_supplyClass;
-    OPCOM_SUPPLY_COOLDOWN params ["_min", "_max"];
-    private _n = _min + floor random (_max - _min + 1);
-    DUWS_opcom_supplyReadyTick set [_class, DUWS_opcom_tick + _n];
-    ["INFO", "OPCOM", format ["deliver: no %1 truck for %2 ticks", _class, _n]] call fnc_log;
     switch (_kind) do {
         case "reinforce": { [_arg, "opcom_reinforce"] call fnc_town_garrison_reinforce };
         case "fortify": { [_arg, "opcom_fortify"] call fnc_town_garrison_fortify };

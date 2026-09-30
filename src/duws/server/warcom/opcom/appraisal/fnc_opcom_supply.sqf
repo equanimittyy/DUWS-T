@@ -51,6 +51,13 @@ DUWS_fnc_opcom_supplyRun = {
     private _t = [_src] call DUWS_fnc_opcom_raise;
     if (isNil "_t") exitWith { false };
     private _ok = [_t, "errand", _dest, "", _errand] call fnc_opcom_task;
-    if (!_ok) then { [_src, _t] call DUWS_fnc_opcom_dismiss };
-    _ok
+    if (!_ok) exitWith { [_src, _t] call DUWS_fnc_opcom_dismiss; false };
+    // Rolled at the order, not the delivery: killing a courier must not open the class to the next one at once.
+    _errand params ["_kind", "", ["_spec", ""]];
+    private _class = [_kind, _spec] call DUWS_fnc_opcom_supplyClass;
+    OPCOM_SUPPLY_COOLDOWN params ["_min", "_max"];
+    private _n = _min + floor random (_max - _min + 1);
+    DUWS_opcom_supplyReadyTick set [_class, DUWS_opcom_tick + _n];
+    ["INFO", "OPCOM", format ["supply: no %1 truck for %2 ticks", _class, _n]] call fnc_log;
+    true
 };
