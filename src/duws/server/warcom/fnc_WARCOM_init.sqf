@@ -34,11 +34,14 @@ WARCOM_createdZones = [_array_of_zones_total,[WARCOM_blu_hq_pos],{_input0 distan
 publicVariable "WARCOM_createdZones";
 
 // Campaign-size income throttle from the ACTUAL zone count (gen can fall short of zones_number): factor 1
-// at or below the reference size, above it income grows as sqrt(zones) so 4x zones pay 2x -- a high
-// zones_number can't hand everyone a bigger war chest. k tunes the curve (1 flat, 0 linear).
+// at or below the reference size, above it income grows as sqrt(zones) so 4x zones pay 2x, up to what
+// _MAX_PAID_ZONES unthrottled zones pay (reached at 16), and flat past that -- a high zones_number can't
+// hand everyone a bigger war chest. k tunes the curve (1 flat, 0 linear).
 private _REF_ZONES = 4;
 private _k = 0.5;
-DUWS_econ_throttle = (_REF_ZONES / ((count WARCOM_createdZones) max _REF_ZONES)) ^ _k;
+private _MAX_PAID_ZONES = 8;
+private _zones = (count WARCOM_createdZones) max _REF_ZONES;
+DUWS_econ_throttle = ((_REF_ZONES / _zones) ^ _k) min (_MAX_PAID_ZONES / _zones);
 ["INFO", "ECON", format ["econ throttle %1 for %2 zones", DUWS_econ_throttle, count WARCOM_createdZones]] call fnc_log;
 
 publicVariable "WARCOM_zones_controled_by_BLUFOR";

@@ -60,7 +60,7 @@ while {true} do {
         if (_dripCarry >= 1) then {
             private _ap = floor _dripCarry;
             _dripCarry = _dripCarry - _ap;
-            _tierCarry = _tierCarry + _ap * OPCOM_AP_DRIP_TIER * DUWS_econ_throttle;
+            _tierCarry = _tierCarry + _ap * OPCOM_AP_DRIP_TIER;
             private _earned = floor _tierCarry;
             _tierCarry = _tierCarry - _earned;
             ["OPF", _ap, "opcom_drip", _earned, "DEBUG"] call fnc_ap_adjust;

@@ -1027,7 +1027,7 @@ DUWS_intel_contact_life = 600;
 
 // Campaign-size throttle on every passive faucet (zone AP trickle, town income, both sides). Computed
 // once from the actual zone count (fnc_WARCOM_init), so income grows as sqrt(zones) above the reference
-// size rather than linearly. 1 until WARCOM init sets it.
+// size, up to a cap, rather than linearly. 1 until WARCOM init sets it.
 DUWS_econ_throttle = 1;
 // The share of OPFOR's 30-minute payout (town and zone AP) that also climbs its tier; the rest is wallet only. OPFOR
 // opens on every zone, so with the whole payout on its tier it climbs from hour zero on ground it never fought for.
@@ -1041,8 +1041,9 @@ OPCOM_AP_DRIP_TICKS = 4;
 // The share of the drip OPFOR keeps with no zone left; the rest scales with the share of zones it holds. A capture
 // has to cost the commander income, but one down to its last zone must still be able to buy a fight back.
 OPCOM_AP_DRIP_FLOOR = 0.5;
-// The share of the drip that also climbs OPFOR's tier, scaled by DUWS_econ_throttle like the payout's. The rest is
-// wallet only: the drip is most of what OPCOM earns, and all of it would reach jets in under half the tuned time.
+// The share of the drip that also climbs OPFOR's tier. The rest is wallet only: the drip is most of what OPCOM earns,
+// and all of it would reach jets in under half the tuned time. Unthrottled, unlike the payout's: the drip does not
+// grow with the zone count, so the throttle would only shrink it and stop a bigger campaign climbing faster.
 OPCOM_AP_DRIP_TIER = 0.1;
 
 insurgent_mode_enable = false; publicVariable "insurgent_mode_enable";
