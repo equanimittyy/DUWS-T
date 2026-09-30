@@ -30,35 +30,13 @@ _x set [4,_selected_soldier_comms_new];
 _x set [5,_selected_soldier_reload_new];
 } forEach duws_operator_list;
 
+// setSkill works only where the unit is local, which for a squad's AI is its leader's machine.
 {
-_selected_soldier_aim = _x skill "aimingAccuracy";
-_selected_soldier_aim_2 = _x skill "aimingShake";
-_selected_soldier_reflexes = _x skill "aimingSpeed";
-_selected_soldier_spotting = _x skill "spotDistance";
-_selected_soldier_spotting_2 = _x skill "spotTime";
-_selected_soldier_courage = _x skill "courage";
-_selected_soldier_reload = _x skill "reloadSpeed";
-_selected_soldier_comms = _x skill "commanding";
-
-_selected_soldier_aim_new = _selected_soldier_aim + ((round (random 5))/100);
-_selected_soldier_aim_new_2 = _selected_soldier_aim_2 + ((round (random 5))/100);
-_selected_soldier_reflexes_new = _selected_soldier_reflexes + ((round (random 5))/100);
-_selected_soldier_spotting_new = _selected_soldier_spotting + ((round (random 5))/100);
-_selected_soldier_spotting_new_2 = _selected_soldier_spotting_2 + ((round (random 5))/100);
-_selected_soldier_courage_new = _selected_soldier_courage + ((round (random 5))/100);
-_selected_soldier_comms_new = _selected_soldier_comms + ((round (random 5))/100);
-_selected_soldier_reload_new = _selected_soldier_reload + ((round (random 5))/100);
-
-_x setskill ["aimingAccuracy",_selected_soldier_aim_new];
-_x setskill ["aimingShake",_selected_soldier_aim_new_2];
-_x setskill ["aimingSpeed",_selected_soldier_reflexes_new];
-_x setskill ["spotDistance",_selected_soldier_spotting_new];
-_x setskill ["spotTime",_selected_soldier_spotting_new_2];
-_x setskill ["courage",_selected_soldier_courage_new];
-_x setskill ["reloadSpeed",_selected_soldier_comms_new];
-_x setskill ["commanding",_selected_soldier_reload_new];
-
-} forEach units group player; 
+    private _unit = _x;
+    private _pairs = ["aimingAccuracy", "aimingShake", "aimingSpeed", "spotDistance", "spotTime", "courage", "reloadSpeed", "commanding"]
+        apply { [_x, (_unit skill _x) + ((round (random 5))/100)] };
+    [[_unit, _pairs], { params ["_unit", "_pairs"]; { _unit setSkill _x } forEach _pairs }] remoteExec ["call", _unit];
+} forEach (allUnits select { !isPlayer _x && {((units group _x) findIf { isPlayer _x }) >= 0} });
 
 {
 _status = _x select 7;

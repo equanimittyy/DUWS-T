@@ -41,7 +41,7 @@ switch (_selected_soldier_status) do
 {
   case "Ready": {
 	buttonSetAction [1601, "[lbCurSel 1500, player] remoteExecCall ['DUWS_fnc_operatorClaim', 2]"];
-	ctrlSetText [1601, "DEPLOY (8 CP)"];
+	ctrlSetText [1601, format ["DEPLOY (%1 CP)", [8] call fnc_escalation_cost]];
   };
   
   case "Injured": {
