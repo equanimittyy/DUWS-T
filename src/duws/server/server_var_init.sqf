@@ -1032,12 +1032,12 @@ DUWS_econ_throttle = 1;
 // The share of OPFOR's 30-minute payout (town and zone AP) that also climbs its tier; the rest is wallet only. OPFOR
 // opens on every zone, so with the whole payout on its tier it climbs from hour zero on ground it never fought for.
 // BLUFOR's zone trickle credits its tier in full, because it pays only for ground the player took.
-DUWS_opfor_payout_tier = 0.5;
+DUWS_opfor_payout_tier = 0.33;
 
 // OPCOM ticks per 1 AP of drip to OPFOR while it holds every zone, on top of the 30-minute payout. The payout
 // lands as one lump that the commander spends within a minute, so without a drip it can only bank or move free
 // units for the rest of the period. Server; tuning.
-OPCOM_AP_DRIP_TICKS = 4;
+OPCOM_AP_DRIP_TICKS = 5;
 // The share of the drip OPFOR keeps with no zone left; the rest scales with the share of zones it holds. A capture
 // has to cost the commander income, but one down to its last zone must still be able to buy a fight back.
 OPCOM_AP_DRIP_FLOOR = 0.5;

@@ -227,9 +227,9 @@ a cheaper way to liquidate a slate, which inverts what the death penalty is for.
 |---|---|---|
 | Zone first capture | `server/init_zones/fnc_captured.sqf:37-43` | once ever per zone: `zone_first_capture_cp` (25) CP + `zone_first_capture_ap` (50) AP; the AP credits BLUFOR's tier |
 | Zone recapture | `server/init_zones/fnc_blufor_cap.sqf` | nothing — a zone's reward is earned once, so trading it back and forth is not a faucet |
-| Zone hold (AP trickle) | `server/warcom/fnc_zonesundercontrol.sqf:71-87` | AP each side: `zones_held × zone_ap_trickle` (5), throttled, every 30 min; credits BLUFOR's tier in full and OPFOR's by `DUWS_opfor_payout_tier` (0.5) |
-| Town income | `server/warcom/fnc_zonesundercontrol.sqf:44-81` (`fnc_civ_townIncome`) | each banded town's worth (1–5 by size, `civ_town_ap`) to its holder every 30 min, throttled — CP to a BLUFOR town, AP to an OPFOR one; `DUWS_opfor_payout_tier` (0.5) of OPFOR's town AP credits its tier |
-| OPCOM drip | `server/warcom/opcom/belief/fnc_opcom_perception_run.sqf` | AP to OPFOR: 1 every `OPCOM_AP_DRIP_TICKS` (4) OPCOM ticks, so every 20 s, while OPFOR holds every zone; `OPCOM_AP_DRIP_FLOOR` (0.5) of it is kept with no zone left; unthrottled; `OPCOM_AP_DRIP_TIER` (0.1) of it credits OPFOR's tier |
+| Zone hold (AP trickle) | `server/warcom/fnc_zonesundercontrol.sqf:71-87` | AP each side: `zones_held × zone_ap_trickle` (5), throttled, every 30 min; credits BLUFOR's tier in full and OPFOR's by `DUWS_opfor_payout_tier` (0.33) |
+| Town income | `server/warcom/fnc_zonesundercontrol.sqf:44-81` (`fnc_civ_townIncome`) | each banded town's worth (1–5 by size, `civ_town_ap`) to its holder every 30 min, throttled — CP to a BLUFOR town, AP to an OPFOR one; `DUWS_opfor_payout_tier` (0.33) of OPFOR's town AP credits its tier |
+| OPCOM drip | `server/warcom/opcom/belief/fnc_opcom_perception_run.sqf` | AP to OPFOR: 1 every `OPCOM_AP_DRIP_TICKS` (5) OPCOM ticks, so every 25 s, while OPFOR holds every zone; `OPCOM_AP_DRIP_FLOOR` (0.5) of it is kept with no zone left; unthrottled; `OPCOM_AP_DRIP_TIER` (0.1) of it credits OPFOR's tier |
 | OPFOR capture consolation | `fnc_captured.sqf:48-51`, `fnc_blufor_cap.sqf:32-35` | AP to OPFOR on every BLUFOR capture: `worth × zone_ap_consolation` (0.15), wallet only |
 | Zone-loss swing | `server/init_zones/fnc_opfor_cap.sqf:51-53` | AP: `worth × zone_ap_swing` (0.15) to OPFOR, the same figure removed from BLUFOR |
 | Side-mission reward | `server/missions/fnc_mission_reward.sqf` | CP `reward × cp_reward_multiplier` (×1.5 when civs-off), plus a BLUFOR AP reward that credits the tier |
@@ -283,15 +283,15 @@ Above 4 zones, income grows as the square root of the zone count, so 16 zones pa
 zones pay. Past 16 zones, income stays flat, so a 30- or 40-zone campaign does not arm either side
 faster than a 16-zone one.
 
-**Half of OPFOR's payout climbs its tier.** `DUWS_opfor_payout_tier` (0.5) of OPFOR's zone and town AP
+**A third of OPFOR's payout climbs its tier.** `DUWS_opfor_payout_tier` (0.33) of OPFOR's zone and town AP
 also credits its earned counter; the rest is wallet only. OPFOR opens holding every zone, so with the
 whole payout on its tier it would climb from hour zero on ground it never fought for. BLUFOR's zone
 trickle credits its tier in full, because it pays only for ground the player took.
 
 **OPCOM's drip is the one faucet off this clock.** The payout lands as one lump, and the commander
 spends it within a minute, so for the rest of the period it could only bank or move free units.
-The drip pays 1 AP every `OPCOM_AP_DRIP_TICKS` (4) OPCOM ticks while OPFOR holds every zone, which is
-up to 90 AP per 30 minutes, and it stops while no human is connected, as the tick does.
+The drip pays 1 AP every `OPCOM_AP_DRIP_TICKS` (5) OPCOM ticks while OPFOR holds every zone, which is
+up to 72 AP per 30 minutes, and it stops while no human is connected, as the tick does.
 
 **A tenth of the drip climbs OPFOR's tier.** The drip is most of what OPCOM earns, so if it all paid
 the wallet only, OPFOR's tier would ride on the 30-minute payout alone. If it all credited
@@ -299,8 +299,8 @@ the wallet only, OPFOR's tier would ride on the 30-minute payout alone. If it al
 `OPCOM_AP_DRIP_TIER` (0.1) of each drip AP also credits the earned counter. Unlike the payout's tier
 credit, it is not throttled: the drip does not grow with the zone count, so the throttle would only
 shrink it and stop a bigger campaign climbing faster. On six zones held, OPFOR's tier income is about
-51 AP per hour at the ~7 s ticks seen in play, which reaches armour in about 6.9 hours and jets in
-about 11.8.
+36 AP per hour at the ~7 s ticks seen in play, which reaches armour in about 9.6 hours and jets in
+about 16.5.
 
 **Half of the drip follows the ground.** `DUWS_fnc_opcom_dripRate` (`fnc_economy_init.sqf`) keeps
 `OPCOM_AP_DRIP_FLOOR` (0.5) of the full rate whatever OPFOR holds, and scales the rest by the share of
