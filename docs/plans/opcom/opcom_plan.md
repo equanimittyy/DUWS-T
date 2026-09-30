@@ -291,8 +291,9 @@ so it moves no faster than a truck delivers.
   (`fnc_opcom_patrol_sense`). A resting unit stamps its own reach too, which keeps the ground OPFOR sits on off the
   patrol list for as long as it sits; a `noncombat` hull that is no recon stamps nothing, since a truck on an errand
   is not out watching ground. What the stamp is not is proof: only a `recon` unit's guaranteed sweep also
-  stamps belief for every BLUFOR group in reach and clears the rows it disproves, because a fallible look that comes
-  up empty proves nothing (`fnc_opcom_cover_clear.sqf`).
+  stamps belief for every BLUFOR group in reach and clears the rows it disproves, both outside every cell that the
+  HQ's or a FOB's `DUWS_base_keep_radius` ring touches, because a fallible look that comes up empty proves nothing
+  (`fnc_opcom_cover_clear.sqf`).
 - **The two kinds scale on different axes.** A recon's worth is the reach of its certain bubble, so its Value counts
   every cell within `OPCOM_RECON_K` of its line at face value. A combatant sees only what it can fight over, so its
   Value counts the narrower engage reach and scales by the threat it walks with, `effForce` ÷
@@ -998,9 +999,10 @@ appraisal already bought ([§Sourcing](#sourcing-hire-on-demand-phase-4d)). Spen
   id, a **bare**-token composition (`none` posture, so OPCOM commands it), and capability flags. `OPCOM_AP_UNIT`
   prices the row by its id, so the menu carries no price column.
 - **Capability flags decide what a unit unlocks; there is no unit "type".** `recon` → a certain sighting of
-  every BLUFOR group within `OPCOM_RECON_K` cells, stamped every tick it travels, where a unit without the flag
-  stamps only that it looked ([§Value](#value)); `supply` → a delivery run, `transport` → carry another
-  unit, `transportable` → ride a ferry across water; `noncombat` keeps a row out of a zone's reserve pool
+  every BLUFOR group within `OPCOM_RECON_K` cells except one in a cell that the HQ's or a FOB's
+  `DUWS_base_keep_radius` ring touches, stamped every tick it travels, where a unit without the flag stamps only
+  that it looked ([§Value](#value)); `supply` → a delivery run, `transport` → carry another unit,
+  `transportable` → ride a ferry across water; `noncombat` keeps a row out of a zone's reserve pool
   (regardless of armament — the boat is armed). A row may carry several.
 
 Prices, in whole AP, set against the drip (`OPCOM_AP_DRIP_TICKS`, up to 72 AP per 30 min while OPFOR holds every
