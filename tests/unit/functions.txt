@@ -88,6 +88,7 @@ duws/server/warcom/fnc_economy_init.sqf::DUWS_fnc_opcom_dripRate
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_op.sqf::DUWS_fnc_opcom_opUnwatched
 duws/server/warcom/opcom/belief/fnc_opcom_grid_coords.sqf::DUWS_fnc_opcom_landAt
 duws/server/warcom/opcom/belief/fnc_opcom_grid_coords.sqf::DUWS_fnc_opcom_blockCells
+duws/server/warcom/opcom/belief/fnc_opcom_grid_coords.sqf::DUWS_fnc_opcom_baseCells
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_gun.sqf::DUWS_fnc_opcom_gunShare
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_tower.sqf::DUWS_fnc_opcom_towerReach
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_exposure.sqf::DUWS_fnc_opcom_defendAt

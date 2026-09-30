@@ -8,7 +8,7 @@
 // discovered subject -- the zone / FOB / HQ keys belief_init reserves -- must be excluded before one is ever
 // written, else an overflight that does not re-detect it as a group would un-discover it.
 if (isNil "DUWS_opcom_grid_w") exitWith {};
-params ["_point", "_k"];
+params ["_point", "_k", ["_blind", []]];
 
 private _w  = DUWS_opcom_grid_w;
 private _c  = [_point] call DUWS_fnc_opcom_w2c;
@@ -20,7 +20,7 @@ private _t  = DUWS_opcom_tick;
 for "_i" from (count DUWS_opcom_belief_key - 1) to 0 step -1 do {
     if ((DUWS_opcom_belief_time select _i) < _t) then {
         private _bc = [DUWS_opcom_belief_pos select _i] call DUWS_fnc_opcom_w2c;
-        if (((abs ((_bc mod _w) - _cx)) max (abs ((floor (_bc / _w)) - _cy))) <= _k) then {
+        if (!(_bc in _blind) && {((abs ((_bc mod _w) - _cx)) max (abs ((floor (_bc / _w)) - _cy))) <= _k}) then {
             [_i] call fnc_opcom_belief_deleteAt;
         };
     };

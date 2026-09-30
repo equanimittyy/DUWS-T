@@ -34,6 +34,25 @@ DUWS_fnc_opcom_blockCells = {
     _out
 };
 
+// OPCOM's certain sensors (recon, an OP burst) are blind in these cells: a sweep from cells away would find a base's
+// garrison and expose the base (fnc_opcom_belief_upsert). Not the MHQ: a moving blind ring hides its riders.
+DUWS_fnc_opcom_baseCells = {
+    private _w = DUWS_opcom_grid_w;
+    private _r = DUWS_base_keep_radius;
+    private _out = [];
+    {
+        _x params ["_bx", "_by"];
+        for "_cy" from (floor ((_by - _r) / OPCOM_GRID_CELL)) to (floor ((_by + _r) / OPCOM_GRID_CELL)) do {
+            for "_cx" from (floor ((_bx - _r) / OPCOM_GRID_CELL)) to (floor ((_bx + _r) / OPCOM_GRID_CELL)) do {
+                private _nearX = _bx max (_cx * OPCOM_GRID_CELL) min ((_cx + 1) * OPCOM_GRID_CELL);
+                private _nearY = _by max (_cy * OPCOM_GRID_CELL) min ((_cy + 1) * OPCOM_GRID_CELL);
+                if (([_bx, _by] distance2D [_nearX, _nearY]) < _r) then { _out pushBackUnique (_cy * _w + _cx) };
+            };
+        };
+    } forEach (Array_of_FOBpos + [PosOfBLUHQ]);
+    _out
+};
+
 DUWS_fnc_opcom_nearestWater = {
     params ["_pos"];
     private _best = _pos;

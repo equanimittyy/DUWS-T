@@ -7,9 +7,9 @@
 //
 // Certainty stays with the recon flag. fnc_opcom_sense rides A3's fallible last-seen (nearTargets on live observers
 // only), so a virtual tasking senses nothing and a live one can be blinded; a recon-flagged tasking instead detects
-// every BLUFOR group in reach with no roll, live or virtual, and clears the rows its reach disproves
-// (fnc_opcom_cover_clear). A combatant's empty look proves nothing, so it buys no clear, and selling certainty to
-// every rifle squad would leave the recon rows nothing to buy.
+// every BLUFOR group in reach outside a base ring's cells with no roll, live or virtual, and clears the rows its
+// reach disproves (fnc_opcom_cover_clear). A combatant's empty look proves nothing, so it buys no clear, and selling
+// certainty to every rifle squad would leave the recon rows nothing to buy.
 //
 // Reach is what the Value priced the sweep on (DUWS_fnc_opcom_patrolReach), Chebyshev cells as the streamer measures
 // them (fnc_opcom_task_step). Belief keys by BLUFOR group netId on the one sighting scale (DUWS_fnc_opcom_sightStr);
@@ -18,6 +18,7 @@ if (!isServer) exitWith {};
 if (isNil "DUWS_opcom_grid_w") exitWith {};
 
 private _w = DUWS_opcom_grid_w;
+private _blind = [] call DUWS_fnc_opcom_baseCells;
 
 // Every visible BLUFOR group's cell once for the tick: [group, cx, cy, lead]. Group, not unit -- belief keys
 // and stamps by group at its sight lead's cell, matching fnc_opcom_sense. allGroups (handles), never a scan
@@ -27,7 +28,7 @@ private _wcells = [];
     private _ldr = [_x] call DUWS_fnc_opcom_sightLead;
     if (!isNull _ldr) then {
         private _ci = [getPosASL _ldr] call DUWS_fnc_opcom_w2c;
-        _wcells pushBack [_x, _ci mod _w, floor (_ci / _w), _ldr];
+        if !(_ci in _blind) then { _wcells pushBack [_x, _ci mod _w, floor (_ci / _w), _ldr] };
     };
 } forEach (allGroups select { side _x == west });
 
@@ -62,7 +63,7 @@ private _wcells = [];
                 };
             } forEach _wcells;
 
-            [_pos, _k] call fnc_opcom_cover_clear;
+            [_pos, _k, _blind] call fnc_opcom_cover_clear;
         };
     };
 } forEach DUWS_opcom_taskings;

@@ -255,6 +255,10 @@ ring a risk, not a certain reveal, and the belief stamp lands whether the post i
 a post left alive keeps feeding its sector to the enemy, so the player kills it or routes around its
 ring.
 
+The burst is blind in every grid cell that the HQ's or a FOB's `DUWS_base_keep_radius` ring overlaps
+(`DUWS_fnc_opcom_baseCells`), as OPCOM's recon sweep is. A unit there is not revealed, carded or stamped, and the
+burst's clear keeps any belief in those cells. Otherwise a post near a base would find its garrison and expose the base.
+
 ## Clearance
 
 `DUWS_fnc_hardpointClearCheck` (`fnc_hardpoint_stream.sqf:100-141`) runs on the shared per-hardpoint

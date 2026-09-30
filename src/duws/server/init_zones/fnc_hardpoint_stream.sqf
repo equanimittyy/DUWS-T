@@ -250,10 +250,11 @@ DUWS_fnc_hardpointOPBurst = {
     private _ocy = floor (_oc / _w);
     // The distance gate is the cell box's circumscribed radius, so it only spares the per-unit cell lookup.
     private _reach = (OP_OBSERVE_K + 1) * OPCOM_GRID_CELL * 1.415;
+    private _blind = [] call DUWS_fnc_opcom_baseCells;
     private _blu = allUnits select {
         side _x == WEST && {alive _x} && {(_x distance2D _pos) < _reach} && {
             private _c = [getPosASL _x] call DUWS_fnc_opcom_w2c;
-            ((abs ((_c mod _w) - _ocx)) max (abs ((floor (_c / _w)) - _ocy))) <= OP_OBSERVE_K
+            !(_c in _blind) && {((abs ((_c mod _w) - _ocx)) max (abs ((floor (_c / _w)) - _ocy))) <= OP_OBSERVE_K}
         }
     };
     if (_blu isEqualTo []) exitWith {};
@@ -292,7 +293,7 @@ DUWS_fnc_hardpointOPSense = {
             if (random 1 < OP_OBSERVE_CHANCE) then {
                 [_pos] call DUWS_fnc_hardpointOPBurst;
                 // After the burst, not gated on it finding anyone: a fired post that turned up nobody is the strongest clear.
-                [_pos, OP_OBSERVE_K] call fnc_opcom_cover_clear;
+                [_pos, OP_OBSERVE_K, [] call DUWS_fnc_opcom_baseCells] call fnc_opcom_cover_clear;
             };
         };
     } forEach DUWS_hardpoints;

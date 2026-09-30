@@ -1604,6 +1604,21 @@ DUWS_opcom_box = [0, 0, 9, 9];
 DUWS_opcom_box = [2, 2, 7, 7];
 ["blockCells: the play box clips inside the grid", count ([22, 2] call DUWS_fnc_opcom_blockCells), 9] call fnc_assertEq;
 
+// --- DUWS_fnc_opcom_baseCells: the cells the HQ's or a FOB's base ring overlaps ---
+DUWS_base_keep_radius = 250;
+Array_of_FOBpos = [];
+PosOfBLUHQ = [1250, 1250, 0];
+["baseCells: a ring about a cell centre stays in its cell, a tangent edge no overlap", [] call DUWS_fnc_opcom_baseCells, [22]] call fnc_assertEq;
+PosOfBLUHQ = [1000, 1000, 0];
+["baseCells: a ring on a cell corner overlaps all four", [] call DUWS_fnc_opcom_baseCells, [11, 12, 21, 22]] call fnc_assertEq;
+PosOfBLUHQ = [3100, 3400, 0];
+["baseCells: an off-centre ring overlaps the diagonal its corner reaches", [] call DUWS_fnc_opcom_baseCells, [65, 66, 75, 76]] call fnc_assertEq;
+PosOfBLUHQ = [3200, 3200, 0];
+["baseCells: a ring short of the diagonal corner skips it", [] call DUWS_fnc_opcom_baseCells, [56, 65, 66]] call fnc_assertEq;
+Array_of_FOBpos = [[1250, 1250, 0], [1300, 1250, 0]];
+PosOfBLUHQ = [1250, 1250, 0];
+["baseCells: FOBs count with the HQ, and a shared cell is listed once", [] call DUWS_fnc_opcom_baseCells, [22, 23]] call fnc_assertEq;
+
 // --- DUWS_fnc_opcom_opUnwatched: the share of a new OP's land block no other OP watches ---
 OP_OBSERVE_K = 2;
 DUWS_opcom_grid_w = 10;
