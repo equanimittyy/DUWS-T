@@ -21,7 +21,7 @@ if (count _known < count _roles) then {
 private _looks = missionNamespace getVariable ["DUWS_banditLooks", []];
 if (_known isEqualTo [] || {_looks isEqualTo []}) exitWith { grpNull };
 
-private _group = [_pos, INDEPENDENT, _known apply { "I_G_Soldier_F" }, [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
+private _group = [_pos, INDEPENDENT, _known apply { "I_G_Soldier_F" }, [], [], opfor_ai_skill apply { _x / 2 }] call BIS_fnc_spawnGroup;
 _group deleteGroupWhenEmpty true;
 
 {
