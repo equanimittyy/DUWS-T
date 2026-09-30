@@ -818,7 +818,7 @@ OPCOM_CAP_HP_TYPE_PER_ZONE = createHashMapFromArray [
 // Supply trucks sit outside the unit cap: OPCOM_SUPPLY_CLASS bounds them, and counting them would let a full
 // roster stall every supply buy.
 OPCOM_CAP_UNITS_PER_ZONE = 8;
-OPCOM_CAP_GARRISON = 10;
+OPCOM_CAP_GARRISON = 2;
 // One truck of a class drives at a time, and none of that class sets off for OPCOM_SUPPLY_COOLDOWN after one sets off,
 // rolled between the two. Keyed by errand, and by build type where the type overrides its errand's class. Tune.
 OPCOM_SUPPLY_CLASS = createHashMapFromArray [
