@@ -136,7 +136,8 @@ rather than designed:
   `OPCOM_VALUE_HALFLIFE`, `OPCOM_SAVE_HORIZON`, `OPCOM_TRAFFIC_HALFLIFE` and `OPCOM_TRAFFIC_SHARE`,
   `OPCOM_NEED_BASE_RATIO` (2.5), the town worth factor (5) and the exposure distances (5 / 10 km, 0.2 floor).
 - **What an asset is worth.** A radio's reach, an OP's eyes and a gun's fire missions, in place of the coverage
-  stand-ins, and the radio's defend ramp (`OPCOM_DEFEND_NEAR` 500 m, `OPCOM_DEFEND_FAR` 2 km) against that reach.
+  stand-ins, and the radio's defend ramp (`OPCOM_DEFEND_NEAR` 500 m, `OPCOM_DEFEND_FAR` 2 km) and overlap weight
+  (`OPCOM_TOWER_OVERLAP` 1) against that reach.
   Where a mortar pit or an artillery battery sites, which is the gun reach and the standoff.
 - **Caution.** `OPCOM_PWIN_FLOOR`, and `OPCOM_GRID_ZONE_ENEMY_FORCE` (8) — the force OPCOM believes every BLUFOR
   zone holds, which sets its baseline caution. Whether belief should carry a threat category, so that a build sites a
@@ -245,7 +246,7 @@ so it moves no faster than a truck delivers.
 |---|---|
 | Zone or town Reinforce / Fortify, zone hardpoint | worth × exposure × gain |
 | Standalone hardpoint, minefield | Σ over its 5×5 block of need × the cover it adds ([§Need and cover fields](#need-and-cover-fields)) |
-| Radio tower | Σ worth of the towns it newly brings under OPFOR's area of influence × defend |
+| Radio tower | (Σ worth of the towns it newly brings under OPFOR's area of influence − `OPCOM_TOWER_OVERLAP` (1) × Σ worth of the towns in reach OPFOR covers already), floored at 0, × defend |
 | OP | build price × the share of its 5×5 block (`OP_OBSERVE_K`) that no other OP watches, sea excluded |
 | Mortar pit, artillery battery | build price × the share of its reach that is OPFOR ground no gun of its own type reaches |
 | Rapport | town worth × skew × 2/10, with skew = max(0.1, 1 − \|rep\| ÷ 20) at 0 or below, 0.05 above 0 |
@@ -334,8 +335,9 @@ so it moves no faster than a truck delivers.
 - **A mast's Value is an absolute AP sum** where an OP's and a gun's are a share of their own footprint, because
   the towns in reach vary by site: a share would score one town out of one as highly as five out of five.
 - **A mast is bought for the towns it reaches.** Rapport is offered only in a town OPFOR's area of influence
-  covers, so a mast opens every uncovered town in its reach to Rapport. A mast that reaches no uncovered town
-  scores 0.
+  covers, so a mast opens every uncovered town in its reach to Rapport. A town in reach that OPFOR covers already,
+  or that a mast on its way reaches, costs `OPCOM_TOWER_OVERLAP` (1) × its worth, so a mast that overlaps as much
+  worth as it adds scores 0.
 - **A minefield is valued on its ground, not as an asset.** It is flat-priced like the assets above, which is a
   pricing likeness and not a Value one: what a minefield is worth is the ground it denies, the same question a
   standalone gun nest answers. It leans on the traffic layer harder than any other build — a field on a road
@@ -1110,7 +1112,7 @@ stay in the band; a belt drops its squares outside it.
 
 | Build | Band cell |
 |---|---|
-| Radio tower | the most town worth brought newly under OPFOR's area of influence × defend, more than `AOI_TOWER_REACH` in grid cells (10) from every other tower |
+| Radio tower | the most tower Value ([§Value](#value)): new town worth less overlapped town worth, × defend, more than `AOI_TOWER_REACH` in grid cells (10) from every other tower. Campaign generation sites its one start tower by the same Value over 24 band draws, after civilian init (`fnc_hardpoint_site_radio`) |
 | OP | the most cells within `OP_OBSERVE_K` that no other OP's ring already covers |
 | Mortar pit | the most OPFOR ground within `OPCOM_MORTAR_REACH` (4 km) that no other mortar reaches, with no pit within `OPCOM_GUN_STANDOFF_K` (1) cells |
 | Artillery battery | the same over `OPCOM_ARTY_REACH` (15 km), against the other batteries |
