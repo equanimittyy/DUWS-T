@@ -149,15 +149,6 @@ killhouse_srv_clear_all = {
     missionNamespace setVariable ["killhouse_enemies", [], true];
 };
 
-// Clearing the flag is the whole cancel mechanism -- the run loop polls it and returns within a
-// tick. Holding the script handle to terminate would be the obvious alternative, but SCRIPT has no serialized form and the mission namespace is written into save games.
-killhouse_srv_end_run = {
-    if (!isServer) exitWith {};
-    if !(missionNamespace getVariable ["killhouse_run_active", false]) exitWith {};
-    missionNamespace setVariable ["killhouse_run_active", false];
-    [localize "STR_DUWS_KILLHOUSE_TRAINING_CANCELLED"] call killhouse_srv_hint;
-};
-
 killhouse_srv_spawn_contacts = {
     if (!isServer) exitWith {};
     params ["_mode", "_slots"];
@@ -329,11 +320,14 @@ killhouse_srv_spawn_enemies = {
 };
 publicVariable "killhouse_srv_spawn_enemies";
 
+// Clearing the flag is the whole cancel mechanism -- the run loop polls it and returns within a
+// tick. Holding the script handle to terminate would be the obvious alternative, but SCRIPT has no serialized form and the mission namespace is written into save games.
 killhouse_srv_cleanup = {
     if (!isServer) exitWith {};
-    call killhouse_srv_end_run;
+    private _cancelled = missionNamespace getVariable ["killhouse_run_active", false];
+    missionNamespace setVariable ["killhouse_run_active", false];
     call killhouse_srv_clear_all;
-    [localize "STR_DUWS_T_CLEANUP_DONE"] call killhouse_srv_hint;
+    [localize (["STR_DUWS_T_CLEANUP_DONE", "STR_DUWS_KILLHOUSE_TRAINING_CANCELLED"] select _cancelled)] call killhouse_srv_hint;
 };
 publicVariable "killhouse_srv_cleanup";
 
