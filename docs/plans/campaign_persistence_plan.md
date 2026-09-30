@@ -683,6 +683,7 @@ restore with the settings group, not here.
 | Reveal | outcome | positions of revealed zones and revealed towns |
 | Arsenal crate | outcome | the contents of the arsenal crate at the HQ, piece by piece, with the contents of each stored uniform, vest and backpack |
 | Task forces | outcome | each task force's name, its men (class, loadout, damage, skill, position and seat) and its vehicles (the garage's vehicle spec, position and direction) |
+| Operatives | input | each operative's six skills, unspent points and whether the team has paid for it, keyed by its identity |
 
 **Nothing per-player is saved.** No loadouts, no per-player cooldowns, and no per-player record of
 what a player bought. Consumable unlocks were already out for exactly this reason — they are
@@ -745,6 +746,15 @@ stood, with each man's loadout, damage and seat, and then registers the group th
 it from the map again, so the load gives the same order. A man or a vehicle whose class no loaded mod
 defines is dropped. The load hint counts a dropped vehicle; a dropped man is logged, because the hint's
 unit count is of enemy units.
+
+**The operative roster is team state, so it is saved.** The server holds one roster for the whole team
+(`server/operative/fnc_operator_roster.sqf`), and every change to it goes through the server. The save
+keeps each operative's skills, unspent points and whether the team has paid its first deploy. It does not
+keep whether the operative is deployed or injured, because a deployed operative is live AI and does not
+survive a restart. So a load returns every paid operative as healed, ready for a free deploy, and every
+unpaid one as ready. The rows are keyed by the operative's identity, not by position, so a roster that
+changes between versions cannot give one operative another's record. An identity that the roster no longer
+has is dropped.
 
 ### The arsenal: the shelf is rebuilt, the pool is stored
 
@@ -1141,7 +1151,8 @@ is already the price tables the economies buy from, so this is a walk and a sum,
 
 **What the pass refunds.** A recruit in a player's squad or in a player's High Command group, at its
 request price scaled by health, and an OPCOM build still siting, at the refund its delivery carries.
-An OPCOM tasking and a task force need no refund, because both restore. A vehicle gets none: parking it at a
+An OPCOM tasking and a task force need no refund, because both restore. A deployed operative needs none
+either: it loads as paid on the roster, so a refund would pay for it twice. A vehicle gets none: parking it at a
 base or garaging it is how a vehicle survives a restart, and a refund for any vehicle in the world
 would pay for captured ones.
 
@@ -1160,6 +1171,7 @@ refund attached to the one restore that consumes it.
 | `server/persistence/fnc_campaign_reconcile.sqf` | The refunds the save adds to the snapshot's pools |
 | `server/persistence/fnc_campaign_restore.sqf` | The gate, the apply, and every restore hook below |
 | `server/init_hq/fnc_BluHQinit.sqf` | Keeps the arsenal crate's handle, `DUWS_hqCrate`, for the save and the restore |
+| `server/operative/fnc_operator_roster.sqf` | The team's operative roster, which the snapshot reads and the apply overlays |
 | `server/persistence/fnc_autoSave.sqf` | The SITREP save, and the carry to the caller's profile |
 | `server/server_init.sqf` | The gate after `serverinit_complete`; one faction resolution for both paths; the saved date; the mission-end writes |
 | `server/warcom/fnc_init_OPFOR_WARCOM.sqf` | Zone and hardpoint replay in place of the locator and generation; the world outcomes before the site poller; escalation after the census; the economy period counted only while a human is on |
