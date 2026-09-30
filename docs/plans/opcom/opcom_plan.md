@@ -1003,7 +1003,7 @@ appraisal already bought ([§Sourcing](#sourcing-hire-on-demand-phase-4d)). Spen
   unit, `transportable` → ride a ferry across water; `noncombat` keeps a row out of a zone's reserve pool
   (regardless of armament — the boat is armed). A row may carry several.
 
-Prices, in whole AP, set against the drip (`OPCOM_AP_DRIP_TICKS`, up to 90 AP per 30 min while OPFOR holds every
+Prices, in whole AP, set against the drip (`OPCOM_AP_DRIP_TICKS`, up to 72 AP per 30 min while OPFOR holds every
 zone) and OPFOR's zone and town income of roughly 40–80 AP per 30 min (`fnc_zonesundercontrol.sqf`):
 
 | Purchase | Price |
