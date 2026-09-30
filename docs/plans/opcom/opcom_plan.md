@@ -936,10 +936,12 @@ destination, and the leg past it takes the threat-priced cell chain a foot unit 
 lift carries a hull. A hull never leaves the road mid-route to go around a threat: the road term already prices a
 threatened stretch.
 
-**A live group walks its route at λ > 0.** It takes a `MOVE` waypoint every `OPCOM_GRID_CELL` (500 m) along the rest of
-its route, before its order's own waypoint (`DUWS_fnc_opcom_routeVia`, `taskings/taskings/fnc_opcom_stream.sqf`), so a
-role that streams live near the players still closes by the route its λ bent. At λ 0 a live group takes one waypoint at
-its target and the engine paths it. A group in combat ignores a move waypoint, so the route holds only on the approach.
+**A live group walks its route at λ > 0 or on a road.** It takes a `MOVE` waypoint every `OPCOM_GRID_CELL` (500 m) along
+the rest of its route, before its order's own waypoint (`DUWS_fnc_opcom_routeVia`, `taskings/taskings/fnc_opcom_stream.sqf`),
+so a role that streams live near the players still closes by the route its λ bent, and a hull keeps to the road it was
+routed on. A transportable unit bound for its near shore walks the land part of its route the same way, and then holds at
+the shore. On a grid route at λ 0, a live group takes one waypoint at its target and the engine paths it. A group in
+combat ignores a move waypoint, so the route holds only on the approach.
 
 ### Chunks
 
