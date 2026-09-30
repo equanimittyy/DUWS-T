@@ -196,7 +196,7 @@ magnitude; above that the best candidate takes most of the probability, and a hi
 | Zone hardpoint Build | one action per unlocked ring type, its targets every uncontested OPFOR zone with a free hardpoint slot (`fnc_hardpoint_zone_cap`) |
 | Town Reinforce | each OPFOR-band town below full strength |
 | Town Fortify | each OPFOR-band town below tier IV |
-| Rapport | each town above −15 and below +10 that OPFOR's area of influence covers (`fnc_aoi_opfor_covers`) |
+| Rapport | each town above −20 and at or below 0 that OPFOR's area of influence covers (`fnc_aoi_opfor_covers`) |
 | Standalone hardpoint Build | one action per unlocked standalone type, its target the band cell the siting pass picks by cover Value ([§Asset siting](#asset-siting)) |
 | Tower / OP / mortar / battery Build | one action each, under the type's cap, target the band cell the siting pass picks by the type's own rule ([§Asset siting](#asset-siting)) |
 | Minefield | one action per variant (AT, AP), target the band cell the siting pass picks by traffic, a belt 150 m deep and 500 m to 1.5 km long |
@@ -233,7 +233,7 @@ so it moves no faster than a truck delivers.
   sighting of its own garrison, into `DUWS_opcom_fobsKnown`, and only a found FOB is an attack target. A found base's
   map marker text gains " (discovered)" (`fnc_baseMarkDiscovered`), and a load applies it again from the saved flags.
 - **Gain** (0–1) is the share of the job a partial action finishes: the force a purchase adds ÷ the force the
-  holding fields at full strength **on its own current tier**, or 3/10 for Rapport, whose −3 step is three tenths
+  holding fields at full strength **on its own current tier**, or 2/10 for Rapport, whose −2 step is two tenths
   of a flip. Measured against the top tier instead, a small zone's refill read as a few percent of a zone it will
   never be, so every buy scored a fraction of what it was worth and the commander banked rather than defend. A
   Fortify's gain is the size of the jump against what the holding has now, since it buys the next tier rather than
@@ -248,7 +248,7 @@ so it moves no faster than a truck delivers.
 | Radio tower | Σ worth of the towns it newly brings under OPFOR's area of influence × defend |
 | OP | build price × the share of its 5×5 block (`OP_OBSERVE_K`) that no other OP watches, sea excluded |
 | Mortar pit, artillery battery | build price × the share of its reach that is OPFOR ground no gun of its own type reaches |
-| Rapport | town worth × skew × 3/10, with skew = max(0.1, 1 − \|rep\| ÷ 10) |
+| Rapport | town worth × skew × 2/10, with skew = max(0.1, 1 − \|rep\| ÷ 20) |
 | Attack QRF | Σ need over the lead sighting's 7×7 block × min(1, the cluster's summed force ÷ (Σ `_fri` over its 3×3 + 1)) |
 | Attack assault, Attack flank | the zone's `_points` |
 | Patrol | Σ need × staleness over the unique cells within its reach of the line it walks, × its scale, × `OPCOM_PATROL_SHARE` (0.2). A recon's reach is `OPCOM_RECON_K` and its scale 1; a combatant's reach is its engage reach (`DUWS_opcom_streamK`) and its scale its threat, `effForce` ÷ `OPCOM_PATROL_FORCE_REF` |
@@ -257,9 +257,9 @@ so it moves no faster than a truck delivers.
 | Arty saturate | net `effForce` killed × `OPCOM_AP_PER_FORCE`: believed force within `lethal × √rounds` of the aim point, less OPFOR's own force inside the spread, × that force's share of all fresh belief |
 | Arty creeping | the parent offensive's staked force × `OPCOM_AP_PER_FORCE` × `OPCOM_ARTY_CREEP_SHARE`, since a creep buys that wave's survival rather than kills |
 
-- **Rapport favours a neutral town.** A town near −10 turns anyway on the free area-of-influence drift, and a −3
-  step barely moves one near +10. The skew is 1 at 0, 0.5 at ±5 and 0.1 from ±9 out, so a town between −15 and −10
-  scores at the floor; a town at +10 or more is BLUFOR-held and no target.
+- **Rapport favours a neutral town.** OPFOR has no passive drift, so Rapport is the only thing that takes a town
+  down. The skew is 1 at 0, 0.5 at −10 and the 0.1 floor from −18 out, so a town already in the OPFOR band still
+  draws Rapport to −20; a town above 0 is no target.
 - **Garrison gathers the QRF pool.** A unit counts once: a worn unit's Value is the larger of defense and heal,
   never the sum, because one unit serves one role at a time. Its defense share shrinks as the zone stacks up, so
   garrisons gather where exposure is high, and a QRF pool forms there with no roster table.
@@ -332,11 +332,9 @@ so it moves no faster than a truck delivers.
   away tomorrow.
 - **A mast's Value is an absolute AP sum** where an OP's and a gun's are a share of their own footprint, because
   the towns in reach vary by site: a share would score one town out of one as highly as five out of five.
-- **The tower amplifier is a bonus, not a reason to build.** Every standing tower, to `AOI_OPFOR_TOWER_CAP` (5),
-  adds 1 to the reputation push on *every* OPFOR-covered town wherever the mast stands
-  (`fnc_zonesundercontrol.sqf`), which at the cap flips a neutral town five times faster. It stays out of Value:
-  it reads the same at every candidate site, so it ranks nothing, and a mast is bought for the towns it reaches. A
-  mast that reaches no uncovered town scores 0.
+- **A mast is bought for the towns it reaches.** Rapport is offered only in a town OPFOR's area of influence
+  covers, so a mast opens every uncovered town in its reach to Rapport. A mast that reaches no uncovered town
+  scores 0.
 - **A minefield is valued on its ground, not as an asset.** It is flat-priced like the assets above, which is a
   pricing likeness and not a Value one: what a minefield is worth is the ground it denies, the same question a
   standalone gun nest answers. It leans on the traffic layer harder than any other build — a field on a road
@@ -973,7 +971,7 @@ appraisal already bought ([§Sourcing](#sourcing-hire-on-demand-phase-4d)). Spen
 |---|---|---|---|
 | Attack | a BLU-held zone | tasking-spawn | 1–N (assault or flank) |
 | QRF | a cluster of BLUFOR sightings inside OPFOR's area of influence | tasking-spawn | 1–N |
-| Rapport | a town above −15 and below +10 inside OPFOR's area of influence (needs `supply`) | tasking-spawn | 1 courier |
+| Rapport | a town above −20 and at or below 0 inside OPFOR's area of influence (needs `supply`) | tasking-spawn | 1 courier |
 | Reinforce | an own depleted zone / town garrison | strength purchase | 0 zone / 1 truck town |
 | Patrol | a recon's or a land combatant's line over stale valuable cells | tasking-spawn | 1 |
 | Probe | an Attack target whose block reads stale | tasking-spawn | 1 |
@@ -1079,15 +1077,14 @@ hardpoint and a build still on its truck:
 
 | Tier (earned AP) | Types a build may place |
 |---|---|
-| 1 Infantry (0) | radio tower (max `AOI_OPFOR_TOWER_CAP` alive, 5), OP, MG, roadblock |
+| 1 Infantry (0) | radio tower (max `AOI_OPFOR_TOWER_CAP` alive, 4), OP, MG, roadblock |
 | 2 Motorised (60) | + AT, minefield |
 | 3 Mechanised (150) | + GMG, AA, mortar pit (max 2 alive) |
 | 4 Armour (350) | + artillery battery (max 1 alive) |
 | 5 Jets (600) | nothing new |
 
-The tower, the mortar pit and the battery cap flat: the tower cap is also the reputation amplifier's, and the guns'
-is the resident AI's. AT, AA, OP and AP minefield cap at 2 a campaign zone, GMG and AT minefield at 1
-(`OPCOM_CAP_HP_TYPE_PER_ZONE`).
+The tower, the mortar pit and the battery cap flat: the guns' cap is the resident AI's. AT, AA, OP and AP
+minefield cap at 2 a campaign zone, GMG and AT minefield at 1 (`OPCOM_CAP_HP_TYPE_PER_ZONE`).
 MG and roadblock carry no cap of their own. All types together, the flat-capped three included, cap at
 `OPCOM_CAP_HP_PER_ZONE` (12) a zone ([§Caps](#caps)).
 
