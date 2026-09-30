@@ -100,7 +100,9 @@ DUWS_fnc_opcom_attackSweep = {
                 };
             };
         } forEach (missionNamespace getVariable ["DUWS_townGarrisonTier", []]);
-        if (DUWS_opcom_hqKnown && {WARCOM_zones_controled_by_BLUFOR isEqualTo []} && {["HQ"] call DUWS_fnc_opcom_captureHolds}) then {
+        // OPFOR at Armour (4) and BLUFOR at Mechanised (3): every other gate here already holds at the campaign start.
+        if (DUWS_opcom_hqKnown && {WARCOM_opfor_tier >= 4} && {WARCOM_blufor_tier >= 3}
+            && {WARCOM_zones_controled_by_BLUFOR isEqualTo []} && {["HQ"] call DUWS_fnc_opcom_captureHolds}) then {
             private _hp = (["HQ"] call fnc_site_at) getOrDefault ["pos", []];
             if (_hp isNotEqualTo []) then { ["HQ", _hp, _hp, "HQ"] call _fnc_consider };
         };
