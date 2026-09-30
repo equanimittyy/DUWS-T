@@ -115,10 +115,10 @@ fnc_hardpoint_garrison = {
 #define HP_ROAD_SNAP 120
 #define HP_AOI_LOCAL_R 2000
 
-// A weighted pick, not the single best, so a type's likeliest ground isn't its only ground. _rejectInZone keeps a
-// standalone road snap out of a zone, whose own ring already holds its roads.
+// A weighted pick, not the single best, so a type's likeliest ground isn't its only ground. _bandOnly re-tests a
+// standalone road snap against the band, since the snap moves the candidate after its own band test.
 fnc_hardpoint_best_ground = {
-    params ["_type", "_fnCand", ["_anchor", []], ["_rejectInZone", false], ["_variant", ""]];
+    params ["_type", "_fnCand", ["_anchor", []], ["_bandOnly", false], ["_variant", ""]];
     private _pool = [];
     private _draws = 0;
     while { _draws < HP_TYPE_DRAWS && {(count _pool) < HP_POOL_ENOUGH * 2} } do {
@@ -137,7 +137,7 @@ fnc_hardpoint_best_ground = {
             if (isNull _road) then { continue };
             private _rp = getPosASL _road;
             _c = [_rp select 0, _rp select 1, 0];
-            if (_rejectInZone && {[_c] call fnc_aoi_in_any_zone}) then { continue };
+            if (_bandOnly && {([_c] call fnc_aoi_field_at) <= 0 || {[_c] call fnc_aoi_in_any_zone}}) then { continue };
         };
         private _f = [_c] call fnc_hardpoint_survey;
         if ((_f select 8) < HP_SITE_SPACING) then { continue };

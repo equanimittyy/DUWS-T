@@ -70,10 +70,11 @@ DUWS_fnc_opcom_mineBuild = {
         if (_best isEqualTo []) exitWith { call _fnc_noGround };
         _best params ["_at", "", "_dir"];
         // Only the centre was scored. A belt runs kilometres past it and crosses ground the one candidate
-        // never saw, so every square is tested here. AP keeps the 100 m road standoff its siting gate
-        // applies; AT is laid on roads by design.
+        // never saw, so every square is tested here, the band included. AP keeps the 100 m road standoff
+        // its siting gate applies; AT is laid on roads by design.
         private _centres = ([_at, _dir, _size select 0, _size select 1] call fnc_hardpoint_minefield_grid) select {
             !surfaceIsWater _x && {_variant isEqualTo "AT" || {(_x nearRoads 100) isEqualTo []}}
+                && {([_x] call fnc_aoi_field_at) > 0} && {!([_x] call fnc_aoi_in_any_zone)}
         };
         private _seq = missionNamespace getVariable ["DUWS_hpOpcomSeq", 0];
         missionNamespace setVariable ["DUWS_hpOpcomSeq", _seq + 1];

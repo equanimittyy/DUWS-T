@@ -101,8 +101,9 @@ unit-tested independently of the terrain read that feeds it:
   `AT` field is the second exception to the road standoff: buried mines are not spotted from the verge,
   and mines off the road stop nothing that drives. Like a roadblock, it is bound to a road:
   `fnc_hardpoint_best_ground` puts its centre on a road within `HP_ROAD_SNAP` (120 m) of the draw, and
-  drops a draw with no road in reach. The belt runs at the bearing it was given, so it lies along the road,
-  across it, or at any angle between. An `AP` field keeps the standoff.
+  drops a draw with no road in reach. A standalone site also drops a draw whose road lies outside the
+  band. The belt runs at the bearing it was given, so it lies along the road, across it, or at any angle
+  between. An `AP` field keeps the standoff.
   Otherwise the multiplier rewards what that type wants — high ground and a road below for MG/AT,
   flat and open for AA, defilade for a mortar, a symmetric crest for a radio mast — plus a mutual-support
   bonus for sitting within interlock range of a hardpoint already down.

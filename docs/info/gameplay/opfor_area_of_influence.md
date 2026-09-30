@@ -141,7 +141,9 @@ After generation, only OPCOM's standalone, asset and minefield builds add to the
 band mask the need field keeps (`appraisal/value/fnc_opcom_need.sqf`), and each build type takes the best of
 them by its own Value. A
 minefield takes the cell holding the most BLUFOR traffic. The truck drives to that cell's centre, and the
-hardpoint is sited within half a grid cell of where it is delivered. The rules are
+hardpoint is sited within half a grid cell of where it is delivered. Each point that a standalone build stands on
+is tested against the band again: the delivered spot, a road snap, and each square of a minefield belt. A belt
+drops the squares that fall outside the band. The rules are
 [`opcom_plan.md`](../../plans/opcom/opcom_plan.md#asset-siting)'s.
 
 A dev-only coverage overlay exists for inspecting the field in play: `fnc_debug_opcom_view` remote
