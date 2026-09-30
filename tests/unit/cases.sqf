@@ -1703,6 +1703,7 @@ OPCOM_RAPPORT_STEP = 2;
 ["rapportValue: a neutral town takes the whole step", [20, 0] call DUWS_fnc_opcom_rapportValue, 4] call fnc_assertClose;
 ["rapportValue: a town at -10 takes half", [20, -10] call DUWS_fnc_opcom_rapportValue, 2] call fnc_assertClose;
 ["rapportValue: a town near -20 scores at the floor", [20, -19] call DUWS_fnc_opcom_rapportValue, 0.4] call fnc_assertClose;
+["rapportValue: a town leaning BLUFOR scores under the floor", [20, 5] call DUWS_fnc_opcom_rapportValue, 0.2] call fnc_assertClose;
 
 // --- DUWS_fnc_opcom_spread: a holding's need over its 5x5 block, weights 3/2/1 by ring ---
 OPCOM_NEED_K = 2;

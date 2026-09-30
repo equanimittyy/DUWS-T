@@ -98,7 +98,7 @@ DUWS_fnc_opcom_townFortifyOffer = {
 
 DUWS_fnc_opcom_rapportOffer = {
     params ["_i", "_rep", "_pos"];
-    if (_rep <= -20 || {_rep > 0} || {!([_pos] call fnc_aoi_opfor_covers)}) exitWith { [] };
+    if (_rep <= -20 || {_rep >= 10} || {!([_pos] call fnc_aoi_opfor_covers)}) exitWith { [] };
     [OPCOM_AP_RAPPORT, format ["Rapport at %1", [_i] call DUWS_fnc_opcom_townLabel],
         [[_i] call DUWS_fnc_opcom_townWorth, _rep] call DUWS_fnc_opcom_rapportValue]
 };

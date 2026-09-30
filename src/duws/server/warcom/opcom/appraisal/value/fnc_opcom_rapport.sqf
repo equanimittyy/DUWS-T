@@ -3,7 +3,8 @@
 if (!isServer) exitWith {};
 
 // Skewed to a neutral town, over the whole range to -20 so a town already leaning OPFOR still draws Rapport.
+// A town leaning BLUFOR scores under all of them, the floor included.
 DUWS_fnc_opcom_rapportValue = {
     params ["_worth", "_rep"];
-    _worth * ((1 - (abs _rep) / 20) max 0.1) * OPCOM_RAPPORT_STEP / 10
+    _worth * ([(1 - (abs _rep) / 20) max 0.1, 0.05] select (_rep > 0)) * OPCOM_RAPPORT_STEP / 10
 };

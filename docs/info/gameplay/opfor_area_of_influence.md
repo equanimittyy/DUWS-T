@@ -71,7 +71,7 @@ The drift is asymmetric by design. **BLUFOR pushes only once it has paid to**:
 town drifts `0` through tier I, `+1` at tier II and `+2` at tier III. Coverage with no tier pushes
 nothing; a tier with no coverage has nothing to push. **OPFOR has no passive push**: its coverage
 does not cancel BLUFOR's, and it moves a town only by buying Rapport, `-OPCOM_RAPPORT_STEP` (2) a
-delivery, offered in each town above `-20` and at or below `0` that OPFOR's coverage reaches
+delivery, offered in each town above `-20` and below `+10` that OPFOR's coverage reaches
 (`DUWS_fnc_opcom_rapportOffer`, `warcom/opcom/appraisal/fnc_opcom_buy_holding.sqf:99`; the Value is
 [`opcom_plan.md`](../../plans/opcom/opcom_plan.md)'s). A delivery to a town the player can see names
 the town and its reputation change in an Allseer line.
