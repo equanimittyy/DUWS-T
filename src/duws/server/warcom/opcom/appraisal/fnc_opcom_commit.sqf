@@ -177,7 +177,8 @@ DUWS_fnc_opcom_attackRun = {
 // A QRF goes at a cluster, every sighting within a cell of the strongest: that block is the force its P(win) and muster
 // read, so one QRF masses on it where lone interceptors would arrive one at a time. Air joins, as it cannot join an
 // assault, since it hunts a group in the open rather than ground it must stand on. A ground unit across water stays
-// out: a ferry lands men a trip at a time, and the target moves. -> targets as DUWS_fnc_opcom_attackSweep's.
+// out: a ferry lands men a trip at a time, and the target moves. A block whose own OPFOR force already stands at the
+// ideal bar, the ratio a QRF package fills to, gains nothing from one. -> targets as DUWS_fnc_opcom_attackSweep's.
 DUWS_fnc_opcom_qrfSweep = {
     private _free = ([true] call DUWS_fnc_opcom_freeCombatants) apply { [_x] call DUWS_fnc_opcom_freeSource };
     private _zones = call DUWS_fnc_opcom_zonesOpen;
@@ -218,9 +219,13 @@ DUWS_fnc_opcom_qrfSweep = {
         private _key = DUWS_opcom_belief_key select (_x select 1);
         private _at = DUWS_opcom_belief_pos select (_x select 1);
         if ((_taken findIf { ([_x, _at] call DUWS_fnc_opcom_cellDist) <= 1 }) < 0) then {
+            // Taken before the gate, so a weaker sighting beside a lead its local defense holds opens none either.
             _taken pushBack _at;
-            private _label = format ["QRF at %1", mapGridPosition _at];
-            [_at, [[[], true, 0, 0, 0]], 0, _label, ["open", _key, _at, _label, [["attacker", [], true, "", 0, []]], "qrf"]] call _fnc_offer;
+            ([_at] call DUWS_fnc_opcom_blockForce) params ["_fri", "_ene"];
+            if (_fri / (_ene + 1) < OPCOM_MUSTER_IDEAL) then {
+                private _label = format ["QRF at %1", mapGridPosition _at];
+                [_at, [[[], true, 0, 0, 0]], 0, _label, ["open", _key, _at, _label, [["attacker", [], true, "", 0, []]], "qrf"]] call _fnc_offer;
+            };
         };
     } forEach _sightings;
     {
