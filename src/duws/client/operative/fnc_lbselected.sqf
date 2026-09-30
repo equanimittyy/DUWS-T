@@ -1,5 +1,5 @@
 // Locality: client -- wired to onLBSelChanged in shared/includes/operative_menu.hpp, which
-// spells it fnc_LBselected.
+// spells it fnc_LBselected, and run again on each roster broadcast while the menu is open.
 _selected_index = lbCurSel 1500;
 
 _selected_soldier = duws_operator_list select _selected_index;
@@ -34,31 +34,29 @@ _selected_soldier_status = _selected_soldier select 7;
  ctrlSetText [1016, format["%1 seconds",_selected_soldier_timeheal]];
  
 
-private _statusColor = [1, 1, 1, 1];
+private _colorOf = { [[1, 1, 1, 1], [1, 0, 0, 1], [0, 1, 0, 1]] select (1 + (["Injured", "Operating"] find _this)) };
+{ lbSetColor [1500, _forEachIndex, (_x select 7) call _colorOf] } forEach duws_operator_list;
+
 switch (_selected_soldier_status) do
 {
   case "Ready": {
-	buttonSetAction [1601, "[] spawn fnc_operator_recruit"];
+	buttonSetAction [1601, "[lbCurSel 1500, player] remoteExecCall ['DUWS_fnc_operatorClaim', 2]"];
 	ctrlSetText [1601, "DEPLOY (8 CP)"];
   };
   
   case "Injured": {
 	buttonSetAction [1601, "hint ""This operative must be fully healed before deploying."""]; 
 	ctrlSetText [1601, "CANNOT DEPLOY"];	
-	_statusColor = [1, 0, 0, 1];
   };
   
   case "Operating": {
 	buttonSetAction [1601, "hint ""This operative is already deployed."""]; 
 	ctrlSetText [1601, "ALREADY DEPLOYED"];	
-	_statusColor = [0, 1, 0, 1];
   };
   
   case "Healed": {
-	buttonSetAction [1601, "[] spawn fnc_operator_recruit"]; 
+	buttonSetAction [1601, "[lbCurSel 1500, player] remoteExecCall ['DUWS_fnc_operatorClaim', 2]"]; 
 	ctrlSetText [1601, "REDEPLOY (0 CP)"];	
   };  
 };
-((uiNamespace getVariable ["duws_operative_display", displayNull]) displayCtrl 1013) ctrlSetTextColor _statusColor;
-
-
+((uiNamespace getVariable ["duws_operative_display", displayNull]) displayCtrl 1013) ctrlSetTextColor (_selected_soldier_status call _colorOf);

@@ -1,7 +1,6 @@
-// Locality: client -- reached from the operative menu's onLBSelChanged via fnc_lbselected,
-// and it reads lbCurSel and group player.
-_selected_soldier = duws_operator_list select lbCurSel 1500;
-_selected_soldier_index = lbCurSel 1500;
+// Locality: client -- sent by the server's operative claim (server/operative/fnc_operator_roster.sqf) to the player
+// who asked, with the row as the server holds it, since this client's copy can be a broadcast behind.
+params ["_selected_soldier_index", "_selected_soldier"];
 
 _selected_soldier_aim = _selected_soldier select 0;
 _selected_soldier_reflexes = _selected_soldier select 1;
@@ -10,15 +9,9 @@ _selected_soldier_courage = _selected_soldier select 3;
 _selected_soldier_comms = _selected_soldier select 4;
 _selected_soldier_reload = _selected_soldier select 5;
 
-_selected_soldier_status = _selected_soldier select 7;
 _selected_soldier_name = _selected_soldier select 8;
 _selected_soldier_identity = _selected_soldier select 9;
-_selected_soldier_class = _selected_soldier select 10;
-
-// Re-deploying a healed operative is free, so only "Ready" costs CP. The guard must stay at top
-// level: nested in a switch case, exitWith leaves only the case and the operative deploys unpaid.
-if (_selected_soldier_status == "Ready" && {!(["CP", 8] call fnc_pool_spend)}) exitWith {hint localize "STR_DUWS_T_e95mc4lv"};
-_paid = [0, duws_last_charge] select (_selected_soldier_status == "Ready");
+_selected_soldier_class = missionNamespace getVariable (_selected_soldier select 10);
 
 // The operative menu opens only from the request menu, so its context names the base.
 // respawn_west stands at the HQ rest tent (fnc_BluHQinit).
@@ -33,7 +26,8 @@ if (!ais_ace_shutDown && {(["Revive", 1] call BIS_fnc_getParamValue) != 0}) then
 };
 
 addswitchableUnit _soldier;
-_soldier setVariable ["DUWS_hireCP", _paid, true];
+// The roster keeps what was paid, so the unit carries no DUWS_hireCP for the cleanup and the save's refunds skip it.
+_soldier setVariable ["DUWS_operative", true, true];
 
 if (player_fatigue == 0) then {_soldier enablefatigue false;};
 
@@ -55,28 +49,4 @@ _soldier setskill ["commanding",_selected_soldier_comms];
 {[_x] joinSilent (group player)} forEach units _group;
 hint format [localize "STR_DUWS_T_PURCHASED_UNIT", _selected_soldier_name];
 
-_selected_index = lbCurSel 1500;
-lbSetColor [1500, _selected_index, [0, 1, 0, 1]];
-
-duws_operator_list select lbCurSel 1500 set [7,"Operating"];
-ctrlSetText [1013, "Operating"];
-((uiNamespace getVariable ["duws_operative_display", displayNull]) displayCtrl 1013) ctrlSetTextColor [0, 1, 0, 1];
-
-buttonSetAction [1601, "hint ""This operative is already deployed."""]; 
-ctrlSetText [1601, "ALREADY DEPLOYED"];	
-
-
-waitUntil {sleep 5; !alive _soldier};
-
-_soldier_timeheal = 60;
-duws_operator_list select _selected_soldier_index set [12,_soldier_timeheal];
-duws_operator_list select _selected_soldier_index set [7,"Injured"];
-
-for [{_timer=_soldier_timeheal}, {_timer>0}, {_timer=_timer-1}] do
-{
-    duws_operator_list select _selected_soldier_index set [12,_timer];
-	sleep 1;
-};
-duws_operator_list select _selected_soldier_index set [12,0];
-duws_operator_list select _selected_soldier_index set [7,"Healed"];
-["info",[localize "STR_DUWS_T_OPERATOR_HEALED", _selected_soldier_name]] call bis_fnc_showNotification;
+[_soldier, _selected_soldier_index] remoteExec ["DUWS_fnc_operatorWatch", 2];

@@ -60,7 +60,7 @@ The only durable write a mission reaches on its own is the profile-backed namesp
 
 ## `exitWith` exits only the innermost block, not the script
 
-`if (cond) exitWith {...}` leaves only the code block that holds it. Nested in an `if/then` block or a `switch` case, it ends that block and the script continues after it; nested in an `if/then` block inside a loop, the loop keeps iterating. A guard nested this way does not stop the script: the operative recruit's CP check sat in a `switch` case, so a refused purchase hinted "no CP" and then deployed the operative unpaid. Fix: put a guard that must stop the script at the script's top level (`fnc_operator_recruit.sqf`), or set a flag inside the block and test it with `exitWith` at top level.
+`if (cond) exitWith {...}` leaves only the code block that holds it. Nested in an `if/then` block or a `switch` case, it ends that block and the script continues after it; nested in an `if/then` block inside a loop, the loop keeps iterating. A guard nested this way does not stop the script: the operative recruit's CP check sat in a `switch` case, so a refused purchase hinted "no CP" and then deployed the operative unpaid. Fix: put a guard that must stop the script at the script's top level, or set a flag inside the block and test it with `exitWith` at top level.
 
 ## `ctrlCreate` on a config display ignores the mission's base classes entirely
 

@@ -726,6 +726,12 @@ fnc_missionLocator = compile preprocessFileLineNumbers "duws\server\missions\fnc
 fnc_operative_mission_complete = compile preprocessFileLineNumbers "duws\server\missions\fnc_operative_mission_complete.sqf";publicVariable "fnc_operative_mission_complete";
 
 // =========================================================================================================
+// server/operative
+// =========================================================================================================
+// Executed: it builds the roster and defines the functions that change it.
+[] call compile preprocessFileLineNumbers "duws\server\operative\fnc_operator_roster.sqf";
+
+// =========================================================================================================
 // server/persistence
 // =========================================================================================================
 // Executed: each defines several functions. The store first, since the save and the restore both call into it.

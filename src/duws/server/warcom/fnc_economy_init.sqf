@@ -351,7 +351,7 @@ fnc_pool_try_spend = {
 	// What was actually charged, sent back with the verdict so a refund pays exactly this and
 	// never the base price. A scalar for CP/AP, a [cp, ap] pair for the dual case. Escalation is
 	// applied here and nowhere else, and only to CP: an AP purchase is permanent, so scaling it
-	// would make buying early strictly better than buying well. The four server-side paths that
+	// would make buying early strictly better than buying well. The server-side paths that
 	// call fnc_cp_adjust directly bypass this handshake and apply escalation themselves.
 	private _charged = 0;
 	switch (_pool) do {

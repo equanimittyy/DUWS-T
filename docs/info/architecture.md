@@ -121,7 +121,7 @@ does not imply server-only.
 | `misc/` | Civilian/informant system, intel-on-death, AI master control |
 | `persistence/` | The campaign snapshot: its store, the save and its triggers, the load screen's server half and the restore hooks |
 | `sounds/` | Ambient music loop |
-| `operative/` | Operative recruit/deploy menu |
+| `operative/` | Operatives: the team's roster under `server/`, which holds it and applies every change; the recruit/deploy menu under `client/` |
 | `includes/` | Dialog and config `.hpp` under `shared/`; the two `#include`d SQF bodies under `client/` |
 | `functions/` | Under `shared/`: the runs-anywhere bodies, plus `fnc_log_init.sqf`, which defines `fnc_log` and `fnc_waitLogged` |
 

@@ -86,7 +86,7 @@ Three properties are load-bearing:
   queues a scheduled job for a later frame, which would split the test from the debit and reopen the
   gap. The same applies to the server-side purchase paths that never used the handshake —
   `server/init_hq/fnc_redeployHQUnits.sqf`, `DUWS_fnc_zoneRedeploy`, `server/supports/fnc_activateBaseRepairStation.sqf`,
-  `server/supports/fnc_uav_scanner.sqf`, `fnc_pylon_set_with_cost`, and the AP-only
+  `server/supports/fnc_uav_scanner.sqf`, `fnc_pylon_set_with_cost`, `DUWS_fnc_operatorClaim`, and the AP-only
   `server/missions/fnc_map_readout_buy.sqf`.
 - **The caller blocks, so it must be scheduled.** `waitUntil` throws in unscheduled code. Every
   purchase entry point is `spawn`ed today — the dialog `action =` fields, the comm-menu `expression =`
@@ -245,7 +245,7 @@ a cheaper way to liquidate a slate, which inverts what the death penalty is for.
 | Rare-zombie kill (WBK) | `server/civilian/fnc_civ_handler_wbk.sqf:359` | +10, or +30 for the Goliath |
 | Support refund | `client/supports/fnc_supports_init.sqf` | the recorded charge in full; `support_death_refund` of the slate when its holder dies |
 | High Command aircraft recall | `server/supports/fnc_hcair_recall.sqf` | the recorded charge in full, CP and AP, when the caller leaves before the aircraft's station time ends |
-| Leaderless squadmate | `server/misc/fnc_repetitive_cleanup.sqf` | the CP charged to hire it (`DUWS_hireCP`: HQ-requested units and operatives deployed from Ready), when the cleanup sweep deletes it alive after its squad leader left with no human left in the squad; paradrop troopers, PMC hires and recruited civilians carry no price |
+| Leaderless squadmate | `server/misc/fnc_repetitive_cleanup.sqf` | the CP charged to hire it (`DUWS_hireCP`: HQ-requested units), when the cleanup sweep deletes it alive after its squad leader left with no human left in the squad; paradrop troopers, PMC hires and recruited civilians carry no price, and an operative carries none because it returns to the team's roster still paid for |
 
 **A zone's worth is one figure now, not two.** `_points` (the worth) rides the capture triggers —
 `fnc_createzone.sqf:280` → `fnc_captured.sqf` → `fnc_opfor_cap.sqf` → `fnc_blufor_cap.sqf` — as
@@ -328,7 +328,7 @@ territory shows no readout.
 | Vehicles | `dialog/fnc_request_vehicle*.sqf` | CP only today, from `DUWS_fnc_vehPrice` (`shared/functions/fnc_veh_price.sqf`): a kind band set by role, a heaviness score placing the vehicle inside it |
 | Squads | `dialog/fnc_request_squad*.sqf` | per squad table |
 | FOB deploy | `client/supports/fnc_request_fob.sqf` | fixed |
-| Operatives | `client/operative/fnc_operator_recruit.sqf:20` | 8 (re-deploying a healed one is free) |
+| Operatives | `server/operative/fnc_operator_roster.sqf:69` | 8, once per operative: the team's roster keeps it paid for, so each later deploy is free, a save included |
 | Mobile HQ | `client/dialog/fnc_MHQ_select.sqf` | 10 |
 | Heli / boat taxi | `supports/taxi/` | fixed |
 | Base repair, HQ, FOB and zone redeploy | `server/supports/fnc_activateBaseRepairStation.sqf`, `server/init_hq/fnc_redeployHQUnits.sqf`, `fnc_redeployFOBUnits.sqf`, `server/init_zones/fnc_zone_build.sqf` | 2 / 2 / 2 / 2 |

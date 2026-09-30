@@ -234,6 +234,19 @@ DUWS_fnc_restoreApply = {
     DUWS_intelLevel = { _x in ["intel1", "intel2", "intel3", "intel4"] } count DUWS_support_permanent;
     DUWS_fortLevel = { _x in ["fort1", "fort2", "fort3", "fort4"] } count DUWS_support_permanent;
 
+    // By identity, not position, so a roster that changes between versions cannot hand one operative another's record.
+    {
+        _x params ["_id", "_stats", "_points", "_paid"];
+        private _i = duws_operator_list findIf { (_x select 9) isEqualTo _id };
+        if (_i >= 0) then {
+            private _row = duws_operator_list select _i;
+            { _row set [_forEachIndex, _x] } forEach _stats;
+            _row set [13, _points];
+            if (_paid) then { _row set [7, "Healed"] };
+        };
+    } forEach (_d getOrDefault ["operators", []]);
+    publicVariable "duws_operator_list";
+
     // Classes a removed mod defined are dropped here rather than restored as names that spawn nothing.
     private _garage = (_d getOrDefault ["garage", []]) select { isClass (configFile >> "CfgVehicles" >> (_x param [0, ""])) };
     DUWS_restoreDropped set ["vehicles", count (_d getOrDefault ["garage", []]) - count _garage];

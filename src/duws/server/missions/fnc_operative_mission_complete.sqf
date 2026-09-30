@@ -68,4 +68,4 @@ _status = _x select 7;
 	_x set [13,_spendable_pts_new];
 	};
 } forEach duws_operator_list;
-
+call DUWS_fnc_operatorPublish;

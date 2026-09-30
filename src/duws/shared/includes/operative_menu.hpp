@@ -302,7 +302,7 @@ class operative_add_aiming: RscButton
 	w = 1 * GUI_GRID_W;
 	h = 1 * GUI_GRID_H;
 	tooltip = "Spend 1 point on this skill";
-	action  = "call DUWS_operator_add_aim"; 
+	action  = "[0] call DUWS_operator_add"; 
 };
 class operative_add_reflexes: RscButton
 {
@@ -313,7 +313,7 @@ class operative_add_reflexes: RscButton
 	w = 1 * GUI_GRID_W;
 	h = 1 * GUI_GRID_H;
 	tooltip = "Spend 1 point on this skill";
-	action  = "call DUWS_operator_add_reflexes"; 
+	action  = "[1] call DUWS_operator_add"; 
 };
 class operative_add_spotting: RscButton
 {
@@ -324,7 +324,7 @@ class operative_add_spotting: RscButton
 	w = 1 * GUI_GRID_W;
 	h = 1 * GUI_GRID_H;
 	tooltip = "Spend 1 point on this skill";
-	action  = "call DUWS_operator_add_spotting"; 
+	action  = "[2] call DUWS_operator_add"; 
 };
 class operative_add_courage: RscButton
 {
@@ -335,7 +335,7 @@ class operative_add_courage: RscButton
 	w = 1 * GUI_GRID_W;
 	h = 1 * GUI_GRID_H;
 	tooltip = "Spend 1 point on this skill";
-	action  = "call DUWS_operator_add_courage"; 
+	action  = "[3] call DUWS_operator_add"; 
 };
 class operative_add_comms: RscButton
 {
@@ -346,7 +346,7 @@ class operative_add_comms: RscButton
 	w = 1 * GUI_GRID_W;
 	h = 1 * GUI_GRID_H;
 	tooltip = "Spend 1 point on this skill";
-	action  = "call DUWS_operator_add_comms"; 
+	action  = "[4] call DUWS_operator_add"; 
 };
 class operative_add_reload: RscButton
 {
@@ -357,7 +357,7 @@ class operative_add_reload: RscButton
 	w = 1 * GUI_GRID_W;
 	h = 1 * GUI_GRID_H;
 	tooltip = "Spend 1 point on this skill";
-	action  = "call DUWS_operator_add_reload"; 
+	action  = "[5] call DUWS_operator_add"; 
 };
 
 
