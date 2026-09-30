@@ -24,7 +24,9 @@ DUWS_fnc_campaignTaskings = {
         // A frozen rider's men despawn as they board, so a live read loses the ones aboard.
         if (!isNull _grp && {count units _grp > 0} && {!(_t getOrDefault ["ferryFrozen", false])}) then {
             _t set ["effForce", [_grp] call DUWS_fnc_opcom_effForceLive];
-            _t set ["pos", getPosASL (leader _grp)];
+            private _ldrPos = getPosASL (leader _grp);
+            private _shore = [_t, _ldrPos] call DUWS_fnc_opcom_swimShore;
+            _t set ["pos", [_shore, _ldrPos] select (_shore isEqualTo [])];
             // The lift reads a bound rider's drop off its route.
             if ((_t getOrDefault ["ridingOn", -1]) < 0) then { _t set ["route", []] };
         };
@@ -33,6 +35,7 @@ DUWS_fnc_campaignTaskings = {
         if ("interceptKey" in _t) then { _t set ["interceptKey", ""] };
         // A mission-time stamp would sit in the next session's future and hold the capture for as long as this one ran.
         _t deleteAt "inZoneAt";
+        _t deleteAt "swimTo";
         if !((_t getOrDefault ["status", ""]) in ["dead", "done"]) then { _t set ["status", "virtual"] };
         _t
     }

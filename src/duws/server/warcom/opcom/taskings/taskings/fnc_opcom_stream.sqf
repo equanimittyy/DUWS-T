@@ -83,6 +83,15 @@ DUWS_fnc_opcom_shoreStage = {
     [_crosses, _stage]
 };
 
+// -> the shore a boat drop's men swim to, or [] once the leader is out of the water, which is what spends the
+// field. A swimmer heads for its order's waypoint in a straight line, and that line can run along the coast.
+DUWS_fnc_opcom_swimShore = {
+    params ["_t", "_ldrPos"];
+    private _shore = _t getOrDefault ["swimTo", []];
+    if (_shore isEqualTo [] || {!surfaceIsWater _ldrPos}) exitWith { [] };
+    _shore
+};
+
 // Push a re-order onto a live group. A transportable unit whose route crosses water drives only to the near shore,
 // where the tasking step borrows a ferry.
 DUWS_fnc_opcom_reOrderLive = {
@@ -105,7 +114,10 @@ DUWS_fnc_opcom_reOrderLive = {
             (_grp addWaypoint [_stage, 0]) setWaypointType "HOLD";
         };
     };
-    [_grp, _order, _t get "target", [_t, getPosASL (leader _grp)] call DUWS_fnc_opcom_routeVia] call DUWS_fnc_opcom_applyOrder;
+    private _via = [_t, getPosASL (leader _grp)] call DUWS_fnc_opcom_routeVia;
+    private _shore = [_t, getPosASL (leader _grp)] call DUWS_fnc_opcom_swimShore;
+    if (_shore isNotEqualTo []) then { _via = [_shore] + _via };
+    [_grp, _order, _t get "target", _via] call DUWS_fnc_opcom_applyOrder;
 };
 
 // -> [x, y] a de-virt may stand on, or [] for none this tick. The unit or a player can close several hundred metres
@@ -274,7 +286,9 @@ DUWS_fnc_opcom_reVirt = {
         _t set ["grp", ""]; _t set ["status", "virtual"];
     };
     _t set ["effForce", [_grp] call DUWS_fnc_opcom_effForceLive];
-    _t set ["pos", getPosASL (leader _grp)];
+    private _ldrPos = getPosASL (leader _grp);
+    private _shore = [_t, _ldrPos] call DUWS_fnc_opcom_swimShore;
+    _t set ["pos", [_shore, _ldrPos] select (_shore isEqualTo [])];
     [_grp] call DUWS_fnc_opcom_despawn;
     _t set ["grp", ""];
     _t set ["route", []];

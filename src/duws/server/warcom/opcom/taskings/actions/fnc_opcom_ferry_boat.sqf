@@ -1,10 +1,11 @@
 // Locality: server, [] call'd at load, after fnc_opcom_ferry_devirt. A boat's live crossing: it parks off the shore
-// and swaps the whole group at once at both ends, because boats are finnicky.
+// at both ends. The pickup swaps the whole group at the shore, because boats are finnicky; the drop turns the men
+// out one by one into the water, and they swim ashore.
 if (!isServer) exitWith {};
 
-// A boat's live [shore, park]: the water-cell centre can sit ~350 m out, past any board range. The park is capped
+// A boat's live leg to a shore: the water-cell centre can sit ~350 m out, past any board range. The park is capped
 // at that centre, which is water by construction (grid_init samples each cell centre), though not always deep.
-DUWS_fnc_opcom_ferryBoatPark = {
+DUWS_fnc_opcom_ferryBoatLeg = {
     params ["_landPt", "_waterPt"];
     private _dir = _landPt getDir _waterPt;
     private _len = _landPt distance2D _waterPt;
@@ -12,7 +13,8 @@ DUWS_fnc_opcom_ferryBoatPark = {
     for "_d" from 0 to _len step 10 do {
         if !(surfaceIsWater (_landPt getPos [_d, _dir])) then { _shore = _d };
     };
-    [_landPt getPos [_shore, _dir], _landPt getPos [(_shore + OPCOM_FERRY_BOAT_PARK) min _len, _dir]]
+    _t set ["ferryShore", _landPt getPos [_shore, _dir]];
+    [_landPt getPos [(_shore + OPCOM_FERRY_BOAT_PARK) min _len, _dir]] call DUWS_fnc_opcom_ferryLegTo;
 };
 
 DUWS_fnc_opcom_ferryBoatRiders = {
@@ -24,7 +26,7 @@ DUWS_fnc_opcom_ferryBoatRiders = {
 };
 
 DUWS_fnc_opcom_ferryBoatDropLeg = {
-    [([_rider get "ferryLand", _t get "target"] call DUWS_fnc_opcom_ferryBoatPark) select 1] call DUWS_fnc_opcom_ferryLegTo;
+    [_rider get "ferryLand", _t get "target"] call DUWS_fnc_opcom_ferryBoatLeg;
 };
 
 DUWS_fnc_opcom_ferryBoatEmbark = {
@@ -38,9 +40,7 @@ DUWS_opcom_ferryHulls set ["boat", createHashMapFromArray [
     ["topickup", {
         if ((_t getOrDefault ["ferryLZ", []]) isEqualTo []) then {
             private _rpos = _rider get "pos";
-            ([_rpos, [_rpos] call DUWS_fnc_opcom_nearestWater] call DUWS_fnc_opcom_ferryBoatPark) params ["_shore", "_park"];
-            _t set ["ferryShore", _shore];
-            [_park] call DUWS_fnc_opcom_ferryLegTo;
+            [_rpos, [_rpos] call DUWS_fnc_opcom_nearestWater] call DUWS_fnc_opcom_ferryBoatLeg;
         };
         call DUWS_fnc_opcom_ferryBoatRiders;
         if (([getPosASL _veh, _t get "ferryLZ"] call DUWS_fnc_opcom_cellDist) <= OPCOM_FERRY_LAND_K) then {
@@ -70,10 +70,14 @@ DUWS_opcom_ferryHulls set ["boat", createHashMapFromArray [
     ["dropland", {
         _rider set ["pos", _tpos];
         private _wait = call DUWS_fnc_opcom_ferryWaitTick;
-        if (((_veh distance2D (_t get "ferryLZ")) < OPCOM_FERRY_BOARD_BOAT) || {_wait >= OPCOM_FERRY_WAIT_MAX}) then { ["dropunload"] call DUWS_fnc_opcom_ferrySetPhase };
+        if ((((_veh distance2D (_t get "ferryLZ")) < OPCOM_FERRY_BOARD_BOAT) && {(abs (speed _veh)) < OPCOM_FERRY_BOAT_STOP})
+            || {_wait >= OPCOM_FERRY_WAIT_MAX}) then {
+            call DUWS_fnc_opcom_ferryHoldHull;
+            _rider set ["swimTo", _t get "ferryShore"];
+            if !(call DUWS_fnc_opcom_ferryDropBoard) exitWith {};
+            ["dropunload"] call DUWS_fnc_opcom_ferrySetPhase;
+            [false] call DUWS_fnc_opcom_ferryUnloadPaced;
+        };
     }],
-    ["dropunload", {
-        [_rider getOrDefault ["ferryLand", _t get "target"]] call DUWS_fnc_opcom_ferryDropSpawn;
-        [_t] call DUWS_fnc_opcom_ferryRelease;
-    }]
+    ["dropunload", { [call DUWS_fnc_opcom_ferryWaitTick] call DUWS_fnc_opcom_ferryUnloadEnd }]
 ]];

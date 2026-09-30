@@ -89,6 +89,13 @@ DUWS_fnc_opcom_ferryLegTo = {
     [_grp, "move", _pt] call DUWS_fnc_opcom_applyOrder;
 };
 
+// The next leg's order clears the HOLD, so nothing lifts it by hand.
+DUWS_fnc_opcom_ferryHoldHull = {
+    private _here = getPosASL _veh;
+    [_grp, "move", _here] call DUWS_fnc_opcom_applyOrder;
+    (_grp addWaypoint [_here, 0]) setWaypointType "HOLD";
+};
+
 // Once per rider group: one streamed in mid-pickup is a new group. -> that group, or grpNull once this hull has it.
 DUWS_fnc_opcom_ferryNewRiders = {
     private _rg = groupFromNetId (_rider get "grp");
@@ -143,7 +150,7 @@ DUWS_fnc_opcom_ferryEmbarkRider = {
     _t set ["embarked", true];
 };
 
-// Spawns the rider still bound; ferryRelease, or a rotor's first man out, unbinds it. _alt spawns it clear
+// Spawns the rider still bound; its first man out, or ferryRelease, unbinds it. _alt spawns it clear
 // of the map: hideObjectGlobal lands a frame or two late, so a group raised on the pad flashes there.
 DUWS_fnc_opcom_ferryDropSpawn = {
     params ["_p", ["_alt", 0]];
@@ -176,17 +183,18 @@ DUWS_fnc_opcom_ferryDropBoard = {
     true
 };
 
-// Put whoever is left on the ground at the LZ: the held men wait 10 km above it, so showing them where they
-// stand drops them to their deaths.
+// Put whoever is left down at the LZ: the held men wait 10 km above it, so showing them where they stand drops
+// them to their deaths. A boat's LZ is its park, where ATL 0 is the seabed, so its men go onto the surface to swim.
 DUWS_fnc_opcom_ferryDropGround = {
     private _rg = groupFromNetId (_rider get "grp");
     if (isNull _rg) exitWith {};
     (_t get "ferryLZ") params ["_lx", "_ly"];
+    private _wet = surfaceIsWater [_lx, _ly];
     {
         moveOut _x;
         _x enableSimulation true;
         _x hideObjectGlobal false;
-        _x setPosATL [_lx, _ly, 0];
+        if (_wet) then { _x setPosASLW [_lx, _ly, 0] } else { _x setPosATL [_lx, _ly, 0] };
     } forEach ((units _rg) select {alive _x});
     _veh setVariable ["DUWS_ferryUnloadQ", []];
 };
@@ -217,7 +225,7 @@ DUWS_fnc_opcom_ferryUnloadEnd = {
 // pickupboard -> carry -> dropland -> dropunload). Transit legs are untimed; each land/board/unload phase caps at
 // OPCOM_FERRY_WAIT_MAX ticks and forces through on expiry, so a rotor's descent and its walk-aboard hold a budget
 // each. Do NOT unify the lifts' board/dismount shapes, which is why each lift type keeps its own phase table; a phase
-// it has no row for does nothing. Strength freezes at the board commit, thaws when the rider is on the ground.
+// it has no row for does nothing. Strength freezes at the board commit, thaws at the first man out.
 DUWS_fnc_opcom_ferryStepLive = {
     params ["_t", "_rider"];
     private _grp = groupFromNetId (_t get "grp");

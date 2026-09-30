@@ -3,13 +3,6 @@
 // a HOLD, so it has no pickupland or dropland.
 if (!isServer) exitWith {};
 
-// The next leg's order clears the HOLD, so nothing lifts it by hand.
-DUWS_fnc_opcom_ferryHoldHull = {
-    private _here = getPosASL _veh;
-    [_grp, "move", _here] call DUWS_fnc_opcom_applyOrder;
-    (_grp addWaypoint [_here, 0]) setWaypointType "HOLD";
-};
-
 DUWS_fnc_opcom_ferryGroundRiders = {
     private _rg = call DUWS_fnc_opcom_ferryNewRiders;
     if (isNull _rg) exitWith {};

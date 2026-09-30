@@ -99,7 +99,7 @@ DUWS_fnc_opcom_ferryHome = {
 DUWS_fnc_opcom_ferryRelease = {
     params ["_t"];
     // Crossing over: thaw the rider's strength freeze and clear its unload guard so live tracking + tasking resume;
-    // a rider still bound here (a boat drop, or a rotor drop nobody got out of) unbinds now.
+    // a rider still bound here (a drop nobody got out of) unbinds now.
     private _r = [_t get "carrying"] call DUWS_fnc_opcom_byId;
     if (!isNil "_r") then {
         _r set ["ferryFrozen", false]; _r set ["unloading", false];
@@ -147,7 +147,7 @@ DUWS_fnc_opcom_ferryTick = {
         // group and is cut loose to re-ferry.
         if (isNull _tg || {(units _tg) findIf {alive _x} < 0}) exitWith {
             private _rg = groupFromNetId (_rider get "grp");
-            // Men still hidden in a rotor drop's unload queue go down with the hull: a loss, not frozen ghosts at the pad.
+            // Men still hidden in a drop's unload queue go down with the hull: a loss, not frozen ghosts at the LZ.
             private _lost = (units _rg) select { isObjectHidden _x };
             { deleteVehicle _x } forEach _lost;
             ["WARN", "OPCOM", format ["ferry: transport %1 (%2) down at %3 -- rider %4 %5, %6 lost unrevealed", _t get "id", _t get "moveType",
