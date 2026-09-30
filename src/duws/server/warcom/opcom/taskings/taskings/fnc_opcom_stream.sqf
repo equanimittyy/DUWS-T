@@ -44,14 +44,11 @@ DUWS_fnc_opcom_applyOrder = {
     if (_first isNotEqualTo []) then { _grp setCurrentWaypoint _first };
 };
 
-// -> the rest of a bent route as MOVE points every OPCOM_GRID_CELL metres along it, [] when nothing bent it (lambda 0,
-// nothing avoided). One waypoint at the target lets the engine path a live group straight through what the route went
-// around; a fixed spacing keeps a road route's dense polyline to a handful of waypoints.
+// -> the rest of _route as MOVE points every OPCOM_GRID_CELL metres along it. A fixed spacing keeps a road route's
+// dense polyline to a handful of waypoints.
 DUWS_fnc_opcom_routeVia = {
-    params ["_t", "_from"];
-    private _route = _t get "route";
-    private _bent = (_t getOrDefault ["lambda", 0]) > 0 || {(_t getOrDefault ["avoid", []]) isNotEqualTo []};
-    if (!_bent || {count _route < 2}) exitWith { [] };
+    params ["_route", "_from"];
+    if (count _route < 2) exitWith { [] };
     private _near = 0;
     { if ((_x distance2D _from) < ((_route select _near) distance2D _from)) then { _near = _forEachIndex } } forEach _route;
     private _via = [];
@@ -106,16 +103,23 @@ DUWS_fnc_opcom_reOrderLive = {
         (_grp addWaypoint [_here, 0]) setWaypointType "HOLD";
     };
     private _order = _t get "order";
-    if ("transportable" in (_t get "flags") && {_order isNotEqualTo "guard"}) then {
-        ([_t, getPosASL (leader _grp)] call DUWS_fnc_opcom_shoreStage) params ["_crosses", "_stage"];
-        if (_crosses) exitWith {
-            [_grp, "move", _stage] call DUWS_fnc_opcom_applyOrder;
-            // A lone MOVE completes and the group drifts off; HOLD pins it at the shore until the ferry clears it.
-            (_grp addWaypoint [_stage, 0]) setWaypointType "HOLD";
-        };
+    private _from = getPosASL (leader _grp);
+    private _route = _t get "route";
+    // One waypoint at the target lets the engine path a group straight through what a bent route went around, and a
+    // hull off the road it was routed on. An unbent grid route is left to the engine, which paths straighter than cells.
+    private _walk = (_t getOrDefault ["lambda", 0]) > 0 || {(_t getOrDefault ["avoid", []]) isNotEqualTo []}
+        || {(_t get "routeMode") isEqualTo "road"};
+    ([_t, _from] call DUWS_fnc_opcom_shoreStage) params ["_crosses", "_stage"];
+    if (_crosses && {"transportable" in (_t get "flags")} && {_order isNotEqualTo "guard"}) exitWith {
+        private _via = if (_walk) then {
+            [_route select [0, _route findIf { [_x] call DUWS_fnc_opcom_isWaterPt }], _from] call DUWS_fnc_opcom_routeVia
+        } else { [] };
+        [_grp, "move", _stage, _via] call DUWS_fnc_opcom_applyOrder;
+        // A lone MOVE completes and the group drifts off; HOLD pins it at the shore until the ferry clears it.
+        (_grp addWaypoint [_stage, 0]) setWaypointType "HOLD";
     };
-    private _via = [_t, getPosASL (leader _grp)] call DUWS_fnc_opcom_routeVia;
-    private _shore = [_t, getPosASL (leader _grp)] call DUWS_fnc_opcom_swimShore;
+    private _via = if (_walk) then { [_route, _from] call DUWS_fnc_opcom_routeVia } else { [] };
+    private _shore = [_t, _from] call DUWS_fnc_opcom_swimShore;
     if (_shore isNotEqualTo []) then { _via = [_shore] + _via };
     [_grp, _order, _t get "target", _via] call DUWS_fnc_opcom_applyOrder;
 };
