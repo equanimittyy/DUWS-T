@@ -13762,16 +13762,16 @@
                 <Spanish>Tu posición ha sido revelada a OPFOR por un puesto de reconocimiento enemigo</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_OPCOM_RAPPORT_DELIVERED">
-                <Original>We have reports that OPFOR delivered aid supplies to %1.</Original>
-                <English>We have reports that OPFOR delivered aid supplies to %1.</English>
-                <Chinesesimp>我们收到报告，OPFOR 已向 %1 运送了援助物资。</Chinesesimp>
-                <German>Uns liegen Meldungen vor, dass OPFOR Hilfsgüter nach %1 geliefert hat.</German>
-                <Polish>Mamy zgłoszenia, że OPFOR dostarczył zapasy pomocowe do %1.</Polish>
-                <Czech>Máme hlášení, že OPFOR doručil pomocné zásoby do %1.</Czech>
-                <Russian>У нас есть данные, что OPFOR доставил гуманитарную помощь в %1.</Russian>
-                <French>Nous avons des rapports indiquant qu'OPFOR a livré des fournitures d'aide à %1.</French>
-                <Chinese>我們收到報告，OPFOR 已向 %1 運送了援助物資。</Chinese>
-                <Spanish>Tenemos informes de que OPFOR ha entregado suministros de ayuda a %1.</Spanish>
+                <Original>We have reports that OPFOR delivered aid supplies to %1 (%2 -&gt; %3 REP).</Original>
+                <English>We have reports that OPFOR delivered aid supplies to %1 (%2 -&gt; %3 REP).</English>
+                <Chinesesimp>我们收到报告，OPFOR 已向 %1 运送了援助物资（声望 %2 -&gt; %3）。</Chinesesimp>
+                <German>Uns liegen Meldungen vor, dass OPFOR Hilfsgüter nach %1 geliefert hat (Ansehen %2 -&gt; %3).</German>
+                <Polish>Mamy zgłoszenia, że OPFOR dostarczył zapasy pomocowe do %1 (reputacja %2 -&gt; %3).</Polish>
+                <Czech>Máme hlášení, že OPFOR doručil pomocné zásoby do %1 (reputace %2 -&gt; %3).</Czech>
+                <Russian>У нас есть данные, что OPFOR доставил гуманитарную помощь в %1 (репутация %2 -&gt; %3).</Russian>
+                <French>Nous avons des rapports indiquant qu'OPFOR a livré des fournitures d'aide à %1 (%2 -&gt; %3 RÉP).</French>
+                <Chinese>我們收到報告，OPFOR 已向 %1 運送了援助物資（聲望 %2 -&gt; %3）。</Chinese>
+                <Spanish>Tenemos informes de que OPFOR ha entregado suministros de ayuda a %1 (reputación %2 -&gt; %3).</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_OPCOM_ARTY_INBOUND">
                 <Original>Be advised, enemy guns are firing on %1. Rounds will land soon. Clear the area.</Original>

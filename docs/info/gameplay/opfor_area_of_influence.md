@@ -70,10 +70,11 @@ The drift is asymmetric by design. **BLUFOR pushes only once it has paid to**:
 `DUWS_bluforRadioLevel` is the tier bought, `0`-`3`, and tier I buys reach only, so a BLUFOR-covered
 town drifts `0` through tier I, `+1` at tier II and `+2` at tier III. Coverage with no tier pushes
 nothing; a tier with no coverage has nothing to push. **OPFOR has no passive push**: its coverage
-does not cancel BLUFOR's, and it moves a town only by buying Rapport, `-OPCOM_RAPPORT_STEP` (3) a
-delivery, offered in each town above `-15` and below `+10` that OPFOR's coverage reaches
+does not cancel BLUFOR's, and it moves a town only by buying Rapport, `-OPCOM_RAPPORT_STEP` (2) a
+delivery, offered in each town above `-20` and at or below `0` that OPFOR's coverage reaches
 (`DUWS_fnc_opcom_rapportOffer`, `warcom/opcom/appraisal/fnc_opcom_buy_holding.sqf:99`; the Value is
-[`opcom_plan.md`](../../plans/opcom/opcom_plan.md)'s).
+[`opcom_plan.md`](../../plans/opcom/opcom_plan.md)'s). A delivery to a town the player can see names
+the town and its reputation change in an Allseer line.
 
 The writer is the existing `fnc_town_rep_adjust` (`server/warcom/fnc_economy_init.sqf:179`),
 already clamped to `[-20, 20]`; the drift and Rapport are silent callers (`_silent` param) beside its
