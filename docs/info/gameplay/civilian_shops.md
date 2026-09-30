@@ -188,7 +188,8 @@ class, so it is the one sellability gate. `Money_roll` itself is never sellable.
 | Class | Base price |
 |---|---|
 | Magazine, glasses, other `CfgWeapons` item | 1 |
-| Handgun, backpack | 2 |
+| Handgun, backpack with a load | 2 |
+| Backpack with no load (`maximumLoad` 0): a static weapon part or a UAV | 6 |
 | Primary weapon | 3 |
 | Launcher | 5 |
 | Vehicle | 1.2 × its request-menu CP price (`DUWS_fnc_vehPrice`) |

@@ -28,7 +28,10 @@ private _markup = FOREIGN_MARKUP_GEAR;
 private _base = call {
     if (isClass (configFile >> "CfgMagazines" >> _class)) exitWith { 1 };
     if (isClass (configFile >> "CfgGlasses" >> _class)) exitWith { 1 };
-    if (_class isKindOf ["Bag_Base", configFile >> "CfgVehicles"]) exitWith { 2 };
+    // A bag that holds nothing is a weapon-system part -- a static's gun or tripod, a UAV -- not storage.
+    if (_class isKindOf ["Bag_Base", configFile >> "CfgVehicles"]) exitWith {
+        [2, 6] select (getNumber (configFile >> "CfgVehicles" >> _class >> "maximumLoad") == 0)
+    };
 
     // Hulls take the request menu's CP price, so a dealer ranks them exactly as HQ does and a retune
     // of the CP bands carries through to the forecourt.
