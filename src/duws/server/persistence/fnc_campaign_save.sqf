@@ -150,7 +150,6 @@ DUWS_fnc_campaignSnapshot = {
 
     _s set ["hardpoints", DUWS_hardpoints];
     _s set ["belts", call DUWS_fnc_campaignBelts];
-    _s set ["radioSeq", missionNamespace getVariable ["DUWS_radioSeq", 0]];
     _s set ["unlocks", DUWS_support_permanent];
     // Paid is all a save keeps of the status: nothing deployed or injured outlives the session.
     _s set ["operators", duws_operator_list apply { [_x select 9, _x select [0, 6], _x select 13, (_x select 7) isNotEqualTo "Ready"] }];

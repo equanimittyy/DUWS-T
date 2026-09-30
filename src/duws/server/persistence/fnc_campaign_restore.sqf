@@ -284,7 +284,6 @@ DUWS_fnc_restoreHardpoints = {
     {
         missionNamespace setVariable [format ["DUWS_hpCap_%1", [_x select 2] call fnc_zone_key], (round ((_x select 3) / 250)) max 1];
     } forEach (DUWS_restore get "zones");
-    missionNamespace setVariable ["DUWS_radioSeq", DUWS_restore getOrDefault ["radioSeq", 0]];
     private _belts = createHashMapFromArray ((DUWS_restore getOrDefault ["belts", []]) apply { [_x select 0, _x select [1, 3]] });
     private _rows = DUWS_restore get "hardpoints";
     {

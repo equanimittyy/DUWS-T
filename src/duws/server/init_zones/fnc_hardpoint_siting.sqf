@@ -199,7 +199,7 @@ fnc_hardpoint_score = {
         // A radio mast wants a hilltop crest: high above the ring, ground falling away on every bearing.
         // _crest rewards a cancelling fall line (aspectMag near 0) and docks a one-sided slope; _high is
         // what tells a crest from flat ground, which has no fall line either. Never zero -- terrain here
-        // is a preference for the deliberate seed, not a veto.
+        // is a preference for a deliberate build, not a veto.
         case "RADIO": {
             private _crest = 1 - ([_aspectMag, 2.5, 12] call _ramp);  // 1 symmetric, 0 one clear downhill
             (0.3 + 1.7 * _high) * (0.4 + 0.6 * _crest)

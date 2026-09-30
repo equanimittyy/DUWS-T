@@ -37,9 +37,9 @@ that already flips a town's side for garrison and income
 so influence spreads only from a town that has fully fallen, never one merely leaning.
 
 The reaches are large against Altis by intent: OPFOR starts holding every zone (all zones are
-OPFOR until captured) with towers already up, so the field opens OPFOR-positive across most of the
-map, while the player opens with `AOI_HQ_REACH` — 2 km around the HQ — and whatever FOBs get
-built. That asymmetry is the starting pressure the rest of the mechanic answers.
+OPFOR until captured), so the field opens OPFOR-positive around every zone, while the player opens
+with `AOI_HQ_REACH` — 2 km around the HQ — and whatever FOBs get built. That asymmetry is the
+starting pressure the rest of the mechanic answers.
 
 ### The exclusion
 
@@ -90,16 +90,15 @@ drift push.
 ### OPFOR: a physical hardpoint
 
 A tower's only effect is its `AOI_TOWER_REACH` coverage, which `DUWS_fnc_aoi_covers` reads live
-from the `DUWS_hardpoints` registry, so a destroyed tower's coverage goes when its row does. The
-campaign seeds 1 or 2 (`server/warcom/fnc_init_OPFOR_WARCOM.sqf:86`), and OPCOM builds more up to
-`AOI_OPFOR_TOWER_CAP` (5) standing or on their way (`DUWS_opcom_assetCap`,
-`warcom/opcom/appraisal/fnc_opcom_assets.sqf`). `"RADIO"` is a hardpoint type like any other
-(`DUWS_hardpointName`, `DUWS_hardpointGarrison`, `server_var_init.sqf`), sited via
-`fnc_hardpoint_seed_radio` (`server/init_zones/fnc_hardpoint_place.sqf:360-396`), which samples the
-band, rejects any draw inside another tower's `AOI_TOWER_REACH`, and stands the mast on the
-best-scoring hilltop of what survives. It is deliberately absent from `DUWS_hardpointWeightZone`
-and `DUWS_hardpointWeightSolo` — a tower is placed on purpose, never rolled into the ordinary
-hardpoint mix.
+from the `DUWS_hardpoints` registry, so a destroyed tower's coverage goes when its row does. No
+tower stands at campaign start. OPCOM builds them in play, up to `AOI_OPFOR_TOWER_CAP` (4) standing
+or on their way (`DUWS_opcom_assetCap`, `warcom/opcom/appraisal/fnc_opcom_assets.sqf`), on the band
+cell whose town reach scores best ([`opcom_plan.md`](../../plans/opcom/opcom_plan.md#asset-siting)),
+and the mast takes the best-scoring crest within half a grid cell of the delivery. The cap stops
+builds only: a save that already holds more towers keeps them. `"RADIO"` is a hardpoint type like
+any other (`DUWS_hardpointName`, `DUWS_hardpointGarrison`, `server_var_init.sqf`). It is
+deliberately absent from `DUWS_hardpointWeightZone` and `DUWS_hardpointWeightSolo` — a tower is
+placed on purpose, never rolled into the ordinary hardpoint mix.
 
 ### BLUFOR: a permanent support, no structure
 
@@ -132,9 +131,9 @@ candidate source — terrain survey, per-type score, facing, spacing — are sha
 documented in
 [`hardpoints.md`](hardpoints.md).
 
-At campaign generation the band is laid after the zone rings: radio towers, the two flank lines, an
-AA net, the observation-post net and the roadblock net ([`hardpoints.md`](hardpoints.md#siting) owns
-the passes and their counts).
+At campaign generation the band is laid after the zone rings: the two flank lines, an AA net, the
+observation-post net and the roadblock net ([`hardpoints.md`](hardpoints.md#siting) owns the passes
+and their counts).
 
 After generation, only OPCOM's standalone, asset and minefield builds add to the band
 (`appraisal/fnc_opcom_buy_build.sqf`). They do not draw from `DUWS_fnc_aoi_bandPos`. Each pick,
@@ -160,7 +159,7 @@ menu, not shown to the player.
 | `AOI_HQ_REACH` | 2000 m | player HQ coverage radius |
 | `AOI_FOB_REACH` | 2000 m | each FOB's coverage radius |
 | `AOI_TOWN_REACH` | 2000 m | added to a banded town's `civ_radius` |
-| `AOI_OPFOR_TOWER_CAP` | 5 | most OPFOR radio towers OPCOM keeps standing or on their way |
+| `AOI_OPFOR_TOWER_CAP` | 4 | most OPFOR radio towers OPCOM keeps standing or on their way |
 | `AOI_BLUFOR_RADIO_STEP` | 0.1 | share of each BLUFOR reach that each BLUFOR radio tier adds |
 
 All defined at `server/server_var_init.sqf:584-621`, server-only (not `publicVariable`d): every

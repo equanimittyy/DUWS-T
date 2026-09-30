@@ -354,57 +354,15 @@ fnc_hardpoint_site_roadblocks = {
     _placed
 };
 
-// Not rolled through fnc_hardpoint_lay: a tower must keep off another's AoI, so it takes the best of a few samples.
-#define HP_RADIO_SPACING 250
-#define HP_RADIO_SAMPLES 6
-fnc_hardpoint_seed_radio = {
-    params [["_n", 2], ["_fnTick", {}]];
-    private _placed = 0;
-    private _tries = 0;
-    while { _placed < _n && {_tries < _n * 12} } do {
-        _tries = _tries + 1;
-
-        // Checked live against standing towers, not a cached count, so coverage never nests.
-        private _best = [];
-        private _bestScore = -1;
-        for "_i" from 1 to HP_RADIO_SAMPLES do {
-            private _draw = call DUWS_fnc_aoi_bandPos;
-            if (_draw isEqualTo []) then { continue };
-            private _cand = _draw select 0;
-            if ((DUWS_hardpoints findIf {
-                (_x select 2) isEqualTo "RADIO" && {(_cand distance2D (_x select 1)) < AOI_TOWER_REACH}
-            }) >= 0) then { continue };
-            private _f = [_cand] call fnc_hardpoint_survey;
-            if ((_f select 8) < HP_RADIO_SPACING) then { continue };
-            private _s = [_f, "RADIO"] call fnc_hardpoint_score;
-            if (_s > _bestScore) then { _bestScore = _s; _best = _cand };
-        };
-        if (_best isEqualTo []) then { continue };
-        private _c = _best;
-
-        // Global sequence: a campaign-start seed and a later raise never share a key.
-        private _seq = missionNamespace getVariable ["DUWS_radioSeq", 0];
-        missionNamespace setVariable ["DUWS_radioSeq", _seq + 1];
-        private _key = format ["hpradio_%1", _seq];
-        private _rdir = random 360;
-        ["RADIO", _c, _rdir, "opfor", _key] call fnc_hardpoint_build;
-        [_key, "RADIO", _c, "opfor", "", _rdir] call fnc_hardpoint_register;
-        _placed = _placed + 1;
-        _placed call _fnTick;
-    };
-    ["INFO", "HARDPOINT", format ["seeded %1/%2 OPFOR radio towers", _placed, _n]] call fnc_log;
-};
-
 // Rolls every campaign-start emplacement before any is laid, so the generation banner totals real hardpoints.
 #define HP_ROAD_HQ_P 0.8    // per-zone chance of an HQ approach roadblock
 #define HP_ROAD_NBR_P 0.4   // per-zone chance of an off-axis inter-zone roadblock
 #define HP_OBS_P 0.5        // per-zone chance of a standalone observation post out in the band
 fnc_hardpoint_plan_counts = {
-    params ["_radioN"];
     private _zc = count serv_zones_array;
     private _zoneCounts = [];
     private _roadTargets = [];
-    private _total = _radioN + _zc;
+    private _total = _zc;
     private _obs = 0;
     {
         _x params ["", "_zpos", "_hpSize"];

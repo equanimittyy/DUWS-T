@@ -78,13 +78,11 @@ sleep 1;
     //
     // The whole emplacement plan -- every zone's ring, the roadblock net, the two flank lines -- is
     // fixed before laying any of it, so the banner counts hardpoints toward a real total, not zones.
-    // Radio is rolled here so the seed call and the plan total share it.
     // The roadblock net comes back pre-expanded to a [zonePos, endpointPos] target per block.
     if (DUWS_campaignLoaded) then {
         call DUWS_fnc_restoreHardpoints;
     } else {
-        private _radioN = 1 + floor random 2;
-        ([_radioN] call fnc_hardpoint_plan_counts) params ["_zoneCounts", "_backline", "_frontline", "_roadTargets", "_obsN", "_hpTotal"];
+        ([] call fnc_hardpoint_plan_counts) params ["_zoneCounts", "_backline", "_frontline", "_roadTargets", "_obsN", "_hpTotal"];
         private _aaN = count serv_zones_array;
         private _hpDone = 0;
         // One banner draw per emplacement, across every pass alike, so the count climbs 1..N as each gun goes
@@ -117,10 +115,6 @@ sleep 1;
         // its zones. Called, not spawned, like the zone loop: each sleeps in its crew drop, so finishing here
         // under the one generation banner keeps it honest. Before civilians because at hour zero the band is
         // the zones and the HQ alone -- towns are neutral and emit nothing yet.
-        //
-        // Radio towers first: their coverage widens the band the rest spread into.
-        [_radioN, _tick] call fnc_hardpoint_seed_radio;
-        _hpDone = _hpDone + _radioN;
 
         // Flank lines: gun nests in the half of the band farther from HQ (backline) and nearer to it (frontline),
         // offset from the zones rather than ringing them. The observation posts below site off the same draw.

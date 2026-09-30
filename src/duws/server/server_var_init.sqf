@@ -616,7 +616,7 @@ DISGUISE_DECAY_DELAY = 5;
 
 // DUWS_bluforRadioLevel is the tier bought (0..3), raised by fnc_support_perm_grant. Server-only readers
 // (the drift, the BLUFOR reach), not broadcast.
-AOI_OPFOR_TOWER_CAP = 5;
+AOI_OPFOR_TOWER_CAP = 4;
 DUWS_bluforRadioLevel = 0;
 AOI_BLUFOR_RADIO_STEP = 0.1;   // each BLUFOR tier adds this share of every BLUFOR base reach, not compounded
 

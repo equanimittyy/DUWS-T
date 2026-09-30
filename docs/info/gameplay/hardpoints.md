@@ -65,7 +65,7 @@ registers it as a standalone hardpoint, and from the Clear Minefield civilian mi
 thinned field and reveals it at once ([`side_mission_catalogue.md`](side_mission_catalogue.md)).
 OPCOM's builds roll only the types OPFOR's tier has unlocked (`DUWS_hardpointTier`), under caps that count every
 standing OPFOR hardpoint, seeded ones included, and every build still siting or on its truck
-(`DUWS_fnc_opcom_hpOpen`). Three types cap flat campaign-wide: `RADIO` at `AOI_OPFOR_TOWER_CAP` (5), `MORTAR` at
+(`DUWS_fnc_opcom_hpOpen`). Three types cap flat campaign-wide: `RADIO` at `AOI_OPFOR_TOWER_CAP` (4), `MORTAR` at
 `OPCOM_CAP_MORTAR` (2) and `ARTY` at `OPCOM_CAP_ARTY` (1). `AT`, `AA`, `GMG` and `OP` cap at their
 `OPCOM_CAP_HP_TYPE_PER_ZONE` factor times the campaign's zone count; `MG` and `ROADBLOCK` carry no cap of their own.
 A `MINEFIELD` caps the same way per variant, `MINEFIELD_AT` at 1 a zone and `MINEFIELD_AP` at 2. The variant is
@@ -183,20 +183,21 @@ a civilian job) skip all of this and are laid whole through `fnc_hardpoint_minef
 area-of-influence band; the roadblock net is the exception, drawing each block on the line from BLU HQ to
 a zone (kept where the OPFOR field is positive) and snapping it to a road, a main road preferred. The two
 flank lines and the observation posts sample the band their own way. `fnc_hardpoint_band_pool`
-(`fnc_hardpoint_place.sqf:265`) draws band points uniformly over the whole map, once, after the radio
-towers widen the band. A per-zone draw would give a small zone's band as many sites as a large one's. The
+(`fnc_hardpoint_place.sqf:262`) draws band points uniformly over the whole map, once. A per-zone draw
+would give a small zone's band as many sites as a large one's. The
 flank lines split the pool at its median distance to BLU HQ: the backline takes the far half and the
 frontline the near half, one nest per zone each. Every pool site keeps `HP_POOL_ZONE_GAP` (300 m) clear of
 every zone's edge, so it does not clump onto a zone's own ring. Radio
-towers are their own hardpoint type, scored for hilltop crests and spaced off each other's coverage radius. Both the band sampler and the radio-tower cap belong to
+towers are their own hardpoint type, scored for hilltop crests; none stands at campaign start, and
+OPCOM builds them in play. Both the band sampler and the radio-tower cap belong to
 [`opfor_area_of_influence.md`](opfor_area_of_influence.md#band-siting): this file owns the
 terrain survey, per-type score, facing and spacing every band placement shares with the zone ring;
 that one owns what the band *is* and what a tower buys the enemy.
 
-All of it — the zone ring, radio-tower seeding, and the standalone band (the two flank lines, an AA
-net, the observation-post net and the roadblock net) — runs in one generation phase between zone
-build-out finishing and civilians starting (`fnc_init_OPFOR_WARCOM.sqf:61-128`), under the same
-progress banner the other phases use. `fnc_hardpoint_plan_counts` (`fnc_hardpoint_place.sqf:405`)
+All of it — the zone ring and the standalone band (the two flank lines, an AA net, the
+observation-post net and the roadblock net) — runs in one generation phase between zone build-out
+finishing and civilians starting (`fnc_init_OPFOR_WARCOM.sqf:73-138`), under the same progress
+banner the other phases use. `fnc_hardpoint_plan_counts` (`fnc_hardpoint_place.sqf:361`)
 rolls every zone's ring, both flank-line counts, the observation-post count and the roadblock targets
 before any of it is laid, so the banner totals real hardpoints rather than counting zones.
 
