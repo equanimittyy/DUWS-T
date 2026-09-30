@@ -475,9 +475,9 @@ The debug harness spends outside the pick and is not capped.
 
 - **Supply trucks sit outside the unit cap.** The class cap bounds the trucks in flight. If the trucks counted, a
   full roster would stop every supply action.
-- **A supply class rests after a delivery.** When a truck delivers, a cooldown rolled from `OPCOM_SUPPLY_COOLDOWN`
+- **A supply class rests after an order.** When a truck sets off, a cooldown rolled from `OPCOM_SUPPLY_COOLDOWN`
   (60–360 ticks, 5–30 min) starts on its class, and no action of that class is offered until it ends
-  (`DUWS_opcom_supplyReadyTick`). A truck that dies sets no cooldown.
+  (`DUWS_opcom_supplyReadyTick`), whether the truck delivers or dies.
 - **The garrison cap is a zone's.** Only a zone homes an OPCOM unit: a town is taken by a unit that guards it, never
   one that garrisons it ([§Attack](#attack-phase-5)).
 - **The hardpoint caps scale with the campaign's zone count,** because the seeded hardpoints count and the seed
