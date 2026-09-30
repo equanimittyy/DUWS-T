@@ -51,7 +51,13 @@ DUWS_opcom_ferryHulls set ["boat", createHashMapFromArray [
         private _wait = call DUWS_fnc_opcom_ferryWaitTick;
         call DUWS_fnc_opcom_ferryBoatRiders;
         if ((_veh distance2D (_t get "ferryLZ")) < OPCOM_FERRY_BOARD_BOAT) exitWith { ["pickupboard"] call DUWS_fnc_opcom_ferrySetPhase };
-        if (_wait >= OPCOM_FERRY_WAIT_MAX) then { call DUWS_fnc_opcom_ferryBoatEmbark };
+        if (_wait >= OPCOM_FERRY_WAIT_MAX) then {
+            // Short of its park on expiry it has beached or snagged, and would start the carry aground from there.
+            private _park = _t get "ferryLZ";
+            call DUWS_fnc_opcom_ferryBoatEmbark;
+            _veh setDir (_park getDir (_t get "ferryLZ"));
+            _veh setPosASLW [_park select 0, _park select 1, 0];
+        };
     }],
     ["pickupboard", {
         private _wait = call DUWS_fnc_opcom_ferryWaitTick;
