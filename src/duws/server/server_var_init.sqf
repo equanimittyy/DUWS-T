@@ -751,7 +751,7 @@ OPCOM_SENSE_BATCH = 8;
 // is a true sensor bubble, not a scan cap: every BLUFOR group within reach is stamped for certain, virtual
 // or live. Foot and car both sweep the 3x3 around them; a heli buys real reach. Tune.
 OPCOM_RECON_K = createHashMapFromArray [
-    ["inf", 1], ["wheeled", 1], ["rotary", 3]
+    ["inf", 1], ["wheeled", 1], ["rotary", 2]
 ];
 
 // The floor BLUFOR-held ground -- a zone, or a town inside their band -- deposits to the enemy layer: ground
