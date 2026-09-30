@@ -196,7 +196,7 @@ magnitude; above that the best candidate takes most of the probability, and a hi
 | Zone hardpoint Build | one action per unlocked ring type, its targets every uncontested OPFOR zone with a free hardpoint slot (`fnc_hardpoint_zone_cap`) |
 | Town Reinforce | each OPFOR-band town below full strength |
 | Town Fortify | each OPFOR-band town below tier IV |
-| Rapport | each town above −20 and at or below 0 that OPFOR's area of influence covers (`fnc_aoi_opfor_covers`) |
+| Rapport | each town above −20 and below +10 that OPFOR's area of influence covers (`fnc_aoi_opfor_covers`) |
 | Standalone hardpoint Build | one action per unlocked standalone type, its target the band cell the siting pass picks by cover Value ([§Asset siting](#asset-siting)) |
 | Tower / OP / mortar / battery Build | one action each, under the type's cap, target the band cell the siting pass picks by the type's own rule ([§Asset siting](#asset-siting)) |
 | Minefield | one action per variant (AT, AP), target the band cell the siting pass picks by traffic, a belt 150 m deep and 500 m to 1.5 km long |
@@ -248,7 +248,7 @@ so it moves no faster than a truck delivers.
 | Radio tower | Σ worth of the towns it newly brings under OPFOR's area of influence × defend |
 | OP | build price × the share of its 5×5 block (`OP_OBSERVE_K`) that no other OP watches, sea excluded |
 | Mortar pit, artillery battery | build price × the share of its reach that is OPFOR ground no gun of its own type reaches |
-| Rapport | town worth × skew × 2/10, with skew = max(0.1, 1 − \|rep\| ÷ 20) |
+| Rapport | town worth × skew × 2/10, with skew = max(0.1, 1 − \|rep\| ÷ 20) at 0 or below, 0.05 above 0 |
 | Attack QRF | Σ need over the lead sighting's 7×7 block × min(1, the cluster's summed force ÷ (Σ `_fri` over its 3×3 + 1)) |
 | Attack assault, Attack flank | the zone's `_points` |
 | Patrol | Σ need × staleness over the unique cells within its reach of the line it walks, × its scale, × `OPCOM_PATROL_SHARE` (0.2). A recon's reach is `OPCOM_RECON_K` and its scale 1; a combatant's reach is its engage reach (`DUWS_opcom_streamK`) and its scale its threat, `effForce` ÷ `OPCOM_PATROL_FORCE_REF` |
@@ -259,7 +259,8 @@ so it moves no faster than a truck delivers.
 
 - **Rapport favours a neutral town.** OPFOR has no passive drift, so Rapport is the only thing that takes a town
   down. The skew is 1 at 0, 0.5 at −10 and the 0.1 floor from −18 out, so a town already in the OPFOR band still
-  draws Rapport to −20; a town above 0 is no target.
+  draws Rapport to −20. A town from +1 to +9 takes a flat 0.05, under every town at 0 or below; a town at +10 or
+  more is BLUFOR-held and no target.
 - **Garrison gathers the QRF pool.** A unit counts once: a worn unit's Value is the larger of defense and heal,
   never the sum, because one unit serves one role at a time. Its defense share shrinks as the zone stacks up, so
   garrisons gather where exposure is high, and a QRF pool forms there with no roster table.
@@ -974,7 +975,7 @@ appraisal already bought ([§Sourcing](#sourcing-hire-on-demand-phase-4d)). Spen
 |---|---|---|---|
 | Attack | a BLU-held zone | tasking-spawn | 1–N (assault or flank) |
 | QRF | a cluster of BLUFOR sightings inside OPFOR's area of influence that local defense does not hold at the ideal bar | tasking-spawn | 1–N |
-| Rapport | a town above −20 and at or below 0 inside OPFOR's area of influence (needs `supply`) | tasking-spawn | 1 courier |
+| Rapport | a town above −20 and below +10 inside OPFOR's area of influence (needs `supply`) | tasking-spawn | 1 courier |
 | Reinforce | an own depleted zone / town garrison | strength purchase | 0 zone / 1 truck town |
 | Patrol | a recon's or a land combatant's line over stale valuable cells | tasking-spawn | 1 |
 | Probe | an Attack target whose block reads stale | tasking-spawn | 1 |
