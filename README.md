@@ -5,8 +5,8 @@ dynamic campaign mission for **Arma 3**. It procedurally
 generates a persistent war: capture zones, run side missions, call in support, and
 fight an AI opposition that reacts to your moves. It descends from Tomata's DUWS_X
 (originally Kibot's DUWS), reworked here with new side missions, a revised
-support/economy system, and automatic faction detection, so it runs mod-free yet
-adapts to most faction mods.
+support/economy system, and automatic faction detection (with ALiVE ORBAT Creator
+support), so it runs mod-free yet adapts to most faction mods.
 
 Play it on the Steam Workshop:
 **[[SP/COOP] DUWS_T](https://steamcommunity.com/sharedfiles/filedetails/?id=3685431219)**

@@ -7,8 +7,8 @@ campaign mission for Arma 3, shipped on the Altis map. It procedurally generates
 persistent war: the player captures zones, runs side missions, and calls in support
 while an AI opposition reacts. It descends from Tomata's DUWS_X (originally Kibot's
 DUWS), rebuilt here with reworked side missions, a revised support/economy system,
-and automatic faction detection — so it runs mod-free yet adapts to most faction mods
-on the Workshop.
+and automatic faction detection (with ALiVE ORBAT Creator support) — so it runs
+mod-free yet adapts to most faction mods on the Workshop.
 
 "Done well" means the mission stays tactically demanding (one bad move costs the
 player dearly), keeps working in single-player and LAN co-op with no required mods,
@@ -18,7 +18,8 @@ https://steamcommunity.com/sharedfiles/filedetails/?id=3685431219
 ## Principles
 
 - **No hard mod dependency.** The mission must run stand-alone. Anything that would
-  force a mod, or break the faction auto-detection, is the wrong call.
+  force a mod, or break the faction auto-detection / ALiVE ORBAT Creator support, is
+  the wrong call.
 - **The unpacked source is the source of truth.** Edit the mission under `src/`
   and repack; never hand-edit the packed `.pbo`. Workflow: [`README.md`](README.md).
 - **Mind the engine's traps.** Arma-specific behaviours that aren't visible in the SQF
