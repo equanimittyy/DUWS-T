@@ -1105,7 +1105,8 @@ runs scheduled, ahead of the pick's unscheduled pass, and keeps a cell's tower a
 area-of-influence inputs or the type's own assets change. A tower's Value reads every OPFOR hardpoint through
 defend, so its memo also resets on any build. The truck drives to the cell's centre, and inside the cell
 the shared terrain siting picks the spot (`fnc_hardpoint_score`,
-[`info/hardpoints.md`](../../info/gameplay/hardpoints.md#siting)).
+[`info/hardpoints.md`](../../info/gameplay/hardpoints.md#siting)). The spot, a road snap and each belt square must
+stay in the band; a belt drops its squares outside it.
 
 | Build | Band cell |
 |---|---|
