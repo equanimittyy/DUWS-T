@@ -21,6 +21,23 @@ private _o3 = [];
 ["countLoadoutChanges: identical loadouts = 0",
     ([["a", "b"], ["a", "b"]] call DUWS_fnc_countLoadoutChanges), 0] call fnc_assertEq;
 
+// --- fnc_loadout_attachments: the attachment classes on a loadout's three weapons ---
+private _attLoadout = [
+    ["arifle_X", "muzzle_A", "acc_B", "optic_C", ["mag_X", 30], [], "bipod_D"],
+    [],
+    ["hgun_Y", "muzzle_E", "", "", ["mag_Y", 15], [], ""],
+    ["U_X", [["FirstAidKit", 1]]], [], [], "H_X", "G_X", [],
+    ["ItemMap", "", "ItemRadio", "ItemCompass", "ItemWatch", ""]
+];
+["loadoutAttachments: muzzle, pointer, optic and bipod of every weapon, nothing else",
+    ([_attLoadout] call fnc_loadout_attachments),
+    ["muzzle_A", "acc_B", "optic_C", "bipod_D", "muzzle_E"]] call fnc_assertEq;
+["loadoutAttachments: an attachment on two weapons is listed once",
+    ([[["a", "optic_C", "", "", [], [], ""], [], ["b", "optic_C", "", "", [], [], ""]]] call fnc_loadout_attachments),
+    ["optic_C"]] call fnc_assertEq;
+["loadoutAttachments: an unarmed loadout has none",
+    ([[[], [], [], [], [], [], "", "", [], []]] call fnc_loadout_attachments), []] call fnc_assertEq;
+
 // --- fnc_cs: substitute the chosen squad callsign into English dialogue lines ---
 duws_callsign = "Alpha 1-1";
 ["cs: default callsign is a no-op",

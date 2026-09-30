@@ -106,7 +106,6 @@ _opfor_units = [opfor_LAT_SOLDIER_X,opfor_SPECOPS_MEDIC_X,opfor_SPECOPS_ENG_X];
 
     _group = createGroup west;
     _group deleteGroupWhenEmpty true;
-    _unit = "";
 
     {
         _unit = _group createUnit [_x,[0,0], [], 0, "FORM"];
@@ -176,7 +175,7 @@ _factionUnitArray = ["blufor"] call fnc_faction_unit_keylist;
 
 _factionLoadouts = [];
 {
-    _factionLoadouts append (flatten getUnitLoadout _x);
+    _factionLoadouts append (flatten ([_x] call fnc_faction_class_loadout));
     sleep 0.1;
 } forEach _factionUnitArray;
 
@@ -221,8 +220,6 @@ _factionLoadouts append _randomListItems;
 _factionLoadouts = _factionLoadouts arrayIntersect _factionLoadouts;
 
 _factionLoadouts = _factionLoadouts - _excludedItems;
-
-copyToClipboard str _factionLoadouts;
 
 _isBackpackWithCapacity = {
     params ["_class"];

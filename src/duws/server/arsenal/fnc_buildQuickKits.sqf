@@ -3,14 +3,13 @@
 if (!isServer) exitWith {};
 
 // Quick kits mirror the DUWS role keys exactly: the player adopts a kit that belongs to a unit the
-// faction actually fields, never gear copied off whatever WEST unit wandered near HQ. getUnitLoadout
-// takes a classname here, so the kit is the unit's config loadout, not one live instance's.
+// faction actually fields, never gear copied off whatever WEST unit wandered near HQ.
 
 private _uniqueLoadouts = [];
 {
     private _className = _x;
     private _displayName = getText (configFile >> "CfgVehicles" >> _className >> "displayName");
-    _uniqueLoadouts pushBack [_className, _displayName, getUnitLoadout _className];
+    _uniqueLoadouts pushBack [_className, _displayName, [_className] call fnc_faction_class_loadout];
 } forEach (["blufor"] call fnc_faction_unit_keylist);
 
 // Alphabetical by display name (what the player reads). Decorate with a lowercased key, sort, strip:
@@ -30,7 +29,6 @@ private _addedMagazines = [];
 private _addedItems = [];
 private _addedBackpacks = [];
 
-// getUnitLoadout nests classnames inside arrays; recurse to pull every string out.
 private _extractStrings = {
     params ["_data", "_resultArray"];
     if (typeName _data == "STRING") then {
@@ -53,7 +51,7 @@ private _extractStrings = {
 
         if (isClass (configFile >> "CfgWeapons" >> _class)) then {
             private _itemType = [_class] call BIS_fnc_itemType;
-            _itemType params ["_category", "_subcategory"];
+            _itemType params ["_category"];
             switch (_category) do {
                 case "Weapon": {
                     if !(_class in _addedWeapons) then {
@@ -63,7 +61,6 @@ private _extractStrings = {
                     };
                 };
                 case "Equipment": {
-                    // Equipment covers helmets, vests, uniforms, glasses, etc.
                     if !(_class in _addedItems) then {
                         [missionNamespace, [_class], true] call BIS_fnc_addVirtualItemCargo;
                         _addedItems pushBack _class;
@@ -93,7 +90,6 @@ private _extractStrings = {
                         if (duws_log_level >= 4) then { ["DEBUG", "GEAR", format ["Added backpack: %1", _class]] call fnc_log; };
                     };
                 } else {
-                    // Misc items: FirstAidKit, Medikit, etc.
                     if !(_class in _addedItems) then {
                         [missionNamespace, [_class], true] call BIS_fnc_addVirtualItemCargo;
                         _addedItems pushBack _class;
@@ -126,8 +122,7 @@ if (count _newFriendly > 0) then {
     };
 };
 
-// Log unconditionally (even when 0 new) so an RPT proves this merge branch ran: a stale build without
-// the fix prints no such line, making "did the count fix load?" answerable from the log alone.
+// Unconditional, even at 0 new, so the RPT shows whether this merge ran.
 ["INFO", "GEAR", format ["friendly set: folded %1 new of %2 role-key classes (mode: %3)",
     count _newFriendly, count _addedClasses, ["Hybrid", "Limited"] select DUWS_arsenalLimited]] call fnc_log;
 

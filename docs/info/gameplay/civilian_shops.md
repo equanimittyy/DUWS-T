@@ -160,11 +160,14 @@ two prices.
 
 The side lists come from `fnc_faction_unit_keylist`. A man key's kit is read from config:
 `weapons[]`, `magazines[]`, `items[]`, `linkedItems[]`, `backpack` and the `uniformList`,
-`vestList`, `headgearList` and `facewearList` random lists. Other sources were rejected:
+`vestList`, `headgearList` and `facewearList` random lists. The attachments on its weapons come from
+`fnc_faction_class_loadout`, because a faction made with the ORBAT Creator of ALiVE names bare weapons
+in `weapons[]` ([ALiVE ORBAT Creator factions](faction_system.md#alive-orbat-creator-factions)). Other
+sources were rejected:
 
 | Rejected source | Why |
 |---|---|
-| Spawning each key for `getUnitLoadout` | `fnc_create_ammo_lists` does this at 0.1 s per class. A shop needs both sides and cannot pay it twice |
+| Spawning each key to read its live kit | A shop needs both sides, and a spawn per class costs more than a config read |
 | `blufor_ammobox_weapons`, `opfor_ammobox_weapons` | Sampled from three hardcoded role keys per side, so a thin slice of what a side fields |
 | `DUWS_friendlyArsenal` | Carries curated extras and the disguise gear, so it is not the mirror of the OPFOR list |
 

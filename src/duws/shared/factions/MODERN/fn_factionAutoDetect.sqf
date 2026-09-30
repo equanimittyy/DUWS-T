@@ -386,9 +386,7 @@ fnc_unitParseRoles = compileFinal {
 	_spec_exp = [];
 	
 	_this apply {
-		getUnitLoadout _x params ["_primaryWeapon", "_secondaryWeapon", "_handgunWeapon", "_uniform", "_vest", "_backpack", "_headgear", "_facewear", "_binocular", "_assignedItems"];
-		// getUnitLoadout layout. Destructured here: 0 primary weapon, 1 secondary weapon
-		// (weapon sub-index 4 = muzzle-1 magazine+ammo), 9 assigned items. Full array: BIS getUnitLoadout.
+		([_x] call fnc_faction_class_loadout) params ["_primaryWeapon", "_secondaryWeapon", "_handgunWeapon", "_uniform", "_vest", "_backpack", "_headgear", "_facewear", "_binocular", "_assignedItems"];
 		
 		_primaryWeaponIsSuppressed = if (count _primaryWeapon > 1) then [{_primaryWeapon # 1 isNotEqualTo ""}, {false}];
 		// getUnitLoadout pads a weapon array to 7 ("" for absent), so `count > 3` means a primary exists, not an optic.

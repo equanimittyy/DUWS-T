@@ -78,11 +78,11 @@ if (_kind isNotEqualTo "gear") exitWith {
 switch (_list) do {
     case "blufor";
     case "opfor": {
-        // Read out of config, never by spawning. fnc_create_ammo_lists spawns each key to call
-        // getUnitLoadout at a tenth of a second per class; a shop needs both sides and cannot pay
-        // that twice.
+        // Read out of config, never by spawning: a shop needs both sides. Attachments come off the class
+        // loadout, because an ORBAT export names bare guns in weapons[].
         {
             private _cfg = configFile >> "CfgVehicles" >> _x;
+            { _classes pushBackUnique _x } forEach ([[_x] call fnc_faction_class_loadout] call fnc_loadout_attachments);
             {
                 { _classes pushBackUnique _x } forEach (getArray (_cfg >> _x));
             } forEach ["weapons", "magazines", "items", "linkedItems"];

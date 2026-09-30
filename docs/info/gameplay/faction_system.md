@@ -263,6 +263,30 @@ Trailing comments name the consuming function for each variable — the de-facto
   identical APC — while drifting the faction identity detection exists to establish, and costing seventy
   permanent scripts and seventy broadcasts every five minutes for a value only read at spawn.
 
+## ALiVE ORBAT Creator factions
+
+A faction made with the ORBAT Creator of ALiVE keeps the full loadout of each man only in the config
+array `ALiVE_orbatCreator_loadout`. CFP uses this export. The other config entries of the class name
+bare weapons, only the loaded magazines, and empty containers. The export also writes an init handler
+that applies the array 0.4 s or more after the spawn, unless the unit has the variable
+`ALiVE_OverrideLoadout`. The handler is plain SQF, so the faction does not need ALiVE at run time.
+
+Thus a spawned unit wears the full kit, but `getUnitLoadout` on its class gives the bare kit.
+`shared/faction_lib/fnc_faction_class_loadout.sqf` gives the array when the class has one, and
+`getUnitLoadout` when it does not. Each reader of a class loadout calls it:
+
+| Reader | What it reads |
+|---|---|
+| `fnc_create_ammo_lists` | Every class on the arsenal shelf and in the friendly set |
+| `fnc_buildQuickKits` | The quick kits |
+| `fnc_unitParseRoles` (AutoDetect) | The Medikit, suppressor and optic that decide the medic, spec-ops and marksman roles |
+| `fnc_arsenal_reward` | The weapons, clothing and attachments of a loot reward |
+| `fnc_vendor_stock` | The attachments on the BLUFOR and OPFOR gear lists |
+
+`fnc_scanEnemyGear` spawns each class and reads it before the handler runs. It reads only the uniform,
+vest, headgear, backpack, NVG and weapons, and the export writes these into the config too. Thus the
+scan sees the same classes.
+
 ## Custom factions
 
 The `CUSTOM` option lets a player define a faction by pasting text. `fnc_custom_faction_capture.sqf` reads

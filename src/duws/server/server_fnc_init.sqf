@@ -1121,6 +1121,7 @@ fnc_custom_faction_parse = compile preprocessFileLineNumbers "duws\shared\factio
 // Broadcast: both request menus and all four request handlers are client-side.
 fnc_faction_rqst_list = compile preprocessFileLineNumbers "duws\shared\faction_lib\fnc_faction_rqst_list.sqf";publicVariable "fnc_faction_rqst_list";
 fnc_faction_unit_keylist = compile preprocessFileLineNumbers "duws\shared\faction_lib\fnc_faction_unit_keylist.sqf";
+fnc_faction_class_loadout = compile preprocessFileLineNumbers "duws\shared\faction_lib\fnc_faction_class_loadout.sqf";
 
 // =========================================================================================================
 // shared/functions
@@ -1129,6 +1130,7 @@ fnc_faction_unit_keylist = compile preprocessFileLineNumbers "duws\shared\factio
 // call it too.
 fnc_captured_loadout_counts = compile preprocessFileLineNumbers "duws\shared\functions\fnc_captured_loadout_counts.sqf";
 fnc_arsenal_weapon_row = compile preprocessFileLineNumbers "duws\shared\functions\fnc_arsenal_weapon_row.sqf";
+fnc_loadout_attachments = compile preprocessFileLineNumbers "duws\shared\functions\fnc_loadout_attachments.sqf";
 // Broadcast: both class browsers that call it -- the faction key editor and the vendor catalogue --
 // run on the player's machine.
 fnc_class_rows_fill = compile preprocessFileLineNumbers "duws\shared\functions\fnc_class_rows_fill.sqf";
