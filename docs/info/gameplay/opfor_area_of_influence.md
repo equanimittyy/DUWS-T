@@ -37,9 +37,9 @@ that already flips a town's side for garrison and income
 so influence spreads only from a town that has fully fallen, never one merely leaning.
 
 The reaches are large against Altis by intent: OPFOR starts holding every zone (all zones are
-OPFOR until captured), so the field opens OPFOR-positive around every zone, while the player opens
-with `AOI_HQ_REACH` — 2 km around the HQ — and whatever FOBs get built. That asymmetry is the
-starting pressure the rest of the mechanic answers.
+OPFOR until captured) and one radio tower, so the field opens OPFOR-positive around every zone and
+across the tower's reach, while the player opens with `AOI_HQ_REACH` — 2 km around the HQ — and
+whatever FOBs get built. That asymmetry is the starting pressure the rest of the mechanic answers.
 
 ### The exclusion
 
@@ -90,10 +90,14 @@ drift push.
 ### OPFOR: a physical hardpoint
 
 A tower's only effect is its `AOI_TOWER_REACH` coverage, which `DUWS_fnc_aoi_covers` reads live
-from the `DUWS_hardpoints` registry, so a destroyed tower's coverage goes when its row does. No
-tower stands at campaign start. OPCOM builds them in play, up to `AOI_OPFOR_TOWER_CAP` (4) standing
-or on their way (`DUWS_opcom_assetCap`, `warcom/opcom/appraisal/fnc_opcom_assets.sqf`), on the band
-cell whose town reach scores best ([`opcom_plan.md`](../../plans/opcom/opcom_plan.md#asset-siting)),
+from the `DUWS_hardpoints` registry, so a destroyed tower's coverage goes when its row does.
+Campaign generation always places one tower in the band before the other band passes, so they sample
+the band it widens (`fnc_hardpoint_site_radio`, `server/init_zones/fnc_hardpoint_place.sqf:360`). The
+tower takes the best-scoring crest of the band draws, because towns emit nothing at generation for a
+town reach to score. OPCOM builds the rest in play, up to `AOI_OPFOR_TOWER_CAP` (4) standing or on
+their way, the start tower included (`DUWS_opcom_assetCap`,
+`warcom/opcom/appraisal/fnc_opcom_assets.sqf`), on the band cell whose town reach scores best
+([`opcom_plan.md`](../../plans/opcom/opcom_plan.md#asset-siting)),
 and the mast takes the best-scoring crest within half a grid cell of the delivery. The cap stops
 builds only: a save that already holds more towers keeps them. `"RADIO"` is a hardpoint type like
 any other (`DUWS_hardpointName`, `DUWS_hardpointGarrison`, `server_var_init.sqf`). It is
@@ -131,9 +135,9 @@ candidate source — terrain survey, per-type score, facing, spacing — are sha
 documented in
 [`hardpoints.md`](hardpoints.md).
 
-At campaign generation the band is laid after the zone rings: the two flank lines, an AA net, the
-observation-post net and the roadblock net ([`hardpoints.md`](hardpoints.md#siting) owns the passes
-and their counts).
+At campaign generation the band is laid after the zone rings: one radio tower first, then the two
+flank lines, an AA net, the observation-post net and the roadblock net
+([`hardpoints.md`](hardpoints.md#siting) owns the passes and their counts).
 
 After generation, only OPCOM's standalone, asset and minefield builds add to the band
 (`appraisal/fnc_opcom_buy_build.sqf`). They do not draw from `DUWS_fnc_aoi_bandPos`. Each pick,

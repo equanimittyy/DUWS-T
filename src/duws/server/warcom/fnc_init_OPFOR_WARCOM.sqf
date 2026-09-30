@@ -114,7 +114,11 @@ sleep 1;
         // Then the standalone passes across the area of influence -- the countryside the enemy holds outside
         // its zones. Called, not spawned, like the zone loop: each sleeps in its crew drop, so finishing here
         // under the one generation banner keeps it honest. Before civilians because at hour zero the band is
-        // the zones and the HQ alone -- towns are neutral and emit nothing yet.
+        // the zones, the HQ and the radio tower alone -- towns are neutral and emit nothing yet.
+
+        // The tower first: its reach widens the band every pass below samples.
+        [_tick] call fnc_hardpoint_site_radio;
+        _hpDone = _hpDone + 1;
 
         // Flank lines: gun nests in the half of the band farther from HQ (backline) and nearer to it (frontline),
         // offset from the zones rather than ringing them. The observation posts below site off the same draw.

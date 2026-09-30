@@ -18,7 +18,7 @@ to clear far more often than a zone changes hands. Hardpoints therefore get thei
 
 That separation runs deeper than shared globals. Zone-ring siting does not run inside
 `fnc_createZone` at all: it runs after every zone has finished building, in a dedicated generation
-phase (`server/warcom/fnc_init_OPFOR_WARCOM.sqf:61-128`, [below](#siting)), reading `zone_meta_array`
+phase (`server/warcom/fnc_init_OPFOR_WARCOM.sqf:73-142`, [below](#siting)), reading `zone_meta_array`
 — data the zone already published — rather than the zone builder's own locals. And a hardpoint's
 garrison is never appended to a zone's own roster
 ([`zones_and_civilians.md#what-captures-a-zone`](zones_and_civilians.md#what-captures-a-zone)):
@@ -189,18 +189,20 @@ would give a small zone's band as many sites as a large one's. The
 flank lines split the pool at its median distance to BLU HQ: the backline takes the far half and the
 frontline the near half, one nest per zone each. Every pool site keeps `HP_POOL_ZONE_GAP` (300 m) clear of
 every zone's edge, so it does not clump onto a zone's own ring. Radio
-towers are their own hardpoint type, scored for hilltop crests; none stands at campaign start, and
-OPCOM builds them in play. Both the band sampler and the radio-tower cap belong to
+towers are their own hardpoint type, scored for hilltop crests. Generation places one tower before the
+other band passes, so its reach widens the band they sample; OPCOM builds the rest in play. Both the
+band sampler and the radio-tower cap belong to
 [`opfor_area_of_influence.md`](opfor_area_of_influence.md#band-siting): this file owns the
 terrain survey, per-type score, facing and spacing every band placement shares with the zone ring;
 that one owns what the band *is* and what a tower buys the enemy.
 
-All of it — the zone ring and the standalone band (the two flank lines, an AA net, the
-observation-post net and the roadblock net) — runs in one generation phase between zone build-out
-finishing and civilians starting (`fnc_init_OPFOR_WARCOM.sqf:73-138`), under the same progress
-banner the other phases use. `fnc_hardpoint_plan_counts` (`fnc_hardpoint_place.sqf:361`)
+All of it — the zone ring and the standalone band (one radio tower, the two flank lines, an AA net,
+the observation-post net and the roadblock net) — runs in one generation phase between zone build-out
+finishing and civilians starting (`fnc_init_OPFOR_WARCOM.sqf:73-142`), under the same progress
+banner the other phases use. `fnc_hardpoint_plan_counts` (`fnc_hardpoint_place.sqf:376`)
 rolls every zone's ring, both flank-line counts, the observation-post count and the roadblock targets
-before any of it is laid, so the banner totals real hardpoints rather than counting zones.
+before any of it is laid, so the banner totals real hardpoints rather than counting zones. The tower
+is not rolled: generation retries it until it stands, and gives up only on a map with no band ground.
 
 ## Streaming and garrison
 
@@ -238,9 +240,9 @@ the codebase scales hardpoint garrison size to `WARCOM_opfor_ap`.
 
 An `OP` is a lookout, not a strongpoint: it fields a close security team on the post and a recon
 patrol screening wide, and while it stands it runs a recon screen against the player. Standalone OPs
-are seeded at generation on a per-zone coin flip (`HP_OBS_P` = 0.5, `fnc_hardpoint_place.sqf:404`) —
+are seeded at generation on a per-zone coin flip (`HP_OBS_P` = 0.5, `fnc_hardpoint_place.sqf:375`) —
 at most one OP out in the band per zone — counted into the generation banner and sited off the flank
-lines' uniform band pool (`fnc_hardpoint_site_obs`, `:316`), facing away from the nearest zone. They are
+lines' uniform band pool (`fnc_hardpoint_site_obs`, `:313`), facing away from the nearest zone. They are
 not rolled from any weight table.
 
 `DUWS_fnc_hardpointOPSense` (`fnc_hardpoint_stream.sqf`) is swept once per OPCOM perception tick

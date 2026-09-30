@@ -354,6 +354,21 @@ fnc_hardpoint_site_roadblocks = {
     _placed
 };
 
+// Retried, not rolled: every band pass after it samples the band this tower widens. The bound only keeps a map with
+// no band ground from hanging generation.
+#define HP_RADIO_TRIES 12
+fnc_hardpoint_site_radio = {
+    params [["_fnTick", {}]];
+    private _placed = 0;
+    for "_i" from 1 to HP_RADIO_TRIES do {
+        _placed = [1, "hpradio", "", fnc_hardpoint_band_cand, _fnTick, fnc_hardpoint_band_anchor,
+            createHashMapFromArray [["RADIO", 1]]] call fnc_hardpoint_lay;
+        if (_placed > 0) exitWith {};
+    };
+    if (_placed < 1) then { ["WARN", "HARDPOINT", "campaign-start radio tower found no band ground"] call fnc_log };
+    _placed
+};
+
 // Rolls every campaign-start emplacement before any is laid, so the generation banner totals real hardpoints.
 #define HP_ROAD_HQ_P 0.8    // per-zone chance of an HQ approach roadblock
 #define HP_ROAD_NBR_P 0.4   // per-zone chance of an off-axis inter-zone roadblock
@@ -362,7 +377,7 @@ fnc_hardpoint_plan_counts = {
     private _zc = count serv_zones_array;
     private _zoneCounts = [];
     private _roadTargets = [];
-    private _total = _zc;
+    private _total = 1 + _zc;  // + 1: the campaign-start radio tower
     private _obs = 0;
     {
         _x params ["", "_zpos", "_hpSize"];
