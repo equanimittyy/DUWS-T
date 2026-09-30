@@ -178,7 +178,7 @@ DUWS_spawnVehicles = [
     ["attackheli", "opfor_ATTACK_HELI_X",   "AttackHeli", 350],
     ["transheli",  "opfor_TRANS_HELI_X",    "AttackHeli", 150],
     ["plane",      "opfor_MISC_AIR_X",      "AttackHeli", 600],
-    ["boat",       "opfor_BOAT_ARMED_X",    "",           60]
+    ["boat",       "opfor_BOAT_ARMED_X",    "",           0]
 ];
 // --DUWS-UNITCOMP END--
 
