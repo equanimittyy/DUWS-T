@@ -269,11 +269,11 @@ so it moves no faster than a truck delivers.
   read off it — `P(win)`, the band and both muster bars — is wrong with it. A probe closes on the objective until its
   3×3 block reads fresh, which is the whole of its resolve: it takes no ground, holds none, and names a `P(win)` of
   1. Its Value is the error it removes, so it scales with the stake about to be laid on that reading and is worth
-  nothing where belief is already fresh. Recon wins the row with no preference written into it: `OPCOM_RECON_K` reads
-  the block from further out and a `noncombat` unit or a hire abandons no defense, so recon buys the same reading at
-  a lower Cost. A land combatant has to close, and against a dug-in garrison it draws fire and often dies — which
-  still bought the reading, and is the only way to read a garrison that observation from outside cannot see. Patrol
-  is the standing sweep over stale valuable ground; a Probe is one objective, refreshed now.
+  nothing where belief is already fresh. Recon wins the row with no preference written into it: a `noncombat` unit or
+  a hire abandons no defense, so recon buys the same reading at a lower Cost. A land combatant has to close, and
+  against a dug-in garrison it draws fire and often dies — which still bought the reading, and is the only way to read
+  a garrison that observation from outside cannot see. Patrol is the standing sweep over stale valuable ground; a
+  Probe is one objective, refreshed now.
 - **A land-taxi is worth the time it saves.** That is the order's Value landing sooner, priced by the delay discount
   (`DUWS_fnc_opcom_taxiWorth`). The lift is sourced with the order at commit, so it is priced on an order not yet
   sent, never on a unit already marching.
