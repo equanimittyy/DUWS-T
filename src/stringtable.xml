@@ -2548,16 +2548,304 @@
                 <Spanish>Día %1 en %2&lt;br/&gt;Zonas controladas: %3 de %4&lt;br/&gt;CP: %5&lt;br/&gt;&lt;br/&gt;BLUFOR: %6&lt;br/&gt;OPFOR: %7</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_fork_missing">
-                <Original>Loads without: %1.</Original>
-                <English>Loads without: %1.</English>
-                <Chinesesimp>加载时缺失：%1。</Chinesesimp>
-                <German>Lädt ohne: %1.</German>
-                <Polish>Wczytuje się bez: %1.</Polish>
-                <Czech>Načte se bez: %1.</Czech>
-                <Russian>Загружается без: %1.</Russian>
-                <French>Se charge sans : %1.</French>
-                <Chinese>載入時缺失：%1。</Chinese>
-                <Spanish>Se carga sin: %1.</Spanish>
+                <Original>Loads without:&lt;br/&gt;%1</Original>
+                <English>Loads without:&lt;br/&gt;%1</English>
+                <Chinesesimp>加载时缺失：&lt;br/&gt;%1</Chinesesimp>
+                <German>Lädt ohne:&lt;br/&gt;%1</German>
+                <Polish>Wczytuje się bez:&lt;br/&gt;%1</Polish>
+                <Czech>Načte se bez:&lt;br/&gt;%1</Czech>
+                <Russian>Загружается без:&lt;br/&gt;%1</Russian>
+                <French>Se charge sans :&lt;br/&gt;%1</French>
+                <Chinese>載入時缺失：&lt;br/&gt;%1</Chinese>
+                <Spanish>Se carga sin:&lt;br/&gt;%1</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_group_fobs">
+                <Original>FOBs</Original>
+                <English>FOBs</English>
+                <Chinesesimp>FOB</Chinesesimp>
+                <German>FOBs</German>
+                <Polish>FOB-y</Polish>
+                <Czech>FOB</Czech>
+                <Russian>FOB</Russian>
+                <French>FOB</French>
+                <Chinese>FOB</Chinese>
+                <Spanish>FOB</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_group_towns">
+                <Original>Town populations</Original>
+                <English>Town populations</English>
+                <Chinesesimp>城镇人口</Chinesesimp>
+                <German>Ortsbevölkerung</German>
+                <Polish>Populacja miejscowości</Polish>
+                <Czech>Populace obcí</Czech>
+                <Russian>Население населённых пунктов</Russian>
+                <French>Population des localités</French>
+                <Chinese>城鎮人口</Chinese>
+                <Spanish>Población de los pueblos</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_group_vendors">
+                <Original>Vendors</Original>
+                <English>Vendors</English>
+                <Chinesesimp>商贩</Chinesesimp>
+                <German>Händler</German>
+                <Polish>Handlarze</Polish>
+                <Czech>Obchodníci</Czech>
+                <Russian>Торговцы</Russian>
+                <French>Marchands</French>
+                <Chinese>商人</Chinese>
+                <Spanish>Vendedores</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_group_belts">
+                <Original>Minefields</Original>
+                <English>Minefields</English>
+                <Chinesesimp>雷区</Chinesesimp>
+                <German>Minenfelder</German>
+                <Polish>Pola minowe</Polish>
+                <Czech>Minová pole</Czech>
+                <Russian>Минные поля</Russian>
+                <French>Champs de mines</French>
+                <Chinese>雷區</Chinese>
+                <Spanish>Campos de minas</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_group_unlocks">
+                <Original>Support unlocks</Original>
+                <English>Support unlocks</English>
+                <Chinesesimp>支援解锁</Chinesesimp>
+                <German>Freigeschaltete Unterstützung</German>
+                <Polish>Odblokowane wsparcie</Polish>
+                <Czech>Odemčená podpora</Czech>
+                <Russian>Разблокированная поддержка</Russian>
+                <French>Soutiens débloqués</French>
+                <Chinese>支援解鎖</Chinese>
+                <Spanish>Apoyos desbloqueados</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_group_officerAlive">
+                <Original>HQ officer</Original>
+                <English>HQ officer</English>
+                <Chinesesimp>总部军官</Chinesesimp>
+                <German>HQ-Offizier</German>
+                <Polish>Oficer HQ</Polish>
+                <Czech>Důstojník HQ</Czech>
+                <Russian>Офицер штаба</Russian>
+                <French>Officier du QG</French>
+                <Chinese>總部軍官</Chinese>
+                <Spanish>Oficial del CG</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_group_clock">
+                <Original>Date and time</Original>
+                <English>Date and time</English>
+                <Chinesesimp>日期和时间</Chinesesimp>
+                <German>Datum und Uhrzeit</German>
+                <Polish>Data i godzina</Polish>
+                <Czech>Datum a čas</Czech>
+                <Russian>Дата и время</Russian>
+                <French>Date et heure</French>
+                <Chinese>日期和時間</Chinese>
+                <Spanish>Fecha y hora</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_group_pools">
+                <Original>CP and AP</Original>
+                <English>CP and AP</English>
+                <Chinesesimp>CP 和 AP</Chinesesimp>
+                <German>CP und AP</German>
+                <Polish>CP i AP</Polish>
+                <Czech>CP a AP</Czech>
+                <Russian>CP и AP</Russian>
+                <French>CP et AP</French>
+                <Chinese>CP 和 AP</Chinese>
+                <Spanish>CP y AP</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_group_held">
+                <Original>Zones held</Original>
+                <English>Zones held</English>
+                <Chinesesimp>已占区域</Chinesesimp>
+                <German>Gehaltene Zonen</German>
+                <Polish>Zdobyte strefy</Polish>
+                <Czech>Držené zóny</Czech>
+                <Russian>Удержанные зоны</Russian>
+                <French>Zones tenues</French>
+                <Chinese>已占區域</Chinese>
+                <Spanish>Zonas controladas</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_group_firstCaptured">
+                <Original>First zone capture</Original>
+                <English>First zone capture</English>
+                <Chinesesimp>夺取首个区域</Chinesesimp>
+                <German>Erste Zoneneinnahme</German>
+                <Polish>Zdobycie pierwszej strefy</Polish>
+                <Czech>Obsazení první zóny</Czech>
+                <Russian>Захват первой зоны</Russian>
+                <French>Capture de la première zone</French>
+                <Chinese>奪取首個區域</Chinese>
+                <Spanish>Captura de la primera zona</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_group_escalation">
+                <Original>Escalation</Original>
+                <English>Escalation</English>
+                <Chinesesimp>局势升级</Chinesesimp>
+                <German>Eskalation</German>
+                <Polish>Eskalacja</Polish>
+                <Czech>Eskalace</Czech>
+                <Russian>Эскалация</Russian>
+                <French>Escalade</French>
+                <Chinese>局勢升級</Chinese>
+                <Spanish>Escalada</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_group_zoneTiers">
+                <Original>Zone tiers</Original>
+                <English>Zone tiers</English>
+                <Chinesesimp>区域等级</Chinesesimp>
+                <German>Zonenstufen</German>
+                <Polish>Poziomy stref</Polish>
+                <Czech>Úrovně zón</Czech>
+                <Russian>Уровни зон</Russian>
+                <French>Paliers des zones</French>
+                <Chinese>區域等級</Chinese>
+                <Spanish>Niveles de las zonas</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_group_garrisons">
+                <Original>Garrisons</Original>
+                <English>Garrisons</English>
+                <Chinesesimp>驻军</Chinesesimp>
+                <German>Garnisonen</German>
+                <Polish>Garnizony</Polish>
+                <Czech>Posádky</Czech>
+                <Russian>Гарнизоны</Russian>
+                <French>Garnisons</French>
+                <Chinese>駐軍</Chinese>
+                <Spanish>Guarniciones</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_group_revealedZones">
+                <Original>Revealed zones</Original>
+                <English>Revealed zones</English>
+                <Chinesesimp>已揭示区域</Chinesesimp>
+                <German>Aufgedeckte Zonen</German>
+                <Polish>Odkryte strefy</Polish>
+                <Czech>Odhalené zóny</Czech>
+                <Russian>Открытые зоны</Russian>
+                <French>Zones révélées</French>
+                <Chinese>已揭示區域</Chinese>
+                <Spanish>Zonas reveladas</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_group_revealedTowns">
+                <Original>Revealed towns</Original>
+                <English>Revealed towns</English>
+                <Chinesesimp>已揭示城镇</Chinesesimp>
+                <German>Aufgedeckte Orte</German>
+                <Polish>Odkryte miejscowości</Polish>
+                <Czech>Odhalené obce</Czech>
+                <Russian>Открытые населённые пункты</Russian>
+                <French>Localités révélées</French>
+                <Chinese>已揭示城鎮</Chinese>
+                <Spanish>Pueblos revelados</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_group_opcom">
+                <Original>OPCOM orders</Original>
+                <English>OPCOM orders</English>
+                <Chinesesimp>OPCOM 命令</Chinesesimp>
+                <German>OPCOM-Befehle</German>
+                <Polish>Rozkazy OPCOM</Polish>
+                <Czech>Rozkazy OPCOM</Czech>
+                <Russian>Приказы OPCOM</Russian>
+                <French>Ordres de l'OPCOM</French>
+                <Chinese>OPCOM 命令</Chinese>
+                <Spanish>Órdenes de OPCOM</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_group_garage">
+                <Original>Garage</Original>
+                <English>Garage</English>
+                <Chinesesimp>车库</Chinesesimp>
+                <German>Garage</German>
+                <Polish>Garaż</Polish>
+                <Czech>Garáž</Czech>
+                <Russian>Гараж</Russian>
+                <French>Garage</French>
+                <Chinese>車庫</Chinese>
+                <Spanish>Garaje</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_group_parked">
+                <Original>Parked vehicles</Original>
+                <English>Parked vehicles</English>
+                <Chinesesimp>停放的载具</Chinesesimp>
+                <German>Geparkte Fahrzeuge</German>
+                <Polish>Zaparkowane pojazdy</Polish>
+                <Czech>Zaparkovaná vozidla</Czech>
+                <Russian>Припаркованная техника</Russian>
+                <French>Véhicules garés</French>
+                <Chinese>停放的載具</Chinese>
+                <Spanish>Vehículos estacionados</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_group_mhq">
+                <Original>MHQ</Original>
+                <English>MHQ</English>
+                <Chinesesimp>MHQ</Chinesesimp>
+                <German>MHQ</German>
+                <Polish>MHQ</Polish>
+                <Czech>MHQ</Czech>
+                <Russian>MHQ</Russian>
+                <French>MHQ</French>
+                <Chinese>MHQ</Chinese>
+                <Spanish>MHQ</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_group_builder">
+                <Original>Builder vehicle</Original>
+                <English>Builder vehicle</English>
+                <Chinesesimp>建造载具</Chinesesimp>
+                <German>Baufahrzeug</German>
+                <Polish>Pojazd budowlany</Polish>
+                <Czech>Stavební vozidlo</Czech>
+                <Russian>Строительная техника</Russian>
+                <French>Véhicule de construction</French>
+                <Chinese>建造載具</Chinese>
+                <Spanish>Vehículo de construcción</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_group_builds">
+                <Original>Builder vehicle fortifications</Original>
+                <English>Builder vehicle fortifications</English>
+                <Chinesesimp>建造载具工事</Chinesesimp>
+                <German>Befestigungen des Baufahrzeugs</German>
+                <Polish>Umocnienia pojazdu budowlanego</Polish>
+                <Czech>Opevnění stavebního vozidla</Czech>
+                <Russian>Укрепления строительной техники</Russian>
+                <French>Fortifications du véhicule de construction</French>
+                <Chinese>建造載具工事</Chinese>
+                <Spanish>Fortificaciones del vehículo de construcción</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_group_zoneBuilds">
+                <Original>Zone fortifications</Original>
+                <English>Zone fortifications</English>
+                <Chinesesimp>区域工事</Chinesesimp>
+                <German>Zonenbefestigungen</German>
+                <Polish>Umocnienia stref</Polish>
+                <Czech>Opevnění zón</Czech>
+                <Russian>Укрепления зон</Russian>
+                <French>Fortifications des zones</French>
+                <Chinese>區域工事</Chinese>
+                <Spanish>Fortificaciones de las zonas</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_group_baseBuilds">
+                <Original>HQ and FOB fortifications</Original>
+                <English>HQ and FOB fortifications</English>
+                <Chinesesimp>总部和 FOB 工事</Chinesesimp>
+                <German>HQ- und FOB-Befestigungen</German>
+                <Polish>Umocnienia HQ i FOB</Polish>
+                <Czech>Opevnění HQ a FOB</Czech>
+                <Russian>Укрепления штаба и FOB</Russian>
+                <French>Fortifications du QG et des FOB</French>
+                <Chinese>總部和 FOB 工事</Chinese>
+                <Spanish>Fortificaciones del CG y los FOB</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_group_capturedPool">
+                <Original>Captured gear</Original>
+                <English>Captured gear</English>
+                <Chinesesimp>缴获装备</Chinesesimp>
+                <German>Erbeutete Ausrüstung</German>
+                <Polish>Zdobyty sprzęt</Polish>
+                <Czech>Ukořistěná výbava</Czech>
+                <Russian>Захваченное снаряжение</Russian>
+                <French>Équipement capturé</French>
+                <Chinese>繳獲裝備</Chinese>
+                <Spanish>Equipo capturado</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_fork_unreadable">
                 <Original>The save store did not read back, so a campaign started now may not be kept</Original>

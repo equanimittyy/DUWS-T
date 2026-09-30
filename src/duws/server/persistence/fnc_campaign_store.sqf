@@ -32,7 +32,8 @@ DUWS_campaignParams = [
 
 // The input groups: a snapshot without one of these would roll fresh ground under the campaign's name.
 DUWS_saveInputs = ["settings", "factions", "hq", "zones", "hardpoints"];
-// A snapshot missing one of these still loads, with that part at its boot value; the load screen names it.
+// A snapshot missing one of these still loads, with that part at its boot value; the load screen names it, so each
+// needs a STR_DUWS_T_fork_group_ key.
 DUWS_saveOutcomes = ["fobs", "towns", "vendors", "belts", "unlocks", "officerAlive", "clock", "pools", "held",
     "firstCaptured", "escalation", "zoneTiers", "garrisons", "revealedZones", "revealedTowns", "opcom", "garage",
     "parked", "mhq", "builder", "builds", "zoneBuilds", "baseBuilds", "capturedPool"];

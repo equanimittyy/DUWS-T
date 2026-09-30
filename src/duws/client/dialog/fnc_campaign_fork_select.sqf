@@ -29,7 +29,7 @@ if (_row isNotEqualTo []) then {
 	} else {
 		private _missing = DUWS_saveOutcomes select { !(_x in (_h getOrDefault ["groups", []])) };
 		if (_missing isNotEqualTo []) then {
-			_text = _text + "<br/><br/>" + format ["<t color='#ff9933'>%1</t>", format [localize "STR_DUWS_T_fork_missing", _missing joinString ", "]];
+			_text = _text + "<br/><br/>" + format ["<t color='#ff9933'>%1</t>", format [localize "STR_DUWS_T_fork_missing", (_missing apply { localize format ["STR_DUWS_T_fork_group_%1", _x] }) joinString "<br/>"]];
 		};
 	};
 };
