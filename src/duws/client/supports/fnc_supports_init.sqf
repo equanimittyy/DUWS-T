@@ -33,9 +33,8 @@ fnc_support_catalogue = {
 		// Insurgent-blocked because every strike it opens is: in that mode it would buy nothing.
 		["offensive_heavy", "PERM", 25, "support_offensive_heavy_available", "STR_DUWS_T_offensive_heavy_row", "", true,  30],
 
-		// Radio towers: each tier a permanent +1 to BLUFOR rep drift and +10% to every BLUFOR reach
-		// (DUWS_bluforRadioLevel). No comm item -- owned outright once bought, mirroring the enemy's
-		// amplifier without a structure.
+		// Radio towers: each tier a permanent +10% to every BLUFOR reach, and II and III each +1 to BLUFOR rep
+		// drift (DUWS_bluforRadioLevel). No comm item -- owned outright once bought.
 		["radio1",    "PERM", 15, "support_radio1_available",      "STR_DUWS_T_radio_tower_1",        "",           false],
 		["radio2",    "PERM", 40, "support_radio2_available",      "STR_DUWS_T_radio_tower_2",        "",           false, 10],
 		["radio3",    "PERM", 60, "support_radio3_available",      "STR_DUWS_T_radio_tower_3",        "",           false, 20],

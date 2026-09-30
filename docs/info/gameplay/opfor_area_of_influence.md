@@ -2,8 +2,9 @@
 
 Zone ownership is list membership (`WARCOM_zones_controled_by_BLUFOR`) and town ownership is a
 number (`civ_town_rep`); neither says anything about the ground *between* them. The area of
-influence is a signed coverage field over the whole map that fills that gap. Two things read it:
-passive town-reputation drift, and where OPFOR's standalone hardpoints get sited.
+influence is a signed coverage field over the whole map that fills that gap. Three things read it:
+BLUFOR's passive town-reputation drift, the towns OPCOM may send Rapport to, and where OPFOR's
+standalone hardpoints get sited.
 
 ## The field
 
@@ -11,10 +12,10 @@ passive town-reputation drift, and where OPFOR's standalone hardpoints get sited
 within reach of a side's ground or it isn't, with no falloff and no per-emitter strength, because
 the drift it drives is a flat step rather than a weighted one (see [Rep drift](#rep-drift)).
 `DUWS_fnc_aoi_covers` (`fnc_aoi_init.sqf:17`) is the shared primitive both sides' coverage tests
-wrap (`fnc_aoi_opfor_covers` / `fnc_aoi_blufor_covers`, `:67-68`); `fnc_aoi_field_at [_pos]`
-(`:73-78`) composes the two into an OPFOR-positive dominance value: `+1` OPFOR-only, `-1`
-BLUFOR-only, `0` contested or empty. Siting reads `fnc_aoi_field_at`; the drift reads the two
-coverage primitives directly so it can layer the radio-tower amplifiers on top.
+wrap (`fnc_aoi_opfor_covers` / `fnc_aoi_blufor_covers`, `:66-67`); `fnc_aoi_field_at [_pos]`
+(`:72-77`) composes the two into an OPFOR-positive dominance value: `+1` OPFOR-only, `-1`
+BLUFOR-only, `0` contested or empty. Siting reads `fnc_aoi_field_at`; the drift reads
+`fnc_aoi_blufor_covers` and the Rapport offer reads `fnc_aoi_opfor_covers` directly.
 
 | Emitter | Side | Reach beyond its edge |
 |---|---|---|
@@ -25,10 +26,10 @@ coverage primitives directly so it can layer the radio-tower amplifiers on top.
 | Banded town | its band's side | `civ_radius + AOI_TOWN_REACH` (2000 m) |
 
 Reach is measured from each source's outer edge, not its centre, so a naturally large zone claims
-proportionally more ground than a small one — the constants live at `server_var_init.sqf:562-566`.
+proportionally more ground than a small one — the constants live at `server_var_init.sqf:584-588`.
 BLUFOR's radio supports are not in this table: they have no structure on the map, so they carry no
-coverage of their own. Each tier widens every BLUFOR reach above and amplifies BLUFOR's drift inside
-that coverage (see [Radio towers](#radio-towers)).
+coverage of their own. Each tier widens every BLUFOR reach above, and tiers II and III set BLUFOR's
+drift inside that coverage (see [Radio towers](#radio-towers)).
 
 A town emits only once its reputation has fully crossed `±10` — the same `OPFOR_BAND` threshold
 that already flips a town's side for garrison and income
@@ -46,70 +47,67 @@ The area of influence is the field's OPFOR-positive region minus the interior of
 `fnc_aoi_in_any_zone [_pos]` (`fnc_aoi_init.sqf:85-88`) tests a point against each zone's own
 `_size`, whoever holds it; inside a zone is the zone hardpoint ring's ground (see
 [`hardpoints.md`](hardpoints.md)), not the band's. The field still *covers* zone interiors — a
-town under a zone still drifts — but siting reads `fnc_aoi_field_at > 0 && !(fnc_aoi_in_any_zone)`,
-so a candidate outside every zone in OPFOR-positive ground is the band.
+town under a BLUFOR zone still drifts, and one under an OPFOR zone still takes Rapport — but siting
+reads `fnc_aoi_field_at > 0 && !(fnc_aoi_in_any_zone)`, so a candidate outside every zone in
+OPFOR-positive ground is the band.
 
 ## Rep drift
 
-Every 30-minute economy tick, before that tick's income tally, each town reads coverage at its
-centre and steps its reputation by the difference of the two sides' pushes
-(`server/warcom/fnc_zonesundercontrol.sqf:46-54`, riding the economy clock in
-`server/warcom/fnc_init_OPFOR_WARCOM.sqf:17-29` rather than running a loop of its own):
+Every 30-minute economy tick, before that tick's income tally, each town inside BLUFOR's coverage
+steps its reputation up by one less than the BLUFOR radio tier
+(`server/warcom/fnc_zonesundercontrol.sqf:36-46`, riding the economy clock rather than running a loop
+of its own):
 
 ```sqf
-private _opforCovers = [_townPos] call fnc_aoi_opfor_covers;
-private _bluforCovers = [_townPos] call fnc_aoi_blufor_covers;
-private _opforPush = 0;
-private _bluforPush = 0;
-if (_opforCovers)  then { _opforPush  = 1 + DUWS_opforRadioLevel };
-if (_bluforCovers) then { _bluforPush = DUWS_bluforRadioLevel };
-if (_bluforPush != _opforPush) then {
-    [_forEachIndex, _bluforPush - _opforPush, "aoi_drift", true] call fnc_town_rep_adjust;
+private _bluPush = DUWS_bluforRadioLevel - 1;
+// ...
+if (_bluPush > 0 && {[getPos (_locs select _forEachIndex)] call fnc_aoi_blufor_covers}) then {
+    [_forEachIndex, _bluPush, "aoi_drift", true] call fnc_town_rep_adjust;
 };
 ```
 
-The pushes are asymmetric by design. **OPFOR pushes by holding ground**: a base `1` for coverage
-alone, plus `DUWS_opforRadioLevel` (its standing radio towers, capped at `AOI_OPFOR_TOWER_CAP` =
-5) — so a town in undisputed OPFOR ground drifts as low as `-6` a tick. **BLUFOR pushes only once
-it has paid to**: `DUWS_bluforRadioLevel` (the tier bought, `0`-`3`) with no base, so a
-BLUFOR-covered town drifts `0` until a radio-tower support is bought, then `+1` to `+3` by tier.
-Coverage with no tier pushes nothing; a tier with no coverage has nothing to push. A town's first
-rep lever is capturing zones (removes OPFOR's coverage and base push where it hurts most); the
-second is buying towers (turns BLUFOR coverage into an actual pull, and widens it).
+The drift is asymmetric by design. **BLUFOR pushes only once it has paid to**:
+`DUWS_bluforRadioLevel` is the tier bought, `0`-`3`, and tier I buys reach only, so a BLUFOR-covered
+town drifts `0` through tier I, `+1` at tier II and `+2` at tier III. Coverage with no tier pushes
+nothing; a tier with no coverage has nothing to push. **OPFOR has no passive push**: its coverage
+does not cancel BLUFOR's, and it moves a town only by buying Rapport, `-OPCOM_RAPPORT_STEP` (3) a
+delivery, offered in each town above `-15` and below `+10` that OPFOR's coverage reaches
+(`DUWS_fnc_opcom_rapportOffer`, `warcom/opcom/appraisal/fnc_opcom_buy_holding.sqf:99`; the Value is
+[`opcom_plan.md`](../../plans/opcom/opcom_plan.md)'s).
 
-The writer is the existing `fnc_town_rep_adjust` (`server/warcom/fnc_economy_init.sqf:136-157`),
-already clamped to `[-20, 20]`; the drift is a silent caller (`_silent` param, `:138`) beside its
-event callers, so it repaints the town marker without posting a notification card. Every consumer
+The writer is the existing `fnc_town_rep_adjust` (`server/warcom/fnc_economy_init.sqf:179`),
+already clamped to `[-20, 20]`; the drift and Rapport are silent callers (`_silent` param) beside its
+event callers, so they repaint the town marker without posting a reputation card. Every consumer
 rep already drove — the OPFOR/BLUFOR band, town income, the map marker colour — follows for free.
 
 ## Radio towers
 
-A radio tower amplifies its side's drift push. OPFOR's tower also carries coverage of its own;
-BLUFOR's tier carries none, but widens the coverage of every other BLUFOR emitter.
+OPFOR's radio tower is a hardpoint with coverage of its own. BLUFOR's radio tier is a support with
+no structure: it widens the coverage of every other BLUFOR emitter and, from tier II, sets BLUFOR's
+drift push.
 
 ### OPFOR: a physical hardpoint
 
-`DUWS_opforRadioLevel` is the live count of uncleared `"RADIO"` rows in the `DUWS_hardpoints`
-registry, capped at `AOI_OPFOR_TOWER_CAP` (`server_var_init.sqf:596`). It is recomputed, never
-incremented in place, by `DUWS_fnc_aoi_opforRecount`
-(`server/init_zones/fnc_hardpoint_stream.sqf:21-24`), called whenever a `"RADIO"` hardpoint is
-registered (`:328`) or cleared (`:182`) — so a destroyed tower drops the amplifier, and its
-`AOI_TOWER_REACH` coverage with it, in the same recount. `"RADIO"` is a hardpoint type like any
-other (`DUWS_hardpointName`, `DUWS_hardpointGarrison`, `server_var_init.sqf:417,430`), sited via
-`fnc_hardpoint_seed_radio` (`server/init_zones/fnc_hardpoint_place.sqf:363-399`), which samples the
+A tower's only effect is its `AOI_TOWER_REACH` coverage, which `DUWS_fnc_aoi_covers` reads live
+from the `DUWS_hardpoints` registry, so a destroyed tower's coverage goes when its row does. The
+campaign seeds 1 or 2 (`server/warcom/fnc_init_OPFOR_WARCOM.sqf:86`), and OPCOM builds more up to
+`AOI_OPFOR_TOWER_CAP` (5) standing or on their way (`DUWS_opcom_assetCap`,
+`warcom/opcom/appraisal/fnc_opcom_assets.sqf`). `"RADIO"` is a hardpoint type like any other
+(`DUWS_hardpointName`, `DUWS_hardpointGarrison`, `server_var_init.sqf`), sited via
+`fnc_hardpoint_seed_radio` (`server/init_zones/fnc_hardpoint_place.sqf:360-396`), which samples the
 band, rejects any draw inside another tower's `AOI_TOWER_REACH`, and stands the mast on the
 best-scoring hilltop of what survives. It is deliberately absent from `DUWS_hardpointWeightZone`
-and `DUWS_hardpointWeightSolo` (`server_var_init.sqf:405-410`) — a tower is placed on purpose,
-never rolled into the ordinary hardpoint mix.
+and `DUWS_hardpointWeightSolo` — a tower is placed on purpose, never rolled into the ordinary
+hardpoint mix.
 
 ### BLUFOR: a permanent support, no structure
 
 `DUWS_bluforRadioLevel` is the tier bought, `0`-`3`, recomputed from the permanent-support record
 on every grant (`server/supports/fnc_support_perm_grant.sqf:19`). It is three `PERM` catalogue
-rows — `radio1`/`radio2`/`radio3` — in `client/supports/fnc_supports_init.sqf:32-34`, gated so a
-tier is hidden until the one below it is owned (`:85-86`). Nothing is placed and nothing streams:
-the purchase itself is the whole effect, so there is no BLUFOR structure for OPFOR to destroy in
-answer to a rising amplifier — only ground to retake.
+rows — `radio1`/`radio2`/`radio3` — in `client/supports/fnc_supports_init.sqf:38-40`, gated so a
+tier is hidden until the one below it is owned (`:114-115`). Nothing is placed and nothing streams:
+the purchase itself is the whole effect, so there is no BLUFOR structure for OPFOR to destroy —
+only ground to retake.
 
 Each tier also widens BLUFOR's coverage. `DUWS_fnc_aoi_covers` multiplies the reach of every BLUFOR
 emitter by `1 + AOI_BLUFOR_RADIO_STEP × DUWS_bluforRadioLevel`, so tiers I to III reach 10%, 20% and
@@ -161,8 +159,8 @@ menu, not shown to the player.
 | `AOI_HQ_REACH` | 2000 m | player HQ coverage radius |
 | `AOI_FOB_REACH` | 2000 m | each FOB's coverage radius |
 | `AOI_TOWN_REACH` | 2000 m | added to a banded town's `civ_radius` |
-| `AOI_OPFOR_TOWER_CAP` | 5 | ceiling on `DUWS_opforRadioLevel`; OPFOR's push bottoms out at `-6` |
+| `AOI_OPFOR_TOWER_CAP` | 5 | most OPFOR radio towers OPCOM keeps standing or on their way |
 | `AOI_BLUFOR_RADIO_STEP` | 0.1 | share of each BLUFOR reach that each BLUFOR radio tier adds |
 
-All defined at `server/server_var_init.sqf:562-599`, server-only (not `publicVariable`d): every
+All defined at `server/server_var_init.sqf:584-621`, server-only (not `publicVariable`d): every
 reader — the drift on the economy tick, the hardpoint band siting — runs on the server.

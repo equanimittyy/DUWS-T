@@ -62,8 +62,7 @@ DUWS_fnc_aoi_covers = {
 // [_pos] call fnc_aoi_opfor_covers / fnc_aoi_blufor_covers -> bool. Every public aoi reader takes a
 // [_pos] array (the raw DUWS_fnc_aoi_covers, fnc_aoi_field_at, fnc_aoi_in_any_zone all do), so these
 // two unwrap it the same way rather than forwarding _this bare: a caller must not have to know which
-// reader wraps. The two primitives the drift reads directly, so it can add the radio-tower amplifiers
-// on top of a flat coverage step.
+// reader wraps.
 fnc_aoi_opfor_covers  = { params ["_pos"]; [_pos, "opfor"]  call DUWS_fnc_aoi_covers };
 fnc_aoi_blufor_covers = { params ["_pos"]; [_pos, "blufor"] call DUWS_fnc_aoi_covers };
 
@@ -80,8 +79,7 @@ fnc_aoi_field_at = {
 // [_pos, _margin] call fnc_aoi_in_any_zone -> bool. Point within _margin (default 0) of any zone's own
 // radius, whoever holds it.
 // Inside a zone is the zone hardpoint system's ground, gated by the capture trigger; the band is the
-// countryside between, so the siting mask excludes zone interiors even though the field still covers
-// them (a town under a zone still drifts).
+// countryside between, so the siting mask excludes zone interiors even though the field still covers them.
 fnc_aoi_in_any_zone = {
     params ["_pos", ["_margin", 0]];
     (zone_meta_array findIf { (_pos distance2D (_x select 1)) <= (_x select 2) + _margin }) >= 0

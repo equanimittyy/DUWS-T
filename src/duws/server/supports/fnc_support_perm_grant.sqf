@@ -12,7 +12,7 @@ if (_key == "" || {_key in DUWS_support_permanent}) exitWith {};
 DUWS_support_permanent pushBack _key;
 publicVariable "DUWS_support_permanent";
 
-// The BLUFOR rep amplifier is the count of radio tiers the team owns, recomputed from the permanent
+// The BLUFOR radio level is the count of radio tiers the team owns, recomputed from the permanent
 // record rather than incremented -- gated buying means the count equals the tier -- so it cannot drift
 // and a save that restored the record restores the level with it. Server-only, like the drift that
 // reads it. Not a radio grant leaves it untouched.

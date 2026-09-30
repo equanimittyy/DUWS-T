@@ -6,7 +6,7 @@ DUWS_opcom_assetPrice = createHashMapFromArray [
     ["RADIO", OPCOM_AP_TOWER], ["OP", OPCOM_AP_OP], ["MORTAR", OPCOM_AP_MORTAR], ["ARTY", OPCOM_AP_ARTY]
 ];
 
-// Flat, unlike the per-zone caps: the tower cap is also the rep amplifier's, the guns' the resident AI's.
+// Flat, unlike the per-zone caps: the guns' cap is the resident AI's.
 DUWS_opcom_assetCap = createHashMapFromArray [
     ["RADIO", AOI_OPFOR_TOWER_CAP], ["MORTAR", OPCOM_CAP_MORTAR], ["ARTY", OPCOM_CAP_ARTY]
 ];

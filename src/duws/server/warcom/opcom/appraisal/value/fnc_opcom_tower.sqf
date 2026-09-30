@@ -14,7 +14,6 @@ DUWS_fnc_opcom_towerReach = {
     _sum
 };
 
-// The amplifier every tower adds stays out: it reads the same at every site, so it ranks nothing.
 DUWS_fnc_opcom_towerValue = {
     params ["_at"];
     private _towns = [];

@@ -15,13 +15,6 @@ if (!isServer) exitWith {};
 // The chance rolls per tick rather than firing every one, so the fix is a risk to break out of, not a certain reveal.
 #define OP_OBSERVE_CHANCE 0.02     // per OPCOM tick; ~0.24/min at OPCOM_TICK_PERIOD 5
 
-// OPFOR radio amplifier = live count of uncleared "RADIO" rows, capped. Recomputed from the registry
-// rather than incremented in place, so it cannot drift out of step with what actually stands.
-DUWS_fnc_aoi_opforRecount = {
-    DUWS_opforRadioLevel = (({(_x select 2) isEqualTo "RADIO"} count DUWS_hardpoints) min AOI_OPFOR_TOWER_CAP);
-    ["INFO", "HARDPOINT", format ["OPFOR radio level -> %1", DUWS_opforRadioLevel]] call fnc_log;
-};
-
 // A zone-coupled hardpoint mirrors this instead of its own ring; an unregistered zone reads an empty
 // map and defaults false. Checks raising too: awake alone flips true only once the whole garrison has
 // spawned -- minutes on a big zone -- so gating on it alone raised the emplacement late or never.
@@ -189,9 +182,6 @@ DUWS_fnc_hardpointClear = {
         publicVariable "DUWS_hardpoints";
         [_key] call DUWS_fnc_opcom_gridDirty;
     };
-    // A cleared tower is gone from the registry above, so the recount drops the amplifier and its
-    // coverage falls with it -- far towns no zone reaches leave OPFOR ground entirely.
-    if ((_o get "hpType") isEqualTo "RADIO") then { call DUWS_fnc_aoi_opforRecount };
     deleteMarker (format ["hpm_%1", _key]);
     // Flagged for the sweep, not deleted here: a radio tower's defenders can still be alive when its mast
     // is wrecked, and deleting them in the player's face reads as a bug. The flag lives on the unit so the
@@ -468,8 +458,6 @@ fnc_hardpoint_register = {
     DUWS_hardpoints pushBack [_key, _pos, _type, _side, _zoneKey, _shown, _dir];
     publicVariable "DUWS_hardpoints";
     [_key] call DUWS_fnc_opcom_gridDirty;
-    // A newly-registered tower raises the amplifier; recount from the row just pushed.
-    if (_type isEqualTo "RADIO") then { call DUWS_fnc_aoi_opforRecount };
 
     // Left standing through stow: a marker is a map object, not a streamed unit, so a stowed emplacement
     // still marks its ground. Alpha tracks the reveal flag; fnc_hardpoint_reveal flips it to 1 on discovery.

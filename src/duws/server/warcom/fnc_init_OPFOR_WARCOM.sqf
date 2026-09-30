@@ -118,8 +118,7 @@ sleep 1;
         // under the one generation banner keeps it honest. Before civilians because at hour zero the band is
         // the zones and the HQ alone -- towns are neutral and emit nothing yet.
         //
-        // Radio towers first: their coverage widens the band the rest spread into, and each raises the OPFOR
-        // rep amplifier so the reputation war opens on the enemy's terms.
+        // Radio towers first: their coverage widens the band the rest spread into.
         [_radioN, _tick] call fnc_hardpoint_seed_radio;
         _hpDone = _hpDone + _radioN;
 

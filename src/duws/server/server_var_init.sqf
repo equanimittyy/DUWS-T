@@ -614,12 +614,9 @@ DISGUISE_DECAY_NEAR_SCALE = 1/3;
 // clearing it.
 DISGUISE_DECAY_DELAY = 5;
 
-// The radio-tower amplifiers, global scalars rather than per-town. DUWS_opforRadioLevel is the count of
-// uncleared enemy "RADIO" hardpoints, capped at AOI_OPFOR_TOWER_CAP, recomputed by fnc_hardpoint_stream
-// on build/clear. DUWS_bluforRadioLevel is the tier bought (0..3), raised by fnc_support_perm_grant, and
-// with no base push it IS the player's whole drift. Server-only readers (the drift, the BLUFOR reach), not broadcast.
+// DUWS_bluforRadioLevel is the tier bought (0..3), raised by fnc_support_perm_grant. Server-only readers
+// (the drift, the BLUFOR reach), not broadcast.
 AOI_OPFOR_TOWER_CAP = 5;
-DUWS_opforRadioLevel = 0;
 DUWS_bluforRadioLevel = 0;
 AOI_BLUFOR_RADIO_STEP = 0.1;   // each BLUFOR tier adds this share of every BLUFOR base reach, not compounded
 

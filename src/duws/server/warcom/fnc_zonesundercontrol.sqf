@@ -33,21 +33,15 @@ private _locs = missionNamespace getVariable ["civ_locations", []];
 private _bluTownWorth = 0;
 private _opfTownWorth = 0;
 private _towns = [];
-// Passive AoI rep drift first, then income on the result -- so a town that crosses a band this
-// tick pays on its new side the same tick. The pushes are asymmetric by design: OPFOR pushes by
-// holding ground (a flat 1 plus its standing radio towers), BLUFOR only once it has bought a tier
-// (no base). A contested town nets the difference; an uncovered one drifts nothing. Silent: no
-// card per town; the marker colour and the tick's hint below carry it (see fnc_town_rep_adjust).
+// Tier I buys reach only; each tier above it adds 1 to the drift.
+private _bluPush = DUWS_bluforRadioLevel - 1;
+// BLUFOR's radio drift first, then income on the result -- so a town that crosses a band this
+// tick pays on its new side the same tick. Asymmetric by design: OPFOR has no passive push and moves a
+// town only by buying Rapport. Silent: no card per town; the marker colour and the tick's hint below
+// carry it (see fnc_town_rep_adjust).
 {
-    private _townPos = getPos (_locs select _forEachIndex);
-    private _opforCovers = [_townPos] call fnc_aoi_opfor_covers;
-    private _bluforCovers = [_townPos] call fnc_aoi_blufor_covers;
-    private _opforPush = 0;
-    private _bluforPush = 0;
-    if (_opforCovers)  then { _opforPush  = 1 + DUWS_opforRadioLevel };
-    if (_bluforCovers) then { _bluforPush = DUWS_bluforRadioLevel };
-    if (_bluforPush != _opforPush) then {
-        [_forEachIndex, _bluforPush - _opforPush, "aoi_drift", true] call fnc_town_rep_adjust;
+    if (_bluPush > 0 && {[getPos (_locs select _forEachIndex)] call fnc_aoi_blufor_covers}) then {
+        [_forEachIndex, _bluPush, "aoi_drift", true] call fnc_town_rep_adjust;
     };
 
     // Income on the post-drift reputation, read back from the array the adjust just wrote.
@@ -106,7 +100,7 @@ if (_bluCP > 0 || {_bluZoneAP > 0}) then {
     } forEach _towns;
     if (_gained isNotEqualTo []) then {
         _rows pushBack localize "STR_DUWS_T_econ_hint_drift";
-        _rows pushBack [localize "STR_DUWS_T_econ_hint_push", format ["+%1", DUWS_bluforRadioLevel]];
+        _rows pushBack [localize "STR_DUWS_T_econ_hint_push", format ["+%1", _bluPush]];
         _rows append _gained;
     };
     private _subtitle = "";

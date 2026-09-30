@@ -188,8 +188,7 @@ towers widen the band. A per-zone draw would give a small zone's band as many si
 flank lines split the pool at its median distance to BLU HQ: the backline takes the far half and the
 frontline the near half, one nest per zone each. Every pool site keeps `HP_POOL_ZONE_GAP` (300 m) clear of
 every zone's edge, so it does not clump onto a zone's own ring. Radio
-towers are their own hardpoint type, scored for hilltop crests and spaced off each other's coverage radius. Both the band sampler and the campaign's radio-tower economics —
-`DUWS_opforRadioLevel` and its cap — belong to
+towers are their own hardpoint type, scored for hilltop crests and spaced off each other's coverage radius. Both the band sampler and the radio-tower cap belong to
 [`opfor_area_of_influence.md`](opfor_area_of_influence.md#band-siting): this file owns the
 terrain survey, per-type score, facing and spacing every band placement shares with the zone ring;
 that one owns what the band *is* and what a tower buys the enemy.
