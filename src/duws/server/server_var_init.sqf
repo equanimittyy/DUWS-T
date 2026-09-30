@@ -849,6 +849,9 @@ OPCOM_EXPOSE_FLOOR = 0.2;
 OPCOM_DEFEND_NEAR = 500;
 OPCOM_DEFEND_FAR = 2000;
 OPCOM_DEFEND_FLOOR = 0.2;
+// A mast's cost per unit of town worth in its reach that OPFOR already covers, against 1 per unit it newly covers:
+// at 1, a mast that overlaps as much worth as it adds scores nothing. Tune.
+OPCOM_TOWER_OVERLAP = 1;
 
 // A town's worth is its income level (1-5) times this, so the richest town still scores under the poorest zone.
 OPCOM_TOWN_WORTH = 5;

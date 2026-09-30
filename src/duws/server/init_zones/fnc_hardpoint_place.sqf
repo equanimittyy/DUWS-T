@@ -357,16 +357,30 @@ fnc_hardpoint_site_roadblocks = {
 // Retried, not rolled: every band pass after it samples the band this tower widens. The bound only keeps a map with
 // no band ground from hanging generation.
 #define HP_RADIO_TRIES 12
+#define HP_RADIO_SAMPLES 24
 fnc_hardpoint_site_radio = {
     params [["_fnTick", {}]];
-    private _placed = 0;
+    private _towns = call DUWS_fnc_opcom_towerTowns;
+    private _res = [];
+    private _at = [];
     for "_i" from 1 to HP_RADIO_TRIES do {
-        _placed = [1, "hpradio", "", fnc_hardpoint_band_cand, _fnTick, fnc_hardpoint_band_anchor,
-            createHashMapFromArray [["RADIO", 1]]] call fnc_hardpoint_lay;
-        if (_placed > 0) exitWith {};
+        _at = [];
+        private _bestV = -1;
+        for "_k" from 1 to HP_RADIO_SAMPLES do {
+            private _draw = call DUWS_fnc_aoi_bandPos;
+            if (_draw isEqualTo []) then { continue };
+            private _p = _draw select 0;
+            private _v = ([_p, _towns, []] call DUWS_fnc_opcom_towerReach) * ([_p] call DUWS_fnc_opcom_defend);
+            if (_v > _bestV) then { _bestV = _v; _at = _p };
+        };
+        if (_at isEqualTo []) then { continue };
+        _res = ["RADIO", DUWS_fnc_opcom_buildCand, "hpradio_0", "", [_at]] call fnc_hardpoint_spawn_sited;
+        if (_res isNotEqualTo []) exitWith {};
     };
-    if (_placed < 1) then { ["WARN", "HARDPOINT", "campaign-start radio tower found no band ground"] call fnc_log };
-    _placed
+    if (_res isEqualTo []) exitWith { ["WARN", "HARDPOINT", "campaign-start radio tower found no band ground"] call fnc_log; 0 };
+    ["INFO", "HARDPOINT", format ["campaign-start radio tower sited near %1", _at apply { round _x }]] call fnc_log;
+    1 call _fnTick;
+    1
 };
 
 // Rolls every campaign-start emplacement before any is laid, so the generation banner totals real hardpoints.

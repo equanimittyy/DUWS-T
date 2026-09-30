@@ -61,7 +61,7 @@ does.
 before the write lands, and the clamp means the writer may apply less than was asked, so any number a
 caller names is a prediction. A town's standing reaches the player as marker *colour* alone —
 `fnc_civ_townRender` sets colour and alpha, the markers are created without text
-(`fnc_civ_init_Tomata.sqf:262-279`), and `civ_town_rep` is never broadcast. SITREP counts towns by band
+(`fnc_civ_init_Tomata.sqf:277-292`), and `civ_town_rep` is never broadcast. SITREP counts towns by band
 instead, off the broadcast `DUWS_blufor_town_pos` and `DUWS_enemy_town_pos`, and names no town's figure.
 
 ## Authority: the server decides a purchase, not the buyer

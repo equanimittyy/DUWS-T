@@ -33,7 +33,7 @@ vendor.
 
 ## Placement
 
-The draft runs once, when `fnc_civ_init_Tomata.sqf:301` calls `fnc_vendor_init`, and never runs
+The draft runs once, when `fnc_civ_init_Tomata.sqf:305` calls `fnc_vendor_init`, and never runs
 again. Its result is the [vendor registry](#vendor-registry), and every later spawn replays it, so a
 town's shops stand in the same buildings for the whole campaign.
 

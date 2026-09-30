@@ -67,11 +67,19 @@ sleep 1;
     while {!(["CIV", "all zones built out",
         {zones_buildout_done >= count serv_zones_array}, 300] call fnc_waitLogged)} do {};
     // The ticker exits on its own condition without redrawing, so clear its last frame here.
-    // With civilians on the pass below overwrites it immediately; with civilians off nothing
-    // would, and a stale "3 of 4 complete" would sit there until the map closed.
+    // A loaded campaign with civilians off draws nothing after it, and a stale "3 of 4 complete"
+    // would sit there until the map closed.
     [""] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
 
-    // Hard Point Generation is its own phase between zones and civilians, so emplacements read a fully-built
+    if (DUWS_campaignLoaded) then { call DUWS_fnc_restoreHardpoints };
+
+    // Before a new campaign's hardpoints: the start tower weighs the towns, and every band pass reads the towns
+    // that start in the OPFOR band.
+    if (!isNil "CIV_PRESENCE" && {CIV_PRESENCE != "NONE"}) then { [] call fnc_civ_init_Tomata; };
+
+    if (DUWS_campaignLoaded) then { call DUWS_fnc_restoreWorld };
+
+    // Hard Point Generation is its own phase after zones and civilians, so emplacements read a fully-built
     // map. Reads zone_meta_array (complete by the wait above). Called, not spawned: fnc_hardpoint_site_zone
     // sleeps in its crew-drop, and running zones in sequence keeps the banner honest. Idempotent per zone
     // (the stored cap guards a rebuild), keyed by fnc_zone_key of the centre.
@@ -79,9 +87,7 @@ sleep 1;
     // The whole emplacement plan -- every zone's ring, the roadblock net, the two flank lines -- is
     // fixed before laying any of it, so the banner counts hardpoints toward a real total, not zones.
     // The roadblock net comes back pre-expanded to a [zonePos, endpointPos] target per block.
-    if (DUWS_campaignLoaded) then {
-        call DUWS_fnc_restoreHardpoints;
-    } else {
+    if (!DUWS_campaignLoaded) then {
         ([] call fnc_hardpoint_plan_counts) params ["_zoneCounts", "_backline", "_frontline", "_roadTargets", "_obsN", "_hpTotal"];
         private _aaN = count serv_zones_array;
         private _hpDone = 0;
@@ -113,8 +119,7 @@ sleep 1;
 
         // Then the standalone passes across the area of influence -- the countryside the enemy holds outside
         // its zones. Called, not spawned, like the zone loop: each sleeps in its crew drop, so finishing here
-        // under the one generation banner keeps it honest. Before civilians because at hour zero the band is
-        // the zones, the HQ and the radio tower alone -- towns are neutral and emit nothing yet.
+        // under the one generation banner keeps it honest.
 
         // The tower first: its reach widens the band every pass below samples.
         [_tick] call fnc_hardpoint_site_radio;
@@ -138,12 +143,9 @@ sleep 1;
         [_roadTargets, _tick] call fnc_hardpoint_site_roadblocks;
         _hpDone = _hpDone + count _roadTargets;
 
-        [""] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
+        // Ends on civilian init's parting banner, not a blank: a map with no towns keeps its warning up.
+        [missionNamespace getVariable ["DUWS_civPrompt", ""]] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
     };
-
-    if (!isNil "CIV_PRESENCE" && {CIV_PRESENCE != "NONE"}) then { [] call fnc_civ_init_Tomata; };
-
-    if (DUWS_campaignLoaded) then { call DUWS_fnc_restoreWorld };
 
     // The one thread that services every site, started once every site a campaign begins with has
     // registered itself. Outside the civilian gate above and after it deliberately: civilian init

@@ -13,6 +13,7 @@ civ_init_done = true;
 // still releases the campaign start.
 private _fnc_finish = {
     params [["_prompt", ""]];
+    DUWS_civPrompt = _prompt;
     [_prompt] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
     ["INFO", "CIV", "Civilian system initialized."] call fnc_log;
 };

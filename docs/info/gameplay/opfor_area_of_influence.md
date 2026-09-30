@@ -92,13 +92,13 @@ drift push.
 A tower's only effect is its `AOI_TOWER_REACH` coverage, which `DUWS_fnc_aoi_covers` reads live
 from the `DUWS_hardpoints` registry, so a destroyed tower's coverage goes when its row does.
 Campaign generation always places one tower in the band before the other band passes, so they sample
-the band it widens (`fnc_hardpoint_site_radio`, `server/init_zones/fnc_hardpoint_place.sqf:360`). The
-tower takes the best-scoring crest of the band draws, because towns emit nothing at generation for a
-town reach to score. OPCOM builds the rest in play, up to `AOI_OPFOR_TOWER_CAP` (4) standing or on
-their way, the start tower included (`DUWS_opcom_assetCap`,
-`warcom/opcom/appraisal/fnc_opcom_assets.sqf`), on the band cell whose town reach scores best
-([`opcom_plan.md`](../../plans/opcom/opcom_plan.md#asset-siting)),
-and the mast takes the best-scoring crest within half a grid cell of the delivery. The cap stops
+the band it widens (`fnc_hardpoint_site_radio`, `server/init_zones/fnc_hardpoint_place.sqf:361`). It
+takes the best of 24 band draws by OPCOM's own tower Value; civilian init runs before hardpoint
+generation so that the towns exist to weigh. OPCOM builds the rest in play, up to
+`AOI_OPFOR_TOWER_CAP` (4) standing or on their way, the start tower included (`DUWS_opcom_assetCap`,
+`warcom/opcom/appraisal/fnc_opcom_assets.sqf`), on the band cell whose town reach scores best, less
+the covered towns it overlaps ([`opcom_plan.md`](../../plans/opcom/opcom_plan.md#asset-siting)). The
+mast takes the best-scoring crest within half a grid cell of the chosen site. The cap stops
 builds only: a save that already holds more towers keeps them. `"RADIO"` is a hardpoint type like
 any other (`DUWS_hardpointName`, `DUWS_hardpointGarrison`, `server_var_init.sqf`). It is
 deliberately absent from `DUWS_hardpointWeightZone` and `DUWS_hardpointWeightSolo` — a tower is

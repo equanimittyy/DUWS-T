@@ -1683,12 +1683,16 @@ DUWS_opcom_box = [0, 0, 39, 39];
 DUWS_opcom_grid_land = [true] call fnc_test_westLand;
 ["gunShare: sea in reach counts against the site", [[10000, 10000, 0], 2000, []] call DUWS_fnc_opcom_gunShare, 35/81] call fnc_assertClose;
 
-// --- DUWS_fnc_opcom_towerReach: the town worth a new mast brings under OPFOR's area of influence ---
+// --- DUWS_fnc_opcom_towerReach: the town worth a new mast brings under OPFOR's area of influence, less its overlap ---
 AOI_TOWER_REACH = 5000;
-private _towns = [[[1000, 0, 0], 10, false], [[4000, 0, 0], 25, false], [[9000, 0, 0], 5, false], [[2000, 0, 0], 15, true]];
+OPCOM_TOWER_OVERLAP = 1;
+private _towns = [[[1000, 0, 0], 10, false], [[4000, 0, 0], 25, false], [[9000, 0, 0], 5, false]];
 ["towerReach: sums the uncovered towns in reach", [[0, 0, 0], _towns, []] call DUWS_fnc_opcom_towerReach, 35] call fnc_assertEq;
-["towerReach: a town another mast on its way reaches is not new", [[0, 0, 0], _towns, [[8000, 0, 0]]] call DUWS_fnc_opcom_towerReach, 10] call fnc_assertEq;
-["towerReach: a mast that reaches no uncovered town scores nothing", [[0, 0, 0], [[[2000, 0, 0], 15, true]], []] call DUWS_fnc_opcom_towerReach, 0] call fnc_assertEq;
+["towerReach: a covered town in reach counts against the site", [[0, 0, 0], _towns + [[[2000, 0, 0], 15, true]], []] call DUWS_fnc_opcom_towerReach, 20] call fnc_assertEq;
+["towerReach: a town another mast on its way reaches counts against the site", [[0, 0, 0], [[[1000, 0, 0], 10, false], [[4000, 0, 0], 5, false]], [[8000, 0, 0]]] call DUWS_fnc_opcom_towerReach, 5] call fnc_assertEq;
+["towerReach: a mast that overlaps more than it adds scores nothing", [[0, 0, 0], [[[1000, 0, 0], 10, false], [[2000, 0, 0], 15, true]], []] call DUWS_fnc_opcom_towerReach, 0] call fnc_assertEq;
+OPCOM_TOWER_OVERLAP = 2;
+["towerReach: a heavier overlap weight costs more", [[0, 0, 0], _towns + [[[2000, 0, 0], 10, true]], []] call DUWS_fnc_opcom_towerReach, 15] call fnc_assertEq;
 
 // --- DUWS_fnc_opcom_defendAt: how close a mast stands to OPFOR's fixed defenses ---
 OPCOM_DEFEND_NEAR = 500;
