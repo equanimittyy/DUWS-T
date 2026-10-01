@@ -1,7 +1,5 @@
-// Garrison attrition, shared by every kind of ground that holds one (zone or town): both wear down the
-// same way, so this is one store keyed by a caller-owned string (`zone_<x>_<y>` / `town_<n>`). Defines
-// several functions, so it is executed by the registry and must load ahead of its two consumers,
-// fnc_zone_state_init and fnc_civ_state_init.
+// Garrison attrition: one store keyed by a caller-owned string (`zone_<x>_<y>`). Defines several functions,
+// so it is executed by the registry and must load ahead of its consumer, fnc_zone_state_init.
 //
 // Attrition is a ledger of lost whole tokens, not a men-thin scalar: a garrison's potential is a multiset
 // of composition tokens, and everything it fields is full minus lost -- so a mauled site comes back
@@ -12,10 +10,6 @@
 // to remember to move. Ground with no holder answers "OPF".
 DUWS_fnc_garrisonSideOf = {
 	params ["_key"];
-	if ((_key select [0, 5]) isEqualTo "town_") exitWith {
-		if (([[parseNumber (_key select [5])] call fnc_civ_repAt] call fnc_civ_townOwner) isEqualTo "BLU")
-			then { "BLU" } else { "OPF" }
-	};
 	if ([_key] call fnc_zone_bluforHeld) exitWith { "BLU" };
 	"OPF"
 };
@@ -27,7 +21,7 @@ DUWS_fnc_garrisonMult = {
 	(round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1
 };
 
-// The full fighting potential, stamped at raise and re-stamped by a tier buy, an OPFOR cap or a town clear. Every strength
+// The full fighting potential, stamped at raise and re-stamped by a tier buy or an OPFOR cap. Every strength
 // measure counts tokens, not men: a tank weighs the same as a patrol.
 // Tokens behind an unearned Army Power rung are skipped at read, not stamp, so a site gains them the moment the rung is
 // earned. Tested per distinct token: the force grid reads every site's full each rebuild.
@@ -50,7 +44,7 @@ DUWS_fnc_garrisonSetFull = {
 };
 
 // The lost ledger: a flat token list, a multiset by value. Persists across a stow -- attrition is what
-// outlives a garrison leaving -- and is cleared only by a fresh campaign or a seed (recapture / clear).
+// outlives a garrison leaving -- and is cleared only by a fresh campaign, a capture or a recapture seed.
 DUWS_fnc_garrisonLost = {
 	params ["_key"];
 	missionNamespace getVariable [format ["DUWS_garrisonLost_%1", _key], []]
@@ -86,13 +80,13 @@ DUWS_fnc_garrisonForce = {
 	([_key] call DUWS_fnc_garrisonMen) + ([_vehTokens] call DUWS_fnc_tokenListForce) + ([_key] call DUWS_fnc_zoneStaticForce)
 };
 
-// The whole-token derivation a zone raise and a town raise share: given the filtered x1 tier list and
+// The whole-token derivation of a zone raise: given the filtered x1 tier list and
 // the multiplier, stamp the site's full potential (mult copies of x1), seed its live reserve pool, and
 // return [garrison, pool]. The survivors split by the standing template -- its worth is the garrison,
 // the surplus is the pool -- so a site's losses come out of its reserve depth before they thin the
 // garrison. The caller raises the garrison and tops it up from the pool; here is only the accounting.
 //
-// _stand is the standing template, a subset of x1 (default x1). Both zones and towns pass a
+// _stand is the standing template, a subset of x1 (default x1). Zones pass a
 // garrison-density-thinned list so fewer patrols stand at once and the trimmed ones fall to the pool;
 // full potential stays mult copies of x1 either way -- density defers force, it does not remove it. The
 // default is retained only as the safe fallback for a caller that passes none.
@@ -180,7 +174,7 @@ DUWS_fnc_garrisonSeed = {
 };
 
 // Full is stamped here, not left to the raise, because the seed thins against it: a retaken zone still carries its
-// old tier's full, and a town just back in the band has none. Rounded up so a small tier I still stands one token.
+// old tier's full. Rounded up so a small tier I still stands one token.
 DUWS_fnc_garrisonSeedOpforCap = {
 	params ["_key", "_x1"];
 	private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1;
@@ -203,8 +197,7 @@ DUWS_fnc_garrisonUnlose = {
 	[_key] call DUWS_fnc_opcom_gridDirty;
 };
 
-// Shared by town and zone, so both climb by one rule. An empty _x1 skips the re-stand, since deriving from it would
-// stamp full to nothing: a town dropped to tier 0 stays live until its next tick collects it.
+// An empty _x1 skips the re-stand, since deriving from it would stamp full to nothing.
 #define REINFORCE_STEP 0.3
 DUWS_fnc_garrisonReinforceCount = {
 	params ["_key"];
@@ -217,8 +210,8 @@ DUWS_fnc_garrisonReinforce = {
 	if (([_key] call DUWS_fnc_garrisonHeld) && {_x1 isNotEqualTo []}) then { [_key, _x1] call DUWS_fnc_garrisonRestand };
 };
 
-// The commander pays reinforcements to field the rest of a bought tier. Bounded by the new full: a cleared town's
-// ledger can still hold the tokens of the higher tier it was cleared at. Full is stamped now, not at the next raise,
+// The commander pays reinforcements to field the rest of a bought tier. Bounded by the new full, so the ledger never
+// files more of a token than the tier fields. Full is stamped now, not at the next raise,
 // so the grid and the readout see the buy at once. The caller re-stands a standing garrison.
 DUWS_fnc_garrisonBuyTier = {
 	params ["_key", "_oldX1", "_newX1"];
@@ -239,10 +232,8 @@ DUWS_fnc_garrisonBuyTier = {
 	[_key, _full] call DUWS_fnc_garrisonSetFull;
 };
 
-// Forgets a site's garrison entirely: full potential and loss ledger both cleared. For a site that
-// stops being a garrison at all -- a town worked back out of the OPFOR band -- so if it becomes one
-// again it starts fresh, rather than redeploying the remains of a garrison the ground no longer holds.
-// A zone is never forgotten: it is always OPFOR-generated ground, and a recapture seeds it instead.
+// Forgets a site's garrison entirely: full potential and loss ledger both cleared. For ground that changes
+// holder, so the new holder starts fresh rather than inheriting the remains of the garrison it beat.
 DUWS_fnc_garrisonForget = {
 	params ["_key"];
 	missionNamespace setVariable [format ["DUWS_garrisonFull_%1", _key], nil];
@@ -251,12 +242,11 @@ DUWS_fnc_garrisonForget = {
 };
 
 // Liveness: a garrison is live from the moment its raise finishes placing men to the stow or capture
-// that tears it down. The capture and clear tests refuse on a garrison that is not live -- stowed,
+// that tears it down. The capture and retake tests refuse on a garrison that is not live -- stowed,
 // mid-raise, or gone -- so empty ground cannot be taken before its men have arrived, and the reserve
-// pass has nothing to top up. Per awake session; the ledger and the full potential outlive it. Both a
-// zone and a town set and clear it, the one signal that the garrison on the ground is real.
-// Zones and towns only. A hardpoint's liveness is its own broadcast DUWS_hardpoints row (latched on
-// clear, read client-side by the strat-map pickers), which this server-only graded ledger cannot model.
+// pass has nothing to top up. Per awake session; the ledger and the full potential outlive it. A
+// hardpoint's liveness is its own broadcast DUWS_hardpoints row (latched on clear, read client-side by
+// the strat-map pickers), which this server-only graded ledger cannot model.
 DUWS_fnc_garrisonHeld = {
 	params ["_key"];
 	missionNamespace getVariable [format ["DUWS_garrisonLive_%1", _key], false]
@@ -265,8 +255,8 @@ DUWS_fnc_garrisonHeld = {
 DUWS_fnc_garrisonSetLive = {
 	params ["_key", "_live"];
 	missionNamespace setVariable [format ["DUWS_garrisonLive_%1", _key], _live];
-	// The live sites are also the registry the reserve pass iterates -- the one list where a zone and a
-	// town meet as garrison sites. Kept in lockstep with the flag: a site is on it exactly while live.
+	// The live sites are also the registry the reserve pass iterates. Kept in lockstep with the flag: a site is on it
+	// exactly while live.
 	private _sites = missionNamespace getVariable ["DUWS_garrisonSites", []];
 	if (_live) then {
 		_sites pushBackUnique _key;
@@ -276,15 +266,6 @@ DUWS_fnc_garrisonSetLive = {
 	};
 	missionNamespace setVariable ["DUWS_garrisonSites", _sites];
 	[_key] call DUWS_fnc_opcom_gridDirty;
-};
-
-// The key a town files under. Delegates to fnc_town_site_key -- the one derivation of a town's key --
-// rather than repeating its format, so the ledger this file keys and the site store the garrison code
-// keys can never drift apart on a town. Zones derive theirs through fnc_zone_key; a town has no such
-// key of its own, so this is the whole of it.
-DUWS_fnc_townStrengthKey = {
-	params ["_townIndex"];
-	[_townIndex] call fnc_town_site_key
 };
 
 // Built from the accessors above, not recomputed, so it prints what the model acts on. A string row opens a section;

@@ -1,5 +1,5 @@
 // Locality: server -- publishes the site store; loaded ahead of the zone/town state files that consume it.
-// Site key: zone_<x>_<y> / town_<n> / FOB_<n> / HQ. One record per occupant, so a town's crowd and garrison are two occupants of one site, not two systems sharing a radius.
+// Site key: zone_<x>_<y> / town_<n> / FOB_<n> / HQ. One record per occupant, so a town's crowd and vendors are two occupants of one site, not two systems sharing a radius.
 if (!isServer) exitWith {};
 
 // Mission namespace values must serialize into save games; hooks are CODE, so they live in their own
@@ -34,11 +34,6 @@ fnc_site_register = {
 
 fnc_site_at = { params ["_key"]; DUWS_sites getOrDefault [_key, createHashMap] };
 
-// Buffer/grace/presence live per occupant, not per site: a town's crowd (200 m/60 s) and its garrison
-// (400 m/120 s) need different answers, and towns sit close enough (210 m apart vs 1200 m zone spacing)
-// that one shared pair of fields could not serve both without a trail of populated towns behind a
-// crossing player.
-//
 // awaitVacate starts latched, else an occupant registered under a player's feet reads them as just
 // having walked up and raises men around them.
 //
@@ -156,7 +151,7 @@ fnc_site_retire = {
     DUWS_siteHooks deleteAt _key;
 };
 
-// By roster, never proximity: a radius sweep once caught a neighbouring town's garrison, which then
+// By roster, never proximity: a radius sweep once caught a neighbouring site's garrison, which then
 // read its untouched survivors as a mauling nobody inflicted and came back thinned all campaign.
 // A vehicle goes only once nothing living is aboard, so a site-crewed transport leaves with its crew
 // while a player-parked one (off roster) stays; empty groups are swept too since not every spawner
@@ -215,7 +210,7 @@ fnc_site_setFrozen = {
     } forEach ([_key, _o get "kind"] call fnc_site_roster);
 };
 
-// Built in one place, so the crowd and garrison can't disagree about which town they're in.
+// Built in one place, so the crowd and vendors can't disagree about which town they're in.
 fnc_town_site_key = {
     params ["_townIndex"];
     format ["town_%1", _townIndex]
@@ -347,7 +342,7 @@ fnc_site_poller = {
                         _o getOrDefault ["minAIHold", _o get "minAI"]
                     } else { _o get "minAI" };
                     // Gates the expensive helper rather than replacing it: fnc_duws_bluforNear still
-                    // decides every ground arrival, so zones and towns keep deciding it the same way.
+                    // decides every ground arrival.
                     private _cheap = if (_bluHolds) then { _playerPos } else { _west };
                     private _ground = (_cheap findIf { _x distance2D _pos < _ring + SITE_CELL }) >= 0
                         && { [_pos, _ring, _min, _bluHolds] call fnc_duws_bluforNear };
@@ -405,8 +400,8 @@ fnc_site_poller = {
                     if ((_o get "emptySince") < 0) then { _o set ["emptySince", diag_tickTime] };
                 };
 
-                // An occupant that answers to more than presence (a garrison also weighs reputation,
-                // purchases, and whether its town is cleared) keeps its own cycle and is handed this
+                // An occupant that answers to more than presence (a zone garrison also weighs purchases
+                // and captures) keeps its own cycle and is handed this
                 // pass's answers rather than folding into a presence test it isn't.
                 // if/else, not an early exit: exitWith inside a forEach ends the whole loop, so one
                 // occupant with its own cycle would stop every occupant after it from being serviced.

@@ -1,54 +1,26 @@
-// Locality: server, [] call'd at load. The capture order: march on BLUFOR-held ground -- a zone, a town they
-// have garrisoned, their HQ or a FOB -- report the crossing into it, and settle once it has changed hands.
+// Locality: server, [] call'd at load. The capture order: march on BLUFOR-held ground -- a zone, their HQ or a
+// FOB -- report the crossing into it, and settle once it has changed hands.
 if (!isServer) exitWith {};
 
-// The target's town index, or -1 for a zone or a base. A town changes hands only by having its garrison cleared,
-// where a zone flips on presence, and four steps below turn on that difference.
-DUWS_fnc_opcom_captureTown = {
-    params ["_key"];
-    if ((_key select [0, 5]) isEqualTo "town_") exitWith { parseNumber (_key select [5]) };
-    -1
-};
-
-// -> whether the target is still BLUFOR's: a zone by the control list, a town by the band its tier belongs to. The
-// HQ never changes hands, so it falls with its officer, whose death is already the HQ's lose condition. A FOB falls
-// with its building.
+// -> whether the target is still BLUFOR's: a zone by the control list. The HQ never changes hands, so it falls with
+// its officer, whose death is already the HQ's lose condition. A FOB falls with its building.
 DUWS_fnc_opcom_captureHolds = {
     params ["_key"];
     if (_key isEqualTo "HQ") exitWith { !isNil "hq_blu1" && {alive hq_blu1} };
     if ((_key select [0, 4]) isEqualTo "FOB_") exitWith {
         (Array_of_FOBS findIf { alive _x && {(_x getVariable ["DUWS_siteKey", ""]) isEqualTo _key} }) >= 0
     };
-    private _i = [_key] call DUWS_fnc_opcom_captureTown;
-    if (_i >= 0) exitWith { ([_i] call fnc_town_garrison_ownerAt) isEqualTo "BLU" };
     [_key] call fnc_zone_bluforHeld
 };
 
 // -> the key of the BLUFOR-held holding a capture at _target takes, "" for none.
 DUWS_fnc_opcom_captureKey = {
     params ["_target"];
-    // Zones first, so ground that is both falls to the bigger prize: a town inside a zone the player also holds is
-    // taken by taking the zone.
     private _i = WARCOM_zones_controled_by_BLUFOR findIf {
         (_x distance2D _target) <= (([[_x] call fnc_zone_key] call fnc_site_at) getOrDefault ["radius", 0])
     };
     if (_i >= 0) exitWith { [WARCOM_zones_controled_by_BLUFOR select _i] call fnc_zone_key };
     private _zk = "";
-    // A town the player garrisoned is capture ground too. Only a garrisoned one: a town with no tier changes hands on
-    // reputation, and there would be nothing for an attacker to beat.
-    private _tiers = missionNamespace getVariable ["DUWS_townGarrisonTier", []];
-    for "_n" from 0 to (count _tiers - 1) do {
-        if (_zk isEqualTo "" && {(_tiers select _n) > 0}
-            && {([_n] call fnc_town_garrison_ownerAt) isEqualTo "BLU"}) then {
-            private _tk = [_n] call fnc_town_site_key;
-            private _site = [_tk] call fnc_site_at;
-            private _sp = _site getOrDefault ["pos", []];
-            if (_sp isNotEqualTo [] && {(_sp distance2D _target) <= (_site getOrDefault ["radius", 0])}) then {
-                _zk = _tk;
-            };
-        };
-    };
-    if (_zk isNotEqualTo "") exitWith { _zk };
     // The nearest base, since a FOB may stand inside the HQ's radius or another FOB's and each attack aims at its own
     // base's centre.
     private _best = -1;
@@ -79,9 +51,8 @@ DUWS_fnc_opcom_captureEnters = {
 // -> true if it garrisoned. A live attacker inside the objective guards until it stows, so it never vanishes in
 // front of a player; one still on the road re-garrisons there.
 //
-// A cleared town keeps no garrison to home into -- its tier went with the clear -- so an attacker that took one
-// holds the ground rather than joining a reserve pool that no longer exists. OPFOR has no pool at a base either, so
-// a base's attacker guards wherever it stands. A FOB's site is retired with it, so its absence reads as outside.
+// OPFOR has no pool at a base, so a base's attacker guards wherever it stands. A FOB's site is retired with it, so its
+// absence reads as outside.
 DUWS_fnc_opcom_captureEnd = {
     params ["_t", "_pos", "_grp"];
     private _zk = _t get "targetZone";
@@ -156,22 +127,13 @@ DUWS_fnc_opcom_stepCapture = {
     if ((_zk select [0, 4]) isEqualTo "FOB_") exitWith { false };
     // Below is the virtual attacker's stand-in for a fight that never renders; a live one takes the ground by winning it.
     if (_live) exitWith { false };
-    private _town = [_zk] call DUWS_fnc_opcom_captureTown;
     if (_entered) then {
-        private _name = "";
-        if (_town >= 0) then {
-            _name = [_town] call DUWS_fnc_opcom_townLabel;
-        } else {
-            private _ni = zone_namePOS_pairs findIf { ([_x select 1] call fnc_zone_key) isEqualTo _zk };
-            if (_ni >= 0) then { _name = (zone_namePOS_pairs select _ni) select 0 };
-        };
-        if (_name isNotEqualTo "") then { [_name, []] call fnc_enemy_contact };
+        private _ni = zone_namePOS_pairs findIf { ([_x select 1] call fnc_zone_key) isEqualTo _zk };
+        if (_ni >= 0) then { [(zone_namePOS_pairs select _ni) select 0, []] call fnc_enemy_contact };
     };
     // A garrison is never beaten virtually: standing its men up is what renders this attacker to fight them
-    // (fnc_site_poller wakes on a virtual one). A town has no undefended case to fall through to -- it changes
-    // hands only by having its garrison cleared, and one without a garrison was never a target. Nor has the HQ,
-    // which falls only with its officer.
-    if (_town >= 0 || {_zk isEqualTo "HQ"} || {([_zk] call fnc_zone_tier) > 0}) exitWith { false };
+    // (fnc_site_poller wakes on a virtual one). The HQ has no undefended case either: it falls only with its officer.
+    if (_zk isEqualTo "HQ" || {([_zk] call fnc_zone_tier) > 0}) exitWith { false };
     // No BLUFOR count: nearTicks 0 means none within K, so its stored force outnumbers nobody; while any are, it waits
     // to render. It still holds for DUWS_captureHold, the rule a live attacker meets through the trigger's timeout.
     if ((_t get "inZone") && {(_t getOrDefault ["nearTicks", 0]) == 0} && {(_t get "effForce") > 0}

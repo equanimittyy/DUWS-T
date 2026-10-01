@@ -332,7 +332,6 @@ fnc_civ_mission_give = compile preprocessFileLineNumbers "duws\server\civ_missio
 // =========================================================================================================
 // server/civilian
 // =========================================================================================================
-fnc_civ_garrison = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_garrison.sqf";
 fnc_civ_init_Tomata = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_init_Tomata.sqf";
 fnc_civ_setup_array = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_setup_array.sqf";
 fnc_civ_selectTowns = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_selectTowns.sqf";

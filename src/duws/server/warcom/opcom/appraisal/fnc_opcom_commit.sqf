@@ -32,9 +32,7 @@ DUWS_fnc_opcom_sendRun = {
 // offensives. It commits as an assault or a flank, each its own action row, its units stage and launch together
 // (fnc_opcom_attack), and the bucket DUWS_fnc_opcom_joinBucket names is a target of its own, filled by a later pick.
 //
-// Zones and towns on the same terms, and the HQ and each FOB once found. What differs is how the ground answers: a
-// zone flips on presence, a town only by having its garrison cleared, so a town with no garrison is no target --
-// there would be nothing to beat, and reputation rather than a fight is what owns it.
+// Zones, and the HQ and each FOB once found. A town is never a target: reputation rather than a fight is what owns it.
 //
 // A source across water from its target reaches it only by ferry, which carries men alone, and lands them a trip at a
 // time, which no flank's timing survives: such a source is offered only if it is transportable, and only to assault.
@@ -91,22 +89,13 @@ DUWS_fnc_opcom_attackSweep = {
             private _zk = [_x] call fnc_zone_key;
             [_zk, _x, ([_zk] call fnc_site_at) get "pos", [_zk] call DUWS_fnc_opcom_zoneLabel] call _fnc_consider;
         } forEach WARCOM_zones_controled_by_BLUFOR;
-        {
-            private _i = _forEachIndex;
-            if (_x > 0 && {([_i] call fnc_town_garrison_ownerAt) isEqualTo "BLU"}) then {
-                private _tp = [_i] call DUWS_fnc_opcom_townPos;
-                if (_tp isNotEqualTo []) then {
-                    [[_i] call fnc_town_site_key, _tp, _tp, [_i] call DUWS_fnc_opcom_townLabel] call _fnc_consider;
-                };
-            };
-        } forEach (missionNamespace getVariable ["DUWS_townGarrisonTier", []]);
         // OPFOR at Armour (4) and BLUFOR at Mechanised (3): every other gate here already holds at the campaign start.
         if (DUWS_opcom_hqKnown && {WARCOM_opfor_tier >= 4} && {WARCOM_blufor_tier >= 3}
             && {WARCOM_zones_controled_by_BLUFOR isEqualTo []} && {["HQ"] call DUWS_fnc_opcom_captureHolds}) then {
             private _hp = (["HQ"] call fnc_site_at) getOrDefault ["pos", []];
             if (_hp isNotEqualTo []) then { ["HQ", _hp, _hp, "HQ"] call _fnc_consider };
         };
-        // Only a FOB that a capture at its centre takes: one inside a held zone or a garrisoned town falls with it.
+        // Only a FOB that a capture at its centre takes: one inside a held zone falls with it.
         {
             private _fk = _x getVariable ["DUWS_siteKey", ""];
             if (_fk in DUWS_opcom_fobsKnown) then {

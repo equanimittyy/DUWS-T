@@ -72,9 +72,9 @@ if ((_pick select 0) isEqualTo "ZONE") exitWith {
 	// What the ground is worth taking rather than how much of it is left -- which is what the bar under it says.
 	private _tier = [_key] call fnc_zone_tier;
 	private _kind = missionNamespace getVariable [format ["DUWS_zoneKind_%1", _key], ""];
-	// The same window a town reports as MOBILISING: OPFOR own the ground and their men are not on it yet.
-	// A zone the player holds is never mobilising, whatever the flag says -- BLUFOR inherit no
-	// garrison at all when they take one, so there is nothing there to be on its way.
+	// OPFOR own the ground and their men are not on it yet. A zone the player holds is never mobilising,
+	// whatever the flag says -- BLUFOR inherit no garrison at all when they take one, so there is nothing
+	// there to be on its way.
 	private _hold = if (!_held && {missionNamespace getVariable [format ["DUWS_zoneMobilising_%1", _key], false]})
 		then { "MOBILISING" } else { "" };
 	["ZONE", [_name, _kind, _held, _seg, _tier, _hold, [["ZONE", _zPos]] call _fnc_buy], _note]
@@ -103,20 +103,5 @@ private _ap = (missionNamespace getVariable ["civ_town_ap", []]) param [_hit, 0]
 // Worth travels alongside the income, not instead of it. They are the same number for a town that
 // has picked a side, but a neutral one earns nothing while still being worth something to turn,
 // and the readout has to be able to say both without re-deriving the tick's figure client-side.
-//
-// The tier is what the town owes, which is not always what is standing in it: a town nobody has
-// walked into yet reads its purchased tier with no men on the ground. That is the honest answer for
-// a map read before travelling -- the readout is describing what the player will meet, not what is
-// loaded. A town still holding says so instead, below.
-private _tier = [_hit] call fnc_town_garrison_tierAt;
-// A mobilising town reports that instead of a tier. The tier is real underneath -- the town is enemy
-// ground either way -- but printing a numeral would say a garrison is standing, and there is none yet.
-private _hold = ["", "MOBILISING"] select (([_hit] call fnc_town_garrison_holdAt) > 0);
-
-// The same twenty-segment five-per-cent scale a zone reports on, floored. A town has no equivalent of a
-// deployed zone's live count -- the roster lives inside the garrison thread and is never published -- so
-// this is the ledger projection, standing garrison or not.
-private _seg = floor (([_hit] call fnc_town_garrison_strengthAt) * 20);
-_seg = (_seg max 0) min 20;
-["TOWN", [_name, _pop, _hasRep, _rep, _income, _side, _ap, _tier, _hold, _seg, [["TOWN", _hit]] call _fnc_buy], _note]
+["TOWN", [_name, _pop, _hasRep, _rep, _income, _side, _ap], _note]
 	remoteExec ["fnc_map_readout_draw", _caller];

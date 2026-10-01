@@ -1,5 +1,5 @@
 // Locality: server, [] call'd at load (before any zone raises) so the raise hook can resolve it. Reconciles a
-// site's reserve pool + ceiling -- a zone's or a town's, one key either way -- with OPCOM's recruited `garrison` units, so a recruit stands or reinforces from the
+// zone's reserve pool + ceiling with OPCOM's recruited `garrison` units, so a recruit stands or reinforces from the
 // garrison's reserve pool. A stow clears the pool and this accounting, so the raise hook re-runs this to re-inject
 // from the OPCOM store.
 //
@@ -76,23 +76,19 @@ DUWS_fnc_opcom_defenderLost = {
     ["INFO", "OPCOM", format ["tasking %1 died defending %2", _t get "id", _key]] call fnc_log;
 };
 
-// A site flipped -- a zone captured, a town's garrison cleared or worked back out of the band. Every unit garrisoned
-// there dies, combatants included: the break line lets a garrison fall with tokens still unspawned in the reserve
-// pool, and one turned loose would stand up inside ground OPFOR no longer hold.
+// A zone captured. Every unit garrisoned there dies, combatants included: the break line lets a garrison fall with
+// tokens still unspawned in the reserve pool, and one turned loose would stand up inside ground OPFOR no longer hold.
 DUWS_fnc_opcom_siteLost = {
     params ["_key"];
     if (isNil "DUWS_opcom_taskings") exitWith {};
-    private _town = [-1, parseNumber (_key select [5])] select ((_key select [0, 5]) isEqualTo "town_");
     private _doomed = [];
     {
         private _t = _x;
         if ((_t get "homeZone") isEqualTo _key && {(_t get "order") isEqualTo "garrison"}) then {
             _doomed pushBack _t;
         } else {
-            private _errand = _t getOrDefault ["errand", []];
             private _bound = (_t getOrDefault ["returnZone", ""]) isEqualTo _key
-                || {(_t getOrDefault ["settleZone", ""]) isEqualTo _key}
-                || {_town >= 0 && {(_errand param [0, ""]) in ["reinforce", "fortify", "rapport"]} && {(_errand param [1, -1]) isEqualTo _town}};
+                || {(_t getOrDefault ["settleZone", ""]) isEqualTo _key};
             if (_bound) then {
                 _t set ["order", "guard"]; _t set ["route", []];
                 _t set ["homeZone", ""]; _t set ["returnZone", ""]; _t set ["settleZone", ""]; _t set ["errand", []];

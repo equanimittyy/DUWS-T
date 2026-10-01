@@ -18,7 +18,7 @@ switch (_mode) do {
         // An errand is an order in its own right here: the move that carries it is implied, not picked first.
         [format ["Tasking %1: order", _key], [
             ["capture", "capture"], ["move", "move"], ["patrol", "patrol"], ["guard", "guard"], ["garrison", "garrison"],
-            ["reinforce a town", "reinforce"], ["fortify a town", "fortify"], ["rapport a town", "rapport"],
+            ["rapport a town", "rapport"],
             ["build a hardpoint", "build"], ["intercept", "intercept"], ["teleport", "teleport"]
         ] apply {
             _x params ["_label", "_next"];
@@ -38,8 +38,6 @@ switch (_mode) do {
     case "guard": { ["task", _key, "guard", [], player] remoteExec ["fnc_debug_opcom", 2] };
     case "garrison": { ["garrisonlist", _key, "", "", player] remoteExec ["fnc_debug_opcom", 2] };
     case "garrison_site": { ["garrison", _ctx, _key, "", player] remoteExec ["fnc_debug_opcom", 2] };
-    case "reinforce";
-    case "fortify";
     case "rapport": { ["townlist", _key, _mode, "", player] remoteExec ["fnc_debug_opcom", 2] };
     case "build": {
         [format ["Tasking %1: build which type?", _key], _hpTypes apply {

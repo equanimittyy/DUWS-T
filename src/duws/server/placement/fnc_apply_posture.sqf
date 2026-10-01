@@ -1,6 +1,6 @@
 // Server-only: addWaypoint, setBehaviour and setPos are no-ops unless the group is local to the
 // machine issuing them (docs/info/architecture/arma_engine_gotchas.md); every caller spawns server-side.
-// Orders live apart from roster, shared by zone bands, town garrisons, patrol and base-guard builders:
+// Orders live apart from roster, shared by zone bands, patrol and base-guard builders:
 // it takes a group already standing rather than raising one, so a vehicle crew and a rifle section are
 // ordered identically here despite spawning very differently.
 // _anchors is hqpatrol's alone (the points that posture walks); every other posture is radial off

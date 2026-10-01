@@ -148,7 +148,7 @@ offset in `fnc_placeHQUnits.sqf`. The redeploy path reads the `HQ_redeploy_*` va
 
 Two ideas, and keeping them apart is what makes the menus make sense:
 
-- A **composition** is a list of tokens, sometimes with a price. A zone tier, a town tier, a
+- A **composition** is a list of tokens, sometimes with a price. A zone tier or a
   purchasable squad. Contract for what the tier tables mean:
   [`zones_and_civilians.md`](../gameplay/zones_and_civilians.md#zone-tiers). A garrison composition writes each
   entry as `posture:token` — one A3 group, its orders and its roster. Typed as one string rather
@@ -159,7 +159,7 @@ Two ideas, and keeping them apart is what makes the menus make sense:
 
 Compositions name tokens; a token is edited in one place and referred to from many. **The unit of
 work is a row, not the table it lives in** — which file a composition sits in is not something the
-person editing it should have to know — so the menu lists every zone tier, town tier and squad
+person editing it should have to know — so the menu lists every zone tier and squad
 together and opening one shows its configuration. A field naming a token shows what that token
 raises beside it, so a reference is never a dead end.
 
@@ -229,7 +229,7 @@ what compositions refer to, so a second row of the same name could never be reac
 Adding a **BLUFOR** team is the same — a squad references it by name and `fnc_BLUFOR_squad_init`
 resolves it.
 
-**Add** is on every menu, not only Tokens: a zone tier, a town tier and a purchasable squad are rows
+**Add** is on every menu, not only Tokens: a zone tier and a purchasable squad are rows
 like any other. A row of a table that declares no `fields=` is typed as one comma-separated list;
 one of a fixed-column table is walked field by field, each blanked from the row above so it keeps
 its kind. The one row that buys nothing on its own is a *squad*: the request dialog switches on a

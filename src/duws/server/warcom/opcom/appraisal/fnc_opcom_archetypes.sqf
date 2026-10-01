@@ -18,7 +18,6 @@ DUWS_opcom_archetypes = createHashMapFromArray [
         ["actionWeight", createHashMapFromArray [
             ["bank", 1], ["attack_assault", 1], ["attack_flank", 1], ["attack_qrf", 1], ["patrol", 1], ["probe", 1], ["garrison", 1],
             ["rapport", 0.9], ["arty_saturate", 1], ["arty_creeping", 1], ["zone_reinforce", 1], ["zone_fortify", 1],
-            ["town_reinforce", 0.9], ["town_fortify", 0.9],
             ["build", 1], ["radio_build", 1], ["op_build", 1], ["mortar_build", 1], ["arty_build", 1]
         ]],
         ["hpMix", createHashMapFromArray [

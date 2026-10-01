@@ -78,7 +78,7 @@ private _apply = {
     private _sel = lbCurSel _list;
     if (_sel < 0) exitWith { hint "Pick a town first."; };
     private _townIndex = parseNumber (_list lbData _sel);
-    private _mode = switch (_idc) do { case 9524: { "ap" }; case 9526: { "tier" }; case 9527: { "reinforce" }; default { "rep" } };
+    private _mode = ["rep", "ap"] select (_idc == 9524);
     [_mode, player, [_townIndex, _delta]] remoteExec ["fnc_debug_econ_server", 2];
     ["snapshot", player] remoteExec ["fnc_debug_econ_server", 2];
 };
@@ -111,9 +111,7 @@ _escBtn ctrlAddEventHandler ["ButtonClick", _apply];
 // Listbox, not a map click: every town's standing and worth readable side by side.
 private _townLabel = _display ctrlCreate ["RscText", 9525];
 _townLabel ctrlSetPosition [0.26, 0.49, 0.48, 0.04];
-// Tier caveat on the label: it's the one edit that can look like a no-op -- the garrison thread
-// zeroes a tier set on a town above -10, since the band decides whether OPFOR holds it at all.
-_townLabel ctrlSetText "Towns (rep clamps to +/-20; tier 0-4, and only holds below -10):";
+_townLabel ctrlSetText "Towns (rep clamps to +/-20):";
 _townLabel ctrlCommit 0;
 
 private _list = _display ctrlCreate ["RscListBox", 9522];
@@ -123,10 +121,10 @@ _list ctrlCommit 0;
 {
     private _btn = _display ctrlCreate ["RscButton", _x];
     _btn ctrlSetPosition [0.26 + 0.12 * _forEachIndex, 0.84, 0.115, 0.05];
-    _btn ctrlSetText (["Rep +/-", "Worth +/-", "Tier +/-", "Reinforce x"] select _forEachIndex);
+    _btn ctrlSetText (["Rep +/-", "Worth +/-"] select _forEachIndex);
     _btn ctrlCommit 0;
     _btn ctrlAddEventHandler ["ButtonClick", _apply];
-} forEach [9523, 9524, 9526, 9527];
+} forEach [9523, 9524];
 
 private _tickBtn = _display ctrlCreate ["RscButton", 9528];
 _tickBtn ctrlSetPosition [0.26, 0.90, 0.235, 0.05];

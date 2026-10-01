@@ -61,21 +61,6 @@ DUWS_fnc_opcom_gridZone = {
     [_key, !([_key] call DUWS_fnc_garrisonHeld) && {_key in DUWS_stowed}, "fri", _zp, [_key] call DUWS_fnc_garrisonForce, _reach]
 };
 
-DUWS_fnc_opcom_gridTown = {
-    params ["_i"];
-    // A neutral town fields no garrison, so it deposits nothing.
-    if (((missionNamespace getVariable ["DUWS_townGarrisonTier", []]) param [_i, 0]) < 1) exitWith { [] };
-    private _key = [_i] call fnc_town_site_key;
-    private _pos = getPos ((missionNamespace getVariable ["civ_locations", []]) select _i);
-    private _reach = ((missionNamespace getVariable ["civ_radii", []]) param [_i, 500]) + OPCOM_GRID_SPREAD;
-    // A BLUFOR town garrison is enemy ground on the same terms a BLU-held zone is, read at its true force.
-    if (([_i] call fnc_town_garrison_ownerAt) isEqualTo "BLU") exitWith {
-        [_key, !([_key] call DUWS_fnc_garrisonHeld), "ene", _pos,
-            ([_key] call DUWS_fnc_garrisonForce) max OPCOM_GRID_ZONE_ENEMY_FORCE, _reach]
-    };
-    [_key, !([_key] call DUWS_fnc_garrisonHeld), "fri", _pos, [_key] call DUWS_fnc_garrisonForce, _reach]
-};
-
 // Priced off the type's layout, so a row weighs the same deployed or stowed; it stands until cleared.
 DUWS_fnc_opcom_gridHp = {
     params ["_row"];
@@ -86,7 +71,6 @@ DUWS_fnc_opcom_gridHp = {
 
 DUWS_fnc_opcom_gridSources = {
     private _out = zone_meta_array apply { [_x select 1, _x select 2] call DUWS_fnc_opcom_gridZone };
-    { _out pushBack ([_forEachIndex] call DUWS_fnc_opcom_gridTown) } forEach (missionNamespace getVariable ["DUWS_townGarrisonTier", []]);
     { _out pushBack ([_x] call DUWS_fnc_opcom_gridHp) } forEach DUWS_hardpoints;
     _out select { _x isNotEqualTo [] }
 };
@@ -97,13 +81,6 @@ DUWS_fnc_opcom_gridSourceOf = {
     if ((_key select [0, 5]) isEqualTo "zone_") exitWith {
         private _i = zone_meta_array findIf { ([_x select 1] call fnc_zone_key) isEqualTo _key };
         if (_i < 0) then { [] } else { [(zone_meta_array select _i) select 1, (zone_meta_array select _i) select 2] call DUWS_fnc_opcom_gridZone }
-    };
-    if ((_key select [0, 5]) isEqualTo "town_") exitWith {
-        private _i = -1;
-        for "_t" from 0 to (count (missionNamespace getVariable ["DUWS_townGarrisonTier", []]) - 1) do {
-            if (([_t] call fnc_town_site_key) isEqualTo _key) exitWith { _i = _t };
-        };
-        if (_i < 0) then { [] } else { [_i] call DUWS_fnc_opcom_gridTown }
     };
     private _i = DUWS_hardpoints findIf { (_x select 0) isEqualTo _key };
     if (_i < 0) then { [] } else { [DUWS_hardpoints select _i] call DUWS_fnc_opcom_gridHp }

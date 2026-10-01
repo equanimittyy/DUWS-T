@@ -8,7 +8,7 @@
 // corpse intel every other mission paid, with nothing in the source to say that was deliberate. A
 // caller cannot forget a step it does not perform.
 //
-// A side mission's guard ring, and only that. A zone and a town garrison hold buildings through the
+// A side mission's guard ring, and only that. A zone garrison holds buildings through the
 // "garrison" posture instead -- one squad to one structure, drawn from an ordinary team roster --
 // which is what a composition can name and vary; this raises its own men by a rule and cannot be
 // asked for anything else.

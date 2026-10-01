@@ -158,8 +158,7 @@ never the server-only `civ_town_rep`.
 so BLUFOR AI ignores him while he blends. Killing him wins, and the kill costs no town reputation
 wherever it happens.
 
-**Two branches, on the town's reputation band** (`fnc_civ_repAt`; enemy = OPFOR band or a standing
-garrison via `fnc_town_garrison_tierAt`):
+**Two branches, on the town's reputation band** (`fnc_civ_repAt`; enemy = OPFOR band):
 - friendly / neutral -- the crowd is thickened, and every added local carries an "Ask about informant"
   action (`fnc_intel_ask_*`) that rolls the shared civilian reaction curve (`fnc_civ_reaction_weights`)
   and, on success, hints his bearing + distance (16-point compass, nearest 5 m) from the asker. A

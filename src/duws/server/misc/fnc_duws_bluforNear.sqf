@@ -1,5 +1,5 @@
-// One player, or _minAI friendly AI, within _radius of _pos. Shared by zone streaming and the
-// town garrison so the two decide "BLUFOR have arrived" the same way.
+// One player, or _minAI friendly AI, within _radius of _pos. Shared so every caller decides
+// "BLUFOR have arrived" the same way.
 // nearEntities rather than a filter over allUnits: the engine's spatial index answers this
 // directly, so the cost tracks nearby units instead of every unit in the mission. Vehicles are
 // queried alongside men and their crew resolved, because a CAManBase-only query does not report

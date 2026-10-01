@@ -1,25 +1,23 @@
 # Garrison strength and reserves
 
-A held zone or town fields a garrison whose strength is a ledger of destroyed composition tokens,
+A held zone fields a garrison whose strength is a ledger of destroyed composition tokens,
 and whose live footprint is capped and topped up from a reserve pool. This doc is the reference for
 that model; where it and the source (`src/duws/server`) disagree, the source wins.
 
-## One model, two site kinds
+## One model
 
-A garrison is a **site**: the shared `fnc_site_*` store (key, pos, radius, roster) that zones and
-towns both register in. A site raises a composition, gets ground down by the same player, and
-comes back at what was left, not what it started with — one model, whichever kind of ground holds
-it. The only differences are which tier tables it draws from (`DUWS_zoneSpawnTiers` and
-`DUWS_zoneSpawnTiersBlu`, `src/duws/server/init_zones/fnc_zone_spawn_sizes.sqf:24`, vs `DUWS_townSpawnTiers`
-and `DUWS_townSpawnTiersBlu`, `src/duws/server/civilian/fnc_civ_state_init.sqf:59`) and what happens once it's beaten: a zone flips
-to BLUFOR, a town is cleared back toward neutral and bought up again by the commander.
+A garrison is a **site**: the shared `fnc_site_*` store (key, pos, radius, roster) that a zone
+registers in. A site raises a composition, gets ground down by the same player, and
+comes back at what was left, not what it started with. It draws its tier rows from `DUWS_zoneSpawnTiers`
+and `DUWS_zoneSpawnTiersBlu` (`src/duws/server/init_zones/fnc_zone_spawn_sizes.sqf:20`). Once it is beaten,
+the zone flips to the attacker.
 
 ## Whose garrison it is
 
 The model is one side's or the other's, never both. `DUWS_fnc_garrisonSideOf {key}`
 (`src/duws/server/garrison/fnc_garrison_strength_init.sqf:11`) is the single derivation, read by every
-ledger call, composition filter and raise below: a zone answers to `WARCOM_zones_controled_by_BLUFOR`,
-a town to the reputation bands (`fnc_civ_townOwner`), and anything else answers `"OPF"`.
+ledger call, composition filter and raise below: a zone answers `"BLU"` when BLUFOR hold it
+(`fnc_zone_bluforHeld`), and `"OPF"` otherwise.
 
 A garrison crews whatever the ground carries, so a zone the player holds mans its prefab's guns with their
 own men; only a raise reaches that pass, which is why it happens exactly when they have a garrison and not
@@ -30,7 +28,7 @@ adds nothing to the force grid, because the site's deposit already counts it
 (`src/duws/server/warcom/opcom/belief/fnc_opcom_grid_sources.sqf`).
 
 Each side fields **its own tier rows**, and BLUFOR's are kept weaker than OPFOR's at every tier.
-`DUWS_fnc_zoneSpawnList` and `DUWS_fnc_townSpawnList` pick the table by side. Both sides share one token
+`DUWS_fnc_zoneSpawnList` picks the table by side. Both sides share one token
 vocabulary: a token resolves through the asking side's vehicle table (`DUWS_spawnVehicles` /
 `DUWS_spawnVehiclesBlu`) and its own earned Army Power. Both vehicle tables are fenced, and the composition
 lint fails a vehicle token only one of them answers — the other side would otherwise resolve the token to its own bare name and hand
@@ -40,9 +38,8 @@ The other difference is how a garrison comes to exist:
 
 | | OPFOR | BLUFOR |
 |---|---|---|
-| First tier | handed over: a retaken zone resets to I, a town crossing the band is written I | bought, like every tier above it |
+| First tier | handed over: a retaken zone resets to I | bought, like every tier above it |
 | Inherited on a flip | nothing — the ledger is forgotten and the tier zeroed | nothing, same rule |
-| Beaten town garrison | files back to tier I, unrefunded | files back to tier 0 |
 | Mobilising hold | held, because OPFOR arrive on ground they already own | none: a BLUFOR garrison never arrives, it is built |
 | Who wakes the site | any BLUFOR, players and AI alike | players, and the attacker — a friendly garrison is AI inside its own ring, and counting it would pin the site awake for good |
 
@@ -50,7 +47,7 @@ A flip in either direction zeroes the tier and forgets the ledger, so neither si
 other's attrition or their spending. Survivors of the beaten garrison fight on where they stand
 (`DUWS_fnc_garrisonRelease`) and are swept once no player is near, whichever side they belong to.
 
-Buying is `fnc_zone_garrison_fortify` / `_reinforce` and `fnc_town_garrison_fortify` / `_reinforce`.
+Buying is `fnc_zone_garrison_fortify` / `_reinforce`.
 Neither charges: the price is the caller's, which is what keeps OPCOM spending only on its own ground
 (its candidate lists skip BLUFOR-held sites). The player buys from the View Map readout at OPCOM's prices
 ([`zones_and_civilians.md`](zones_and_civilians.md#attrition-carries-between-visits)).
@@ -76,7 +73,7 @@ A locked token is kept, not dropped. `DUWS_fnc_garrisonFull` leaves it out, so i
 strength, force, break test or standing template until OPFOR's earned Army Power reaches its rung
 (`DUWS_fnc_tokenLocked`). The site then gains it with no restamp, so a zone stamped at campaign start
 fields its armour once the rung is earned. A seed and a tier buy file locked tokens as lost, so earning a
-rung never refills ground that a clear, a retake or a purchase left owed.
+rung never refills ground that a retake or a purchase left owed.
 
 Every strength measure counts tokens, not men: a tank, a 2-man patrol and a 6-man team each weigh one
 token. The one exception is `DUWS_fnc_garrisonForce`, the OPCOM force grid's firepower figure, which
@@ -88,7 +85,7 @@ Chip damage does not persist; only a wipe does.
 
 Every raise, and every buy on a standing garrison, re-stands through `DUWS_fnc_garrisonRestand {key,
 x1}`. It calls the shared derivation `DUWS_fnc_garrisonDerive {key, x1, mult, stand}`
-(`src/duws/server/garrison/fnc_garrison_strength_init.sqf:77`), which stamps `full`, computes
+(`src/duws/server/garrison/fnc_garrison_strength_init.sqf:93`), which stamps `full`, computes
 `surviving`, and splits it against `_stand` (the density-thinned standing template) into
 `[garrison, pool]`. Losses come out of the pool before they ever thin the standing garrison. The
 derive rebuilds only the base pool, so Restand carries OPCOM's pooled tokens across it. It then sets
@@ -103,7 +100,7 @@ twice. The sync adds a token for each newly homed unit, removes the token of a u
 moves the ceiling by the difference. A stow clears this record with the pool.
 
 A raise then fills to the ceiling through `DUWS_fnc_garrisonStandFill {key, garrison}`
-(`src/duws/server/garrison/fnc_garrison_strength_init.sqf:106`). It draws random fieldable base tokens
+(`src/duws/server/garrison/fnc_garrison_strength_init.sqf:123`). It draws random fieldable base tokens
 from the pool first, and OPCOM's homed units take only the room that is left. The drawn tokens leave
 the pool and stand with the garrison, so the players meet the whole force on arrival, not a short or
 empty site that waits up to five minutes for its first refill wave. The draw stops at the global
@@ -114,18 +111,18 @@ The ledger API, all in `src/duws/server/garrison/fnc_garrison_strength_init.sqf`
 
 | Function | Does |
 |---|---|
-| `DUWS_fnc_garrisonSetFull {key, full}` | Stamp `full`. Called by the derivation, a tier buy, an OPFOR cap and a town clear. |
+| `DUWS_fnc_garrisonSetFull {key, full}` | Stamp `full`. Called by the derivation, a tier buy and an OPFOR cap. |
 | `DUWS_fnc_garrisonLocked {key}` | The stamped tokens that `DUWS_fnc_garrisonFull` leaves out because their rung is not earned yet. |
 | `DUWS_fnc_garrisonLost {key}` | The lost token list. |
 | `DUWS_fnc_garrisonSurviving {key}` | `full` minus `lost`, by value. |
 | `DUWS_fnc_garrisonRecordLoss {key, token}` | Push one lost token, bounded at its count in `full` — a double-fire of the killed handler is a no-op. |
 | `DUWS_fnc_garrisonStrength {key}` | The live `[0,1]` projection the map bar reads. |
-| `DUWS_fnc_garrisonSeed {key, keep}` | Keep `keep` random tokens of `full` and file the rest lost, locked tokens included, which spends the pool before the garrison. Called by `DUWS_fnc_garrisonSeedOpforCap`, and with `keep` 0 by a town clear. |
-| `DUWS_fnc_garrisonSeedOpforCap {key, x1}` | Stamp `full` at the tier I list `x1`, then keep `ceil(0.1 × full)` tokens. Rounded up, so a tier I site at multiplier 1 still stands one token. Called when OPFOR take ground: a zone retake (`fnc_opfor_cap`) and a town crossing into the OPFOR band (`fnc_civ_garrison`). |
+| `DUWS_fnc_garrisonSeed {key, keep}` | Keep `keep` random tokens of `full` and file the rest lost, locked tokens included, which spends the pool before the garrison. Called by `DUWS_fnc_garrisonSeedOpforCap`, and with `keep` 0 by the debug zone-flip tool. |
+| `DUWS_fnc_garrisonSeedOpforCap {key, x1}` | Stamp `full` at the tier I list `x1`, then keep `ceil(0.1 × full)` tokens. Rounded up, so a tier I site at multiplier 1 still stands one token. Called when OPFOR retake a zone (`fnc_opfor_cap`). |
 | `DUWS_fnc_garrisonUnlose {key, n}` | Remove `n` random unlocked lost entries, or all of them if fewer are lost — a paid replacement, not a heal. |
-| `DUWS_fnc_garrisonReinforce {key, x1}` | Unlose `floor(REINFORCE_STEP × full)` tokens (`REINFORCE_STEP` is `0.3`), then re-stand a standing garrison at `x1`. The town and zone reinforce purchases both call it. |
-| `DUWS_fnc_garrisonBuyTier {key, oldX1, newX1}` | Stamp `full` at `newX1` and file all but a tenth (rounded up, drawn from unlocked tokens) of the tokens it adds over `oldX1` as lost, bounded at each token's count in the new `full`. The zone and town fortify both call it, so a bought tier must be reinforced to field whole. The caller re-stands a standing garrison. |
-| `DUWS_fnc_garrisonForget {key}` | Clear `full`/`lost` entirely. Called only when a town leaves the OPFOR band, whether or not a garrison stands, so a garrison re-earned later starts fresh instead of redeploying the remains of ground that stopped being contested. |
+| `DUWS_fnc_garrisonReinforce {key, x1}` | Unlose `floor(REINFORCE_STEP × full)` tokens (`REINFORCE_STEP` is `0.3`), then re-stand a standing garrison at `x1`. The zone reinforce purchase calls it. |
+| `DUWS_fnc_garrisonBuyTier {key, oldX1, newX1}` | Stamp `full` at `newX1` and file all but a tenth (rounded up, drawn from unlocked tokens) of the tokens it adds over `oldX1` as lost, bounded at each token's count in the new `full`. The zone fortify calls it, so a bought tier must be reinforced to field whole. The caller re-stands a standing garrison. |
+| `DUWS_fnc_garrisonForget {key}` | Clear `full`/`lost` entirely. Called when BLUFOR capture a zone, so BLUFOR inherit nothing of the garrison they beat. |
 | `DUWS_fnc_garrisonHeld {key}` | Liveness: true from the moment a raise finishes placing men to the stow or capture that tears it down. Gates the capture test and the refill pass. |
 
 `DUWS_fnc_garrisonSetLive {key, live}` (same file) is the only writer of `DUWS_fnc_garrisonHeld`,
@@ -145,17 +142,17 @@ an upgrade starts every garrison fresh.
 ## Recording a loss
 
 `DUWS_fnc_garrisonReserveWatch {key, grps}`
-(`src/duws/server/init_zones/fnc_garrison_reserve.sqf:240`) tags each unit with its group's source
+(`src/duws/server/init_zones/fnc_garrison_reserve.sqf:232`) tags each unit with its group's source
 token — stamped on the group at raise by `DUWS_fnc_zoneSpawnOne`
-(`src/duws/server/init_zones/fnc_zone_spawn_sizes.sqf:303`) — and hangs a `Killed` handler on it.
+(`src/duws/server/init_zones/fnc_zone_spawn_sizes.sqf:296`) — and hangs a `Killed` handler on it.
 The handler checks that the whole group is down (`{alive _x} count units (group _unit) == 0`)
 before calling `DUWS_fnc_garrisonRecordLoss`; a unit dying with squadmates still up records
 nothing. The tag rides the *unit*, not the group, since a dead man can outlive it. The same
 handler also fires the event-refill trigger (below).
 
-A zone or town raise hangs the watch only after it places every group, so a group that dies during
+A zone raise hangs the watch only after it places every group, so a group that dies during
 the raise has no handler to record it. `DUWS_fnc_garrisonRefundUnplaced {key, tokens, grps}`
-(`src/duws/server/init_zones/fnc_garrison_reserve.sqf:265`) runs between the raise and the watch. It
+(`src/duws/server/init_zones/fnc_garrison_reserve.sqf:257`) runs between the raise and the watch. It
 returns the token of each group with no living man, and of each token that raised no group, to the
 pool, and the refill pass fields it again. Such a death comes from the placement (for example, a
 vehicle that spawns on a slope), not from a fight, so it does not cost the garrison a token. Without
@@ -189,18 +186,18 @@ triple a tier's groups on one site alone, and two hot sites at once would blow t
 
 Per-site, the live *composition* group count is capped at the standing template's count plus the
 OPCOM combatants homed there, stored as `DUWS_zoneCeiling_<key>`. `DUWS_fnc_garrisonGroupCount {key}`
-(`src/duws/server/init_zones/fnc_zone_state_init.sqf:205`) counts distinct alive groups the
+(`src/duws/server/init_zones/fnc_zone_state_init.sqf:190`) counts distinct alive groups the
 streaming garrison raised; a prefab's manned static weapons sit on the same roster but are
 excluded, so a site with guns doesn't read as already at its ceiling. Globally,
-`DUWS_zoneGroupCeiling` (130, `src/duws/server/server_var_init.sqf:457`) pauses a garrison's spawns
+`DUWS_zoneGroupCeiling` (130, `src/duws/server/server_var_init.sqf:512`) pauses a garrison's spawns
 and refills once its own side's group count (`DUWS_fnc_sideGroupCount {side}`) reaches it — slack for
-hardpoints and town garrisons, which raise their own groups outside any per-site cap but still count
+hardpoints, which raise their own groups outside any per-site cap but still count
 against this wall. The engine's limit is per side, so a BLUFOR garrison is throttled by BLUFOR groups,
 the player's own squads and recruits included.
 
 ## The refill pass
 
-`DUWS_fnc_garrisonReservePass` (`src/duws/server/init_zones/fnc_garrison_reserve.sqf:589`) walks
+`DUWS_fnc_garrisonReservePass` (`src/duws/server/init_zones/fnc_garrison_reserve.sqf:579`) walks
 every site on `DUWS_garrisonSites` that is held and has a non-empty pool — with no BLUFOR-presence
 gate, the same as the event trigger below, so a site refills whether or not it is being fought;
 sorts the candidates by player count present, most-crowded first; and spawns
@@ -224,12 +221,12 @@ the pool to the ground without changing that total; only a wipe does.
 ## Placement: keeping a wave off the player's back
 
 `DUWS_fnc_garrisonReservePos {center, radius, side}`
-(`src/duws/server/init_zones/fnc_garrison_reserve.sqf:87`) chooses where a wave stands up, in
+(`src/duws/server/init_zones/fnc_garrison_reserve.sqf:82`) chooses where a wave stands up, in
 priority order, so a player never watches a squad appear and is not flanked from their own approach
 direction:
 
 1. **Full distance.** The wave stands up `DUWS_zoneReserveSpawnRing` (1000 m,
-   `src/duws/server/server_var_init.sqf:530`) beyond the site radius. It stands closer only when no
+   `src/duws/server/server_var_init.sqf:527`) beyond the site radius. It stands closer only when no
    bearing on the whole circle gives a usable point at that distance.
 2. **Opposite the player approach.** The spawn bearing is `-bluDir`, where
    `bluDir` is the site-centre-to-player-centroid direction — reserves come from the far side and
@@ -251,7 +248,7 @@ reaches full distance, and then the farthest one wins.
 A candidate is rejected when it is in the water after the road snap, or within the player floor of
 any living player. Every player counts for the floor, not only those at the site: the anti-flank
 bearing points at the far side, which is where a second team blocking or flanking stands. The floor,
-`DUWS_zoneReserveSpawnDist` (400 m, `src/duws/server/server_var_init.sqf:526`),
+`DUWS_zoneReserveSpawnDist` (400 m, `src/duws/server/server_var_init.sqf:523`),
 is measured from the nearest player rather than scaled to the site radius — a radius-relative floor
 would drop a wave a kilometre off a small island and on top of the player at a large base. It is
 separate from the ring so a walked-in point can still stand inside the ring. Candidates come from
@@ -312,7 +309,7 @@ range, a SAM denying the airspace over the zone.
 ## The break test
 
 `DUWS_fnc_garrisonBeaten {key}` (`src/duws/server/init_zones/fnc_garrison_reserve.sqf:10`) is the
-one capture/clear line for both site kinds: standing groups plus pooled tokens, worn to **15 % of
+one capture line for a zone: standing groups plus pooled tokens, worn to **15 % of
 `full`'s token count**. A group counts as one whole token while any of its men stands, which is why
 the line sits above a tenth. A site with an unspent pool cannot fall on an empty perimeter — the pooled
 tokens hold it above the line until the waves have spawned and been killed, so a player has to draw out
@@ -325,21 +322,15 @@ placed nobody is neither lost nor pooled and would hold the site forever. OPCOM'
 tokens in the pool. A prefab's turret crews carry no reserve tag, so they do not count.
 
 `garrisonBeaten` alone never takes ground. `DUWS_fnc_siteTaken`
-(`src/duws/server/init_zones/fnc_garrison_reserve.sqf`) is the one rule for a zone capture, a zone
-retake and a town clear. It also needs an attacking ground unit inside the site radius, and the
+(`src/duws/server/init_zones/fnc_garrison_reserve.sqf`) is the one rule for a zone capture and a zone
+retake. It also needs an attacking ground unit inside the site radius, and the
 attacker outnumbering the defender over the streaming ring (radius + 400 m), ground units only, counted
 owner-blind. All three must hold unbroken for `DUWS_captureHold` (20 s,
 `src/duws/server/server_var_init.sqf`), and the function stamps that hold itself.
 
-- **Zone capture and retake** run it as the zone trigger's condition, twice a second.
-- **Town clear** runs it as the condition of the town's own trigger, also twice a second, and only
-  at tier I or above (`src/duws/server/civilian/fnc_civ_garrison.sqf`). Clearing pays a reputation
-  credit and drops the tier to I —
-  not 0; ownership survives, only the purchase was beaten. It stamps `full` at tier I with every
-  token lost, so the town stands nothing until the commander resupplies it. A raise with nothing to
-  stand never goes live, so the clear cannot fire again on an empty town.
+The zone trigger runs it as its condition, twice a second.
 
-Survivors of a flipped zone or a cleared town are not ordered off. `DUWS_fnc_garrisonRelease` moves
+Survivors of a flipped zone are not ordered off. `DUWS_fnc_garrisonRelease` moves
 them to the site's `leftover` roster and clears their garrison key, so a later wipe records nothing
 against the ledger. They fight on where they stand, and `DUWS_fnc_garrisonLeftoverSweep`
 deletes each one once no player is within 500 m.

@@ -65,7 +65,7 @@ _hostage addEventHandler ["HandleDamage", {
 }];
 
 // Garrison hand-spread into the hostage building, not via the garrison posture (which could seat them in a
-// bigger neighbour). DUWS_garrisonedBy stops an overlapping town garrison double-occupying the house.
+// bigger neighbour). DUWS_garrisonedBy stops an overlapping garrison double-occupying the house.
 private _garrison = ["garrison:team", getPosATL _hostageBldg, 30, "none", getPosATL _hostageBldg] call DUWS_fnc_zoneSpawnOne;
 if (isNull _garrison) exitWith {
     deleteVehicle _hostage;

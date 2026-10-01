@@ -45,7 +45,7 @@ One core weapon or structure per hardpoint; garrison and streaming are per type,
 
 Tables: `DUWS_hardpointGarrison`, `DUWS_hardpointName`, `DUWS_hardpointStreaming`
 (`server/server_var_init.sqf:377-441`). Classnames resolve through the same `opfor_*_X` faction
-globals and the static-role table every zone and town garrison uses
+globals and the static-role table every zone garrison uses
 ([`faction_system.md#static-weapons-resolve-at-placement`](faction_system.md#static-weapons-resolve-at-placement))
 — hardcoding a unit or turret classname is the one change that breaks mod-free operation and faction
 auto-detection. `opfor_ARTY_X` is the one core that is a vehicle rather than a static, resolved and

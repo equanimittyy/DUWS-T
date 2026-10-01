@@ -21,9 +21,7 @@ if (_townIndex < 0) exitWith {
 private _townPos    = getPos (_locs select _townIndex);
 private _townRadius = _radii param [_townIndex, 200];
 
-// Enemy town: OPFOR-banded, or holding a garrison the reputation band has not caught up to yet.
-private _rep       = [_townIndex] call fnc_civ_repAt;
-private _enemyTown = (_rep <= -10) || {([_townIndex] call fnc_town_garrison_tierAt) > 0};
+private _enemyTown = ([_townIndex] call fnc_civ_repAt) <= -10;
 
 if (!([15, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exitWith {};
 

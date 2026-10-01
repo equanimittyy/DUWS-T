@@ -151,7 +151,6 @@ fnc_town_rep_announce = {
 		case "idap_deadline":         { "STR_DUWS_T_civ_rep_why_aid_failed" };
 		case "protect_civ_success":   { "STR_DUWS_T_civ_rep_why_escort" };
 		case "protect_civ_casualty":  { "STR_DUWS_T_civ_rep_why_escort_lost" };
-		case "garrison_cleared":      { "STR_DUWS_T_civ_rep_why_garrison" };
 		case "vehicle_stolen":        { "STR_DUWS_T_civ_rep_why_vehicle" };
 		default                       { "STR_DUWS_T_civ_rep_why_other" };
 	});
@@ -205,7 +204,6 @@ fnc_town_rep_adjust = {
 		};
 	};
 	["INFO", "CIV", format ["TOWNREP %1: %2 -> %3 (%4)", _townIndex, _old, _new, _reason]] call fnc_log;
-	if ((_old <= -10) != (_new <= -10)) then { [_townIndex] call DUWS_town_band };
 
 	if (_new == _old || _silent) exitWith {};
 	private _key = format ["%1:%2", _townIndex, _reason];

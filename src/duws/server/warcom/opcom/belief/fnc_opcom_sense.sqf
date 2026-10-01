@@ -4,7 +4,7 @@
 // its firepower (the force model, fnc_opcom_force) and the tick. A group nobody senses holds at last-seen
 // and decays; force is the firepower at that sighting, held between sightings.
 //
-// An observer is any live east group, whatever raised it -- a de-virt tasking, a zone or town garrison, a
+// An observer is any live east group, whatever raised it -- a de-virt tasking, a zone garrison, a
 // side-mission spawn -- so the batch stagger below throttles every OPFOR sensor, not only taskings.
 //
 // Two engine traps shape this (see arma_engine_gotchas.md). `east knowsAbout` is side-wide and lingers high

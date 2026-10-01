@@ -4,10 +4,6 @@
 // (DUWS_spawnVehicles), else stands as a faction-named classname directly. Grammar and team table
 // live in shared/functions/fnc_spawn_vocab, loaded early enough to price the BLUFOR squad catalogue;
 // this file holds OPFOR's vehicles and tiers.
-//
-// Zones and towns share the token vocabulary, tables and spawner (so a new team/vehicle is added
-// once) but keep separate composition sets, so a town can field a zone tier's infantry without its
-// heavy armour or air.
 
 // Indexed tier-1, absolute not cumulative: a tier is the whole garrison, so a tier IV zone reads off
 // one row instead of four summed.
@@ -65,9 +61,8 @@ DUWS_fnc_spawnFilter = {
     _tokens select { ([_x, _side, true] call DUWS_fnc_tokenClass) != "" }
 };
 
-// The enemy multiplier, applied to a composition rather than inside a roster: a x3 town garrison
-// fields three patrols where it fielded one, instead of one patrol of six men. Town garrisons alone
-// call this now -- a zone turns the multiplier into reserve depth (fnc_zone_spawn) instead.
+// The enemy multiplier, applied to a composition rather than inside a roster: a x3 garrison's full
+// potential holds three patrols where it held one, instead of one patrol of six men.
 //
 // Rejected the roster-scaling shape: that cost two roster columns (a "core" the multiplier repeated,
 // a "tail" added once), made group size a campaign setting the player read as one huge fire team, and

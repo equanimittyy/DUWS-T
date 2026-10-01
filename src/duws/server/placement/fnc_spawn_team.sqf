@@ -1,18 +1,16 @@
-// Locality: server -- called from the zone spawn band, the town garrison and the mission patrol
-// builders, all server-side.
+// Locality: server -- called from the zone spawn band and the mission patrol builders, all server-side.
 // radius: 50 for a patrol inside a base, 500 for medium, 1300 for island.
 //
 // Raises a team -- a row on DUWS_teamRosters, ordered under fnc_apply_posture -- for either army.
 //
 // _side ("opfor"/"blufor") drives all three of the engine side, the skill range and the roster
-// prefix, and defaults to opfor so the callers that name no side (zone band, town garrison) spawn
+// prefix, and defaults to opfor so the callers that name no side (zone band) spawn
 // exactly as before. The roster table is shared and holds bare role names; the side is prepended when
 // the men are drawn (DUWS_fnc_teamRoster). Not a full side: only the two armies have a role vocabulary
 // and skill globals -- CIVILIAN has neither, so a civilian caller stays a direct BIS_fnc_spawnGroup.
 //
 // Returned rather than only spawned, for the callers that `call` it: the zone band flags what it
-// raised so the capture test can tell this zone's garrison from passers-by, and the town garrison
-// needs the handle to count its strength and to order it out.
+// raised so the capture test can tell this zone's garrison from passers-by.
 
 // _posture defaults to the close patrol every team walked when orders were a column on its roster
 // row, so the side-mission callers that name only a team still get what they always got. A token may

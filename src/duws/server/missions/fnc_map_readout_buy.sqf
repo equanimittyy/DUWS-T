@@ -1,11 +1,11 @@
-// Locality: server. Priced as OPCOM's same buy, but a town's lands at once where OPCOM's rides a truck.
+// Locality: server. Priced as OPCOM's same buy.
 if (!isServer) exitWith {};
 
 params [["_ref", []], ["_action", ""], ["_caller", objNull]];
 if (isNull _caller) exitWith {};
-_ref params [["_kind", ""], ["_id", -1]];
+_ref params [["_kind", ""], ["_id", []]];
+if (_kind isNotEqualTo "ZONE") exitWith {};
 
-private _isZone = _kind isEqualTo "ZONE";
 private _fortify = _action isEqualTo "FORTIFY";
 private _cost = [OPCOM_AP_REINFORCE, OPCOM_AP_FORTIFY] select _fortify;
 // The defaults fail closed: a site no longer BLUFOR's answers [] and reads as contested.
@@ -20,17 +20,14 @@ if (!_contested && {[_canReinforce, _canFortify] select _fortify}) then {
 		private _reason = format ["map readout %1 by %2", toLower _action, name _caller];
 		["BLU", -_cost, _reason] call fnc_ap_adjust;
 		if (_fortify) then {
-			if (_isZone) then { [[_id] call fnc_zone_key, _reason] call fnc_zone_garrison_fortify }
-				else { [_id, _reason] call fnc_town_garrison_fortify };
+			[[_id] call fnc_zone_key, _reason] call fnc_zone_garrison_fortify;
 			_note = "STR_DUWS_T_mapview_buy_fortified";
 		} else {
-			if (_isZone) then { [[_id] call fnc_zone_key, _reason] call fnc_zone_garrison_reinforce }
-				else { [_id, _reason] call fnc_town_garrison_reinforce };
+			[[_id] call fnc_zone_key, _reason] call fnc_zone_garrison_reinforce;
 			_note = "STR_DUWS_T_mapview_buy_reinforced";
 		};
 	};
 };
 
-// Redrawn from the site's own centre, which the nearest-centre pick always resolves back to this site.
-private _pos = if (_isZone) then { _id } else { getPos ((missionNamespace getVariable ["civ_locations", []]) select _id) };
-[_pos, _caller, _note] call fnc_map_readout_query;
+// Redrawn from the zone's own centre, which the nearest-centre pick always resolves back to this zone.
+[_id, _caller, _note] call fnc_map_readout_query;

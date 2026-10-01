@@ -98,8 +98,6 @@ DUWS_fnc_opcom_deliver = {
     (_t get "errand") params [["_kind", ""], "_arg", ["_spec", ""], ["_refund", 0]];
     ["INFO", "OPCOM", format ["deliver: tasking %1 lands %2 at %3", _t get "id", _t get "errand", _t get "target"]] call fnc_log;
     switch (_kind) do {
-        case "reinforce": { [_arg, "opcom_reinforce"] call fnc_town_garrison_reinforce };
-        case "fortify": { [_arg, "opcom_fortify"] call fnc_town_garrison_fortify };
         case "rapport": {
             private _reps = missionNamespace getVariable ["civ_town_rep", []];
             private _old = _reps select _arg;

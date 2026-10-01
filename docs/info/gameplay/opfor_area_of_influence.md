@@ -32,9 +32,9 @@ coverage of their own. Each tier widens every BLUFOR reach above, and tiers II a
 drift inside that coverage (see [Radio towers](#radio-towers)).
 
 A town emits only once its reputation has fully crossed `±10` — the same `OPFOR_BAND` threshold
-that already flips a town's side for garrison and income
-(`server/civilian/fnc_civ_garrison.sqf:33`, `fnc_civ_state_init.sqf:296-301`). A neutral town is inert,
-so influence spreads only from a town that has fully fallen, never one merely leaning.
+that flips a town's side for income (`fnc_civ_townOwner`, `server/civilian/fnc_civ_state_init.sqf`).
+A neutral town is inert, so influence spreads only from a town that has fully fallen, never one
+merely leaning.
 
 The reaches are large against Altis by intent: OPFOR starts holding every zone (all zones are
 OPFOR until captured) and one radio tower, so the field opens OPFOR-positive around every zone and
@@ -71,8 +71,8 @@ The drift is asymmetric by design. **BLUFOR pushes only once it has paid to**:
 town drifts `0` through tier I, `+1` at tier II and `+2` at tier III. Coverage with no tier pushes
 nothing; a tier with no coverage has nothing to push. **OPFOR has no passive push**: its coverage
 does not cancel BLUFOR's, and it moves a town only by buying Rapport, `-OPCOM_RAPPORT_STEP` (2) a
-delivery, offered in each town above `-20` and below `+10` that OPFOR's coverage reaches
-(`DUWS_fnc_opcom_rapportOffer`, `warcom/opcom/appraisal/fnc_opcom_buy_holding.sqf:99`; the Value is
+delivery, offered in each town above `-20` that OPFOR's coverage reaches, a BLUFOR town included
+(`DUWS_fnc_opcom_rapportOffer`, `warcom/opcom/appraisal/fnc_opcom_buy_holding.sqf`; the Value is
 [`opcom_plan.md`](../../plans/opcom/opcom_plan.md)'s). A delivery to a town the player can see names
 the town and its reputation change in an Allseer line.
 

@@ -6,7 +6,7 @@ params ["_missionPos", "_radius", ["_patrols", 5]];
 // Three distinct offsets; anything past the third repeats the last position.
 private _offsets = [[30, 20], [30, 0], [35, 0]];
 
-// Claimed here, not in the builders (shared with zone/town garrisons), so teardown collects the ring
+// Claimed here, not in the builders (shared with zone garrisons), so teardown collects the ring
 // wherever it patrolled. Each builder runs in its own thread to read back its group. The mission token
 // is captured up front and compiled into the claim -- a spawned thread does not inherit caller privates,
 // and a group raised late must claim the mission that ordered it, not the next if a finish advanced it.

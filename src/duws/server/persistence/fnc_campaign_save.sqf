@@ -163,7 +163,6 @@ DUWS_fnc_campaignSnapshot = {
 
     private _siteKeys = zone_meta_array apply { [_x select 1] call fnc_zone_key };
     _s set ["zoneTiers", _siteKeys apply { [_x, [_x] call fnc_zone_tier] }];
-    for "_i" from 0 to (count _locs - 1) do { _siteKeys pushBack ([_i] call fnc_town_site_key) };
     _s set ["garrisons", (_siteKeys select { !isNil { missionNamespace getVariable format ["DUWS_garrisonFull_%1", _x] } }) apply {
         [_x, missionNamespace getVariable format ["DUWS_garrisonFull_%1", _x],
             missionNamespace getVariable [format ["DUWS_garrisonLost_%1", _x], []]]
@@ -173,7 +172,6 @@ DUWS_fnc_campaignSnapshot = {
     if (!isNil "civ_town_rep") then {
         _s set ["townRep", civ_town_rep];
         _s set ["townAp", civ_town_ap];
-        _s set ["townGarrison", [DUWS_townGarrisonTier, DUWS_townGarrisonOwner]];
     };
 
     _s set ["revealedZones", (zone_namePOS_pairs select { _x select 2 }) apply { _x select 1 }];

@@ -13,7 +13,7 @@
 # to round-trip through Eden.
 #
 # kind= sorts a table's rows into one of two menus, because the unit of work is a row rather than
-# the table it lives in: every zone tier, town tier and squad is listed together as a composition,
+# the table it lives in: every zone tier and squad is listed together as a composition,
 # and everything a composition names by token is listed together as a team.
 #
 # A table declaring `fields=` has fixed columns rather than a free-length list, and is edited a
@@ -1025,7 +1025,7 @@ while ($true) {
     Write-Host "===================="
     Write-Host ""
     Write-Host "  1. Static compositions   (object layouts: link them into Eden)"
-    Write-Host "  2. Unit compositions     (what a zone, town or squad fields)"
+    Write-Host "  2. Unit compositions     (what a zone or squad fields)"
     Write-Host "  3. Tokens                (what one name stands for: men, a vehicle, a gun)"
     Write-Host ""
     Write-Host "   Q. Quit"

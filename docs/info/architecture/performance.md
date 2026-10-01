@@ -177,7 +177,7 @@ cached and recomputed when its input changes, not derived again on every tick.
 
 The grid stage (`warcom/opcom/belief/fnc_opcom_grid_rebuild.sqf`) keeps the holdings nobody is near in a
 cached static layer, and re-prices a holding only when a writer marks its key dirty. Code that writes a
-garrison ledger, zone ownership, a town's tier, the hardpoint registry or a composition's stow state calls
+garrison ledger, zone ownership, the hardpoint registry or a composition's stow state calls
 `DUWS_fnc_opcom_gridDirty` with the key, after the write. A missed mark leaves the old deposit on the grid
 until the next full rebuild. The Debug menu's OPCOM page runs a "Grid drift check" that reports it: a gap
 above 0.05 names the cell.

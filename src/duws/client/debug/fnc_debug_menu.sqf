@@ -87,7 +87,7 @@ switch (_page) do {
         ["Zones & hardpoints", [
             DBG_BACK("root"),
             ["Garrison ledger (click map)", {
-                ["Click a zone or town to read its garrison ledger.",
+                ["Click a zone to read its garrison ledger.",
                     "Dev tool: tier, max, available and dead tokens with the strength maths.",
                     { params ["_pos"]; [_pos, player] remoteExec ["fnc_debug_garrison_query", 2] }] call fnc_debug_map_click;
             }, [], DBG_MAP],

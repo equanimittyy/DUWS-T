@@ -25,11 +25,10 @@ private _picked = if (lbCurSel _list < 0) then { "" } else { _list lbData (lbCur
 private _sel = 0;
 lbClear _list;
 {
-    _x params ["_index", "_name", "_hasRep", "_rep", "_ap", ["_tier", 0], ["_str", 1]];
+    _x params ["_index", "_name", "_hasRep", "_rep", "_ap"];
     // Data = town index, not row position: buttons act on the picked town even if the list order changes.
-    // Tier arabic here, not the map's roman -- it's the figure the +/- button moves.
-    private _row = _list lbAdd format ["%1  --  rep %2, worth %3, tier %4, str %5",
-        _name, if (_hasRep) then { _rep } else { "n/a" }, _ap, _tier, _str];
+    private _row = _list lbAdd format ["%1  --  rep %2, worth %3",
+        _name, if (_hasRep) then { _rep } else { "n/a" }, _ap];
     _list lbSetData [_row, str _index];
     if (str _index == _picked) then { _sel = _row };
 } forEach _towns;

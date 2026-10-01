@@ -386,7 +386,6 @@ DUWS_fnc_restoreWorld = {
     if ("garrisons" in _r) then {
         private _saved = (_r get "garrisons") apply { _x select 0 };
         private _sites = (_r get "zones") apply { [_x select 2] call fnc_zone_key };
-        for "_i" from 0 to (count (_r getOrDefault ["towns", []]) - 1) do { _sites pushBack ([_i] call fnc_town_site_key) };
         {
             if !(_x in _saved) then {
                 missionNamespace setVariable [format ["DUWS_garrisonFull_%1", _x], nil];
@@ -404,9 +403,6 @@ DUWS_fnc_restoreWorld = {
     if (!isNil "civ_town_rep" && {count _rep isEqualTo count civ_town_rep}) then {
         civ_town_rep = +_rep;
         civ_town_ap = +(_r getOrDefault ["townAp", civ_town_ap]);
-        (_r getOrDefault ["townGarrison", [DUWS_townGarrisonTier, DUWS_townGarrisonOwner]]) params ["_tiers", "_owners"];
-        DUWS_townGarrisonTier = +_tiers;
-        DUWS_townGarrisonOwner = +_owners;
         for "_i" from 0 to (count civ_town_rep - 1) do {
             [_i] call fnc_civ_townRender;
             { [_i, _forEachIndex] call fnc_vendor_markerPaint } forEach ([_i] call fnc_vendor_recs);

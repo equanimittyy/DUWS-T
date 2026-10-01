@@ -177,9 +177,8 @@ missionNamespace setVariable ["civ_visible", _newVis];
 
 // Per-town reputation and Army Power worth. Neither array is broadcast: nothing on a client
 // reads them, and the markers they drive are painted with global-effect commands.
-// Off entirely in RAVAGE and WBK -- a zombie apocalypse has no civil standing to lose and
-// nobody to install an OPFOR garrison, so the number would be a dial with nothing on the other
-// end of it. Those towns keep the neutral band permanently.
+// Off entirely in RAVAGE and WBK -- a zombie apocalypse has no civil standing to lose, so the
+// number would be a dial with nothing on the other end of it. Those towns keep the neutral band permanently.
 if !(CIV_PRESENCE in ["RAVAGE", "WBK"]) then {
     private _n = count _locations;
     private _townRep = [];
@@ -217,21 +216,7 @@ if !(CIV_PRESENCE in ["RAVAGE", "WBK"]) then {
     // Seed the placement keep-out list from the starting reputations: towns overlapping an enemy zone
     // begin at -20, so they are enemy ground before the first band crossing would ever fire the rebuild.
     [] call fnc_enemy_towns_refresh;
-    // Tier I is the floor for a town starting in the OPFOR band: the -20 towns above are enemy ground
-    // before anyone has played a minute, and reading them as ungarrisoned until the first garrison cycle
-    // would let the commander appraise them as neutral. Everything else starts at 0 (BLUFOR/neutral).
-    missionNamespace setVariable ["DUWS_townGarrisonTier", _townRep apply {[0, 1] select (_x <= -10)}];
-    // Whose those tiers are. Only the OPFOR band grants one at start, so every other town owes nobody.
-    missionNamespace setVariable ["DUWS_townGarrisonOwner", _townRep apply {["", "OPF"] select (_x <= -10)}];
-    // No strength array: the shared attrition store answers full for ground nobody has fought over,
-    // so a town needs no entry until something writes one.
-    missionNamespace setVariable ["DUWS_townGarrisonHold", _townRep apply {0}];
     ["INFO", "CIV", format ["Town reputation registered for %1 towns, AP worth %2", _n, _townAp]] call fnc_log;
-
-    // One garrison thread for all towns, like fnc_civ_handler below. Started after the arrays above
-    // exist, since its first pass reads every town's reputation and tier. Called rather than spawned:
-    // it files hooks and returns, and they have to exist before the poller starts.
-    [] call fnc_civ_garrison;
 };
 
 {
@@ -265,8 +250,8 @@ if !(CIV_PRESENCE in ["RAVAGE", "WBK"]) then {
         ];
     };
 
-    // Alpha is the whole of hiding: a hidden town keeps its trigger, its garrison and its
-    // population, exactly as a hidden zone keeps its OPFOR. Only the map stays quiet.
+    // Alpha is the whole of hiding: a hidden town keeps its trigger and its population, exactly as a
+    // hidden zone keeps its OPFOR. Only the map stays quiet.
     private _shown = _newVis select _locIndex;
 
     // Created neutral, then repainted below by the same renderer the reputation writer uses,

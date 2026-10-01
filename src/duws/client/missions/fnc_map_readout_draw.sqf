@@ -22,7 +22,7 @@ private _fnc_pipes = {
 // Green for what is left, grey for what is gone. A bar rather than a percentage because this is read
 // while deciding where to go next -- proportion at a glance beats a figure the player has to weigh
 // against a garrison size they cannot see. Twenty segments wide, so a full garrison reads as a solid
-// block; the query owns the scale. Shared by zones and towns so the two cannot read differently.
+// block; the query owns the scale.
 private _fnc_bar = {
 	params ["_seg"];
 	format [localize "STR_DUWS_T_zone_mapview_garrison",
@@ -58,8 +58,7 @@ switch (_kind) do {
 		// whichever side holds it.
 		//
 		// A zone OPFOR have just retaken says so instead. The men are owed and not yet standing, so a
-		// numeral here would report a garrison that is not there -- the same reason a town in the
-		// window reports its hold rather than its tier.
+		// numeral here would report a garrison that is not there.
 		_lines pushBack (if (_hold isEqualTo "MOBILISING") then {
 			format [localize "STR_DUWS_T_mapview_garrison_tier",
 				localize "STR_DUWS_T_mapview_garrison_mobilising"]
@@ -78,9 +77,7 @@ switch (_kind) do {
 
 	case "TOWN": {
 		_data params [["_name", ""], ["_pop", 0], ["_hasRep", false], ["_rep", 0], ["_income", 0],
-			["_side", ""], ["_ap", 0], ["_tier", 0], ["_hold", ""], ["_seg", 0], ["_offer", []]];
-		_buy = _offer;
-		_buyTier = _tier;
+			["_side", ""], ["_ap", 0]];
 		private _lines = [
 			format ["<t size='1.2'>%1</t>", _name],
 			format [localize "STR_DUWS_T_civ_mapview_pop", _pop]
@@ -100,21 +97,6 @@ switch (_kind) do {
 				case "OPF": { format [localize "STR_DUWS_T_civ_mapview_income_opf", _income] };
 				default { format [localize "STR_DUWS_T_civ_mapview_income_none", _ap] };
 			});
-			// Last, so it sits where a zone's tier does -- directly above where a town strength bar
-			// would go. Inside the reputation gate with the rest: a town that registers no
-			// reputation can hold no tier either, and printing "None" would read as a town that
-			// merely happens to be ungarrisoned.
-			//
-			_lines pushBack (if (_hold isEqualTo "MOBILISING") then {
-				format [localize "STR_DUWS_T_mapview_garrison_tier",
-					localize "STR_DUWS_T_mapview_garrison_mobilising"]
-			} else {
-				[_tier] call _fnc_tier
-			});
-			// Under the tier, where a zone's bar sits. Only on a town that owes a garrison: a
-			// neutral town has none, and a full grey bar there would read as one wiped rather than
-			// as one that was never raised.
-			if (_tier >= 1) then { _lines pushBack ([_seg] call _fnc_bar) };
 		};
 		_text = _lines joinString "<br/>";
 	};

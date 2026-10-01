@@ -35,12 +35,12 @@ DUWS_fnc_opcom_supplyOpen = {
         }) < 0}
 };
 
-// One supply truck per town at a time, so a second never lands a buy on a garrison the first already filled.
+// One supply truck per town at a time, so a second never doubles the Rapport run the first is carrying.
 DUWS_fnc_opcom_townsSupplied = {
     private _busy = [];
     {
         (_x getOrDefault ["errand", []]) params [["_kind", ""], ["_town", -1]];
-        if (_kind in ["reinforce", "fortify", "rapport"]) then { _busy pushBackUnique _town };
+        if (_kind isEqualTo "rapport") then { _busy pushBackUnique _town };
     } forEach DUWS_opcom_taskings;
     _busy
 };

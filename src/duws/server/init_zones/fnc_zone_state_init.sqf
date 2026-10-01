@@ -144,7 +144,7 @@ fnc_zone_garrison_fortify = {
 	missionNamespace setVariable [format ["DUWS_zoneTier_%1", _zoneKey], _new];
 	private _x1 = [_new, _side] call DUWS_fnc_zoneSpawnList;
 	[_zoneKey, [_old, _side] call DUWS_fnc_zoneSpawnList, _x1] call DUWS_fnc_garrisonBuyTier;
-	// No thread adopts a zone's tier the way the town garrison thread does, so the buy re-stands it here.
+	// No thread adopts a zone's tier, so the buy re-stands it here.
 	if ([_zoneKey] call DUWS_fnc_garrisonHeld) then { [_zoneKey, _x1] call DUWS_fnc_garrisonRestand };
 	[_zoneKey, _old, _new] call DUWS_fnc_zoneBuildGrant;
 	["INFO", "ZONES", format ["%1 tier %2 -> %3 (%4)", _zoneKey, _old, _new, _reason]] call fnc_log;
@@ -199,7 +199,7 @@ DUWS_fnc_garrisonGroupCount = {
 };
 
 // Every group one side holds anywhere -- the global throttle input. Against the 144-per-side cap, not a
-// zone's own count: hardpoints and town garrisons raise their own groups on their own rules and are not
+// zone's own count: hardpoints raise their own groups on their own rules and are not
 // pooled or per-zone bounded, but they do count here, so a dense field pushes zones to back off and
 // leave the engine headroom. The cap is per side, so BLUFOR's count carries the player's own squads.
 DUWS_fnc_sideGroupCount = {

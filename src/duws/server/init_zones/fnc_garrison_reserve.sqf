@@ -14,7 +14,7 @@ DUWS_fnc_garrisonBeaten = {
     (([_key] call DUWS_fnc_garrisonGroupCount) + count ([_key] call DUWS_fnc_garrisonReserve)) <= (0.15 * _full)
 };
 
-// The one rule for taking ground, zone or town, in either direction: _side has a unit inside the site radius, the
+// The one rule for taking a zone, in either direction: _side has a unit inside the site radius, the
 // defender's garrison is beaten, and _side outnumbers _foe over the streaming ring -- all held unbroken for
 // DUWS_captureHold. -> true once held.
 // One stamp per site, tagged with the side, so a direction's stamp never carries over a flip into the other.
@@ -27,14 +27,9 @@ DUWS_fnc_siteTaken = {
     // The ring the garrison streams in, not the radius, so a flip leaves no outer-ring force the attacker never
     // had to beat.
     private _ring = _radius + ((DUWS_streamProfiles get _profile) select 0);
-    // Tier 0 holds no garrison -- a town outside the OPFOR band, or a zone BLUFOR hold until they build one -- so
-    // there is nothing to beat. A garrison that is not live (stowed, mid-raise) refuses, so ground is never taken
-    // before its men are placed.
-    private _tier = if ((_key select [0, 5]) isEqualTo "town_") then {
-        [parseNumber (_key select [5])] call fnc_town_garrison_tierAt
-    } else {
-        [_key] call fnc_zone_tier
-    };
+    // Tier 0 holds no garrison -- a zone BLUFOR hold until they build one -- so there is nothing to beat. A garrison
+    // that is not live (stowed, mid-raise) refuses, so ground is never taken before its men are placed.
+    private _tier = [_key] call fnc_zone_tier;
     private _won = (_tier == 0 || {([_key] call DUWS_fnc_garrisonHeld) && {[_key] call DUWS_fnc_garrisonBeaten}})
         && {([_pos, _radius, _side, true] call fnc_side_count_at) > 0}
         && {([_pos, _ring, _side, true] call fnc_side_count_at) > ([_pos, _ring, _foe, true] call fnc_side_count_at)};
@@ -52,7 +47,7 @@ DUWS_fnc_siteTaken = {
 // soldier doing it does not.
 #define LEFTOVER_KEEP_RADIUS 500
 
-// A flipped zone's or cleared town's survivors fight on where they stand; an engaged group cannot be ordered off
+// A flipped zone's survivors fight on where they stand; an engaged group cannot be ordered off
 // (arma_engine_gotchas.md). Their key is cleared so a later wipe records nothing against the ledger the flip has
 // just reseeded, and they move to their own roster so a new garrison's raise and count never see them.
 DUWS_fnc_garrisonRelease = {
@@ -104,8 +99,7 @@ DUWS_fnc_garrisonReservePos = {
 
     // Soft nudge toward the nearest zone the side holds so the wave reads as coming from friendly ground;
     // clamped to a narrow arc since anti-flank always wins -- this only ever bends the spawn, never swings
-    // it back toward the players. Applies to town reserves too: zones are the only friendly-ground signal
-    // there is.
+    // it back toward the players.
     private _others = (missionNamespace getVariable [
         ["WARCOM_zones_controled_by_OPFOR", "WARCOM_zones_controled_by_BLUFOR"] select (_side isEqualTo "BLU"), []]) select {
         (_x distance2D _center) > _radius
@@ -580,8 +574,7 @@ DUWS_fnc_garrisonReserveRefillOne = {
 };
 
 // Most-crowded fight resupplies first; refills are spawned per site so waves stagger independently and one
-// site's sleep never holds the next. Iterates the live-garrison registry, so a zone and a town are candidates
-// by the same rule -- the one place the two site kinds meet. No BLUFOR-presence gate, matching the kill-event
+// site's sleep never holds the next. Iterates the live-garrison registry. No BLUFOR-presence gate, matching the kill-event
 // path (DUWS_fnc_garrisonReserveOnKill): a held site below its ceiling refills whether or not it is fought.
 DUWS_fnc_garrisonReservePass = {
     if (!isServer) exitWith {};

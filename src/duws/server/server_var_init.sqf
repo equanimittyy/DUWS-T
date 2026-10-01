@@ -123,22 +123,20 @@ base_garrison_sleep_range = 500;
 //   buffer   metres added to the site radius to make the ring presence is tested over
 //   grace    seconds the empty ring waits before the site streams out (for a base, re-freezes)
 //   latch    start latched, so a site registered under a player does not raise its garrison around them
-//   aiAware  gate on the AI-aware BLUFOR test (zones, town garrisons) rather than a plain player list
+//   aiAware  gate on the AI-aware BLUFOR test (zones) rather than a plain player list
 //   minAI    how many BLUFOR hold the ring to keep an aiAware site up
-// town_crowd and town_gar split one town into two answers (noticed at 200 m/60 s vs held at 400 m/120 s).
 // A base is 0/short because it freezes in place rather than streaming off the map. Read by
-// fnc_site_occupant_register_profile and, for the town's own tick, by fnc_civ_garrison.
+// fnc_site_occupant_register_profile and DUWS_fnc_siteTaken.
 DUWS_streamProfiles = createHashMapFromArray [
     ["zone",       [400, 120, true,  true,  2]],
     ["town_crowd", [200,  60, false, false, 2]],
-    ["town_gar",   [400, 120, true,  true,  2]],
     ["base",       [  0,  10, false, false, 2]]
 ];
 
 // A FOB is a fast-travel destination, so one inside a streaming ring would land players past the approach every
 // presence test assumes (zones_and_civilians.md). The request runs on a client, which holds no site store:
 // [zone buffer, town buffer, HQ ring].
-DUWS_fobKeepOut = [(DUWS_streamProfiles get "zone") select 0, (DUWS_streamProfiles get "town_gar") select 0,
+DUWS_fobKeepOut = [(DUWS_streamProfiles get "zone") select 0, (DUWS_streamProfiles get "town_crowd") select 0,
     base_garrison_sleep_range + ((DUWS_streamProfiles get "base") select 0)];
 publicVariable "DUWS_fobKeepOut";
 
@@ -518,8 +516,8 @@ DUWS_zoneGroupCeiling = 130;
 // rather than one-in-one-out.
 DUWS_zoneReinforceFrac = 0.5;
 
-// The floor distance, in metres, a garrison group spawns from every player: a reserve wave, and each group a zone or
-// town raise places. No larger than the streaming ring's margin, or a raise woken by a player at the ring's edge could
+// The floor distance, in metres, a garrison group spawns from every player: a reserve wave, and each group a zone
+// raise places. No larger than the streaming ring's margin, or a raise woken by a player at the ring's edge could
 // place nothing. Flat, not zone-relative, so it reads the same at a 50 m base and a 1300 m island -- a radius-relative
 // distance would drop reserves a kilometre out of the island and on top of the player in the base.
 DUWS_zoneReserveSpawnDist = 400;
@@ -821,7 +819,7 @@ OPCOM_CAP_GARRISON = 2;
 // One truck of a class drives at a time, and none of that class sets off for OPCOM_SUPPLY_COOLDOWN after one sets off,
 // rolled between the two. Keyed by errand, and by build type where the type overrides its errand's class. Tune.
 OPCOM_SUPPLY_CLASS = createHashMapFromArray [
-    ["reinforce", "reinforce"], ["fortify", "reinforce"], ["rapport", "rapport"],
+    ["rapport", "rapport"],
     ["build", "hardpoint"], ["mine", "hardpoint"],
     ["RADIO", "asset"], ["OP", "asset"], ["MORTAR", "asset"], ["ARTY", "asset"]
 ];

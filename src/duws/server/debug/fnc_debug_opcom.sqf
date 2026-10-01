@@ -16,8 +16,7 @@ switch (_verb) do {
         ["Recruit a unit", _rows, "recruit", ""] remoteExec ["fnc_debug_opcom_pick", _caller];
     };
     case "garrisonlist": {
-        // _a = tasking id. The OPFOR ground a unit can settle into: every zone BLUFOR has not captured, and every
-        // town holding a garrison. Both file under one site key, so the settle and its reserve sync read the same.
+        // _a = tasking id. The OPFOR ground a unit can settle into: every zone BLUFOR has not captured.
         private _rows = [];
         {
             private _zp = _x select 1;
@@ -26,17 +25,7 @@ switch (_verb) do {
                 _rows pushBack [_d, [_zp] call fnc_zone_key, format ["zone %1  (%2 m away)", [_zp] call fnc_zone_key, round _d]];
             };
         } forEach zone_meta_array;
-        // A boat garrisons a zone's port, so it is never offered a town.
-        private _t = [_a] call DUWS_fnc_opcom_byId;
-        private _boat = !isNil "_t" && {(_t get "moveType") isEqualTo "boat"};
-        {
-            private _tier = [_forEachIndex] call fnc_town_garrison_tierAt;
-            if (!_boat && {_tier >= 1}) then {
-                private _d = _caller distance2D (getPos _x);
-                _rows pushBack [_d, [_forEachIndex] call fnc_town_site_key, format ["town %1  (tier %2, %3 m away)", text _x, _tier, round _d]];
-            };
-        } forEach (missionNamespace getVariable ["civ_locations", []]);
-        if (_rows isEqualTo []) exitWith { "No OPFOR zone or garrisoned town." remoteExec ["hint", _caller] };
+        if (_rows isEqualTo []) exitWith { "No OPFOR zone." remoteExec ["hint", _caller] };
         _rows sort true;
         ["Garrison which site?", _rows apply { [_x select 1, _x select 2] }, "garrison_site", _a] remoteExec ["fnc_debug_opcom_pick", _caller];
     };
@@ -71,16 +60,12 @@ switch (_verb) do {
         ["Order which unit or gun?", _rows, "order", ""] remoteExec ["fnc_debug_opcom_pick", _caller];
     };
     case "townlist": {
-        // _a = tasking id, _b = errand kind. Nearest first; reinforce and fortify list only towns with a garrison.
+        // _a = tasking id, _b = errand kind. Nearest first.
         private _locs = missionNamespace getVariable ["civ_locations", []];
         private _reps = missionNamespace getVariable ["civ_town_rep", []];
         private _rows = [];
         {
-            private _tier = [_forEachIndex] call fnc_town_garrison_tierAt;
-            if (_b isEqualTo "rapport" || {_tier >= 1}) then {
-                _rows pushBack [_caller distance2D (getPos _x), _forEachIndex, format ["%1  (rep %2, tier %3, strength %4)", text _x, _reps param [_forEachIndex, 0], _tier,
-                    ([_forEachIndex] call fnc_town_garrison_strengthAt) toFixed 2]];
-            };
+            _rows pushBack [_caller distance2D (getPos _x), _forEachIndex, format ["%1  (rep %2)", text _x, _reps param [_forEachIndex, 0]]];
         } forEach _locs;
         if (_rows isEqualTo []) exitWith { format ["No town to %1.", _b] remoteExec ["hint", _caller] };
         _rows sort true;

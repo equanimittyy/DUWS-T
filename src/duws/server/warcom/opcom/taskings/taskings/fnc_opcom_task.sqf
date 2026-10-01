@@ -4,12 +4,12 @@
 //   _order: one of the orders below. `guard` holds where it stands and ignores
 //     _target; `move` and `patrol` march to _target and settle to guard there, and `probe` settles sooner, once the
 //     block about _target reads fresh. A `capture` takes the BLUFOR-held
-//     holding at _target -- a zone, a town they have garrisoned, their HQ or a FOB -- and aims at its centre; it ends
+//     holding at _target -- a zone, their HQ or a FOB -- and aims at its centre; it ends
 //     when the ground is no longer theirs (fnc_opcom_task_step). An `intercept`'s _target is a belief row key (a BLUFOR
 //     group's netId); it follows the row's believed position.
-//   _returnZone: `return` only, and required by it -- the site key, zone or town, whose garrison it joins on
+//   _returnZone: `return` only, and required by it -- the zone key whose garrison it joins on
 //     arrival. A boat goes to the site's port instead of _target (never a land point); a portless one refuses it.
-//   _errand: `errand` only, and required by it -- a supply run: ["reinforce" | "fortify" | "rapport", townIndex],
+//   _errand: `errand` only, and required by it -- a supply run: ["rapport", townIndex],
 //     ["build", pos, type, refund] or ["mine", pos, [variant, [cols, rows]], refund], delivered on arrival
 //     (DUWS_fnc_opcom_deliver) in place of a settle, and the truck spent. A build that finds no ground pays refund
 //     back.
@@ -33,7 +33,7 @@ if (_isErrand && {_errand isEqualTo []}) exitWith {
 if (_order isNotEqualTo "guard" && {_target isEqualTo []}) exitWith {
     ["WARN", "OPCOM", format ["task: order %1 needs a target", _order]] call fnc_log; false
 };
-if (_isErrand && {!((_errand param [0, ""]) in ["reinforce", "fortify", "rapport", "build", "mine"])}) exitWith {
+if (_isErrand && {!((_errand param [0, ""]) in ["rapport", "build", "mine"])}) exitWith {
     ["WARN", "OPCOM", format ["task: unknown errand %1", _errand]] call fnc_log; false
 };
 // An errand is goods spent on arrival, so it rides a supply unit (docs/plans/opcom/opcom_plan.md, What AP buys).
