@@ -5,7 +5,7 @@ if (!isServer) exitWith {};
 // The interceptor's own arrival look: a hunt has to find a group that moved off the fix it was sent to, which no
 // other order needs. A recon's sweep bought at one point instead of carried along a route (fnc_opcom_patrol_sense):
 // every BLUFOR group in reach is stamped for certain, the reach reads swept-clear (fnc_opcom_cover_stamp) and belief
-// the look disproves clears (fnc_opcom_cover_clear). -> the closest group's netId outside the HQ's cells, or "".
+// the look disproves clears (fnc_opcom_cover_clear). -> the closest group's netId outside the base cells, or "".
 DUWS_fnc_opcom_interceptLook = {
     if (isNil "DUWS_opcom_grid_w") exitWith { "" };
     params ["_point"];
@@ -19,7 +19,7 @@ DUWS_fnc_opcom_interceptLook = {
             if (([_lp, _point] call DUWS_fnc_opcom_cellDist) <= OPCOM_INTERCEPT_K) then {
                 [netId _x, [_lp select 0, _lp select 1, 0], [_x] call DUWS_fnc_opcom_sightStr] call fnc_opcom_belief_upsert;
                 private _d = _point distance2D _lp;
-                if (_d < _bd && {!([_lp] call DUWS_fnc_opcom_inHqCells)}) then { _bd = _d; _best = netId _x };
+                if (_d < _bd && {!([_lp] call DUWS_fnc_opcom_inBaseCells)}) then { _bd = _d; _best = netId _x };
             };
         };
     } forEach (allGroups select { side _x == west });
@@ -28,7 +28,7 @@ DUWS_fnc_opcom_interceptLook = {
 };
 
 // Re-plans only once the row's believed position moves past one cell: each re-plan is an A* search. A decayed row
-// leaves the last position read, and so does a row in the HQ's cells: the unit goes on to its last fix, where its look
+// leaves the last position read, and so does a row in the base cells: the unit goes on to its last fix, where its look
 // finds a group outside them or it guards.
 DUWS_fnc_opcom_interceptFollow = {
     params ["_t", "_live", ["_force", false]];
@@ -36,7 +36,7 @@ DUWS_fnc_opcom_interceptFollow = {
     if (_i < 0) exitWith {};
     private _bp = DUWS_opcom_belief_pos select _i;
     if (!_force && {([_bp, _t get "target"] call DUWS_fnc_opcom_cellDist) <= 1}) exitWith {};
-    if ([_bp] call DUWS_fnc_opcom_inHqCells) exitWith {};
+    if ([_bp] call DUWS_fnc_opcom_inBaseCells) exitWith {};
     _t set ["target", +_bp];
     ([_t get "pos", _bp, _t get "moveType", _t getOrDefault ["lambda", 0]] call fnc_opcom_route) params ["_pts", "_mode"];
     _t set ["route", _pts]; _t set ["routeMode", _mode]; _t set ["leg", 0];

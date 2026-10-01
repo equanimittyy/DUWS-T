@@ -186,7 +186,7 @@ DUWS_fnc_opcom_qrfSweep = {
     private _sightings = [];
     {
         private _bp = DUWS_opcom_belief_pos select _forEachIndex;
-        if ([_x] call DUWS_fnc_opcom_beliefIsSighting && {[_bp] call fnc_aoi_opfor_covers} && {!([_bp] call DUWS_fnc_opcom_inHqCells)}) then {
+        if ([_x] call DUWS_fnc_opcom_beliefIsSighting && {[_bp] call fnc_aoi_opfor_covers} && {!([_bp] call DUWS_fnc_opcom_inBaseCells)}) then {
             _sightings pushBack [DUWS_opcom_belief_str select _forEachIndex, _forEachIndex];
         };
     } forEach DUWS_opcom_belief_key;
@@ -244,7 +244,7 @@ DUWS_fnc_opcom_patrolSweep = {
     private _free = ((call DUWS_fnc_opcom_free) select { [_x get "flags", _x get "moveType"] call DUWS_fnc_opcom_isPatroller })
         apply { [_x] call DUWS_fnc_opcom_freeSource };
     private _zones = call DUWS_fnc_opcom_zonesOpen;
-    private _pool = DUWS_opcom_needCells - ([[PosOfBLUHQ]] call DUWS_fnc_opcom_baseCells);
+    private _pool = DUWS_opcom_needCells - ([] call DUWS_fnc_opcom_baseCells);
     private _dests = [];
     for "_i" from 1 to (OPCOM_PATROL_SAMPLES min count _pool) do {
         _dests pushBack ([_pool deleteAt (floor random count _pool)] call DUWS_fnc_opcom_c2w);

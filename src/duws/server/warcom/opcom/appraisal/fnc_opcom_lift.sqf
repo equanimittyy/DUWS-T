@@ -55,12 +55,12 @@ DUWS_fnc_opcom_liftFor = {
     _best
 };
 
-// -> [] where no hull may set a rider down: on water, or in the HQ's cells.
+// -> [] where no hull may set a rider down: on water, or in the base cells.
 DUWS_fnc_opcom_qrfDrop = {
     params ["_from", "_at"];
     private _f = OPCOM_QRF_DROP_K * OPCOM_GRID_CELL / ((_at distance2D _from) max 1);
     private _drop = [(_at select 0) + ((_from select 0) - (_at select 0)) * _f, (_at select 1) + ((_from select 1) - (_at select 1)) * _f, 0];
-    [_drop, []] select ([_drop] call DUWS_fnc_opcom_isWaterPt || {[_drop] call DUWS_fnc_opcom_inHqCells})
+    [_drop, []] select ([_drop] call DUWS_fnc_opcom_isWaterPt || {[_drop] call DUWS_fnc_opcom_inBaseCells})
 };
 
 // The saving joins the Value, the lift's price the price and its Cost the Cost. expValue stays the walk's: a Ferry

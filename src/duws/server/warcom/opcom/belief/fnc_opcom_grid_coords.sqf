@@ -37,7 +37,6 @@ DUWS_fnc_opcom_blockCells = {
 // OPCOM's certain sensors (recon, an OP burst) are blind in these cells: a sweep from cells away would find a base's
 // garrison and expose the base (fnc_opcom_belief_upsert). Not the MHQ: a moving blind ring hides its riders.
 DUWS_fnc_opcom_baseCells = {
-    params [["_bases", Array_of_FOBpos + [PosOfBLUHQ]]];
     private _w = DUWS_opcom_grid_w;
     private _r = DUWS_base_keep_radius;
     private _out = [];
@@ -50,15 +49,15 @@ DUWS_fnc_opcom_baseCells = {
                 if (([_bx, _by] distance2D [_nearX, _nearY]) < _r) then { _out pushBackUnique (_cy * _w + _cx) };
             };
         };
-    } forEach _bases;
+    } forEach (Array_of_FOBpos + [PosOfBLUHQ]);
     _out
 };
 
-// No QRF or patrol goes into the HQ's cells, whatever the HQ attack gate: only an assault or a flank, behind that
-// gate, takes OPCOM onto the HQ.
-DUWS_fnc_opcom_inHqCells = {
+// No QRF or patrol goes into the base cells, whatever the attack gates: only an assault or a flank, behind its gate,
+// takes OPCOM onto the HQ or a FOB.
+DUWS_fnc_opcom_inBaseCells = {
     params ["_pos"];
-    ([_pos] call DUWS_fnc_opcom_w2c) in ([[PosOfBLUHQ]] call DUWS_fnc_opcom_baseCells)
+    ([_pos] call DUWS_fnc_opcom_w2c) in ([] call DUWS_fnc_opcom_baseCells)
 };
 
 DUWS_fnc_opcom_nearestWater = {

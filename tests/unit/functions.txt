@@ -91,7 +91,7 @@ duws/server/warcom/opcom/belief/fnc_opcom_grid_coords.sqf::DUWS_fnc_opcom_landAt
 duws/server/warcom/opcom/belief/fnc_opcom_grid_coords.sqf::DUWS_fnc_opcom_blockCells
 duws/server/warcom/opcom/belief/fnc_opcom_grid_coords.sqf::DUWS_fnc_opcom_w2c
 duws/server/warcom/opcom/belief/fnc_opcom_grid_coords.sqf::DUWS_fnc_opcom_baseCells
-duws/server/warcom/opcom/belief/fnc_opcom_grid_coords.sqf::DUWS_fnc_opcom_inHqCells
+duws/server/warcom/opcom/belief/fnc_opcom_grid_coords.sqf::DUWS_fnc_opcom_inBaseCells
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_gun.sqf::DUWS_fnc_opcom_gunShare
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_tower.sqf::DUWS_fnc_opcom_towerReach
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_exposure.sqf::DUWS_fnc_opcom_defendAt

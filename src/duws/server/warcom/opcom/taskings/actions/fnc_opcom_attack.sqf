@@ -363,8 +363,8 @@ DUWS_fnc_opcom_buildupStep = {
     if (_qrf && {!([_attack] call DUWS_fnc_opcom_qrfFollow)}) exitWith {
         [_attack, "dropped: the sighting is no longer believed"] call DUWS_fnc_opcom_attackClose;
     };
-    if (_qrf && {[_attack get "pos"] call DUWS_fnc_opcom_inHqCells}) exitWith {
-        [_attack, "dropped: the sighting entered the HQ's cells"] call DUWS_fnc_opcom_attackClose;
+    if (_qrf && {[_attack get "pos"] call DUWS_fnc_opcom_inBaseCells}) exitWith {
+        [_attack, "dropped: the sighting entered the base cells"] call DUWS_fnc_opcom_attackClose;
     };
     if (!_qrf && {!([_attack get "target"] call DUWS_fnc_opcom_captureHolds)}) exitWith {
         [_attack, "dropped: the target is no longer BLUFOR's"] call DUWS_fnc_opcom_attackClose;
@@ -413,8 +413,8 @@ DUWS_fnc_opcom_executionStep = {
         // Following the lead keeps the next QRF off the same cluster.
         [_attack] call DUWS_fnc_opcom_qrfFollow;
     };
-    if (_qrf && {[_attack get "pos"] call DUWS_fnc_opcom_inHqCells}) exitWith {
-        [_attack, "broken off: the sighting entered the HQ's cells"] call DUWS_fnc_opcom_attackBreak;
+    if (_qrf && {[_attack get "pos"] call DUWS_fnc_opcom_inBaseCells}) exitWith {
+        [_attack, "broken off: the sighting entered the base cells"] call DUWS_fnc_opcom_attackBreak;
     };
     if (_qrf) then { [_attack] call DUWS_fnc_opcom_qrfLand };
     private _r = [_attack] call DUWS_fnc_opcom_musterRatio;
