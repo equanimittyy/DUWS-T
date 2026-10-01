@@ -132,7 +132,7 @@ localised name, so a support's stringtable label holds no price in any language.
 label is a second price, and it goes stale the first time the catalogue changes.
 
 `fnc_escalation.sqf` sets the multiplier from a level ladder: a level is a fixed count of ruined
-houses — a fifty-third of the map's house census split into eleven levels, so thirty houses on Altis
+houses — two fifty-thirds of the map's house census split into eleven levels, so sixty houses on Altis
 — and each level adds 0.1 to the multiplier. Level 11 is the ceiling, and it ends the campaign:
 `campaign_lost` with the `island_ruined` ending.
 

@@ -10,15 +10,15 @@ if (CIV_PRESENCE == "RAVAGE" || CIV_PRESENCE == "WBK") exitWith {};
 
 // A whole-map census counts every House on the terrain, the overwhelming majority of them in
 // settlements no campaign ever visits, so the raw total is far larger than anything a player
-// could plausibly destroy. A fifty-third of it is the loss condition, so a level costs a
-// five-hundred-and-eighty-third of the map -- thirty houses on Altis.
-#define ESCALATION_FRACTION (1 / 53)
+// could plausibly destroy. Two fifty-thirds of it is the loss condition -- sixty houses a level on
+// Altis.
+#define ESCALATION_FRACTION (2 / 53)
 #define ESCALATION_MAX_LEVEL 11
 // Floor the per-level step, not the budget: on a house-sparse map the fraction drives the step
 // toward zero, which would make every single house its own level. Pin it to an absolute minimum so
 // the loss threshold is a real count of ruin rather than a fraction of a tiny census -- keeps this
-// portable off Altis. Inert on Altis, where the fraction already yields thirty.
-#define ESCALATION_MIN_TIER 15
+// portable off Altis. Inert on Altis, where the fraction already yields sixty.
+#define ESCALATION_MIN_TIER 30
 
 // The census is one engine call that cannot yield -- 5.03 s for Altis's 17472 houses -- so it is
 // a frame stall, not 5 s of shared scheduler time, and no rearranging here changes that. Instead
