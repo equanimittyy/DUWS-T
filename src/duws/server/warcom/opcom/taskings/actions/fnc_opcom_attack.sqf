@@ -217,6 +217,21 @@ DUWS_fnc_opcom_attackClose = {
         ["", ", its creep unfired"] select ((_attack get "creep") isNotEqualTo [])]] call fnc_log;
 };
 
+// Off capture, or its target stays busy to the attack sweep. Guard, not return: an engaged group ignores a move order
+// (arma_engine_gotchas.md).
+DUWS_fnc_opcom_attackBreak = {
+    params ["_attack", "_outcome"];
+    {
+        {
+            if ((_x getOrDefault ["ridingOn", -1]) < 0) then {
+                _x set ["hold", 0];
+                [_x, "guard"] call fnc_opcom_task;
+            };
+        } forEach ([_attack, _x] call DUWS_fnc_opcom_roleUnits);
+    } forEach (_attack get "roles");
+    [_attack, _outcome] call DUWS_fnc_opcom_attackClose;
+};
+
 DUWS_fnc_opcom_bucketForce = {
     params ["_attack", "_role"];
     private _force = 0;
@@ -348,6 +363,9 @@ DUWS_fnc_opcom_buildupStep = {
     if (_qrf && {!([_attack] call DUWS_fnc_opcom_qrfFollow)}) exitWith {
         [_attack, "dropped: the sighting is no longer believed"] call DUWS_fnc_opcom_attackClose;
     };
+    if (_qrf && {[_attack get "pos"] call DUWS_fnc_opcom_inHqCells}) exitWith {
+        [_attack, "dropped: the sighting entered the HQ's cells"] call DUWS_fnc_opcom_attackClose;
+    };
     if (!_qrf && {!([_attack get "target"] call DUWS_fnc_opcom_captureHolds)}) exitWith {
         [_attack, "dropped: the target is no longer BLUFOR's"] call DUWS_fnc_opcom_attackClose;
     };
@@ -389,25 +407,19 @@ DUWS_fnc_opcom_executionStep = {
     private _roles = (_attack get "roles") select { (_x get "units") isNotEqualTo [] };
     _attack set ["roles", _roles];
     if (_roles isEqualTo []) exitWith { [_attack, "aborted: every unit was lost"] call DUWS_fnc_opcom_attackClose };
-    if ((_attack get "kind") isEqualTo "qrf") then {
+    private _qrf = (_attack get "kind") isEqualTo "qrf";
+    if (_qrf) then {
         [_attack] call DUWS_fnc_opcom_qrfRekey;
         // Following the lead keeps the next QRF off the same cluster.
         [_attack] call DUWS_fnc_opcom_qrfFollow;
-        [_attack] call DUWS_fnc_opcom_qrfLand;
     };
+    if (_qrf && {[_attack get "pos"] call DUWS_fnc_opcom_inHqCells}) exitWith {
+        [_attack, "broken off: the sighting entered the HQ's cells"] call DUWS_fnc_opcom_attackBreak;
+    };
+    if (_qrf) then { [_attack] call DUWS_fnc_opcom_qrfLand };
     private _r = [_attack] call DUWS_fnc_opcom_musterRatio;
     if (_r < OPCOM_ATTACK_BREAK) exitWith {
-        // Off capture, or its target stays busy to the attack sweep. Guard, not return: an engaged group ignores a
-        // move order (arma_engine_gotchas.md).
-        {
-            {
-                if ((_x getOrDefault ["ridingOn", -1]) < 0) then {
-                    _x set ["hold", 0];
-                    [_x, "guard"] call fnc_opcom_task;
-                };
-            } forEach ([_attack, _x] call DUWS_fnc_opcom_roleUnits);
-        } forEach _roles;
-        [_attack, format ["failed at %1:1, below the break-off bar", _r toFixed 2]] call DUWS_fnc_opcom_attackClose;
+        [_attack, format ["failed at %1:1, below the break-off bar", _r toFixed 2]] call DUWS_fnc_opcom_attackBreak;
     };
     [_attack] call DUWS_fnc_opcom_converge;
     if ((_attack get "creep") isNotEqualTo []) then { [_attack] call DUWS_fnc_opcom_creepStep };

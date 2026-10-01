@@ -1635,6 +1635,12 @@ PosOfBLUHQ = [3200, 3200, 0];
 Array_of_FOBpos = [[1250, 1250, 0], [1300, 1250, 0]];
 PosOfBLUHQ = [1250, 1250, 0];
 ["baseCells: FOBs count with the HQ, and a shared cell is listed once", [] call DUWS_fnc_opcom_baseCells, [22, 23]] call fnc_assertEq;
+["baseCells: a base list of the HQ alone leaves the FOBs out", [[PosOfBLUHQ]] call DUWS_fnc_opcom_baseCells, [22]] call fnc_assertEq;
+
+// --- DUWS_fnc_opcom_inHqCells: a point in a cell the HQ's base ring overlaps ---
+DUWS_opcom_box = [0, 0, 9, 9];
+["inHqCells: a point off the ring but in its cell", [[1450, 1050, 0]] call DUWS_fnc_opcom_inHqCells, true] call fnc_assertEq;
+["inHqCells: a FOB's cell is not the HQ's", [[1600, 1250, 0]] call DUWS_fnc_opcom_inHqCells, false] call fnc_assertEq;
 
 // --- DUWS_fnc_opcom_opUnwatched: the share of a new OP's land block no other OP watches ---
 OP_OBSERVE_K = 2;
@@ -2116,6 +2122,7 @@ DUWS_fnc_opcom_moveDelay = { params ["", "", ["_h", 0]]; [1, 0.5] select (_h == 
 DUWS_fnc_opcom_moveDelay = { 1 };
 OPCOM_QRF_DROP_K = 2;
 DUWS_fnc_opcom_isWaterPt = { false };
+DUWS_fnc_opcom_inHqCells = { false };
 ["qrfDrop: the rider is set down OPCOM_QRF_DROP_K cells short of the sighting, on its side",
     [[5000, 0, 0], [0, 0, 0]] call DUWS_fnc_opcom_qrfDrop, [1000, 0, 0]] call fnc_assertEq;
 ["qrfDrop: the drop lies on the line from the sighting to the rider",
@@ -2123,6 +2130,9 @@ DUWS_fnc_opcom_isWaterPt = { false };
 DUWS_fnc_opcom_isWaterPt = { true };
 ["qrfDrop: no hull lands a rider on water", [[5000, 0, 0], [0, 0, 0]] call DUWS_fnc_opcom_qrfDrop, []] call fnc_assertEq;
 DUWS_fnc_opcom_isWaterPt = { false };
+DUWS_fnc_opcom_inHqCells = { true };
+["qrfDrop: no hull lands a rider in the HQ's cells", [[5000, 0, 0], [0, 0, 0]] call DUWS_fnc_opcom_qrfDrop, []] call fnc_assertEq;
+DUWS_fnc_opcom_inHqCells = { false };
 private _fnc_ride = {
     params ["_offers"];
     ([_offers, [0, 0, 0], [0, 0, 0], 20, 0, _stand, 0, "QRF X", -1, 360, true] call DUWS_fnc_opcom_attackPackage) select 0
