@@ -37,14 +37,18 @@ private _lifetime = [_this, 0, 0, [0]] call BIS_fnc_param;
 _lifetime = _lifetime max 300;
 
 // Collected by class, and spared only by the persistent flag. Opt out rather than opt in, so a drop
-// added later is swept without anyone having to remember to register it. Bodybags are listed by every
-// name they go by rather than one base class, and the ACE one is listed unconditionally: a class no
-// loaded mod defines simply censuses to nothing, so naming it costs a query when ACE is absent and
-// catches the bags when it is not.
+// added later is swept without anyone having to remember to register it.
 private _litterClasses = ["WeaponHolder", "GroundWeaponHolder", "WeaponHolderSimulated",
     "SmokeShell", "ReammoBox_F", "ParachuteBase",
     "Land_BodyBag_01_base_F", "Land_BodyBag_01_F", "Land_BodyBag_01_black_F",
     "Land_BodyBag_01_blue_F", "ACE_bodyBagObject"];
+// Each census call walks every mission object. allMissionObjects returns subclasses too, so a class
+// under another listed one only repeats that walk, and a class no loaded mod defines has nothing to find.
+_litterClasses = _litterClasses select {
+    private _c = _x;
+    (isClass (configFile >> "CfgVehicles" >> _c) || {isClass (configFile >> "CfgAmmo" >> _c)})
+    && {(_litterClasses findIf { _x != _c && {_c isKindOf _x} }) < 0}
+};
 
 // A building never reaches the sweep by census -- it is Static, not AllVehicles. The engine also
 // never damages one in place: it deletes the object and spawns a replacement, so the tracked member
@@ -106,12 +110,6 @@ while {true} do {
         _candidates append (allMissionObjects _type);
     } forEach _litterClasses;
     private _censusMs = round ((diag_tickTime - _t0) * 1000);
-    // Deduped in one engine call rather than by a unique insert per element: pushBackUnique rescans
-    // the list it is building on every insert, so the cost was quadratic in the litter lying on the
-    // map -- a few hundred holders and bodies after a firefight is tens of thousands of comparisons a
-    // pass. The census has to come after it -- the bodybag classes are listed beside their own base
-    // class, so a raw append reports those objects more than once.
-    _candidates = _candidates arrayIntersect _candidates;
     private _census = count _candidates;
 
     _candidates append allDeadMen;

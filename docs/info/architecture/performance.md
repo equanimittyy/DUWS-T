@@ -35,7 +35,9 @@ The shape's worst instance is gone with the airdrop reinforcement it belonged to
 re-filtered `allUnits` by side and distance every 5 s, and kept doing it until that zone's defenders
 fell to a quarter of their starting count — which for a zone the player never attacks is never.
 `fnc_duws_bluforNear` is the shape done right, and answers a comparable question per site off the
-spatial index instead — behind a player-list pre-gate, so a site nobody is near pays nothing.
+spatial index instead — behind a player-list pre-gate, so a site nobody is near pays nothing. The
+pre-gate's unit lists keep one point per 100 m square (`SITE_CELL`), because squad-mates stand metres
+apart: each site walks a few dozen points rather than every soldier on the map.
 
 ## Site streaming owns AI despawn, so a caching layer cannot simply be added
 
@@ -198,8 +200,8 @@ line are wall time: a scheduled stage that reads long may be waiting on other sc
 |---|---|---|
 | `[OPCOM] grid tick=… ms[…] pick[…] route[…]` | `warcom/opcom/belief/fnc_opcom_perception_run.sqf` | each stage of the 5 s OPCOM tick, the parts of its pick, and its A* searches |
 | `[OPCOM] need field rebuilt (…)`, `need deposits re-spread` | `warcom/opcom/appraisal/value/fnc_opcom_need.sqf` | each band rebuild and the signature parts that forced it; each deposit-only re-spread |
-| `[STREAM] site pass: …` | `misc/fnc_site_stream_init.sqf` | the 10 s pass over every streamed site, and the frames it spans |
-| `[CLEANUP] litter census …` | `misc/fnc_repetitive_cleanup.sqf` | the sweep's `allMissionObjects` census, sampled every 10th pass |
+| `[STREAM] site pass: …` | `misc/fnc_site_stream_init.sqf` | the 2 s pass over every streamed site, and the frames it spans |
+| `[CLEANUP] litter census …` | `misc/fnc_repetitive_cleanup.sqf` | the sweep's `allMissionObjects` census, one call per litter class that no other listed class covers, sampled every 10th pass |
 | `[PERF] fps …` | `server/server_init.sqf` | once a minute: frame rate, the longest frame and the count of hitches since the last line, entity counts, and the five most numerous scheduled scripts by file |
 | `[PERF] hitch: …` | `server/server_init.sqf` | each frame of 150 ms or more, logged in that frame, so the lines around it name the work that held it |
 

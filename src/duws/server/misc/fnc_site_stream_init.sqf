@@ -225,6 +225,10 @@ fnc_town_site_key = {
 // raises: at ten seconds a driver met hardpoints popping in beside the road.
 #define SITE_TICK 2
 
+// Squad-mates stand metres apart, so the unit lists every site walks keep one point per square of this
+// side. A snapped point moves at most 71 m, so a gate that reaches this far past its ring misses nobody.
+#define SITE_CELL 100
+
 // The presence test for occupants that answer to players alone -- a town's crowd, and a base thawing
 // on approach.
 fnc_site_near = {
@@ -260,6 +264,17 @@ fnc_site_hostileNear = {
 // never do real work inline. Every hook below either answers a question or spawns a worker.
 fnc_site_poller = {
     if (!isServer) exitWith {};
+    private _fnc_cells = {
+        private _cells = createHashMap;
+        {
+            private _p = getPosATL _x;
+            private _ix = round ((_p select 0) / SITE_CELL);
+            private _iy = round ((_p select 1) / SITE_CELL);
+            // One number per square: no map is 10000 squares across.
+            _cells set [_ix * 10000 + _iy, [_ix * SITE_CELL, _iy * SITE_CELL]];
+        } forEach _this;
+        values _cells
+    };
     while {true} do {
         // A throw would kill this daemon for the whole session (see fnc_repetitive_cleanup).
         try {
@@ -273,7 +288,7 @@ fnc_site_poller = {
         // lists are built once here, and neither costs a spatial query until somebody is actually
         // within reach of the site being asked about.
         // side group, not side: a disguised player is captive, and a captive unit reads CIVILIAN.
-        private _west = (allUnits select { side group _x == WEST }) apply { getPosATL _x };
+        private _west = (allUnits select { side group _x == WEST }) call _fnc_cells;
         private _playerPos = _players apply { getPosATL _x };
         // WEST aircraft positions for occupant-declared air rings, off the vehicle list (not
         // allUnits): one entry per aircraft, not per crew seat, and far shorter to walk.
@@ -295,7 +310,7 @@ fnc_site_poller = {
         // Hostile half of the same gate, for frozen sites below. Built once here rather than per
         // site: with the HQ plus a FOB per zone-and-a-half, per-site spatial queries would run more
         // often than the per-zone threads this poller replaced.
-        private _east = (allUnits select { side _x == EAST }) apply { getPosATL _x };
+        private _east = (allUnits select { side _x == EAST }) call _fnc_cells;
         // OPCOM's virtual units stand on no unit list, so a site closing with one would never see it --
         // and raising the garrison to meet it is what renders it (fnc_opcom_task_step).
         private _eastVirt = [];
@@ -334,7 +349,7 @@ fnc_site_poller = {
                     // Gates the expensive helper rather than replacing it: fnc_duws_bluforNear still
                     // decides every ground arrival, so zones and towns keep deciding it the same way.
                     private _cheap = if (_bluHolds) then { _playerPos } else { _west };
-                    private _ground = (_cheap findIf { _x distance _pos < _ring }) >= 0
+                    private _ground = (_cheap findIf { _x distance2D _pos < _ring + SITE_CELL }) >= 0
                         && { [_pos, _ring, _min, _bluHolds] call fnc_duws_bluforNear };
                     // Air ring: a BLUFOR aircraft reaching in from beyond the ground ring, only for
                     // occupants that declare one (AA, or a zone), against the prebuilt list --
@@ -364,14 +379,14 @@ fnc_site_poller = {
                 // Gated by the cheap list first: fnc_side_count_at still decides (it resolves crew
                 // and filters the dead, which the bare _east list does neither), reached only once
                 // somebody is actually within range.
-                if (_frozen && {!_here} && {(_east findIf { _x distance _pos < _ring }) >= 0}) then {
+                if (_frozen && {!_here} && {(_east findIf { _x distance2D _pos < _ring + SITE_CELL }) >= 0}) then {
                     _here = ([_pos, _ring, EAST] call fnc_side_count_at) > 0;
                 };
 
                 // The test above watches for BLUFOR, which on BLUFOR ground would leave an assault walking
                 // into an empty site and taking it off men who never rendered.
                 if (!_here && {_bluHolds}
-                    && {((_east findIf { _x distance _pos < _ring }) >= 0)
+                    && {((_east findIf { _x distance2D _pos < _ring + SITE_CELL }) >= 0)
                         || {(_eastVirt findIf { _x distance2D _pos < _ring }) >= 0}}) then {
                     _here = [_pos, _ring] call fnc_site_hostileNear;
                 };

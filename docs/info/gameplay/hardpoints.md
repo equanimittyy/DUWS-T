@@ -168,7 +168,9 @@ being laid: the field
 is stored as squares of `[centre, plan, objects]`, where the plan is the positions the square still owes
 and an empty object list means the square is off the map. `fnc_hardpoint_minefield_cycle`, run from the
 hardpoint tick, makes a square's mines inside `DUWS_mineStreamIn` (350 m) and deletes them past
-`DUWS_mineStreamOut` (450 m), so a belt costs its stream ring rather than its length. The in-ring covers a
+`DUWS_mineStreamOut` (450 m), so a belt costs its stream ring rather than its length. A pass that finds
+nobody in the field's ring and no square standing skips the field, clearance count included, because its plan
+cannot change while no mine exists. The in-ring covers a
 vehicle crossing one 2 s site poll at speed. A square with somebody inside `MINE_NO_POP` (50 m) of its
 centre waits until they move off, so a mine never appears under the player it would kill. Such a field
 registers unlatched, as every hardpoint does ([Streaming and garrison](#streaming-and-garrison)): a latch

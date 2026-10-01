@@ -156,17 +156,19 @@ fnc_hardpoint_minefield_left = {
     _n
 };
 
-// [_key, _here, _revealed] call fnc_hardpoint_minefield_cycle -- one site-poller pass over a streamed
-// field. A square nobody is near never exists, so a belt costs its stream ring, not its length.
+// [_key, _here, _revealed] call fnc_hardpoint_minefield_cycle -> whether any mine stands (always, for a
+// field laid whole) -- one site-poller pass over a streamed field. A square nobody is near never exists,
+// so a belt costs its stream ring, not its length.
 // _here false (nobody inside the site's ring) takes the whole field off the map without a player scan.
 fnc_hardpoint_minefield_cycle = {
     params ["_key", "_here", ["_revealed", false]];
     private _squares = missionNamespace getVariable [format ["DUWS_hpMineSquares_%1", _key], []];
-    if (_squares isEqualTo []) exitWith {};
+    if (_squares isEqualTo []) exitWith { true };
 
     private _players = [];
     if (_here) then { _players = ((call BIS_fnc_listPlayers) select { alive _x }) apply { getPosATL _x } };
 
+    private _up = false;
     {
         _x params ["_c", "_plan", "_objs"];
         // Backwards, so deleting an entry cannot skip the next one. Plan and objects are index-aligned:
@@ -194,7 +196,9 @@ fnc_hardpoint_minefield_cycle = {
             { deleteVehicle _x } forEach _objs;
             _objs resize 0;
         };
+        if (_objs isNotEqualTo []) then { _up = true };
     } forEach _squares;
+    _up
 };
 
 // [_mines] remoteExec ["fnc_hardpoint_minefield_reveal", 0, jip] -- adds the mines to this machine's map icons.

@@ -281,10 +281,14 @@ DUWS_hardpointHooks = createHashMapFromArray [["tick", {
     if (_o getOrDefault ["cleared", false]) exitWith {};
     if (_here) then { _o set ["lastSeen", _now] };
 
+    private _field = (_o get "hpType") isEqualTo "MINEFIELD";
+    // With nobody near and no mine standing, the plan cannot change, so this pass would answer as the last did.
+    if (_field && {!_here} && {!(_o getOrDefault ["minesUp", true])}) exitWith {};
+
     // Ahead of the clearance count, which reads the plan this pass prunes.
-    if ((_o get "hpType") isEqualTo "MINEFIELD") then {
+    if (_field) then {
         private _r = DUWS_hardpoints findIf { (_x select 0) isEqualTo _key };
-        [_key, _here, _r > -1 && {(DUWS_hardpoints select _r) select 5}] call fnc_hardpoint_minefield_cycle;
+        _o set ["minesUp", [_key, _here, _r > -1 && {(DUWS_hardpoints select _r) select 5}] call fnc_hardpoint_minefield_cycle];
     };
 
     [_key, _o] call DUWS_fnc_hardpointClearCheck;
