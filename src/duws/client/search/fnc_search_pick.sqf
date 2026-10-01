@@ -9,12 +9,12 @@
 // already searched (DUWS_search_done) is excluded from both, so every corpse is offered once.
 //
 // Flagged targets are single-use and bypass the budget; the combat corpse is gated by it here for
-// the prompt, and again on the server for authority. Budget read with defaults: the broadcast
-// DUWS_searchCooldown/DUWS_searchAllowance may not have landed when this first evaluates.
+// the prompt, and again on the server for authority. Budget and class list read with defaults: their
+// broadcasts may not have landed when this first evaluates.
 //
-// Enemy is read from the class config side (0 = east), not `side _x`: the engine reports every
-// corpse as civilian, so a live `side` test matches no body. The config lookup is death-stable and
-// survives the AGC corpse-swap the flag-free corpse scan exists to sidestep.
+// Enemy is matched by class against DUWS_enemyManClasses (recorded at each EAST death), never `side _x`
+// (every corpse reports civilian) or config side (the mod's side, not the side the mission fields it on).
+// A class also survives the AGC corpse-swap, which a flag on the body would not.
 params ["_who"];
 private _reach = 3;
 
@@ -30,6 +30,7 @@ private _window = missionNamespace getVariable ["DUWS_searchCooldown", 900];
 private _spent = (missionNamespace getVariable ["DUWS_searchTimes", []]) select {time - _x < _window};
 if (count _spent >= (missionNamespace getVariable ["DUWS_searchAllowance", 3])) exitWith { objNull };
 
+private _enemyClasses = missionNamespace getVariable ["DUWS_enemyManClasses", []];
 private _eye = eyePos _who;
 private _look = eyeDirection _who;
 private _best = objNull;
@@ -39,7 +40,7 @@ private _bestDist = _reach;
         !alive _x
         && {!(_x getVariable ["DUWS_search_done", false])}
         && {_x distance _who < _bestDist}
-        && {getNumber (configFile >> "CfgVehicles" >> typeOf _x >> "side") == 0}
+        && {typeOf _x in _enemyClasses}
     ) then {
         private _rel = (eyePos _x) vectorDiff _eye;
         private _mag = vectorMagnitude _rel;

@@ -301,6 +301,7 @@ DUWS_intelDocumentLabels = ["STR_DUWS_T_INTEL_ITEM_phone", "STR_DUWS_T_INTEL_ITE
 // (DUWS_searchTimes) lives in missionNamespace and is broadcast: the prompt's condition runs on the client.
 DUWS_searchCooldown = 900;   publicVariable "DUWS_searchCooldown";
 DUWS_searchAllowance = 3;    publicVariable "DUWS_searchAllowance";
+DUWS_enemyManClasses = [];
 
 manually_chosen = false;publicVariable "manually_chosen";
 

@@ -306,6 +306,19 @@ publicVariable "VCM_ADVANCEDMOVEMENT";
 if (isServer) then {
     if (isNil "playerKillCount") then { playerKillCount = createHashMap; };
     departedKillBatches = 0;
+
+    // Records the classes the corpse search treats as enemy (fnc_search_pick) while `side` still reads
+    // the fighting side. Separate from the kill tally, which exits on kills no player made. Civilian
+    // classes are skipped: a civilian body flipped to EAST would make its whole class searchable.
+    addMissionEventHandler ["EntityKilled", {
+        params ["_killed"];
+        if (!(_killed isKindOf "CAManBase") || {side _killed != east}) exitWith {};
+        private _class = typeOf _killed;
+        if (_class in DUWS_enemyManClasses || {getNumber (configFile >> "CfgVehicles" >> _class >> "side") == 3}) exitWith {};
+        DUWS_enemyManClasses pushBack _class;
+        publicVariable "DUWS_enemyManClasses";
+    }];
+
     addMissionEventHandler ["EntityKilled", {
         params ["_killed", "_killer", "_instigator"];
 
