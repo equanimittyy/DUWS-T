@@ -83,7 +83,7 @@ the map.
 search, all six side-mission sites, the civilian menu when it lands, and the Intelligence Center's clock.
 
 **A payout has two halves and pays both.** The pool half reveals one hidden position; the contact half
-plots a random share of the eligible OPCOM units where they are marching. They answer different questions — *where is
+plots a random share of the eligible OPCOM units where they stand. They answer different questions — *where is
 the war*, and *what is the enemy doing right now* — so making them compete for a single draw only ever
 starved whichever mattered more that hour. Either half can come up empty; the payout reports having nothing
 only when both do. The one exception is the unbought Intelligence Center's report, which pays the contact half
@@ -284,34 +284,41 @@ is the per-object cost this shape exists to avoid. `onPlayerKilled.sqf` strips e
 ## A contact is a snapshot
 
 An OPCOM unit is a virtual record (`DUWS_opcom_taskings`), a hashMap that marches a route every OPCOM tick
-and only becomes real men when a player comes near. A contact is what intel makes of one: one global marker
-on the position that record held at the moment the intel landed, and nothing after that.
+and only becomes real men when a player comes near. A contact is what intel makes of one: global markers on
+the position that record held at the moment the intel landed, and nothing after that.
 
-`server/search/fnc_intel_contact_init.sqf` draws it. The marker is a 0.8-size arrow (`mil_arrow_noShadow`) on the
-unit's position, rotated to its heading with `setMarkerDir` — the leg it is walking now, or the target once
-the route is spent, because a route bends around terrain and its last point is not where the unit is headed
-next. A streamed unit plots at its group leader and heads for the group's current waypoint instead, because
-its record's leg stops advancing once the group walks its own waypoints.
+`server/search/fnc_intel_contact_init.sqf` draws it. The unit is an OPFOR unit icon, the NATO diamond, picked by
+its recruit-menu row (`DUWS_intel_contactIcons`), so infantry, motorized, mechanized, armor, air, recon,
+support and naval units read apart. The row rather than the movement type, because a recon car and a supply
+truck are both wheeled.
 
-**The arrow is the whole contact: where it was, and which way it was going.** A type icon and an order label
-stood on it before, and both answer what the enemy *is doing* — a live readout of a unit the player has not
-found, which is what [§What intel is for](#what-intel-is-for) rules out. A fix reports a sighting, so two of
-the three facts were the wrong kind. A tasking with nowhere left to go therefore plots nothing rather than an
-arrow pointing at random.
+A unit on a marching order also gets a 0.8-size arrow (`mil_arrow_noShadow`), rotated to its heading with
+`setMarkerDir`: the leg it is walking now, or the target once the route is spent, because a route bends around
+terrain and its last point is not where the unit is headed next. The arrow stands 120 m off the icon along that
+heading, because the two overlap into one unreadable stamp at map zoom. A streamed unit plots at its group
+leader and heads for the group's current waypoint instead, because its record's leg stops advancing once the
+group walks its own waypoints.
 
-**The marker never moves, and that is the feature.** A tracker would cost one marker update per contact per
+**The icon says what the unit is; the arrow says which way it was going.** A unit at rest (`guard` or
+`garrison`), or a marching unit with no next point, plots the icon alone. No order label stands on the
+marker: it would answer what the enemy *is doing*, a live readout of a unit the player has not found, which
+[§What intel is for](#what-intel-is-for) rules out.
+
+**The markers never move, and that is the feature.** A tracker would cost one marker update per contact per
 tick for the whole team. So the contact ages: the unit marches on, and what the player holds is a last known
-position. The arrow starts fully opaque and fades out over `DUWS_intel_contact_life` (600 s), then the
-marker is deleted. One thread per contact holds only the tasking id and the marker name. The fade goes in 20
-steps rather than smoothly, because each `setMarkerAlpha` on a global marker is a network broadcast.
+position. The icon and the arrow start fully opaque and fade out together over `DUWS_intel_contact_life`
+(600 s), then the markers are deleted. One thread per contact holds only the tasking id and its marker names.
+The fade goes in 20 steps rather than smoothly, because each `setMarkerAlpha` on a global marker is a network
+broadcast.
 
-Every tasking whose order is not `guard` or `garrison` is eligible, virtual or streamed. A garrison is not
-eligible: it is the content of a zone, and the zone reveal is what puts that on the map.
+Every tasking is eligible, virtual or streamed, at rest or marching. The one exception is a garrison whose
+home zone is still hidden: a garrison rests on its zone, so its icon would mark a zone that the player has not
+found. Once the zone is revealed, its garrison can plot.
 
-**A unit that is already plotted is plotted again.** The payout deletes its old marker and draws a fresh one
+**A unit that is already plotted is plotted again.** The payout deletes its old markers and draws fresh ones
 at the unit's current position, and the fade starts again. `DUWS_intel_contacts` maps each tasking id to the
-marker that plots it now. Each plot takes a new marker name, so the thread of a replaced marker sees that it
-no longer owns the unit and stops.
+markers that plot it now. Each plot takes new marker names, so the thread of replaced markers sees that it no
+longer owns the unit and stops.
 
 **One payout plots a random share of the eligible units, inside a window that the Intelligence Center's level
 sets.** The window applies to every source, not only to the center's own report: a private term for the center
@@ -327,9 +334,9 @@ is how "one place decides what intel is worth" stops being true.
 
 The share is drawn again for each payout, and the units in it are picked at random. The share is rounded up,
 so a payout with any eligible unit plots at least one. An older draw could pay nothing while something was
-there to find, which read as an unreliable source rather than as a quiet sector. A unit that plots nothing
-does not use up a place in the share. The batch is announced once rather than per contact: eight Allseer lines queued behind
-each other would still be arriving minutes later.
+there to find, which read as an unreliable source rather than as a quiet sector. Garrisons usually outnumber
+the units on the march, so they take most of a share. The batch is announced once rather than per contact:
+eight Allseer lines queued behind each other would still be arriving minutes later.
 
 **The half is gated on the player knowing where at least one OPFOR-held zone is.** A march plotted across
 ground whose owner they have never found names nothing, and in hardcore that blank map is the opening the

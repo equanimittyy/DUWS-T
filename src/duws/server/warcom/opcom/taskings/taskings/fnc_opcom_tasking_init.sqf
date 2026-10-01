@@ -89,7 +89,7 @@ DUWS_fnc_opcom_drawable = {
 };
 
 // The complement of the two rests, never a list of names: an order added to the table is out on the ground by
-// default rather than forgotten by its readers (fnc_debug_opcom_ai, fnc_intel_payout).
+// default rather than forgotten by its readers (fnc_debug_opcom_ai, fnc_intel_contact_init).
 DUWS_fnc_opcom_marching = { params ["_t"]; !((_t get "order") in ["guard", "garrison"]) };
 
 call DUWS_fnc_opcom_ports_init;
