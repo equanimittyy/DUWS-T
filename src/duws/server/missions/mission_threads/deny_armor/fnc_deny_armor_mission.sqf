@@ -8,7 +8,7 @@ if (!([11, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exit
 #define DA_DISEMBARK   140      // troops dismount once their transport is this close to the tank
 #define DA_ARRIVE      15       // a live crewman this close to the tank is working on it (AI halts at the hull)
 #define DA_ARRIVE_ZONE 150      // a repaired tank this close to its home zone has got away (fail)
-#define DA_REQUISITION_DMG 0.65  // player-crewed hull repaired to <= this mean hit-point damage (>=35% component health) wins. Toolkit field repair floors the repairable parts at ~0.6; fnc_veh_comp_damage now means every part (the un-repaired hull included), so the gate keeps only thin headroom over that floor. Reads the parts, not raw getDammage, which field repair never moves.
+#define DA_REQUISITION_DMG 0.65  // mean part damage, not getDammage (field repair never moves it); toolkit repair floors the parts at ~0.6, so this is thin headroom over that floor
 
 // Repair time scales inversely with the nearest OPFOR zone's distance (NEAR at/inside NEARDIST, FAR
 // at/beyond FARDIST, linear between): a tank repaired near its own lines is the harder denial.
@@ -26,9 +26,8 @@ private _deadline = DUWS_curDeadlineAt;
 private _randomPos = _MissionPos;
 private _targetpos = _MissionPos;
 
-// The tank's ground: flat, hull-clear, within ~100 m of a road so the convoy rides the network in and the
-// repaired tank drives home on it, yet off the carriageway so it reads as a derelict. No road near the
-// objective falls back to the safe-pos by the target.
+// Within ~100 m of a road so the convoy rides the network in and the repaired tank drives home on it, yet
+// off the carriageway so it reads as a derelict.
 private _vehpos = [];
 private _tankRoads = _targetpos nearRoads 100;
 if !(_tankRoads isEqualTo []) then {
@@ -51,23 +50,18 @@ _tank setVehicleAmmo 0.1;
 [_tank] call fnc_veh_disable_engine;
 _tank setVariable ["persistent", true];
 
-// Then Overlord's opening brief (manual, place-name format, no callsign substitution).
 private _marker = [_randomPos, DA_RADIUS, _taskId, localize "STR_DUWS_T_destroyarmour_desc", _mission_name, "destroy"] call fnc_mission_present;
 private _place = [_randomPos] call fnc_place_name;
 [localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_destroyarmour_start", _place]] remoteExec ["fnc_duws_dialogue", 0];
 sleep 6;
 [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_destroyarmour_copy"] remoteExec ["fnc_duws_dialogue", 0];
 
-// Convoy origin: midway between the tank and the nearest OPFOR zone, jittered run to run. No known OPFOR
-// zone falls back to the fixed distance on a random bearing. Floored clear of the objective ring so the
-// convoy never starts on top of the tank.
 private _opforZones = missionNamespace getVariable ["WARCOM_zones_controled_by_OPFOR", []];
 private _bearing = random 360;
 private _convoyDist = DA_CONVOY_DIST;
 private _zoneDist = DA_REPAIR_NEARDIST;   // no zone known -> treat as the near case, the full repair window
-private _zonePos = [];                     // the tank's home once repaired: the zone it drives back to
-// Prefer the siting pass's vetted home zone (corridor clear of BLUFOR) while still OPFOR-held, else
-// the nearest held zone to the tank. Neither -> the synthetic exfil below stands in.
+private _zonePos = [];
+// Prefer the siting pass's vetted home zone (corridor clear of BLUFOR) while still OPFOR-held.
 private _nearest = [];
 if (!(_destZone isEqualTo []) && {(_opforZones findIf { _x distance2D _destZone < 50 }) >= 0}) then {
     _nearest = _destZone;
@@ -84,10 +78,9 @@ if !(_nearest isEqualTo []) then {
 };
 private _repairTime = linearConversion [DA_REPAIR_NEARDIST, DA_REPAIR_FARDIST, _zoneDist, DA_REPAIR_NEAR, DA_REPAIR_FAR, true];
 
-// Convoy start: MUST snap to a road, drive in crossing no water. Roll the approach (bearing jittered,
-// spread and search radius widening each miss) until a road-snapped, dry start is found -- an off-network
-// start fights the pathfinder, one across an inlet never arrives. Past the cap any road is taken (road is
-// the hard requirement, dry corridor a preference).
+// Convoy start: MUST snap to a road, drive in crossing no water -- an off-network start fights the
+// pathfinder, one across an inlet never arrives. Past the cap any road is taken (road is the hard
+// requirement, dry corridor a preference).
 private _baseBearing = _bearing;
 private _convoyStart = [];
 private _roadR = 300;
@@ -97,7 +90,9 @@ while { _convoyStart isEqualTo [] } do {
     private _spread = 15 + (_spin * 5);
     _bearing = _baseBearing + (random (2 * _spread) - _spread);
     private _entry = _targetpos getPos [_convoyDist, _bearing];
-    private _roads = _entry nearRoads _roadR;
+    // The snap reaches _roadR from the probe, so it re-applies the probe's floor: a start inside it seats
+    // the lead truck at the tank.
+    private _roads = (_entry nearRoads _roadR) select { (_x distance2D _vehpos) >= DA_RADIUS + 100 };
     if !(_roads isEqualTo []) then {
         private _cand = getPosATL (_roads select 0);
         // Never seat the column inside BLUFOR's area of influence: a convoy forming up in the player's
@@ -109,18 +104,16 @@ while { _convoyStart isEqualTo [] } do {
     if (_spin % 6 == 0) then { _roadR = _roadR + 200 };
 };
 
-// No zone to reach (all still OPFOR, or none created): a synthetic exfil out past the settled convoy
-// start on its bearing stands in, so the escape is a real drive rather than an unreachable target.
+// No OPFOR zone left: a synthetic exfil past the convoy start stands in, so the escape is a real drive
+// rather than an unreachable target.
 if (_zonePos isEqualTo []) then { _zonePos = _targetpos getPos [_convoyDist + 500, _bearing] };
 
-// The tank crew: two crewmen and the repairing engineer, their own group so the win test reads exactly
-// these three.
+// Their own group so the win test reads exactly these three.
 private _crewGrp = [_convoyStart, EAST, [opfor_CREW_X, opfor_CREW_X, opfor_ENG_SOLDIER_X], [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
 _crewGrp deleteGroupWhenEmpty true;
 private _crewUnits = units _crewGrp;
 
-// The escort rifle team, placed on the exact convoy point (posture "none" overrides the band). A team,
-// not a vehicle token, so it is faction-safe on a pack that never named this role.
+// A team, not a vehicle token, so it is faction-safe on a pack that never named this role.
 private _teamGrp = ["team", _convoyStart, DA_RADIUS, "none", _convoyStart] call fnc_spawn_team;
 private _teamUnits = if (isNull _teamGrp) then { [] } else { units _teamGrp };
 
@@ -138,7 +131,7 @@ private _riders = _crewUnits + _teamUnits;
 (_laid select 0) params ["_t0p", "_t0d"];
 _t0p = [_t0p, opfor_TRANS_TRUCK_X] call fnc_convoy_fit;
 private _truckSpawn = [_t0p, _t0d, opfor_TRANS_TRUCK_X, EAST] call BIS_fnc_spawnVehicle;
-private _truck = _truckSpawn select 0;                 // lead truck, watched for the disembark trigger
+private _truck = _truckSpawn select 0;
 _truck setDir _t0d;
 private _trucks = [_truck];
 private _truckGrps = [_truckSpawn select 2];
@@ -213,12 +206,9 @@ _wp setWaypointCompletionRadius 40;
 _convoyGrp setVariable ["DUWS_convoy_route0", _route0];
 [_convoyGrp] spawn fnc_convoy_drive;
 
-// The convoy intel holds a beat behind the open: Overlord's brief already played at mission start
-// (above); 10s on, the approach arrow drops and Allseer calls the eyes-on -- the convoy intel is never
-// handed the instant the mission opens.
+// The convoy intel is never handed the instant the mission opens.
 sleep 10;
-// Orange arrow at the entry point, pointing the way it drives. Approach direction only (the ellipse
-// marks the tank), so it stays static and clears once the convoy is in and engaged.
+// Approach direction only (the ellipse marks the tank), so it clears once the convoy arrives or is engaged.
 private _arrow = format ["da_arrow_%1%2", round (_targetpos select 0), round (_targetpos select 1)];
 deleteMarker _arrow;   // a rounded-position name can collide with a prior mission's leftover
 createMarker [_arrow, _convoyStart];
@@ -230,9 +220,6 @@ _arrow setMarkerAlpha 0.8;
 _arrow setMarkerText localize "STR_DUWS_T_destroyarmour_arrow";
 [localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_destroyarmour_convoy"] remoteExec ["fnc_duws_dialogue", 0];
 
-// Teardown for both outcomes: clear both markers, end the task, hand the objective to map cleanup.
-// mission_end flags claimed units on a ~5-minute far-clock rather than poofing them, so a convoy the
-// player is still fighting does not blink out.
 private _finish = {
     params ["_status"];
     // Drop the mission-only protection: a tank the player took is now theirs under ordinary cleanup
@@ -241,19 +228,12 @@ private _finish = {
     _tank setVariable ["persistent", false];
     _convoyGrp setVariable ["DUWS_convoy_stop", true];
     deleteMarker _arrow;
-    // Mechanical teardown through the shared chokepoint: marker clear, task state, slot release. The
-    // branches keep their own outcome line, reward and timeout notice, so finish speaks and pays nothing
-    // here (line [], pay false, notify false).
+    // The branches keep their own outcome line, reward and timeout notice, so finish speaks and pays nothing.
     [_mission_name, _taskId, _status, _targetpos, DA_RADIUS, [_marker], [], false, _compKey, false, false] call fnc_mission_finish;
 };
 
-// The repair race. WIN when the tank is denied (crew dead, or tank destroyed) or a player requisitions it
-// (crews it repaired to 50% mean component health or better); FAIL when a live crew drives the repaired tank home, or on the deadline.
-// Between: the crew dismount once a transport reaches the tank and work the hull; the clock advances only
-// while a crewman is at it and no player has taken it.
-// _underAttack = the column has gone COMBAT, OR a convoy vehicle took enemy fire (HandleDamage flag) or is
-// destroyed, or any man is down. Tripping it releases the convoy driver (below), whose exit re-enables the
-// drivers' FSM so the escort manoeuvres natively rather than staying force-marched.
+// Tripping this releases the convoy driver (below), whose exit re-enables the drivers' FSM so the escort
+// manoeuvres natively rather than staying force-marched.
 private _underAttack = {
     (!isNull _convoyGrp && {behaviour (leader _convoyGrp) == "COMBAT"})
     || {(_convoyVeh findIf { !alive _x || {_x getVariable ["DA_underFire", false]} }) >= 0}
@@ -329,8 +309,6 @@ while { true } do {
     };
 
     if (!_dismounted) then {
-        // The crew dismount when a transport reaches the tank, or once none is left alive (survivors bail
-        // and finish on foot), and make for the hull.
         private _aliveTrucks = _trucks select { alive _x };
         if (_aliveTrucks isEqualTo [] || {(_aliveTrucks findIf { (_x distance2D _tank) < DA_DISEMBARK }) >= 0}) then {
             _dismounted = true;
@@ -357,9 +335,6 @@ while { true } do {
                     private _seats = [{ _this moveInDriver _tank }, { _this moveInCommander _tank }, { _this moveInGunner _tank }];
                     { _x call (_seats param [_forEachIndex, {}]) } forEach _liveCrew;
                     (units _crewGrp) joinSilent _convoyGrp;
-                    // Home at a road pace unless the convoy was hit: an unopposed crew drives back on
-                    // LIMITED, an ambushed one races on FULL. Same casualty/damage test (_underAttack)
-                    // that pours the security team out.
                     private _homeSpeed = ["LIMITED", "FULL"] select (call _underAttack);
                     _convoyGrp setBehaviour "SAFE";
                     _convoyGrp setCombatMode "YELLOW";
