@@ -170,7 +170,7 @@ if (DUWS_campaignLoaded) then { call _fnc_resolveFactions };
 // Everything below consumes only PosOfBLUHQ (set at placement) until this gate.
 while {!(["BOOT", "createzone_server (setup screens committed)", {createzone_server}, 300] call fnc_waitLogged)} do {};
 
-// HQ placement runs after the confirmation screen now, so this cannot gate the resolution loop
+// HQ placement runs after the confirmation screen, so this cannot gate the resolution loop
 // above: the screen would be waiting on a placement the player has not been offered yet. Kept as
 // a guard here, where PosOfBLUHQ is about to be read for real.
 while {!(["BOOT", "chosen_hq_placement (player is placing HQ)", {chosen_hq_placement}, 300] call fnc_waitLogged)} do {};
@@ -307,12 +307,12 @@ if (isServer) then {
     if (isNil "playerKillCount") then { playerKillCount = createHashMap; };
     departedKillBatches = 0;
 
-    // Records the classes the corpse search treats as enemy (fnc_search_pick) while `side` still reads
-    // the fighting side. Separate from the kill tally, which exits on kills no player made. Civilian
-    // classes are skipped: a civilian body flipped to EAST would make its whole class searchable.
+    // Records the classes the corpse search treats as enemy (fnc_search_pick) by `side group`: `side`
+    // already reads civilian here. Separate from the kill tally, which exits on kills no player made.
+    // Civilian classes are skipped: a civilian body flipped to EAST would make its whole class searchable.
     addMissionEventHandler ["EntityKilled", {
         params ["_killed"];
-        if (!(_killed isKindOf "CAManBase") || {side _killed != east}) exitWith {};
+        if (!(_killed isKindOf "CAManBase") || {side group _killed != east}) exitWith {};
         private _class = typeOf _killed;
         if (_class in DUWS_enemyManClasses || {getNumber (configFile >> "CfgVehicles" >> _class >> "side") == 3}) exitWith {};
         DUWS_enemyManClasses pushBack _class;
@@ -343,11 +343,11 @@ if (isServer) then {
         };
         if (isNull _shooter) exitWith {};
 
-        // Only hostiles pay: EntityKilled also fires for civilians, friendlies and empty vehicles,
-        // and paying for civilian kills would reward exactly what the town reputation charge
-        // penalises. 0.6 is the engine's hostile/friendly cutoff; every playable side pair is set
-        // to 0, so INDEPENDENT zombies still count.
-        if ((side _shooter) getFriend (side _killed) >= 0.6) exitWith {};
+        // Only hostiles pay: EntityKilled also fires for civilians, friendlies and empty vehicles (no
+        // group), and paying for civilian kills rewards what the town reputation charge penalises.
+        // `side group`, not `side`: the dead already read civilian here. 0.6 is the engine's hostile
+        // cutoff; every playable side pair is set to 0, so INDEPENDENT zombies still count.
+        if (isNull group _killed || {(side _shooter) getFriend (side group _killed) >= 0.6}) exitWith {};
 
         // The tally converts to CP and AP on the periodic sweep below, not here.
         private _uid = getPlayerUID _shooter;
