@@ -404,7 +404,7 @@ fnc_roadblock_gate_arm = {
 // _zoneKey "" is standalone, on its own ring; set, it mirrors that zone's garrison instead.
 fnc_hardpoint_register = {
     params ["_key", "_type", "_pos", ["_side", "opfor"], ["_zoneKey", ""], ["_dir", 0], ["_ring", 0]];
-    (DUWS_hardpointStreaming getOrDefault [_type, [600, 300, false, 0]])
+    (DUWS_hardpointStreaming getOrDefault [_type, [600, 180, false, 0]])
         params ["_radius", "_grace", "_neverStream", "_airRing"];
     // _ring overrides the type's, for a hardpoint bigger than one emplacement: a minefield belt runs
     // kilometres, and the poller only looks at a site somebody is already inside.
@@ -419,7 +419,8 @@ fnc_hardpoint_register = {
     _occ set ["airRing", _airRing];
     _occ set ["neverStream", _neverStream];
     _occ set ["hpZoneKey", _zoneKey];
-    _occ set ["lastSeen", time];
+    // Spent, not time: a register-time stamp read as BLUFOR just gone and raised every hardpoint.
+    _occ set ["lastSeen", -1e6];
 
     // Registry row for OPCOM and the map readout: [key, pos, type, side, zone, revealed, dir]. Presence is
     // liveness -- the clearance check deletes the row on fall. Hardcore gates only the initial intel: what
@@ -466,6 +467,7 @@ fnc_hardpoint_register = {
         private _men = [_objs, _pos, _side, _key, _occ get "hpGarrison"] call fnc_hardpoint_garrison;
         ([_key] call fnc_site_roster) append _men;
         _occ set ["awake", true];
+        _occ set ["lastSeen", time];
         missionNamespace setVariable [format ["DUWS_hpPeak_%1", _key], [_key] call fnc_site_alive];
     };
 
@@ -490,6 +492,7 @@ fnc_hardpoint_register = {
         private _up = [_pos, _radius, _occ get "minAI", _airRing] call fnc_site_bluforOrAir;
         _occ set ["looseUp", _up];
         if (_up) then {
+            _occ set ["lastSeen", time];
             ([_key] call fnc_site_roster) append
                 ([_objs, _pos, _side, _key, _occ get "hpGarrison", true] call fnc_hardpoint_garrison);
         };

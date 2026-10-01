@@ -212,7 +212,7 @@ is not rolled: generation retries it until it stands, and gives up only on a map
 A hardpoint registers as a site the same way a zone does — `fnc_site_register`,
 `fnc_site_occupant_register`, `fnc_site_hooks_set` (`server/misc/fnc_site_stream_init.sqf:19,49,87`)
 — so the shared poller tests it against the same per-pass player list rather than paying a spatial
-query per hardpoint (`fnc_hardpoint_register`, `server/init_zones/fnc_hardpoint_stream.sqf:401-506`).
+query per hardpoint (`fnc_hardpoint_register`, `server/init_zones/fnc_hardpoint_stream.sqf:405-512`).
 What differs from a zone is the lifecycle: one gun-and-garrison emplacement that wakes, sleeps and
 can be cleared, never captured or retaken.
 
@@ -232,14 +232,20 @@ seen on two passes in a row, so one sighting of a passing aircraft raises nothin
 moment. A latch would read a crewed emplacement as empty and stow it in front of the player when its
 grace ran out.
 
+**The grace starts only from a real sighting.** When `fnc_hardpoint_register` crews a hardpoint, its
+180 s grace starts at that moment. When it stows one, the grace starts already spent, so only BLUFOR
+in the ring can raise it. A grace stamped at every registration raised every standalone hardpoint and
+battery garrison on the first pass after a campaign start or load. The grace is short because a
+defender in a fight (`fnc_duws_engaged`) holds the stow past it.
+
 **Pinning is `neverStream` only.** `MORTAR`, `ARTY` and `MINEFIELD` are marked `neverStream` in
-`DUWS_hardpointStreaming` (`server_var_init.sqf:377-393`). A battery is pinned so OPCOM can task it with
+`DUWS_hardpointStreaming` (`server_var_init.sqf:394-421`). A battery is pinned so OPCOM can task it with
 no player near; a minefield is pinned because a mine has to be made with `createMine`, and the
 composition's own deploy rebuilds members with `createVehicle`, which would hand back inert props.
 A minefield instead streams on its own path, square by square ([Siting](#siting)).
 On registration, every member of their
 composition is re-filed through `fnc_duws_keep` with `_pinned = true`
-(`fnc_hardpoint_stream.sqf:473`), which sets `DUWS_noStow` and excludes the object from
+(`fnc_hardpoint_stream.sqf:478`), which sets `DUWS_noStow` and excludes the object from
 `fnc_duws_stow`'s crewed-member refusal and its delete pass
 (`server/misc/fnc_composition_stream_init.sqf:38-46,93-100`). Every other type stows and redeploys
 like an ordinary composition: garrisons are raised fresh from `DUWS_fnc_teamRoster` on each raise
@@ -300,7 +306,7 @@ vanish with the clear.
 ## Reveal
 
 Every hardpoint gets a marker on registration: shape `"ICON"`, type `"loc_Bunker"`, coloured by side,
-with the type token as its text (`fnc_hardpoint_stream.sqf:431-438`) — one icon shape for every type,
+with the type token as its text (`fnc_hardpoint_stream.sqf:436-443`) — one icon shape for every type,
 distinguished by label rather than by symbol. The marker's alpha and the revealed flag start at the rule
 in [`intel_system.md`](intel_system.md#what-is-hidden-depends-on-when-it-came-into-existence): a hardpoint
 laid by campaign generation is shown outside hardcore and hidden under it, and one built in play
