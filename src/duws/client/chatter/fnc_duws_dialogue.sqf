@@ -65,7 +65,7 @@ if (_channel isEqualTo "") then {
 // The tone marks a radio transmission arriving, so both radio channels earn it; VOICE is in
 // the room and does not. NET's plays from the drain when the line reaches the screen (it may
 // sit behind others first); SUB-NET's plays below, when it prints.
-private _squelch = _channel in ["NET", "SUB-NET"];
+private _squelch = _channel in ["NET", "SUB-NET"] && {profileNamespace getVariable ["DUWS_T_radioSquelch", true]};
 
 // Callsign substitution belongs here rather than at the call site, and below the decision
 // above: the table holds the stringtable's "Alpha 1-1", so a host who has renamed the team

@@ -1,8 +1,7 @@
 // Locality: client. Per-player display/audio options, opened from the medical tent. Every setting
 // lives in profileNamespace (the player's profile, not the campaign save), so each co-op client
-// keeps its own choice and it survives death and reload with no server state. The three visibility
-// toggles work by flag alone: the earplugs, disguise and view-distance actions read these same
-// flags in their addAction conditions, so hiding one takes effect on the next frame with no re-add.
+// keeps its own choice and it survives death and reload with no server state. Each reader checks
+// its flag at use, so a toggle takes effect at once with no action re-add.
 //
 // Re-opens itself after each toggle so the row labels reflect the new state; fnc_open_action_menu
 // closes before running a row's code, so the fresh dialog replaces rather than stacks.
@@ -12,6 +11,7 @@ if (!hasInterface) exitWith {};
 private _musicOn = !(profileNamespace getVariable ["DUWS_T_muteMissionMusic", false]);
 private _earOn   = profileNamespace getVariable ["DUWS_T_showEarplugs", true];
 private _disgOn  = profileNamespace getVariable ["DUWS_T_showDisguise", true];
+private _sqOn    = profileNamespace getVariable ["DUWS_T_radioSquelch", true];
 
 private _label = {
     params ["_nameKey", "_on"];
@@ -64,6 +64,20 @@ private _green = [0.082, 1, 0, 1];
             hint format [localize "STR_DUWS_T_USEROPT_HINT",
                 localize "STR_DUWS_T_USEROPT_DISGUISE",
                 localize (["STR_DUWS_T_USEROPT_OFF", "STR_DUWS_T_USEROPT_ON"] select _show)];
+            [] call fnc_user_options_menu;
+        },
+        [],
+        _green
+    ],
+    [
+        ["STR_DUWS_T_USEROPT_SQUELCH", _sqOn] call _label,
+        {
+            private _on = !(profileNamespace getVariable ["DUWS_T_radioSquelch", true]);
+            profileNamespace setVariable ["DUWS_T_radioSquelch", _on];
+            saveProfileNamespace;
+            hint format [localize "STR_DUWS_T_USEROPT_HINT",
+                localize "STR_DUWS_T_USEROPT_SQUELCH",
+                localize (["STR_DUWS_T_USEROPT_OFF", "STR_DUWS_T_USEROPT_ON"] select _on)];
             [] call fnc_user_options_menu;
         },
         [],

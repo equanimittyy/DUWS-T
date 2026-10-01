@@ -6182,6 +6182,18 @@
                 <Chinese>偽裝</Chinese>
                 <Spanish>Disfraz</Spanish>
             </Key>
+            <Key ID="STR_DUWS_T_USEROPT_SQUELCH">
+                <Original>Radio squelch</Original>
+                <English>Radio squelch</English>
+                <Chinesesimp>无线电提示音</Chinesesimp>
+                <German>Funk-Signalton</German>
+                <Polish>Trzask radia</Polish>
+                <Czech>Šum vysílačky</Czech>
+                <Russian>Шум рации</Russian>
+                <French>Grésillement radio</French>
+                <Chinese>無線電提示音</Chinese>
+                <Spanish>Chasquido de radio</Spanish>
+            </Key>
                     <Key ID="STR_DUWS_T_repair_select_pylon">
                 <Original>Select pylon and weapon.</Original>
                 <English>Select pylon and weapon.</English>
