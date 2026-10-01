@@ -169,16 +169,6 @@ class CfgNotifications
         difficulty[] = {};
     };
 
-    class CPaddedattrition
-    {
-        title = "$STR_DUWS_T_CPATTRITION_TITLE";
-        iconText = "+%1";
-        description = "$STR_DUWS_T_CPATTRITION_MSG";
-        color[] = {0.5,1,1,1};
-        priority = 0;
-        difficulty[] = {};
-    };
-
     class APaddedmission
     {
         title = "$STR_DUWS_T_elszwwpc2";

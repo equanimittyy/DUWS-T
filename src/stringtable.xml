@@ -10326,18 +10326,6 @@
                 <French>Le BLUFOR a reçu %1 CP.</French>
                 <Chinese>BLUFOR 已獲得 %1 CP。</Chinese>
             </Key>
-            <Key ID="STR_DUWS_T_CPATTRITION_TITLE">
-                <Original>CP Bonus: Enemy attrition</Original>
-                <English>CP Bonus: Enemy attrition</English>
-                <Chinesesimp>CP 奖励：消耗敌军</Chinesesimp>
-                <German>CP-Bonus: Feindzermürbung</German>
-                <Polish>Premia CP: Straty wroga</Polish>
-                <Czech>Bonus CP: Opotřebení nepřítele</Czech>
-                <Russian>Бонус CP: истощение противника</Russian>
-                <French>Bonus CP : usure de l'ennemi</French>
-                <Chinese>CP 獎勵：消耗敵軍</Chinese>
-                <Spanish>Bonificación de CP: desgaste enemigo</Spanish>
-            </Key>
             <Key ID="STR_DUWS_T_CPATTRITION_MSG">
                 <Original>Due to your efforts, BLUFOR was awarded %1 CP.</Original>
                 <English>Due to your efforts, BLUFOR was awarded %1 CP.</English>

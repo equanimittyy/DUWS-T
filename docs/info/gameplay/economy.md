@@ -240,7 +240,7 @@ a cheaper way to liquidate a slate, which inverts what the death penalty is for.
 | Bandit corpse loot | `server/bandits/fnc_bandit_spawn.sqf` | half of bandits carry 1 `Money_roll`, none when the inventory is full |
 | Search payout (`pool` kind) | `server/search/fnc_search_claim.sqf` | +1–3 CP, on a flagged body or objective whose payout draw lands on `pool` |
 | Vehicle recycle | `server/supports/fnc_activateBaseRecycleStation.sqf` | `DUWS_fnc_calculateVehicleValue` per empty vehicle, summed then rounded |
-| Kill income | `server/server_init.sqf:275-361` | +1 per 10 hostile kills, swept on the economy tick; the remainder carries |
+| Kill income | `server/server_init.sqf:306-408` | +1 per 10 hostile kills, swept every 60 seconds (`kill_cp_period`) with a hint to each player paid; the remainder carries |
 | Killhouse training | `server/killhouse/fnc_createKillhouse.sqf:303-304` | +1 for clearing 10 targets, or +3 for clearing 20 challenge enemies, once per run |
 | Rare-zombie kill (WBK) | `server/civilian/fnc_civ_handler_wbk.sqf:359` | +10, or +30 for the Goliath |
 | Support refund | `client/supports/fnc_supports_init.sqf` | the recorded charge in full; `support_death_refund` of the slate when its holder dies |
@@ -263,7 +263,7 @@ ground fought over repeatedly is no less strategically valuable, so its AP must 
 
 **The passive-hold loop is the campaign's single economy clock.** It is spawned exactly once
 (`server/warcom/fnc_init_OPFOR_WARCOM.sqf:17`), so income does not stack per zone captured, and every
-passive faucet — the zone AP trickle both sides, BLUFOR town CP, OPFOR town AP and kill income — is
+passive faucet — the zone AP trickle both sides, BLUFOR town CP and OPFOR town AP — is
 paid from the same 30-minute iteration. Equal nominal periods are not one clock:
 a suspended thread resumes when the scheduler reaches it, so separate loops accrue their own slop and
 walk apart. No faucet is gated on holdings — a side with no towns or zones simply computes 0 from
@@ -274,8 +274,9 @@ CP and zone AP taken, with each pool's total; the throttle cut as the subtitle w
 cutting the faucets; and each revealed town whose reputation rose, with BLUFOR's radio push and the
 town's CP income if it is in the BLUFOR band. The readout leaves out OPFOR's side of the tick. Allseer
 cues it on SUB-NET with a line that carries no figures, so the tick is not announced twice. Kill
-income rides the same tick but is kept out of the readout and announced only to the player who earned
-it: naming attrition in a campaign-wide report would advertise kill farming as an income route.
+income has its own one-minute sweep and stays out of the readout. It is announced only to the player
+who earned it, because naming attrition in a campaign-wide report would advertise kill farming as an
+income route.
 
 **The throttle grows income with campaign size, then caps it.** `DUWS_econ_throttle`
 (`fnc_WARCOM_init.sqf`) scales the zone trickle and town income on both sides. It is 1 up to 4 zones.

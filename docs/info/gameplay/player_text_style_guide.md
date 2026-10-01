@@ -205,11 +205,7 @@ information, cyan for economy — so the sentence itself does not have to shout 
 
 **One event, one surface.** A hint doubling a voiced radio line, or a card doubling a hint, buys
 nothing: the card clips at ~60 characters where the hint had no limit, and the radio already said it.
-There are two standing exceptions. Kill income (`CPaddedattrition`, `server/server_init.sqf`) is by
-audience a per-player hint but wears the cyan economy card, because CP arriving is what the card
-vocabulary already means and kill income is the one income that would otherwise look different; it
-fires on the economy tick rather than on an action, so it is neither frequent enough to read as noise
-nor small enough to want burying. Incoming OPCOM artillery (`DUWS_fnc_opcom_fireWarn`,
+There is one standing exception. Incoming OPCOM artillery (`DUWS_fnc_opcom_fireWarn`,
 `server/warcom/opcom/appraisal/fnc_opcom_fire.sqf`) is voiced by Allseer and also carded red
 (`critical`), because a barrage kills whoever stays and a radio line can scroll past under other
 chatter.

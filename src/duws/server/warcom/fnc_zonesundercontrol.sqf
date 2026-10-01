@@ -1,7 +1,7 @@
 if (!isServer) exitWith {};
 /*
-    The campaign economy tick: one pass paying the zone AP trickle (both sides), town income
-    (BLUFOR CP, OPFOR AP) and kill income together, run every 30 minutes by the one clock
+    The campaign economy tick: one pass paying the zone AP trickle (both sides) and town income
+    (BLUFOR CP, OPFOR AP) together, run every 30 minutes by the one clock
     WARCOM init spawns. One clock, not one timer per faucet of the same nominal period: a
     suspended thread resumes only when the scheduler reaches it, so separate loops accrue their own
     slop and walk apart over a session. Driven from WARCOM init because that runs unconditionally,
@@ -73,10 +73,6 @@ WARCOM_opfor_lastIncome = _opfAP;
 if (_bluCP > 0)     then { [_bluCP, "civ_town_income"] call fnc_cp_adjust };
 if (_bluZoneAP > 0) then { ["BLU", _bluZoneAP, "zone_trickle", _bluZoneAP] call fnc_ap_adjust };
 if (_opfAP > 0)     then { ["OPF", _opfAP, "opfor_income", round (_opfAP * DUWS_opfor_payout_tier)] call fnc_ap_adjust };
-
-// Pays and notifies each player its own kill award; deliberately absent from the territory
-// hint below. Naming attrition there would advertise kill farming as an income route.
-call fnc_kill_income_sweep;
 
 // Only on a paid tick: a reduced-income subtitle with no income to reduce would read as an error.
 // An unrevealed town stays off it, or the hint would name what the town reveal keeps hidden.

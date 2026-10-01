@@ -108,11 +108,10 @@ duws_callsign = "Alpha 1-1";publicVariable "duws_callsign";
 
 cp_reward_multiplier = 1;publicVariable "cp_reward_multiplier";
 
-// Kill income: each economy tick, a player's tally converts at kill_cp_award CP per kill_cp_kills
-// kills, debiting the paid-for kills and carrying the remainder forward. No period here -- it rides
-// the economy tick's own clock. Server-only: tally, sweep and payout all live on the server.
+// Server-only; a tally below kill_cp_kills carries to the next sweep.
 kill_cp_kills = 10;
 kill_cp_award = 1;
+kill_cp_period = 60;
 
 // Distance at which a FOB or HQ garrison stops being simulated -- nothing culled it before, so every
 // base ran pathing and targeting for the whole campaign regardless of distance. Server-only.

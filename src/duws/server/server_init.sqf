@@ -383,32 +383,27 @@ if (isServer) then {
     addMissionEventHandler ["Ended", { ["mission end"] call DUWS_fnc_campaignSave }];
     addMissionEventHandler ["MPEnded", { ["mission end"] call DUWS_fnc_campaignSave }];
 
-    // Paid in one periodic sweep rather than per kill: a tally the player watches build reads as
-    // campaign economy, where a payout per body reads as a score feed. Defined here beside the
-    // handlers that fill the tally, but driven by the campaign economy tick in
-    // server/warcom/fnc_zonesundercontrol.sqf -- a second timer of the same nominal period would
-    // accrue its own scheduler slop and walk out of phase.
-    fnc_kill_income_sweep = {
-        {
-            private _uid = getPlayerUID _x;
-            private _kills = playerKillCount getOrDefault [_uid, 0];
-            private _batches = floor (_kills / kill_cp_kills);
-            if (_batches > 0) then {
-                private _award = _batches * kill_cp_award;
-                // Server-side caller: call runs inline, where remoteExec [...,2] would land a frame later.
-                [_award, "kill_income"] call fnc_cp_adjust;
-                playerKillCount set [_uid, _kills - _batches * kill_cp_kills];
-                // A card, not a hint -- deliberately the exception to the one-player-to-hint rule in
-                // docs/info/gameplay/player_text_style_guide.md: CP arriving speaks the card vocabulary
-                // its siblings cpaddedmission and apaddedmission already own, so moving it would make
-                // kill income the only income that reads as a refusal.
-                ["CPaddedattrition", [_award]] remoteExec ["BIS_fnc_showNotification", _x, false];
-            };
-        } forEach allPlayers;
+    // Swept, not paid per batch, so a burst of kills lands as one hint per player.
+    [] spawn {
+        while {true} do {
+            sleep kill_cp_period;
+            {
+                private _uid = getPlayerUID _x;
+                private _kills = playerKillCount getOrDefault [_uid, 0];
+                private _batches = floor (_kills / kill_cp_kills);
+                if (_batches > 0) then {
+                    private _award = _batches * kill_cp_award;
+                    // Server-side caller: call runs inline, where remoteExec [...,2] would land a frame later.
+                    [_award, "kill_income"] call fnc_cp_adjust;
+                    playerKillCount set [_uid, _kills - _batches * kill_cp_kills];
+                    [format [localize "STR_DUWS_T_CPATTRITION_MSG", _award]] remoteExec ["hint", _x];
+                };
+            } forEach allPlayers;
 
-        if (departedKillCP > 0) then {
-            [departedKillCP, "kill_income_departed"] call fnc_cp_adjust;
-            departedKillCP = 0;
+            if (departedKillCP > 0) then {
+                [departedKillCP, "kill_income_departed"] call fnc_cp_adjust;
+                departedKillCP = 0;
+            };
         };
     };
 };
