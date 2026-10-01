@@ -169,11 +169,11 @@ is stored as squares of `[centre, plan, objects]`, where the plan is the positio
 and an empty object list means the square is off the map. `fnc_hardpoint_minefield_cycle`, run from the
 hardpoint tick, makes a square's mines inside `DUWS_mineStreamIn` (350 m) and deletes them past
 `DUWS_mineStreamOut` (450 m), so a belt costs its stream ring rather than its length. The in-ring covers a
-vehicle crossing one 10 s site poll at speed. A square with somebody inside `MINE_NO_POP` (50 m) of its
-centre waits until they move off, so a mine never appears under the player it would kill. Such a field also
-registers unlatched, unlike every other site: the arrival latch reads false until BLUFOR have once been
-outside the ring, and a belt's ring is its whole length, so a field laid near the player stayed inert
-until they walked a kilometre off it. Each pass first prunes every standing square back to the
+vehicle crossing one 2 s site poll at speed. A square with somebody inside `MINE_NO_POP` (50 m) of its
+centre waits until they move off, so a mine never appears under the player it would kill. Such a field
+registers unlatched, as every hardpoint does ([Streaming and garrison](#streaming-and-garrison)): a latch
+reads false until BLUFOR have once been outside the ring, and a belt's ring is its whole length, so a
+latched field laid near the player stayed inert until they walked a kilometre off it. Each pass first prunes every standing square back to the
 mines still armed, dropping a spent mine's position with it, so ground the player cleared stays clear
 across a stow. `fnc_hardpoint_minefield_ring` gives the site radius such a field registers with — half its
 long side plus the stream-out distance — since the poller only looks at a site somebody is already
@@ -207,19 +207,27 @@ is not rolled: generation retries it until it stands, and gives up only on a map
 ## Streaming and garrison
 
 A hardpoint registers as a site the same way a zone does — `fnc_site_register`,
-`fnc_site_occupant_register`, `fnc_site_hooks_set` (`server/misc/fnc_site_stream_init.sqf:30,66,110`)
+`fnc_site_occupant_register`, `fnc_site_hooks_set` (`server/misc/fnc_site_stream_init.sqf:19,49,87`)
 — so the shared poller tests it against the same per-pass player list rather than paying a spatial
-query per hardpoint (`fnc_hardpoint_register`, `server/init_zones/fnc_hardpoint_stream.sqf:297-341`).
+query per hardpoint (`fnc_hardpoint_register`, `server/init_zones/fnc_hardpoint_stream.sqf:401-506`).
 What differs from a zone is the lifecycle: one gun-and-garrison emplacement that wakes, sleeps and
 can be cleared, never captured or retaken.
 
 **A zone-child hardpoint mirrors its zone rather than streaming on its own ring.**
-`DUWS_fnc_hardpointZoneAwake` (`:32-37`) reads the zone's own garrison occupant and answers awake or
+`DUWS_fnc_hardpointZoneAwake` (`:21-24`) reads the zone's own garrison occupant and answers awake or
 raising; a standalone hardpoint instead wakes on its own presence ring
 (`DUWS_hardpointStreaming`'s `spawnRadius`/`grace` per type) and, for `AA`, an additional 5,000 m
 *air* ring so a jet is noticed before its ground ring would ever fire — the streaming answer to the
 same problem the plan raised for AA (a static gun cannot deploy fast enough to catch what crosses a
 600 m ring in seconds), solved here by waking earlier rather than by never sleeping.
+
+**A raise starts on the first site pass that finds BLUFOR on the ground in the ring.** The poller runs
+every 2 s (`SITE_TICK`), and the raise worker re-tests nothing before it deploys, so the wait after a
+player enters the ring is at most one pass plus the crew drop. An aircraft in the `AA` air ring must be
+seen on two passes in a row, so one sighting of a passing aircraft raises nothing. **No hardpoint registers latched.**
+`fnc_hardpoint_register` already crews or stows the emplacement for whoever is in the ring at that
+moment. A latch would read a crewed emplacement as empty and stow it in front of the player when its
+grace ran out.
 
 **Pinning is `neverStream` only.** `MORTAR`, `ARTY` and `MINEFIELD` are marked `neverStream` in
 `DUWS_hardpointStreaming` (`server_var_init.sqf:377-393`). A battery is pinned so OPCOM can task it with
@@ -228,7 +236,7 @@ composition's own deploy rebuilds members with `createVehicle`, which would hand
 A minefield instead streams on its own path, square by square ([Siting](#siting)).
 On registration, every member of their
 composition is re-filed through `fnc_duws_keep` with `_pinned = true`
-(`fnc_hardpoint_stream.sqf:319-321`), which sets `DUWS_noStow` and excludes the object from
+(`fnc_hardpoint_stream.sqf:473`), which sets `DUWS_noStow` and excludes the object from
 `fnc_duws_stow`'s crewed-member refusal and its delete pass
 (`server/misc/fnc_composition_stream_init.sqf:38-46,93-100`). Every other type stows and redeploys
 like an ordinary composition: garrisons are raised fresh from `DUWS_fnc_teamRoster` on each raise
@@ -264,7 +272,7 @@ burst's clear keeps any belief in those cells. Otherwise a post near a base woul
 
 ## Clearance
 
-`DUWS_fnc_hardpointClearCheck` (`fnc_hardpoint_stream.sqf:100-141`) runs on the shared per-hardpoint
+`DUWS_fnc_hardpointClearCheck` (`fnc_hardpoint_stream.sqf:84-129`) runs on the shared per-hardpoint
 tick and branches on type family:
 
 | Family | Cleared when |
@@ -278,18 +286,18 @@ Judged only while the hardpoint is deployed (`DUWS_hpPeak_<key>` present), so a 
 empty roster is never read as one beaten — the same guard a zone's own capture test uses.
 
 Clearing is latched and destructive to the record, not a flag: `DUWS_fnc_hardpointClear`
-(`:169-227`) deletes the row from `DUWS_hardpoints` outright (`:178`) rather than marking it cleared
+(`:156-213`) deletes the row from `DUWS_hardpoints` outright (`:167`) rather than marking it cleared
 in place, so a re-manned gun cannot un-clear what the player already took. Survivors are left where
-they fell, flagged for the cleanup sweep once the player is clear (`DUWS_binMe`, `:196`, on the
+they fell, flagged for the cleanup sweep once the player is clear (`DUWS_binMe`, `:182`, on the
 default lifetime) rather than deleted in front of anyone — a radio tower in particular can fall with
 defenders still alive, since its clear condition is the mast, not the garrison. The composition is
-released through `fnc_duws_release` (`:201`) like any other, so wrecks stay for the sweep rather than
+released through `fnc_duws_release` (`:187`) like any other, so wrecks stay for the sweep rather than
 vanish with the clear.
 
 ## Reveal
 
 Every hardpoint gets a marker on registration: shape `"ICON"`, type `"loc_Bunker"`, coloured by side,
-with the type token as its text (`fnc_hardpoint_stream.sqf:334-341`) — one icon shape for every type,
+with the type token as its text (`fnc_hardpoint_stream.sqf:431-438`) — one icon shape for every type,
 distinguished by label rather than by symbol. The marker's alpha and the revealed flag start at the rule
 in [`intel_system.md`](intel_system.md#what-is-hidden-depends-on-when-it-came-into-existence): a hardpoint
 laid by campaign generation is shown outside hardcore and hidden under it, and one built in play
@@ -299,10 +307,12 @@ hardpoint's own key rather than position, the way `fnc_zone_reveal` owns its fla
 `fnc_civ_town_reveal` owns `civ_visible`. It announces each reveal as an Allseer line on SUB-NET, naming
 the type (`DUWS_hardpointName`) and the nearest zone or town (`DUWS_fnc_hardpointNearestPlace`).
 
-Two ways a hidden hardpoint is found. **Proximity**: the streaming tick checks every player within
-100 m (`HP_REVEAL_RADIUS`, `fnc_hardpoint_stream.sqf:15`) of a still-hidden hardpoint whose parent
-zone (if any) is itself already revealed, and reveals it — a zone-child hardpoint cannot be found
-before its zone is. **Intel**: `fnc_intel_payout` draws `"HP"` as one of its kinds whenever the
+Two ways a hidden hardpoint is found. **Proximity**: each hardpoint registers a server trigger that
+fires when a player comes within 100 m (`HP_REVEAL_RADIUS`, `fnc_hardpoint_stream.sqf:13`) and its parent
+zone (if any) is already revealed (`DUWS_fnc_hardpointZoneFound`), as a zone reveals on entry — a
+zone-child hardpoint cannot be found before its zone is. A trigger checks every 0.5 s, where the site
+pass would let a driver cross the 100 m disc between two polls. It retires on firing, or with the
+hardpoint's clear. **Intel**: `fnc_intel_payout` draws `"HP"` as one of its kinds whenever the
 eligible set is non-empty — unrevealed, and either standalone or whose parent zone is already
 revealed (`server/search/fnc_intel_payout.sqf:48-60`) — matched by `fnc_zone_key`, the same key both a
 revealed zone and a hardpoint row carry.
@@ -327,7 +337,7 @@ anything back. Every hardpoint except a minefield pays, zone and standalone alik
 artillery or mortar hardpoint, of which a radio also pays `10 AP` and artillery `5 AP`. CP runs
 through `fnc_cp_adjust` and any AP through `fnc_ap_adjust`, each on its own carded notification naming
 the type and nearest zone or town — a single combined card buried the AP gain in the CP badge
-(`DUWS_fnc_hardpointClear`, `fnc_hardpoint_stream.sqf:209-225`; `notifications.hpp`, `HPdestroyed` /
+(`DUWS_fnc_hardpointClear`, `fnc_hardpoint_stream.sqf:204-212`; `notifications.hpp`, `HPdestroyed` /
 `HPdestroyedAP`). A zone hardpoint's bounty is paid on top of the zone's own capture bounty. A minefield
 pays nothing, a hazard removed rather than a garrison beaten, but its clear is still carded without a
 bounty badge (`HPcleared`).

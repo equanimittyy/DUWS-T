@@ -224,18 +224,6 @@ DUWS_fnc_zoneStow = {
 // poller holds the clock of every other site.
 DUWS_fnc_zoneRaiseWorker = {
     params ["_key", "_pos", "_size"];
-    // Confirmed after a 5s pause rather than on first perimeter contact, so a transiting helicopter or
-    // a patrol that turns back doesn't trigger a full rebuild for someone already leaving. Air uses the same terms the poller's wake does: a committed aircraft holds the raise, where discounting anything airborne would confirm an air wake straight back off.
-    sleep 5;
-    private _reach = _size + DUWS_streamArrivalMargin;
-    // The same second reading the poller's wake took, so the two cannot disagree and strand the site.
-    private _blu = ([_key] call DUWS_fnc_garrisonSideOf) isEqualTo "BLU";
-    private _confirmed = [_pos, _reach, 2, DUWS_zoneAirRing, DUWS_zoneAirCommitSpeed, true, _blu] call fnc_site_bluforOrAir;
-    if (!_confirmed && _blu) then { _confirmed = [_pos, _reach] call fnc_site_hostileNear };
-    if (!_confirmed) exitWith {
-        missionNamespace setVariable [ZONE_RAISE_SLOT(_key), false];
-    };
-
     // Cleared here rather than where the band is raised: the turret crews below are garrison too, and
     // clearing after them would drop them.
     [_key] call fnc_site_roster_clear;

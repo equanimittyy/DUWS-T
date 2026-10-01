@@ -22,7 +22,7 @@
 DUWS_mineSquare = 50;
 
 // A streamed square's mines are made inside the first distance and deleted past the second. The in-ring
-// must cover a vehicle crossing a whole site poll (SITE_TICK, 10 s) at speed, or a driver reaches ground
+// must cover a vehicle crossing a whole site poll (SITE_TICK) at speed, or a driver reaches ground
 // whose mines do not exist yet. The 100 m between the two is hysteresis: somebody holding station on that
 // edge would otherwise re-lay and clear the same square every pass.
 DUWS_mineStreamIn = 350;

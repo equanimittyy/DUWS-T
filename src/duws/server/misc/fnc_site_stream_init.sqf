@@ -57,7 +57,7 @@ fnc_site_occupant_register = {
     private _o = createHashMapFromArray [
         ["kind", _kind], ["side", _side], ["buffer", _buffer], ["grace", _grace],
         ["aiAware", _aiAware], ["minAI", _minAI],
-        ["awake", _frozen], ["seenLast", false], ["emptySince", -1], ["awaitVacate", _latch],
+        ["awake", _frozen], ["airLast", false], ["emptySince", -1], ["awaitVacate", _latch],
         ["baseline", 0], ["tier", 0], ["deployedList", []], ["deployedStrength", 0],
         ["trg", objNull], ["raising", false]
     ];
@@ -221,10 +221,9 @@ fnc_town_site_key = {
     format ["town_%1", _townIndex]
 };
 
-// Ten seconds: how long a player can stand somewhere before anything should appear, since a
-// late-materialising garrison is the pop-in every hold/latch here exists to prevent. Zones and crowds
-// already ran at this; only the town garrison was slower, at thirty.
-#define SITE_TICK 10
+// Every second between passes is ground a vehicle crosses inside the streaming ring before anything
+// raises: at ten seconds a driver met hardpoints popping in beside the road.
+#define SITE_TICK 2
 
 // The presence test for occupants that answer to players alone -- a town's crowd, and a base thawing
 // on approach.
@@ -237,21 +236,11 @@ fnc_site_near = {
 // 0 = none): any BLUFOR aircraft reaching in from beyond it, player or AI flown -- folded in here
 // because bluforNear discounts anything airborne, and an AA emplacement must still wake for a jet
 // overhead its ground ring never reaches.
-// Shared by the raise worker and the register, so a wake and its confirmation can't reach opposite
-// answers and strand the gun.
-// _airSpeed (0 = no gate) and _playerAir narrow the air answer to a zone's threat: under-speed and,
-// when _playerAir, only player-crewed or a UAV -- so an AI transit or support heli isn't a wake. AA
-// passes neither, to catch any jet at cruise. Both match the poller's prebuilt committed-air list, so
-// wake and re-confirmation can't disagree.
 fnc_site_bluforOrAir = {
-    params ["_pos", "_ring", ["_minAI", 2], ["_airRing", 0], ["_airSpeed", 0], ["_playerAir", false], ["_playersOnly", false]];
-    if ([_pos, _ring, _minAI, _playersOnly] call fnc_duws_bluforNear) exitWith { true };
+    params ["_pos", "_ring", ["_minAI", 2], ["_airRing", 0]];
+    if ([_pos, _ring, _minAI] call fnc_duws_bluforNear) exitWith { true };
     if (_airRing <= 0) exitWith { false };
-    ((_pos nearEntities [["Air"], _airRing]) findIf {
-        ({ side _x == WEST } count (crew _x)) > 0
-        && {_airSpeed <= 0 || {speed _x < _airSpeed}}
-        && {!_playerAir || {unitIsUAV _x || {(crew _x) findIf { isPlayer _x } >= 0}}}
-    }) >= 0
+    ((_pos nearEntities [["Air"], _airRing]) findIf { ({ side _x == WEST } count (crew _x)) > 0 }) >= 0
 };
 
 // Whether an attacker is in reach: live OPFOR, or an OPCOM tasking still virtual, which stands on no unit
@@ -277,6 +266,9 @@ fnc_site_poller = {
         sleep SITE_TICK;
 
         private _players = (call BIS_fnc_listPlayers) select { alive _x };
+        // fnc_duws_bluforNear's airborne rule, so a crowd and a garrison agree on who is flying.
+        private _playersAir = _players select { private _v = vehicle _x; _v isKindOf "Air" && {!(_v isKindOf "ParachuteBase")} };
+        private _playersLand = _players - _playersAir;
         // A crowd is held up by a player, a garrison by any BLUFOR -- two different answers, so both
         // lists are built once here, and neither costs a spatial query until somebody is actually
         // within reach of the site being asked about.
@@ -332,6 +324,7 @@ fnc_site_poller = {
                 private _ring = _radius + (_o get "buffer");
                 private _bluHolds = (_o getOrDefault ["enemyAware", false])
                     && {([_key] call DUWS_fnc_garrisonSideOf) isEqualTo "BLU"};
+                private _airSeen = false;
                 private _here = if (_o get "aiAware") then {
                     // Fewer AI hold a site than raise one -- hysteresis that stops a zone flickering
                     // off around the edges of the force that just took it.
@@ -348,16 +341,22 @@ fnc_site_poller = {
                     // bluforNear discounts anything airborne, so this is a site's whole reach against
                     // aircraft. airRingCommitted picks player-crewed/UAV only for a zone; AA reads
                     // every aircraft to catch a jet at cruise.
-                    _ground || {
+                    _airSeen = !_ground && {
                         private _ar = _o getOrDefault ["airRing", 0];
                         _ar > 0 && {
                             private _air = if (_o getOrDefault ["airRingCommitted", false]) then { _westAirCommitted } else { _westAir };
                             (_air findIf { _x distance _pos < _ar }) >= 0
                         }
-                    }
+                    };
+                    _ground
                 } else {
-                    [_players, _pos, _ring] call fnc_site_near
+                    _airSeen = [_playersAir, _pos, _ring] call fnc_site_near;
+                    [_playersLand, _pos, _ring] call fnc_site_near
                 };
+                // A jet crosses most rings between two passes, so presence from the air counts only once
+                // the pass before saw it too.
+                if (_airSeen && {_o get "airLast"}) then { _here = true };
+                _o set ["airLast", _airSeen];
 
                 // A frozen site must wake on either side too: a garrison the shared BLUFOR test can't
                 // rouse (its AI arm watches for BLUFOR on OPFOR ground) would sit in the middle of the
@@ -419,11 +418,8 @@ fnc_site_poller = {
                             [_key, _o] call _fnc_sleep;
                         };
                     } else {
-                        // Two consecutive polls, not a sleep-and-retest: both exist so a helicopter
-                        // transiting the radius doesn't commit a fill, but this form doesn't stall the
-                        // shared pass that holds every other site's clock.
                         private _fnc_present = [_key, _kind, "present", {true}] call fnc_site_hook;
-                        if (_here && {_o get "seenLast"} && {[_key, _o] call _fnc_present}) then {
+                        if (_here && {[_key, _o] call _fnc_present}) then {
                             _o set ["awake", true];
                             _o set ["lastSeen", _now];
                             private _fnc_wake = [_key, _kind, "wake"] call fnc_site_hook;
@@ -432,7 +428,6 @@ fnc_site_poller = {
                 };
                 };
                 };
-                _o set ["seenLast", _here];
             } forEach (DUWS_occupants getOrDefault [_key, []]);
         } forEach DUWS_sites;
 

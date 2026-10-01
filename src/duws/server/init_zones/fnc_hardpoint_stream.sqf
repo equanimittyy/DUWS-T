@@ -23,26 +23,17 @@ DUWS_fnc_hardpointZoneAwake = {
     (_o getOrDefault ["awake", false]) || {_o getOrDefault ["raising", false]}
 };
 
+// A zone-child hardpoint is never found before its zone, so closing on a gun cannot mark ground the map still hides.
+DUWS_fnc_hardpointZoneFound = {
+    params ["_zk"];
+    _zk isEqualTo "" || {(zone_namePOS_pairs findIf { (_x select 2) && {([_x select 1] call fnc_zone_key) isEqualTo _zk} }) > -1}
+};
+
 // Dispatched, not inline: the raise re-crews statics through DUWS_fnc_manStatics, which sleeps in the
 // drop-and-settle, and the poller holds every other site's clock.
 DUWS_fnc_hardpointRaiseWorker = {
     params ["_key", "_o"];
-    // Confirmed after a pause rather than on the first frame anyone clips the ring: a transiting
-    // helicopter would otherwise rebuild the whole emplacement for someone already leaving.
-    sleep 5;
-    private _site = [_key] call fnc_site_at;
-    private _pos = _site get "pos";
-    // Re-confirmed with the same test that started the raise: a standalone hardpoint re-tests its own
-    // ring including air ring, so an AA woken by a jet overhead is not dropped by a ground-only recheck.
-    private _zk = _o getOrDefault ["hpZoneKey", ""];
-    private _stillUp = if (_zk isEqualTo "") then {
-        [_pos, (_site get "radius") + (_o get "buffer"), _o get "minAI", _o getOrDefault ["airRing", 0]] call fnc_site_bluforOrAir
-    } else {
-        _zk call DUWS_fnc_hardpointZoneAwake
-    };
-    if (!_stillUp) exitWith {
-        missionNamespace setVariable [HP_RAISE_SLOT(_key), false];
-    };
+    private _pos = ([_key] call fnc_site_at) get "pos";
 
     // Props and guns back first, then the garrison onto them -- men must not spawn into ground about
     // to carry a bunker, and the guns have to exist before anyone mans them.
@@ -61,12 +52,7 @@ DUWS_fnc_hardpointRaiseWorker = {
 // composition deploy/re-crew and leaves peak untouched (it stays anchored on the crew set at register).
 DUWS_fnc_hardpointLooseRaiseWorker = {
     params ["_key", "_o"];
-    sleep 5;
-    private _site = [_key] call fnc_site_at;
-    private _pos = _site get "pos";
-    private _up = [_pos, (_site get "radius") + (_o get "buffer"), _o get "minAI",
-        _o getOrDefault ["airRing", 0]] call fnc_site_bluforOrAir;
-    if (!_up) exitWith { missionNamespace setVariable [HP_LOOSE_SLOT(_key), false] };
+    private _pos = ([_key] call fnc_site_at) get "pos";
     private _objs = (DUWS_compositions getOrDefault [_key, []]) select { !isNull _x };
     private _men = [_objs, _pos, _o get "hpSide", _key, _o get "hpGarrison", true] call fnc_hardpoint_garrison;
     ([_key] call fnc_site_roster) append _men;
@@ -199,13 +185,13 @@ DUWS_fnc_hardpointClear = {
     } forEach ["garrison", "crew"];
     // Wrecks left standing for the sweep, not deleted: release drops the pins and schedules disposal.
     [_key] call fnc_duws_release;
-    // The gate trigger is keyed to the composition, not a member, so release never reaches it -- drop it
-    // here or it evaluates over a cleared key for the rest of the campaign (objNull elsewhere is a no-op).
-    private _gateTrg = missionNamespace getVariable [format ["DUWS_gateTrg_%1", _key], objNull];
-    if (!isNull _gateTrg) then {
-        deleteVehicle _gateTrg;
-        missionNamespace setVariable [format ["DUWS_gateTrg_%1", _key], nil];
-    };
+    // The gate and reveal triggers are keyed to the hardpoint, not a member, so release never reaches them --
+    // drop them here or they evaluate over a cleared key for the rest of the campaign (objNull is a no-op).
+    {
+        private _var = format [_x, _key];
+        deleteVehicle (missionNamespace getVariable [_var, objNull]);
+        missionNamespace setVariable [_var, nil];
+    } forEach ["DUWS_gateTrg_%1", "DUWS_hpRevealTrg_%1"];
     ["INFO", "HARDPOINT", format ["%1 cleared", _key]] call fnc_log;
 
     private _name = DUWS_hardpointName getOrDefault [_o get "hpType", _o get "hpType"];
@@ -293,25 +279,7 @@ DUWS_fnc_hardpointOPSense = {
 DUWS_hardpointHooks = createHashMapFromArray [["tick", {
     params ["_key", "_o", "_here", "_now"];
     if (_o getOrDefault ["cleared", false]) exitWith {};
-    if (_here) then {
-        _o set ["lastSeen", _now];
-
-        // Gated behind _here so the precise player scan only runs inside the wider streaming ring, and
-        // behind the parent zone for a zone-child hardpoint -- closing on a gun never marks it before its
-        // zone is found. fnc_hardpoint_reveal itself no-ops once flagged, so loitering in range doesn't re-announce it.
-        private _i = DUWS_hardpoints findIf { (_x select 0) isEqualTo _key };
-        if (_i > -1 && {!((DUWS_hardpoints select _i) select 5)}) then {
-            private _pzk = _o getOrDefault ["hpZoneKey", ""];
-            private _parentUp = _pzk isEqualTo "" ||
-                { (zone_namePOS_pairs findIf { (_x select 2) && {([_x select 1] call fnc_zone_key) isEqualTo _pzk} }) > -1 };
-            if (_parentUp) then {
-                private _hpPos = (DUWS_hardpoints select _i) select 1;
-                if (((call BIS_fnc_listPlayers) findIf { alive _x && {_x distance2D _hpPos < HP_REVEAL_RADIUS} }) > -1) then {
-                    ["ONE", _key] call fnc_hardpoint_reveal;
-                };
-            };
-        };
-    };
+    if (_here) then { _o set ["lastSeen", _now] };
 
     // Ahead of the clearance count, which reads the plan this pass prunes.
     if ((_o get "hpType") isEqualTo "MINEFIELD") then {
@@ -438,10 +406,9 @@ fnc_hardpoint_register = {
     // kilometres, and the poller only looks at a site somebody is already inside.
     if (_ring > 0) then { _radius = _ring };
     [_key, _pos, _radius, "stream"] call fnc_site_register;
-    // The latch holds a site false until BLUFOR leave its ring. A field has no garrison to hold back, and
-    // its ring is the belt's whole length, so latching left one laid near BLUFOR inert for good.
-    private _latch = _type isNotEqualTo "MINEFIELD";
-    private _occ = [_key, "garrison", EAST, 0, _grace, _latch, true] call fnc_site_occupant_register;
+    // No latch: the end of this function crews or stows for whoever is in the ring, and a latch stowed that
+    // crew in front of them once the grace ran out.
+    private _occ = [_key, "garrison", EAST, 0, _grace, false, true] call fnc_site_occupant_register;
     _occ set ["hpSide", _side];
     _occ set ["hpGarrison", DUWS_hardpointGarrison getOrDefault [_type, ""]];
     _occ set ["hpType", _type];
@@ -474,6 +441,20 @@ fnc_hardpoint_register = {
 
     // Armed once per key: the trigger outlives the stow/deploy cycles the composition goes through.
     if (_type isEqualTo "ROADBLOCK") then { [_key, _pos, _side] call fnc_roadblock_gate_arm; };
+
+    // A trigger, as a zone's reveal is: a driver can cross the disc between two site passes. Armed whatever
+    // the flag, since a restore rewrites the flag after this returns.
+    private _revealTrg = createTrigger ["EmptyDetector", _pos, false];
+    _revealTrg setTriggerArea [HP_REVEAL_RADIUS, HP_REVEAL_RADIUS, 0, false];
+    _revealTrg setTriggerActivation ["ANYPLAYER", "PRESENT", false];
+    _revealTrg setVariable ["DUWS_hpKey", _key];
+    _revealTrg setVariable ["DUWS_hpZoneKey", _zoneKey];
+    _revealTrg setTriggerStatements [
+        "this && {[thisTrigger getVariable 'DUWS_hpZoneKey'] call DUWS_fnc_hardpointZoneFound}",
+        "['ONE', thisTrigger getVariable 'DUWS_hpKey'] call fnc_hardpoint_reveal; deleteVehicle thisTrigger",
+        ""
+    ];
+    missionNamespace setVariable [format ["DUWS_hpRevealTrg_%1", _key], _revealTrg];
 
     // The dev tool spawns onto the player, so its hardpoints read up and crew immediately.
     private _objs = (DUWS_compositions getOrDefault [_key, []]) select { !isNull _x };

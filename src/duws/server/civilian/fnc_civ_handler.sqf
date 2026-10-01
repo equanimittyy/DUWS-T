@@ -5,8 +5,7 @@
 
     What is left here is the crowd's own four answers -- when it may exist, what it fills with, how
     it follows the players, and how it is collected. Everything else is the question every site
-    asks, so the poll interval, the two-sample confirm, the grace period and the presence test are
-    fnc_site_poller's.
+    asks, so the poll interval, the grace period and the presence test are fnc_site_poller's.
 
     RAVAGE and WBK keep the older trigger-driven handlers.
 */

@@ -921,8 +921,7 @@ The narrowing is the friendly half. On ground BLUFOR hold, presence counts **pla
 the player built is friendly AI standing inside its own ring, so the AI arm of `fnc_duws_bluforNear`
 would read it as an arrival and hold the site awake for the rest of the campaign. A site that never
 sleeps never re-raises, which is how the player would come back to an empty town. The helper takes a
-`_playersOnly` flag for it, and the poller, the zone raise worker and the town raise worker all set it
-off the same owner derivation.
+`_playersOnly` flag for it, which the poller sets from the site's owner (`DUWS_fnc_garrisonSideOf`).
 
 **Bases are a special case, and fast travel is why.** The `freeze` disposal mode freezes their garrisons
 rather than deleting it, and the usual reason given — that rebuilding would hand back every soldier
@@ -968,11 +967,11 @@ exists.
 
 ### A town streams like a zone
 
-Per town, `fnc_civ_handler.sqf` is the enemy zone gate: a town fills once it
-has been occupied on two consecutive polls, and everything tagged `civ_locIndex` is deleted once the
-grace period since the last sighting expires. The grace restarts on every sighting, so leaving starts
-the clock rather than how long you stayed, and the confirmation is what stops a helicopter crossing the
-disc filling a town for someone already past it.
+Per town, `fnc_civ_handler.sqf` is the enemy zone gate: a town fills on the first poll that finds a
+player on the ground in reach, and everything tagged `civ_locIndex` is deleted once the grace period since
+the last sighting expires. The grace restarts on every sighting, so leaving starts the clock rather than how
+long you stayed. A player in an aircraft counts only once two polls in a row find them, so an aircraft that
+crosses the disc between two polls fills nothing, while a helicopter that lingers does.
 
 Presence is players only, where the zone gate counts friendly AI as well (`fnc_duws_bluforNear`): a
 town fills so there is somebody to talk to, and an AI squad passing through has nobody to talk to it.
@@ -1014,8 +1013,8 @@ point of sharing it with the zone gate at all. This is not the `O(zones × all u
 the streaming loop recorded as deliberately removed: the list is built once a tick and holds
 BLUFOR only, so what each town is tested against is the friendly force, not every unit in the mission.
 
-The garrison's raise cannot run in that thread — it confirms over five seconds, then waits on the
-spawners and on OPFOR actually appearing, up to a minute — so it is dispatched to a worker per town
+The garrison's raise cannot run in that thread — it waits on the spawners and on OPFOR actually
+appearing, up to a minute — so it is dispatched to a worker per town
 and adopted on a later cycle, exactly as `fnc_civ_handler` dispatches its fill. A town with a raise in
 flight is skipped entirely until it reports, or the reinforcement test would read the still-empty
 roster as owing the whole composition and raise it a second time.

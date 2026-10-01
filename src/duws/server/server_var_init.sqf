@@ -502,7 +502,7 @@ DUWS_postureBands = createHashMapFromArray [
 
 // The margin beyond a zone's own radius that its streaming reaches: a zone raises and holds its
 // garrison for BLUFOR this much further out than the capture trigger tests, so the men are on the
-// objective before the players who tripped it arrive. Read by fnc_createZone and fnc_zone_stream_init.
+// objective before the players who tripped it arrive. Read by fnc_createZone and fnc_garrison_reserve.
 DUWS_streamArrivalMargin = 400;
 
 // Zone reserve / reinforcement tuning. The enemy multiplier is reserve depth: a zone fields at most its

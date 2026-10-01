@@ -147,7 +147,7 @@ player out of one currency still has a route.
 |---|---|
 | Body search | by the flagged materiel on the ground, not by a clock — a third of any combat group, zone garrison and side-mission patrol alike |
 | Side-mission objective | flagged with certainty; reaching the object is the gate |
-| Walking into a zone or town | not applicable; it reveals the ground the player is standing on and rolls nothing |
+| Walking into a zone or town, or within 100 m of a hardpoint | not applicable; it reveals the ground the player is standing on and rolls nothing |
 | Civilian frisk | flagged with certainty; the arrest is the price, and its payout table carries the odds |
 | Intelligence Center | by the odds its levels buy — one roll per OPCOM tick ([§The Intelligence Center](#the-intelligence-center)) |
 

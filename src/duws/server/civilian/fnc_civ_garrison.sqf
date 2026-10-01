@@ -1,6 +1,6 @@
 // Locality: server -- registered once for all towns by server/civilian/fnc_civ_init_Tomata.sqf.
 // Owns each town's garrison for fnc_site_poller, whichever side the reputation bands put the town on: raises on arrival, reinforces on purchase, streams out when empty, settles on clear.
-// The raise is dispatched to a per-town worker (5 s confirm, then up to 60 s for men) so the poller thread never stalls on one town.
+// The raise is dispatched to a per-town worker (up to 60 s for men) so the poller thread never stalls on one town.
 if (!isServer) exitWith {};
 
 // RAVAGE/WBK register no town reputation, so no town ever crosses the OPFOR band; this thread would otherwise spin doing nothing.
@@ -31,17 +31,6 @@ private _fnc_raise = {
     private _key = [_i] call fnc_town_site_key;
     private _side = [_key] call DUWS_fnc_garrisonSideOf;
     private _army = [EAST, WEST] select (_side isEqualTo "BLU");
-
-    // Five-second re-test (as zones do), so grazing the perimeter doesn't commit a garrison for someone already leaving.
-    // A town BLUFOR hold woke for its attacker as readily as for its owner, so it re-tests for either.
-    sleep 5;
-    private _reach = _radius + ((DUWS_streamProfiles get "town_gar") select 0);
-    private _blu = _side isEqualTo "BLU";
-    private _confirmed = [_centre, _reach, 2, _blu] call fnc_duws_bluforNear;
-    if (!_confirmed && _blu) then { _confirmed = [_centre, _reach] call fnc_site_hostileNear };
-    if (!_confirmed) exitWith {
-        missionNamespace setVariable [RAISE_SLOT(_i), []];
-    };
 
     // Zone's reserve model: filtered x1 tier thins to garrison_density on stand, surplus + mult-1 copies wait in the pool, less the loss ledger.
     private _garrison = [_key, [_key, [_tier, _side] call DUWS_fnc_townSpawnList] call DUWS_fnc_garrisonRestand] call DUWS_fnc_garrisonStandFill;
