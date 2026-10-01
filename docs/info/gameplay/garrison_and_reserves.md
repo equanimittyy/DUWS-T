@@ -9,7 +9,7 @@ that model; where it and the source (`src/duws/server`) disagree, the source win
 A garrison is a **site**: the shared `fnc_site_*` store (key, pos, radius, roster) that a zone
 registers in. A site raises a composition, gets ground down by the same player, and
 comes back at what was left, not what it started with. It draws its tier rows from `DUWS_zoneSpawnTiers`
-and `DUWS_zoneSpawnTiersBlu` (`src/duws/server/init_zones/fnc_zone_spawn_sizes.sqf:20`). Once it is beaten,
+(`src/duws/server/init_zones/fnc_zone_spawn_sizes.sqf:17`). Once it is beaten,
 the zone flips to the attacker.
 
 ## Whose garrison it is
@@ -27,8 +27,7 @@ BLUFOR ground carrying no garrison. A sighted group on a live BLUFOR garrison's 
 adds nothing to the force grid, because the site's deposit already counts it
 (`src/duws/server/warcom/opcom/belief/fnc_opcom_grid_sources.sqf`).
 
-Each side fields **its own tier rows**, and BLUFOR's are kept weaker than OPFOR's at every tier.
-`DUWS_fnc_zoneSpawnList` picks the table by side. Both sides share one token
+Both sides field **the same tier rows** and share one token
 vocabulary: a token resolves through the asking side's vehicle table (`DUWS_spawnVehicles` /
 `DUWS_spawnVehiclesBlu`) and its own earned Army Power. Both vehicle tables are fenced, and the composition
 lint fails a vehicle token only one of them answers — the other side would otherwise resolve the token to its own bare name and hand

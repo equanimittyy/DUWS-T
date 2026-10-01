@@ -138,7 +138,7 @@ which composition the zone fields; strength is how much of that is left.** Weigh
 the roll is skewed to the top: most zones are the full objective and a low roll is the occasional
 soft one worth taking early.
 
-`DUWS_zoneSpawnTiers` (OPFOR) and `DUWS_zoneSpawnTiersBlu` (BLUFOR) each hold one composition per tier,
+`DUWS_zoneSpawnTiers` holds one composition per tier for both sides,
 **absolute rather than cumulative** — a row is
 the whole garrison, so what a tier IV zone is reads off one line instead of being assembled from
 four. Tier reaches only the units a zone spawns alongside itself; the prefab, the fortification
@@ -147,8 +147,7 @@ scatter and their crews are not part of it.
 **Tier moves the whole fight, dug-in slots included.** A repeated entry is how a tier fields two of
 something; nothing about the *ground* multiplies a row afterwards, and the one thing that does — the
 campaign's enemy multiplier — scales whole cards and applies to every OPFOR zone alike. The dug-in slots,
-`garrison:garrison_element`, climb from one at tier I to two at tier IV on OPFOR's rows, and from none
-at tier I to two at tier IV on BLUFOR's.
+`garrison:garrison_element`, climb from one at tier I to two at tier IV.
 `fnc_zone_tier_roll` refuses to roll twice, and tests for a missing tier rather than a positive one, so a
 stored 0 never re-rolls. `fnc_createzone` is re-entrant by design — `zone_meta_array`
 exists so a zone can be rebuilt through it — and a rebuild that re-rolled would change what the ground
@@ -193,7 +192,7 @@ A zone is described by two arrays that never meet in source, and the tier reache
 
 | | Holds | Tiered | Where |
 |---|---|---|---|
-| Composition | one entry per A3 group, `posture:token` | yes, a row per tier | `DUWS_zoneSpawnTiers`, `DUWS_zoneSpawnTiersBlu` |
+| Composition | one entry per A3 group, `posture:token` | yes, a row per tier | `DUWS_zoneSpawnTiers` |
 | Prefab | one row per object — sandbags, wire, bunkers, towers and the guns alike | no, drawn by weighted roll at zone creation (`fnc_createzone.sqf:130-140`) | the Eden composition each `init_zones/prefabs/modern/fnc_modern_*.sqf` reads (`duws_zone_*` in `src/duws/compositions/`) |
 
 **A prefab object cannot carry a posture, because a posture is an order and there is no group to
@@ -585,7 +584,7 @@ more usefully — **which of them cannot be moved alone.**
   the count over the ring holds it until the commander reinforces. Moving either number changes that
   for every capture at once.
 
-**A figure that is arithmetic rather than balance.** OPFOR's tier IV zone row lands on twenty-one groups,
+**A figure that is arithmetic rather than balance.** The tier IV zone row lands on twenty-one groups,
 which at full garrison density is also the site's group ceiling — raising it raises what every tier IV zone on the map costs
 the server, not just the one in front of the player.
 
@@ -597,7 +596,7 @@ and building one is the player's job and their expense.
 
 A bought tier fields a tenth of what it adds and owes the rest, so the first buy stands a thin tier I
 that climbs by **30 % per reinforcement** — the same two sinks and the same ledger the enemy commander
-spends on. The garrison itself is the same model on its own weaker tier rows, with no enemy-multiplier reserve copies, raised through BLUFOR's hulls and
+spends on. The garrison itself is the same model on the same tier rows, with no enemy-multiplier reserve copies, raised through BLUFOR's hulls and
 their own Army Power rungs, streaming and wearing down exactly as the enemy's does
 ([`garrison_and_reserves.md`](garrison_and_reserves.md#whose-garrison-it-is)).
 

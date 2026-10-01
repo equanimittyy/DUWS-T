@@ -164,7 +164,7 @@ together and opening one shows its configuration. A field naming a token shows w
 raises beside it, so a reference is never a dead end.
 
 ```sqf
-// --DUWS-UNITCOMP BEGIN name="OPFOR zone tiers" kind=composition rowname="Tier %1" row="tier I..IV"--
+// --DUWS-UNITCOMP BEGIN name="Zone tiers" kind=composition rowname="Tier %1" row="tier I..IV"--
 DUWS_zoneSpawnTiers = [
     ["patrol", "team", "car"],
     ...

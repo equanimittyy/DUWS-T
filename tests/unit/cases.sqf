@@ -406,7 +406,6 @@ blufor_TANK_X = "blu_tank";
 WARCOM_blufor_ap_earned = 200;
 DUWS_zoneSpawnTiers = [["patrol"], ["patrol", "car"], ["patrol", "apc"],
     ["patrol", "team", "car", "apc", "heli"]];
-DUWS_zoneSpawnTiersBlu = [["patrol"], ["car"], ["patrol", "car"], ["patrol", "car", "apc"]];
 
 // --- fnc_faction_pick: one classname per spawn, drawn from the detected pool ---
 // The pool is what detection found; the global is a stable representative for the two hundred-odd
@@ -532,8 +531,8 @@ TEST_Air = 1;
 
 ["tokenClass: a token resolves to the asking side's hull",
     (["apc", "BLU"] call DUWS_fnc_tokenClass), "blu_apc"] call fnc_assertEq;
-["zoneSpawnList: BLUFOR raise their own rows, not OPFOR's",
-    ([2, "BLU"] call DUWS_fnc_zoneSpawnList), ["car"]] call fnc_assertEq;
+["zoneSpawnList: BLUFOR raise the same row as OPFOR",
+    ([2, "BLU"] call DUWS_fnc_zoneSpawnList), ["patrol", "car"]] call fnc_assertEq;
 // Each side's rungs are its own counter: BLUFOR's earned Army Power unlocks BLUFOR's armour.
 WARCOM_blufor_ap_earned = 40;
 ["tokenClass: a BLUFOR token below its rung is locked on BLUFOR's counter",

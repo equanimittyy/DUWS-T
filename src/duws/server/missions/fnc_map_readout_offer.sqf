@@ -13,5 +13,5 @@ if (([_key] call DUWS_fnc_garrisonSideOf) isNotEqualTo "BLU") exitWith { [] };
 [
 	[_key] call DUWS_fnc_opcom_siteContested,
 	([_key] call DUWS_fnc_garrisonStrength) < 1 && {([_key] call DUWS_fnc_garrisonReinforceCount) > 0},
-	([_key] call fnc_zone_tier) < count DUWS_zoneSpawnTiersBlu
+	([_key] call fnc_zone_tier) < count DUWS_zoneSpawnTiers
 ]

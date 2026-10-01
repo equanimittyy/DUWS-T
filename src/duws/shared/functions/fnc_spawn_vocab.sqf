@@ -2,7 +2,7 @@
 // which only the server does.
 //
 // The shared half of the spawn vocabulary: the composition-token grammar and the team rosters both
-// sides field. Vehicles and the zone tiers that name them are OPFOR's and load later, in
+// sides field. Vehicles and the zone tiers that name them load later, in
 // init_zones/fnc_zone_spawn_sizes.
 //
 // Its own file for a load-order reason: the BLUFOR squad catalogue is built at server_init, before
