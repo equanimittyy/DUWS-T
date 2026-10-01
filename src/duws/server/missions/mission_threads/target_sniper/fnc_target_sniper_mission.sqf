@@ -139,7 +139,7 @@ private _done = { (_this findIf { alive _x }) < 0 };
 
 if (!([5, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exitWith {};
 
-private _radius = 800;
+private _radius = 600;
 // Trust the offer: the perch search anchors on the offered near-enemy dot.
 private _randomPos = _MissionPos;
 private _targetpos = _MissionPos;
