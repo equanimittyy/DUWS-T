@@ -6,7 +6,8 @@
 // whole run, so a spent one releases the caller's next copy at once.
 //
 // The flag is a fast-travel destination, not a respawn position: the trip is taken deliberately from
-// a base, so the player arrives kitted and with their squad instead of naked off a death.
+// a base, so the player arrives kitted and with their squad instead of alone off a death, stripped of
+// tracked gear.
 if (!isServer) exitWith {};
 
 #define RALLY_TRAVELS 10

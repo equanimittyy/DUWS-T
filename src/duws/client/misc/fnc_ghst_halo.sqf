@@ -171,7 +171,8 @@ if (!_excludePlayer) then {
     waituntil {sleep 0.1;(position _caller select 2) <= _altchute};
     _caller removeaction _bis_fnc_halo_action;
 
-    // _caller, not player: a death mid-jump rebinds player to the respawned body, which must stay naked.
+    // _caller, not player: a death mid-jump rebinds player to the respawned body, and the pre-jump loadout
+    // would hand it the money and tracked gear left on the corpse.
     if ((vehicle _caller) iskindof "ParachuteBase") exitwith {
         waitUntil {sleep 0.1; !alive _caller || {isTouchingGround _caller}};
         if (alive _caller) then { player setUnitLoadout(player getVariable["Saved_Loadout",[]]); };

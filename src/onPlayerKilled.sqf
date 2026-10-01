@@ -4,5 +4,6 @@
 // onPlayerRespawn adds fresh ones to the new body.
 removeAllActions player;
 
+DUWS_deathLoadout = getUnitLoadout player;
 player setVariable["Saved_Face", face player];
 player setVariable["Saved_Speaker", speaker player];

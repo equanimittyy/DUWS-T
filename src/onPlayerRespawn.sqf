@@ -9,8 +9,14 @@ sleep 1;
     };
 } forEach (missionNamespace getVariable ["killhouse_respawns", []]);
 
-// Explicit strip: the engine dresses a respawned unit in its class kit, free gear on every death.
-player setUnitLoadout [[], [], [], [], [], [], "", "", [], ["", "", "", "", "", ""]];
+// The engine dresses a respawn in its class kit, so the death loadout replaces it. The corpse keeps the
+// original, so only unlimited gear is copied: a copy of tracked gear, money or intel would mint it.
+private _keep = {
+    params ["_cls", "_isWeapon"];
+    if (_isWeapon) then { _cls = [_cls] call fnc_arsenal_weapon_row };
+    !(_cls in DUWS_forcedRemoveItems) && {([_cls] call DUWS_fnc_arsenal_countFor) < 0}
+};
+player setUnitLoadout ([DUWS_deathLoadout, _keep] call DUWS_fnc_loadout_keep);
 
 private _savedFace = player getVariable ["Saved_Face", ""];
 private _savedSpeaker = player getVariable ["Saved_Speaker", ""];

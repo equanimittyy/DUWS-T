@@ -21,6 +21,35 @@ private _o3 = [];
 ["countLoadoutChanges: identical loadouts = 0",
     ([["a", "b"], ["a", "b"]] call DUWS_fnc_countLoadoutChanges), 0] call fnc_assertEq;
 
+// --- DUWS_fnc_loadout_keep: the loadout with every rejected class emptied out ---
+private _keepKit = [
+    ["rifle", "sup", "badlight", "optic", ["mag", 30], ["badmag", 1], ""],
+    ["badgun", "", "", "", ["mag", 1], [], ""],
+    [],
+    ["uni", [["fak", 2], ["Money_roll", 5], ["mag", 3, 30],
+        [["badgun", "", "", "", [], [], ""], 1], [["pistol", "", "", "", ["badmag", 6], [], ""], 1]]],
+    ["badvest", [["fak", 1]]],
+    [],
+    "badhat", "", [],
+    ["ItemMap", "", "badradio", "ItemCompass", "", ""]
+];
+private _keepBad = ["badlight", "badmag", "badgun", "Money_roll", "badvest", "badhat", "badradio"];
+private _kept = [_keepKit, { params ["_c"]; !(_c in _keepBad) }] call DUWS_fnc_loadout_keep;
+["loadoutKeep: a kept weapon loses only its rejected attachment and magazine",
+    _kept select 0, ["rifle", "sup", "", "optic", ["mag", 30], [], ""]] call fnc_assertEq;
+["loadoutKeep: a rejected weapon takes its magazine with it", _kept select 1, []] call fnc_assertEq;
+["loadoutKeep: a kept container drops rejected contents and filters the weapons it holds",
+    _kept select 3, ["uni", [["fak", 2], ["mag", 3, 30], [["pistol", "", "", "", [], [], ""], 1]]]] call fnc_assertEq;
+["loadoutKeep: a rejected container takes its contents with it", _kept select 4, []] call fnc_assertEq;
+["loadoutKeep: rejected headgear and assigned items are blanked",
+    [_kept select 6, _kept select 9], ["", ["ItemMap", "", "", "ItemCompass", "", ""]]] call fnc_assertEq;
+["loadoutKeep: the input loadout is not changed",
+    [(_keepKit select 0) select 2, count ((_keepKit select 3) select 1)], ["badlight", 5]] call fnc_assertEq;
+private _keptFlag = [[["x", "", "", "", [], [], ""], [], [], ["uni", [["x", 1]]], [], [], "", "", [], ["", "", "", "", "", ""]],
+    { params ["_c", "_isWeapon"]; !(_isWeapon && {_c == "x"}) }] call DUWS_fnc_loadout_keep;
+["loadoutKeep: only a weapon name is asked as a weapon",
+    [_keptFlag select 0, _keptFlag select 3], [[], ["uni", [["x", 1]]]]] call fnc_assertEq;
+
 // --- fnc_loadout_attachments: the attachment classes on a loadout's three weapons ---
 private _attLoadout = [
     ["arifle_X", "muzzle_A", "acc_B", "optic_C", ["mag_X", 30], [], "bipod_D"],

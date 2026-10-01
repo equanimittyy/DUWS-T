@@ -55,6 +55,47 @@ DUWS_fnc_countLoadoutChanges = {
     count (_added + _removed)
 };
 
+// A rejected weapon or container takes its attachments, magazines and contents with it: they have
+// nowhere to sit.
+DUWS_fnc_loadout_keep = {
+    params ["_loadout", "_keep"];
+    private _ok = {
+        params ["_cls", ["_isWeapon", false]];
+        _cls isEqualTo "" || {[_cls, _isWeapon] call _keep}
+    };
+    private _weapon = {
+        params ["_w"];
+        if (_w isEqualTo [] || {!([_w select 0, true] call _ok)}) exitWith { [] };
+        { if !([_w select _x] call _ok) then { _w set [_x, ""] } } forEach [1, 2, 3, 6];
+        {
+            private _m = _w select _x;
+            if (!(_m isEqualTo []) && {!([_m select 0] call _ok)}) then { _w set [_x, []] };
+        } forEach [4, 5];
+        _w
+    };
+    private _container = {
+        params ["_c"];
+        if (_c isEqualTo [] || {!([_c select 0] call _ok)}) exitWith { [] };
+        private _contents = [];
+        {
+            private _cls = _x select 0;
+            if (_cls isEqualType []) then {
+                private _w = [_cls] call _weapon;
+                if !(_w isEqualTo []) then { _contents pushBack [_w, _x select 1] };
+            } else {
+                if ([_cls] call _ok) then { _contents pushBack _x };
+            };
+        } forEach (_c select 1);
+        [_c select 0, _contents]
+    };
+    private _l = +_loadout;
+    { _l set [_x, [_l select _x] call _weapon] } forEach [0, 1, 2, 8];
+    { _l set [_x, [_l select _x] call _container] } forEach [3, 4, 5];
+    { if !([_l select _x] call _ok) then { _l set [_x, ""] } } forEach [6, 7];
+    _l set [9, (_l select 9) apply { ["", _x] select ([_x] call _ok) }];
+    _l
+};
+
 // items force-removed from a loadout: money and intel
 DUWS_forcedRemoveItems = [
     "Money_roll", "Files", "Wallet_ID", "SmartPhone", "MobilePhone",

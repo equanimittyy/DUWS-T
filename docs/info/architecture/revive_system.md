@@ -35,11 +35,19 @@ The respawn menu sorts its entries by name, so each label starts with a number t
 | Each FOB | `3. FOB <name>` | [`fnc_fob_server.sqf`](../../../src/duws/server/supports/fnc_fob_server.sqf) |
 | Killhouse entrances | `4. Killhouse A`, `5. Killhouse B` | [`fnc_createKillhouse.sqf`](../../../src/duws/server/killhouse/fnc_createKillhouse.sqf) |
 
-A respawned player starts naked: [`onPlayerRespawn.sqf`](../../../src/onPlayerRespawn.sqf) sets an empty
-loadout, because the engine otherwise dresses the new unit in its class kit. The dead body keeps the old
-kit. The Full and Hybrid arsenal modes keep the startup kit free to draw again. The Limited mode draws it
-from the pool like any other gear
-([`fnc_arsenal_counts.sqf`](../../../src/duws/client/arsenal/fnc_arsenal_counts.sqf)).
+A respawned player gets back the loadout they died with, minus money, intel and every class the arsenal
+mode tracks. The dead body keeps the original, so a copy of any of those would mint it. A dropped weapon or
+container takes its attachments, magazines and contents with it.
+[`onPlayerRespawn.sqf`](../../../src/onPlayerRespawn.sqf) sets the loadout, because the engine otherwise
+dresses the new unit in its class kit. A class comes back only when `DUWS_fnc_arsenal_countFor`
+([`fnc_arsenal_counts.sqf`](../../../src/duws/client/arsenal/fnc_arsenal_counts.sqf)) reads it as
+unlimited:
+
+| Arsenal mode | What comes back |
+| --- | --- |
+| Full | Everything except money and intel. |
+| Hybrid | Standard-issue gear, the startup kit, and magazines when ammo is not tracked. Captured gear is dropped. |
+| Limited | Nothing in practice. Every other class is tracked, so the untracked magazines have no weapon or container left to hold them. |
 
 AIS is compiled through `#include "modules\AIS\cfgFunctions.hpp"` in `description.ext` and auto-boots via
 its CfgFunctions pre/postInit.

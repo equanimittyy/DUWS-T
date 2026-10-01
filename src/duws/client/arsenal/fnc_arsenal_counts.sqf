@@ -28,8 +28,8 @@ DUWS_fnc_arsenal_canon = {
 // infinity glyph). Order matters -- each earlier rule is a hard override of the ones below it.
 DUWS_fnc_arsenal_countFor = {
     params ["_cls"];
-    // Full mode leaves the whole arsenal unlimited; the enforcer marks it non-restricted.
-    if (!(player getVariable ["DUWS_isRestrictedArsenal", false])) exitWith { -1 };
+    // Full is read from the mode, not the open's restricted flag: a respawn asks with no arsenal open.
+    if ((missionNamespace getVariable ["DUWS_paramArsenal", 0]) == 1) exitWith { -1 };
     // The compatible-magazines list hands back lowercased classnames (BIS folds case from the weapon's
     // config mag list), while the kit, friendly set, pool and DUWS_arsenalTaken key on the config's own
     // case. `in`, isEqualTo and the HashMap key are all case-sensitive, so a lowercased class missed
