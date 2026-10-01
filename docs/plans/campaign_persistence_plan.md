@@ -240,7 +240,7 @@ correctly by every future loop and a missed read is silent.
 **Time-based state must be stored as a remaining duration, never as an absolute stamp.**
 `diag_tickTime` counts from process start, so any stamp saved in one session sits in the future in
 the next and wedges whatever it gates for as long as the old session ran. The mission already
-carries a monitor that clears future stamps off player objects (`server/server_init.sqf:441-468`);
+carries a monitor that clears future stamps off player objects (`server/server_init.sqf:508-536`);
 that stays as the backstop, and nothing new should need it.
 
 ## What an engine save could not cover
