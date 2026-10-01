@@ -4,7 +4,7 @@ _arrayOfYellowUnits = [];
 
 {
     _team = assignedTeam _x;
-    if (_team == "YELLOW") then {
+    if (_team == "YELLOW" && {!isPlayer _x}) then {
         _arrayOfYellowUnits = _arrayOfYellowUnits + [_x];
     }
 } forEach units group player;

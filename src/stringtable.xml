@@ -17184,16 +17184,16 @@
         </Container>
         <Container name="Task Forces &amp; High Command">
             <Key ID="STR_DUWS_T_5i5rdhy7">
-                <German>Keine Einheiten dem gelben Team zugewiesen.</German>
-                <Spanish>No hay unidades asignadas al equipo amarillo.</Spanish>
-                <Chinesesimp>尚无单位分配至黄色小队。</Chinesesimp>
-                <Original>No units assigned to Yellow team.</Original>
-                <English>No units assigned to Yellow team.</English>
-                <Polish>Brak jednostek przypisanych do zespołu żółtego.</Polish>
-                <Czech>Žádné jednotky nejsou přiřazeny k žlutému týmu.</Czech>
-                <Russian>В жёлтой команде нет бойцов.</Russian>
-                <French>Aucune unité affectée à l'équipe Jaune.</French>
-                <Chinese>尚無單位分配至黃色小隊。</Chinese>
+                <German>Keine KI-Einheiten dem gelben Team zugewiesen.</German>
+                <Spanish>No hay unidades de IA asignadas al equipo amarillo.</Spanish>
+                <Chinesesimp>尚无 AI 单位分配至黄色小队。</Chinesesimp>
+                <Original>No AI units assigned to Yellow team.</Original>
+                <English>No AI units assigned to Yellow team.</English>
+                <Polish>Brak jednostek AI przypisanych do zespołu żółtego.</Polish>
+                <Czech>Žádné jednotky AI nejsou přiřazeny k žlutému týmu.</Czech>
+                <Russian>В жёлтой команде нет бойцов ИИ.</Russian>
+                <French>Aucune unité IA affectée à l'équipe Jaune.</French>
+                <Chinese>尚無 AI 單位分配至黃色小隊。</Chinese>
             </Key>
             <Key ID="STR_DUWS_T_c2hnymzn">
                 <German>Übergabe abgeschlossen.\nZugriff auf deine Gruppe mit\n[L.CTRL - SPACE].</German>
@@ -17566,6 +17566,18 @@
                 <French>Confie l'escouade HC sélectionnée à Overlord en tant que groupement tactique. Elle est commandée automatiquement.</French>
                 <Chinese>將所選 HC 小隊作為特遣隊交給 Overlord，之後將由系統自動指揮。</Chinese>
                 <Spanish>Entrega la escuadra HC seleccionada a Overlord como fuerza operativa. Queda bajo mando automático.</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_HAS_PLAYER">
+                <Original>A squad with a player in it cannot become a task force.</Original>
+                <English>A squad with a player in it cannot become a task force.</English>
+                <Chinesesimp>含有玩家的小队无法编为特遣队。</Chinesesimp>
+                <German>Eine Gruppe mit einem Spieler kann keine Task Force werden.</German>
+                <Polish>Drużyna z graczem nie może zostać grupą zadaniową.</Polish>
+                <Czech>Družstvo s hráčem se nemůže stát úkolovým uskupením.</Czech>
+                <Russian>Отряд с игроком не может стать оперативной группой.</Russian>
+                <French>Une escouade comptant un joueur ne peut pas devenir un groupement tactique.</French>
+                <Chinese>含有玩家的小隊無法編為特遣隊。</Chinese>
+                <Spanish>Una escuadra con un jugador no puede convertirse en fuerza operativa.</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_TASKFORCE_TAKEN">
                 <Original>All units, this is Overlord. %1 is now under my command as Task Force %2.</Original>
