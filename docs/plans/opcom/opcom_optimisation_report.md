@@ -223,8 +223,8 @@ shorter sleep under load would add load.
 - **`decay`, `prune` and `contested`** are linear over the belief rows or the site keys. Their 49-209 ms readings
   arrived on ticks where every stage inflated together, the contention signature.
 - **The intel contact scripts** that the PERF line lists twelve to twenty of (`fnc_intel_contact_init.sqf x20`) are
-  one thread per plotted contact that wakes 20 times over `DUWS_intel_contact_life` to fade its marker
-  (`search/fnc_intel_contact_init.sqf:68-76`). They sleep between steps; they do not poll.
+  one thread per plotted contact that wakes 20 times over `DUWS_intel_contact_life` to fade its markers
+  (`search/fnc_intel_contact_init.sqf:86-94`). They sleep between steps; they do not poll.
 - **`fnc_taskforce_tick`** exits on an empty task-force list, which is the whole play-test.
 - **The DEBUG line's own grid scans** are gated on the log level (`fnc_opcom_perception_run.sqf:76`).
 - **The grid stage's re-pricing of awake sites** (`fnc_opcom_grid_rebuild.sqf:51-54`, through
