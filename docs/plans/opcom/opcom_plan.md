@@ -202,8 +202,8 @@ magnitude; above that the best candidate takes most of the probability, and a hi
 | Tower / OP / mortar / battery Build | one action each, under the type's cap, target the band cell the siting pass picks by the type's own rule ([§Asset siting](#asset-siting)) |
 | Minefield | one action per variant (AT, AP), target the band cell the siting pass picks by traffic, a belt 150 m deep and 500 m to 1.5 km long |
 | Attack assault, Attack flank | while no assault or flank is open and the attack cooldown has ended, each BLUFOR-held zone, each town they have garrisoned, the HQ once found (`DUWS_opcom_hqKnown`) while its officer lives, BLUFOR hold no zone, OPFOR stand at Armour or above (`WARCOM_opfor_tier` 4) and BLUFOR at Mechanised or above (`WARCOM_blufor_tier` 3), and each FOB once found (`DUWS_opcom_fobsKnown`) that a capture at its centre takes, so not one inside a held zone or a garrisoned town; and each attack of the row's kind still in buildup that needs more units; flank only below band 2 and from the target's own landmass, and a source across water only as infantry ([§Attack](#attack-phase-5)) |
-| Attack QRF | each cluster of BLUFOR sightings inside OPFOR's area of influence with no QRF on it and no local defense at the ideal bar, and each QRF still in buildup that needs more units ([§QRF](#qrf-an-attack-on-a-moving-cluster)) |
-| Patrol | each of `OPCOM_PATROL_SAMPLES` (3) sampled stale cells, one unit apiece, taken by the recon or land combatant, free or hired, that scores best |
+| Attack QRF | each cluster of BLUFOR sightings inside OPFOR's area of influence and outside the HQ's cells with no QRF on it and no local defense at the ideal bar, and each QRF still in buildup that needs more units ([§QRF](#qrf-an-attack-on-a-moving-cluster)) |
+| Patrol | each of `OPCOM_PATROL_SAMPLES` (3) sampled stale cells outside the HQ's cells, one unit apiece, taken by the recon or land combatant, free or hired, that scores best |
 | Probe | each assault or flank target whose 3×3 block reads stale and has no probe already on it, and that an Attack can source or a buildup stages for, one unit apiece, sourced from Patrol's rows |
 | Garrison | each open zone under the garrison cap ([§Caps](#caps)), taken by the combatant, free or hired, healthy or worn, that scores best |
 | Arty saturate | each fresh belief sighting in range of an owned battery that is not firing, held by a creep or on cooldown |
@@ -843,6 +843,11 @@ time, and no-retreat turns that into defeat in detail.
   muster bars already read (`DUWS_fnc_opcom_qrfSweep`, `appraisal/fnc_opcom_commit.sqf`). The strongest sighting
   keys the record, and the attack follows it each tick (`DUWS_fnc_opcom_qrfFollow`). A lead that is no longer
   believed drops a QRF still in buildup. A sighting within a cell of a standing QRF draws no second one.
+- **No QRF goes into the HQ's cells,** every grid cell that the HQ's `DUWS_base_keep_radius` ring touches
+  (`DUWS_fnc_opcom_inHqCells`), whatever the HQ attack gate. A sighting there is no part of any cluster. A lead that
+  enters them drops a QRF in buildup and breaks off one in execution, each unit not on a lift guarding where it
+  stands. A unit whose own group enters them stops following it, goes on to its last fix, and its look there takes
+  only a group outside them. A set-down point in them holds the rider, as one on water does.
 - **Local defense at the ideal bar draws no QRF.** The sweep opens none where the lead sighting's 3×3 block reads
   OPFOR's own force at `OPCOM_MUSTER_IDEAL` or better against the block's BLUFOR force, and no weaker sighting within
   a cell of that lead opens one either. A QRF already open keeps its muster and its joins.
