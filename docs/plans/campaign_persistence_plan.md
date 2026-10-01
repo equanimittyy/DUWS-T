@@ -377,8 +377,8 @@ server, or in a lobby somebody re-configured, changes the rules a player has bee
 hours. The arsenal is the sharpest case: a campaign saved with every class count-tracked comes back
 unlimited, and the pool it was spending against stops meaning anything
 ([§The arsenal](#the-arsenal-the-shelf-is-rebuilt-the-pool-is-stored)). The saved value therefore wins
-for the arsenal mode and ammo tracking, fatigue, the first-person restriction, rest weather and the
-lose conditions.
+for the arsenal mode and ammo tracking, fatigue, the first-person restriction, rest weather, the
+lose conditions and the town generation.
 
 **Six params stay the host's.** `DUWS_Debug`, `DUWS_LogLevel`, `DUWS_GroupIcons`,
 `DUWS_CleanupLifetime` and `DUWS_AutosaveInterval` say how a server is being run, not what the
