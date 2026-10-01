@@ -53,8 +53,8 @@ DUWS_fnc_opcom_baseCells = {
     _out
 };
 
-// No QRF or patrol goes into the base cells, whatever the attack gates: only an assault or a flank, behind its gate,
-// takes OPCOM onto the HQ or a FOB.
+// No QRF goes into the base cells, whatever the attack gates: only an assault or a flank, behind its gate, targets the
+// HQ or a FOB.
 DUWS_fnc_opcom_inBaseCells = {
     params ["_pos"];
     ([_pos] call DUWS_fnc_opcom_w2c) in ([] call DUWS_fnc_opcom_baseCells)
