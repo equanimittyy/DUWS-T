@@ -36,11 +36,12 @@ survey loop and returns before wave 1:
    This is the same draw as the HQ's turn in wave 1, so a hardcore start shows the same towns in both
    modes.
 2. Select every pool town. There is no quota for each anchor and no top-up.
-3. Append the clusters from `[_anchors, _hqPos, _candidates] call fnc_civ_detectClusters`.
+3. Append the clusters from
+   `[_anchors, _ANCHOR_RADIUS, _MIN_BUILDINGS, _candidates] call fnc_civ_detectClusters`.
 4. Return `[_selected, []]`. The spare queue is empty, because every qualifying town is in the queue
    already. A town that the HQ keep-out rejects has no stand-in.
-5. Write one log line: the anchor count, the map towns selected, the clusters found, the grid points
-   scanned and the scan time. This line replaces the Ranked selection line for the Dynamic branch.
+5. Write one log line: the anchor count, the map towns selected, the clusters found and the scan
+   time. This line replaces the Ranked selection line for the Dynamic branch.
 
 ### Building clusters
 
@@ -93,17 +94,16 @@ holds the ground. A cluster that opened there would put a synthetic hamlet on OP
 
 ## Registration
 
-Three changes in `server/civilian/fnc_civ_init_Tomata.sqf`:
+The mode branches inside selection, so the call at `:30` does not change. Two changes in
+`server/civilian/fnc_civ_init_Tomata.sqf`:
 
-1. **Dispatch** (`:30`). Ranked or Dynamic selection by `DUWS_paramTownGen`. The restore path does
-   not change.
-2. **Delete the dropped clusters.** A cluster that the HQ keep-out rejects, or that the overlap cull
+1. **Delete the dropped clusters.** A cluster that the HQ keep-out rejects, or that the overlap cull
    drops (`:99-160`), gets `deleteLocation`. A map Location stays in the engine, as now. A dropped
    cluster that stayed in the engine would be a town to server-side `nearestLocations` readers that
    no registry holds.
-3. **Name the kept clusters** after the cull. A kept Location with `DUWS_cluster` and no
-   `DUWS_sector` draws a word from `fnc_zone_name` (`init_zones/fnc_zone_state_init.sqf:24`). The
-   Location gets `DUWS_sector` set to the word, and
+2. **Name the kept clusters** after the cull. A kept Location with `DUWS_cluster` and no
+   `DUWS_sector` draws a word from `fnc_zone_name` (`init_zones/fnc_zone_state_init.sqf:24`) and
+   stores it in `DUWS_sector`. Every kept cluster, new or restored, then gets
    `setText format [localize "STR_DUWS_T_civ_sector", _word]`.
    - Naming runs after the cull so that a dropped cluster does not use a word.
    - `fnc_zone_name` draws from the zone pool, `DUWS_zoneNames`. Every zone has its name before
@@ -123,7 +123,7 @@ the vendor draft do not change.
 |---|---|
 | Parameter | A row in `DUWS_campaignParams`, as in [The parameter](#the-parameter) |
 | Town row | `[pos, radius, pop]` becomes `[pos, radius, pop, sector]` in `fnc_campaign_save.sqf:140-148`; `sector` is `""` for a map town |
-| Town restore | `DUWS_fnc_restoreTownQueue` (`fnc_campaign_restore.sqf:322`): a row with a sector word creates its Location directly, with `DUWS_cluster`, `DUWS_sector` and the formatted text, and logs no "no town at" warning. A row without one resolves as now |
+| Town restore | `DUWS_fnc_restoreTownQueue` (`fnc_campaign_restore.sqf:322`): a row with a sector word creates its Location directly, with `DUWS_cluster` and `DUWS_sector`, and logs no "no town at" warning; registration sets its text. A row without one resolves as now |
 | Older saves | A row with no fourth element reads `""` through a `params` default, so every row in an older save is a map town. The format version stays `1` |
 | Sector words | `DUWS_zoneNames` already saves and restores (`fnc_campaign_save.sqf:135`, `fnc_campaign_restore.sqf:272`), and now holds the sector words too |
 
@@ -158,7 +158,7 @@ total.
 | `src/duws/server/civilian/fnc_civ_detectClusters.sqf` | New: the cluster scan |
 | `src/duws/server/server_fnc_init.sqf` | Register `fnc_civ_detectClusters` |
 | `src/duws/server/civilian/fnc_civ_selectTowns.sqf` | Add the Dynamic branch after the survey |
-| `src/duws/server/civilian/fnc_civ_init_Tomata.sqf` | Dispatch, delete dropped clusters, name kept clusters |
+| `src/duws/server/civilian/fnc_civ_init_Tomata.sqf` | Delete dropped clusters, name kept clusters |
 | `src/stringtable.xml` | Add `STR_DUWS_T_civ_sector` with every language tag |
 | `src/duws/server/persistence/fnc_campaign_save.sqf` | Add the sector word to the town row |
 | `src/duws/server/persistence/fnc_campaign_restore.sqf` | Restore a sector row as a cluster |
@@ -173,7 +173,7 @@ total.
    lint, and the sqf-vm parse check reports no error on the file.
 3. Add the Dynamic branch to `fnc_civ_selectTowns.sqf`. Verify: the parse check passes. In Ranked
    mode the selection log line does not change.
-4. Change the registration: dispatch, cluster deletion, cluster naming and the stringtable key.
+4. Change the registration: cluster deletion, cluster naming and the stringtable key.
    Verify: the parse check passes, and every language tag on the new key keeps `%1`.
 5. Add the sector word to the save and the restore. Verify: the parse check passes on both files.
 6. Update `zones_and_civilians.md` with the code change, and the persistence plan in its own

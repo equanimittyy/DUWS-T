@@ -323,7 +323,8 @@ consumers keep seeing them (`server/civilian/fnc_civ_init_Tomata.sqf:145-170`). 
 mission-namespace rule and is still worth fixing, but it does not block this plan. The snapshot
 stores town positions, and restore re-resolves each one to a Location through the same
 `nearestLocations` filter the selector uses (`server/civilian/fnc_civ_selectTowns.sqf:42`); the world
-guard pins the map, so the lookup returns what it stored.
+guard pins the map, so the lookup returns what it stored. A building cluster of Dynamic generation is
+no map town, so restore creates its Location again from the saved position and sector word.
 
 ## The snapshot
 
@@ -412,7 +413,7 @@ must not have a snapshot put the old list back.
 | Zone builds | outcome | per zone, its flag factory's credit balance and each object that the factory made: its class, world position and orientation |
 | Base builds | outcome | for the HQ and each FOB, its factory's credit balance and each object that the factory made: its class, world position and orientation |
 | Commanding officer | outcome | whether `hq_blu1` is alive |
-| Civilians | input | town positions, names, radii and populations |
+| Civilians | input | town positions, radii and populations, and the sector word of a building cluster |
 | Vendors | input | `DUWS_vendors`: per town slot, the shop's type, position, facing and remaining respawn seconds |
 | Clock | outcome | `date`, `DUWS_timeSkew` |
 
