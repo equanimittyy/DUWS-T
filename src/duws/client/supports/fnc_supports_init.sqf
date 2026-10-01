@@ -20,12 +20,12 @@
 // a ladder has one only on its level I row.
 fnc_support_catalogue = {
 	[
-		["armory",    "PERM", 20, "support_armory_available",      "STR_DUWS_T_kw2lnaig",             "",           false],
+		["armory",    "PERM", 10, "support_armory_available",      "STR_DUWS_T_kw2lnaig",             "",           false],
 		["halo",      "PERM", 15, "support_halo_available",        "STR_DUWS_T_xghf3qqd",             "",           true,  30],
 		// One vehicle depot buys both repair and recycle (its apply case activates both stations).
 		// Flag keeps its pre-merge name (support_veh_repair_available) -- renaming it would read an
 		// existing campaign save's depot as un-owned on load.
-		["vehicle_depot", "PERM", 20, "support_veh_repair_available", "STR_DUWS_T_vehicle_repair",     "",           false],
+		["vehicle_depot", "PERM", 10, "support_veh_repair_available", "STR_DUWS_T_vehicle_repair",     "",           false],
 		["mobile_HQ", "PERM", 10, "support_mobile_HQ_available",   "STR_DUWS_T_b7gmddq3",             "",           false],
 		["fob",       "PERM", 10, "support_FOB_available",         "STR_DUWS_T_fob_request_row",      "fob_support",false],
 		["logistics", "PERM", 10, "support_logistics_available",   "STR_DUWS_T_logistics_row",        "",           false],
