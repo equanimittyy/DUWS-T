@@ -59,7 +59,7 @@ DUWS_fnc_opcom_dripRate = {
 fnc_ap_adjust = {
 	if (!isServer) exitWith {};
 	// _earned credits the one-way earned counter (never the ladder wallet), so it is passed only by
-	// the recurring faucets each side genuinely earns -- BLUFOR's zone trickle, missions and
+	// the recurring faucets each side genuinely earns -- BLUFOR's zone trickle, missions, kills and
 	// first-capture bonus; a share of OPFOR's town and zone income and of OPCOM's drip. Spends, swings,
 	// consolation and refunds leave it 0, so ground regained and money spent never move the ladder.
 	// _level lets the drip log at DEBUG: at INFO it would write a line to the RPT every few ticks.

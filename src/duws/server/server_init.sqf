@@ -305,7 +305,7 @@ VCM_ADVANCEDMOVEMENT = false;
 publicVariable "VCM_ADVANCEDMOVEMENT";
 if (isServer) then {
     if (isNil "playerKillCount") then { playerKillCount = createHashMap; };
-    departedKillCP = 0;
+    departedKillBatches = 0;
     addMissionEventHandler ["EntityKilled", {
         params ["_killed", "_killer", "_instigator"];
 
@@ -336,7 +336,7 @@ if (isServer) then {
         // to 0, so INDEPENDENT zombies still count.
         if ((side _shooter) getFriend (side _killed) >= 0.6) exitWith {};
 
-        // The tally converts to CP on the periodic sweep below, not here.
+        // The tally converts to CP and AP on the periodic sweep below, not here.
         private _uid = getPlayerUID _shooter;
         playerKillCount set [_uid, (playerKillCount getOrDefault [_uid, 0]) + 1];
     }];
@@ -353,7 +353,7 @@ if (isServer) then {
     addMissionEventHandler ["PlayerDisconnected", {
         params ["", "_uid"];
         private _kills = playerKillCount getOrDefault [_uid, 0];
-        departedKillCP = departedKillCP + (floor (_kills / kill_cp_kills)) * kill_cp_award;
+        departedKillBatches = departedKillBatches + floor (_kills / kill_cp_kills);
         playerKillCount deleteAt _uid;
     }];
 
@@ -392,17 +392,21 @@ if (isServer) then {
                 private _kills = playerKillCount getOrDefault [_uid, 0];
                 private _batches = floor (_kills / kill_cp_kills);
                 if (_batches > 0) then {
-                    private _award = _batches * kill_cp_award;
+                    private _cp = _batches * kill_cp_award;
+                    private _ap = _batches * kill_ap_award;
                     // Server-side caller: call runs inline, where remoteExec [...,2] would land a frame later.
-                    [_award, "kill_income"] call fnc_cp_adjust;
+                    [_cp, "kill_income"] call fnc_cp_adjust;
+                    ["BLU", _ap, "kill_income", _ap] call fnc_ap_adjust;
                     playerKillCount set [_uid, _kills - _batches * kill_cp_kills];
-                    [format [localize "STR_DUWS_T_CPATTRITION_MSG", _award]] remoteExec ["hint", _x];
+                    [format [localize "STR_DUWS_T_CPATTRITION_MSG", _cp, _ap]] remoteExec ["hint", _x];
                 };
             } forEach allPlayers;
 
-            if (departedKillCP > 0) then {
-                [departedKillCP, "kill_income_departed"] call fnc_cp_adjust;
-                departedKillCP = 0;
+            if (departedKillBatches > 0) then {
+                private _ap = departedKillBatches * kill_ap_award;
+                [departedKillBatches * kill_cp_award, "kill_income_departed"] call fnc_cp_adjust;
+                ["BLU", _ap, "kill_income_departed", _ap] call fnc_ap_adjust;
+                departedKillBatches = 0;
             };
         };
     };

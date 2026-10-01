@@ -110,7 +110,8 @@ cp_reward_multiplier = 1;publicVariable "cp_reward_multiplier";
 
 // Server-only; a tally below kill_cp_kills carries to the next sweep.
 kill_cp_kills = 10;
-kill_cp_award = 1;
+kill_cp_award = 2;
+kill_ap_award = 1;
 kill_cp_period = 60;
 
 // Distance at which a FOB or HQ garrison stops being simulated -- nothing culled it before, so every
@@ -231,7 +232,7 @@ DUWS_playerRides = createHashMap;
 DUWS_civMissions = createHashMap;
 DUWS_civMissionSeq = 0;
 
-DUWSMP_CP_death_cost = 1;publicVariable "DUWSMP_CP_death_cost";
+DUWSMP_CP_death_cost = 2;publicVariable "DUWSMP_CP_death_cost";
 
 dynamic_weather_enable = true;publicVariable "dynamic_weather_enable";	
 
