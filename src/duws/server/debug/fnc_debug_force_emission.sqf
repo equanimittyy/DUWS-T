@@ -10,7 +10,7 @@ if (isNull _caller) exitWith {};
 
 // Nearest by centre across all zones and standing OPFOR hardpoints -- no radius gate, so a click near a
 // point-sized hardpoint still resolves it. One shared nearest test so the closer kind wins outright.
-// _pick: ["zone", pos, radius] or ["hp", pos, key, type].
+// _pick: ["zone", pos, radius] or ["hp", pos, key, type, zone key].
 private _best = 1e11;
 private _pick = [];
 
@@ -23,7 +23,7 @@ private _pick = [];
 {
 	if ((_x select 3) isEqualTo "opfor") then {
 		private _d = _pos distance2D (_x select 1);
-		if (_d < _best) then { _best = _d; _pick = ["hp", _x select 1, _x select 0, _x select 2]; };
+		if (_d < _best) then { _best = _d; _pick = ["hp", _x select 1, _x select 0, _x select 2, _x select 4]; };
 	};
 } forEach DUWS_hardpoints;
 
@@ -57,11 +57,11 @@ if (_kind isEqualTo "zone") then {
 		];
 	};
 } else {
-	_pick params ["", "", "_key", "_type"];
+	_pick params ["", "", "_key", "_type", "_zoneKey"];
 	_lines = [
 		format ["[FORCE EMISSION] %1", _key],
 		format ["  OPFOR hardpoint (%1) -> friendly layer", _type],
-		format ["  emitting: %1 force (composed)", [_type] call DUWS_fnc_hpForce],
+		format ["  emitting: %1 force (composed)", [_type, _zoneKey] call DUWS_fnc_hpForce],
 		format ["  reach: %1 m   dist: %2 m", OPCOM_GRID_SPREAD, round _best]
 	];
 };

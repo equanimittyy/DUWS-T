@@ -22,7 +22,7 @@ DUWS_fnc_opcom_zoneBuildTargets = {
         if (([_zk, _zs] call fnc_hardpoint_zone_cap) > ([_zk] call DUWS_fnc_opcom_zoneSlotsUsed)) then {
             _out pushBack [[_zk, _type], [_type] call DUWS_fnc_opcom_hpPrice,
                 format ["Build %1 at %2", DUWS_hardpointName getOrDefault [_type, _type], [_zk] call DUWS_fnc_opcom_zoneLabel],
-                _mix * ([_worth, _exp, [_type] call DUWS_fnc_hpForce, _tier] call DUWS_fnc_opcom_holdValue)];
+                _mix * ([_worth, _exp, [_type, _zk] call DUWS_fnc_hpForce, _tier] call DUWS_fnc_opcom_holdValue)];
         };
     } forEach (call DUWS_fnc_opcom_zonesOpen);
     _out

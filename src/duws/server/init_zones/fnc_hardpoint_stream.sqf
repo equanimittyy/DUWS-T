@@ -414,7 +414,7 @@ fnc_hardpoint_register = {
     // crew in front of them once the grace ran out.
     private _occ = [_key, "garrison", EAST, 0, _grace, false, true] call fnc_site_occupant_register;
     _occ set ["hpSide", _side];
-    _occ set ["hpGarrison", DUWS_hardpointGarrison getOrDefault [_type, ""]];
+    _occ set ["hpGarrison", ["", DUWS_hardpointGarrison getOrDefault [_type, ""]] select (_zoneKey isEqualTo "")];
     _occ set ["hpType", _type];
     _occ set ["airRing", _airRing];
     _occ set ["neverStream", _neverStream];

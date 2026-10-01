@@ -64,9 +64,9 @@ DUWS_fnc_opcom_gridZone = {
 // Priced off the type's layout, so a row weighs the same deployed or stowed; it stands until cleared.
 DUWS_fnc_opcom_gridHp = {
     params ["_row"];
-    _row params ["_key", "_pos", "_type", "_side"];
+    _row params ["_key", "_pos", "_type", "_side", "_zoneKey"];
     if (_side isNotEqualTo "opfor") exitWith { [] };
-    [_key, true, "fri", _pos, [_type] call DUWS_fnc_hpForce, OPCOM_GRID_SPREAD]
+    [_key, true, "fri", _pos, [_type, _zoneKey] call DUWS_fnc_hpForce, OPCOM_GRID_SPREAD]
 };
 
 DUWS_fnc_opcom_gridSources = {

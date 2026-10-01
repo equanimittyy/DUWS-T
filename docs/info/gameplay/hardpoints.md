@@ -43,6 +43,9 @@ One core weapon or structure per hardpoint; garrison and streaming are per type,
 | `MINEFIELD` | 50 m mine squares, no core weapon | none | AT or AP variant; squares stream per player distance; cleared when no armed mine remains |
 | `RADIO` | live comms mast + 7 frozen HMG/AA nests | rifle team + 2 weapons teams | see [`opfor_area_of_influence.md`](opfor_area_of_influence.md#radio-towers) |
 
+The Garrison column is a standalone hardpoint's. A zone hardpoint fields only the crew of its guns, because the
+zone's own garrison is its infantry.
+
 Tables: `DUWS_hardpointGarrison`, `DUWS_hardpointName`, `DUWS_hardpointStreaming`
 (`server/server_var_init.sqf:377-441`). Classnames resolve through the same `opfor_*_X` faction
 globals and the static-role table every zone garrison uses
@@ -289,7 +292,7 @@ tick and branches on type family:
 | `MINEFIELD` | no mine is left: its plan for a streamed field, its filed hazard list for one laid whole |
 | `MORTAR`, `ARTY` | no piece in its composition is alive — crew alone is not enough, since the pieces are pinned resident and a crew killed off an intact gun would otherwise clear a battery that still stands |
 | `RADIO` | its mast (the one live, damageable member) is destroyed, whatever the garrison's state |
-| everything else | its site roster — gun crew plus loose defenders — is down to zero alive |
+| everything else | its site roster — gun crew plus any loose defenders — is down to zero alive |
 
 Judged only while the hardpoint is deployed (`DUWS_hpPeak_<key>` present), so a stowed emplacement's
 empty roster is never read as one beaten — the same guard a zone's own capture test uses.

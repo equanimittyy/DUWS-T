@@ -476,6 +476,7 @@ DUWS_hardpointBounty = createHashMapFromArray [
 
 // The loose garrison each hardpoint type fields: a DUWS_teamRosters token, or an array of them,
 // resolved per side when crewed. "" is no loose garrison (a minefield's men would stand on its own mines).
+// Standalone hardpoints only: a zone hardpoint fields just its gun crew, since the zone's own garrison is its infantry.
 // AT/AA field the weapons team matching the emplaced gun's role rather than a generic rifle section.
 // RADIO/ARTY/MORTAR scale their garrison to strategic value; one element always screens wide (widepatrol)
 // while the rest hold close. Gun crews for ARTY/MORTAR/RADIO are separate and stay resident.

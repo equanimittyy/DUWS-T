@@ -17,7 +17,7 @@ _this spawn {
     private _key = format ["hpdev_%1", _n];
 
     // Garrison is the type's, fielded by the spawn from DUWS_hardpointGarrison -- a dev spawn stands up
-    // the same defenders a shipped one of that type would, and a minefield still gets none.
+    // the same defenders a shipped standalone one of that type would, and a minefield still gets none.
     private _objs = [];
     private _ring = 0;
     private _what = "";

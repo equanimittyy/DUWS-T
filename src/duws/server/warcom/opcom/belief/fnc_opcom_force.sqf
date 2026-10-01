@@ -103,14 +103,14 @@ DUWS_fnc_tokenListForce = {
 
 // A hardpoint type -> its composed force: every weapon in the type's layout (DUWS_hardpointComp_<type>),
 // each classPower-priced and summed -- a prop classifies to 0, a two-gun roadblock counts both, a radio
-// base its whole nest -- plus its loose garrison. Read off the layout data, not live objects, so it holds
-// whether the emplacement is deployed or stowed (the grid deposits for a stowed row too).
+// base its whole nest -- plus a standalone one's loose garrison. Read off the layout data, not live objects, so it
+// holds whether the emplacement is deployed or stowed (the grid deposits for a stowed row too).
 DUWS_fnc_hpForce = {
-    params ["_type"];
+    params ["_type", ["_zoneKey", ""]];
     private _comp = missionNamespace getVariable [format ["DUWS_hardpointComp_%1", _type], []];
     private _static = 0;
     { _static = _static + ([_x select 0] call DUWS_fnc_classPower) } forEach _comp;
-    private _gar = DUWS_hardpointGarrison getOrDefault [_type, ""];
+    private _gar = ["", DUWS_hardpointGarrison getOrDefault [_type, ""]] select (_zoneKey isEqualTo "");
     private _tokens = if (_gar isEqualType "") then { [_gar] - [""] } else { _gar };
     _static + ([_tokens] call DUWS_fnc_tokenListForce)
 };
