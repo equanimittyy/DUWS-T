@@ -270,14 +270,14 @@ MASTER_allLocationsPos = [];publicVariable "MASTER_allLocationsPos";
 // [successChance, [[payoutKind, weight], ...], nothingKey] per search source.
 // combat rolls at the search, not spawn (any corpse is searchable). Its gate is per-search, and
 // DUWS_searchAllowance searches are allowed per DUWS_searchCooldown window: gate * allowance is the
-// expected payouts per window (0.60 * 3 = 1.80), so raising the allowance without dropping the gate
+// expected payouts per window (0.75 * 3 = 2.25), so raising the allowance without dropping the gate
 // multiplies intel volume. objective/civ_frisk are flagged at spawn with chance 1 (never miss,
 // single-use) and read this table only for kinds.
 // Weights, not a cumulative ladder: adding a kind is one row instead of re-deriving every band below it.
 // Kinds draw without replacement; an exhausted kind drops out and the remainder re-draw, so a dry pool
 // never turns a search into silence.
 DUWS_searchSources = createHashMapFromArray [
-    ["combat",    [0.60, [["intel", 1], ["money", 7], ["document", 4]],            "STR_DUWS_T_INTEL_FOUND_n"]],
+    ["combat",    [0.75, [["intel", 6], ["money", 44], ["document", 25]],         "STR_DUWS_T_INTEL_FOUND_n"]],
     ["objective", [1,    [["intel", 1]],                                             "STR_DUWS_T_INTEL_FOUND_n"]],
     ["civ_frisk", [1,    [["money", 3], ["document", 1], ["nothing", 4]],            "STR_DUWS_T_INTEL_FOUND_n"]]
 ];
