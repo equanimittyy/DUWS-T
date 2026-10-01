@@ -929,7 +929,7 @@ the client that opens it and has to know at open time which rows are dead, and t
 conditions are evaluated on every machine that carries them. A boolean pushed when it changes beats a
 request-and-wait handshake in front of every open, which would either delay the menu or pop rows grey
 after the player is already looking at them — the same trade the search flag makes
-([`intel_system.md`](intel_system.md#the-success-roll-is-spent-at-spawn-so-the-price-is-the-fight)).
+([`intel_system.md`](intel_system.md#a-flagged-source-is-marked-at-spawn)).
 
 `DUWS_civ_stopped` is written server-side, in the call-over's own server function rather than in the
 client action body that triggers it: a client that owns the flag can open the menu on a local it never
@@ -995,14 +995,14 @@ influence.
 
 #### What a search turns up
 
-Every arrested civilian is flagged searchable, so the odds live entirely in the `civ_frisk` payout table
-(`server/server_var_init.sqf`), drawn by weight rather than by a threshold ladder:
+Every arrested civilian is flagged searchable, so the odds live entirely in the `civ_frisk` row
+(`server/server_var_init.sqf`): a 50 % success chance, then a draw by weight. The overall odds are:
 
-| Weight | Outcome |
+| Chance | Outcome |
 |---:|---|
 | 3 / 8 | 1–5 `Item_Money_roll` on the ground |
 | 1 / 8 | exactly one item from Wallet_traitor / FlashDisk / SmartPhone / MobilePhone |
-| 4 / 8 | nothing |
+| 4 / 8 | nothing (the missed chance) |
 
 Three quarters of what is found is cash, so a frisk is a gamble on pocket change rather than a way to
 farm intel. Phones share the pool with the documents because both exist only to be turned in at the HQ

@@ -241,7 +241,7 @@ a cheaper way to liquidate a slate, which inverts what the death penalty is for.
 | Intel analysis (terminal) | `server/search/fnc_intelAnalysis.sqf` | per document, always paid: 1 CP (`MobilePhone`/`Wallet_ID`), 2 (`SmartPhone`), 3 (`FlashDisk`), 4 (`Files`), 5 (`FilesSecret`/`FileTopSecret`); each also rolls a per-item chance to reveal one hidden position. A turn-in made before a pending award lands joins that award, so one card pays the batch with ≤1 reveal |
 | Enemy corpse loot | `server/search/fnc_addRandomLoot.sqf` | half of enemies carry 1 `Money_roll` (personal cash); intel documents no longer dropped here |
 | Bandit corpse loot | `server/bandits/fnc_bandit_spawn.sqf` | half of bandits carry 1 `Money_roll`, none when the inventory is full |
-| Search payout (`pool` kind) | `server/search/fnc_search_claim.sqf` | +1–3 CP, on a flagged body or objective whose payout draw lands on `pool` |
+| Search payout (`money` kind) | `server/search/fnc_search_claim.sqf` | 1–3 `Money_roll` into the searcher's inventory; a corpse search multiplies it by its ladder row's count, 1–3 ([`intel_system.md`](intel_system.md#a-corpse-search-walks-a-ladder)) |
 | Vehicle recycle | `server/supports/fnc_activateBaseRecycleStation.sqf` | `DUWS_fnc_calculateVehicleValue` per empty vehicle, summed then rounded |
 | Kill income | `server/server_init.sqf:306-413` | `kill_cp_award` (2) CP + `kill_ap_award` (1) AP per 10 hostile kills, swept every 60 seconds (`kill_cp_period`) with a hint to each player paid; the AP credits BLUFOR's tier; the remainder carries |
 | Killhouse training | `server/killhouse/fnc_createKillhouse.sqf:303-304` | +1 for clearing 10 targets, or +3 for clearing 20 challenge enemies, once per run |

@@ -8,9 +8,7 @@
 // within reach instead, so a ragdoll need only be faced, not have the cursor land on it. A body
 // already searched (DUWS_search_done) is excluded from both, so every corpse is offered once.
 //
-// Flagged targets are single-use and bypass the budget; the combat corpse is gated by it here for
-// the prompt, and again on the server for authority. Budget and class list read with defaults: their
-// broadcasts may not have landed when this first evaluates.
+// Class list read with a default: its broadcast may not have landed when this first evaluates.
 //
 // Enemy is matched by class against DUWS_enemyManClasses (recorded at each EAST death), never `side _x`
 // (every corpse reports civilian) or config side (the mod's side, not the side the mission fields it on).
@@ -25,10 +23,6 @@ if (
     && {!(_c getVariable ["DUWS_search_done", false])}
     && {!(_c isKindOf "CAManBase") || {!alive _c} || {_c getVariable ["isSurrendered", false]}}
 ) exitWith { _c };
-
-private _window = missionNamespace getVariable ["DUWS_searchCooldown", 900];
-private _spent = (missionNamespace getVariable ["DUWS_searchTimes", []]) select {time - _x < _window};
-if (count _spent >= (missionNamespace getVariable ["DUWS_searchAllowance", 3])) exitWith { objNull };
 
 private _enemyClasses = missionNamespace getVariable ["DUWS_enemyManClasses", []];
 private _eye = eyePos _who;

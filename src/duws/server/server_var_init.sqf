@@ -267,19 +267,37 @@ HQ_pos_found_generated = false;publicVariable "HQ_pos_found_generated";
 MASTER_allLocations_filtered = [];//publicVariable "MASTER_allLocations_filtered";
 MASTER_allLocationsPos = [];publicVariable "MASTER_allLocationsPos";
 
-// [successChance, [[payoutKind, weight], ...], nothingKey] per search source.
-// combat rolls at the search, not spawn (any corpse is searchable). Its gate is per-search, and
-// DUWS_searchAllowance searches are allowed per DUWS_searchCooldown window: gate * allowance is the
-// expected payouts per window (0.75 * 3 = 2.25), so raising the allowance without dropping the gate
-// multiplies intel volume. objective/civ_frisk are flagged at spawn with chance 1 (never miss,
-// single-use) and read this table only for kinds.
-// Weights, not a cumulative ladder: adding a kind is one row instead of re-deriving every band below it.
+// [successChance, [[payoutKind, weight], ...], nothingKey] per flagged search source.
+// Weights, not cumulative bands: adding a kind is one row instead of re-deriving every band below it.
 // Kinds draw without replacement; an exhausted kind drops out and the remainder re-draw, so a dry pool
 // never turns a search into silence.
 DUWS_searchSources = createHashMapFromArray [
-    ["combat",    [0.75, [["intel", 6], ["money", 44], ["document", 25]],         "STR_DUWS_T_INTEL_FOUND_n"]],
     ["objective", [1,    [["intel", 1]],                                             "STR_DUWS_T_INTEL_FOUND_n"]],
-    ["civ_frisk", [1,    [["money", 3], ["document", 1], ["nothing", 4]],            "STR_DUWS_T_INTEL_FOUND_n"]]
+    ["civ_frisk", [0.5,  [["money", 3], ["document", 1]],                            "STR_DUWS_T_INTEL_FOUND_n"]]
+];
+
+// [successChance, [[payoutKind, weight], ...], count] per corpse-search step, indexed by the team's searches
+// in the last DUWS_searchCooldown seconds. U-shaped on purpose: thin mid-ladder, richest at the floor, so
+// a team that keeps searching is paid for it.
+DUWS_searchLadder = [
+    [0.90, [["intel", 10], ["money", 55], ["document", 35]], 2],
+    [0.85, [["intel", 10], ["money", 55], ["document", 35]], 1],
+    [0.80, [["intel", 10], ["money", 55], ["document", 35]], 1],
+    [0.75, [["intel", 5],  ["money", 57], ["document", 38]], 1],
+    [0.70, [["intel", 0],  ["money", 60], ["document", 40]], 1],
+    [0.65, [["intel", 0],  ["money", 60], ["document", 40]], 1],
+    [0.60, [["intel", 0],  ["money", 60], ["document", 40]], 1],
+    [0.55, [["intel", 0],  ["money", 60], ["document", 40]], 1],
+    [0.50, [["intel", 0],  ["money", 60], ["document", 40]], 1],
+    [0.45, [["intel", 10], ["money", 52], ["document", 38]], 1],
+    [0.40, [["intel", 20], ["money", 45], ["document", 35]], 2],
+    [0.35, [["intel", 30], ["money", 37], ["document", 33]], 2],
+    [0.30, [["intel", 40], ["money", 30], ["document", 30]], 2],
+    [0.25, [["intel", 45], ["money", 28], ["document", 27]], 2],
+    [0.20, [["intel", 50], ["money", 25], ["document", 25]], 3],
+    [0.15, [["intel", 60], ["money", 20], ["document", 20]], 3],
+    [0.10, [["intel", 70], ["money", 15], ["document", 15]], 3],
+    [0.05, [["intel", 80], ["money", 10], ["document", 10]], 3]
 ];
 
 // The physical items a "document" find drops, and a patrol camp's table may hold. Only base-game Item_
@@ -294,13 +312,8 @@ DUWS_intelDocumentLabels = ["STR_DUWS_T_INTEL_ITEM_phone", "STR_DUWS_T_INTEL_ITE
     "STR_DUWS_T_INTEL_ITEM_smartphone", "STR_DUWS_T_INTEL_ITEM_flashdrive",
     "STR_DUWS_T_INTEL_ITEM_files"];
 
-// A rolling window: up to DUWS_searchAllowance combat-corpse searches per DUWS_searchCooldown seconds,
-// session-wide -- one shared budget for the whole team, not per player. This budget, not troop density,
-// is what bounds intel volume, since any corpse is searchable and the success roll is spent at the
-// search. Deliberately tight. Objective/civ_frisk searches are single-use and bypass it. The tally
-// (DUWS_searchTimes) lives in missionNamespace and is broadcast: the prompt's condition runs on the client.
-DUWS_searchCooldown = 900;   publicVariable "DUWS_searchCooldown";
-DUWS_searchAllowance = 3;    publicVariable "DUWS_searchAllowance";
+// The ladder's tally (DUWS_searchTimes) is one for the whole team, not per player.
+DUWS_searchCooldown = 900;
 DUWS_enemyManClasses = [];
 
 manually_chosen = false;publicVariable "manually_chosen";

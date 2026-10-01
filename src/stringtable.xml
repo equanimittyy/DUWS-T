@@ -7652,6 +7652,18 @@
                 <French>Document trouvé : %1. Analysez le renseignement au QG.</French>
                 <Chinese>找到文件：%1。前往總部分析情報。</Chinese>
             </Key>
+            <Key ID="STR_DUWS_T_LOOT2_MANY">
+                <Original>Found documents: %1x %2. Analyse intel at HQ.</Original>
+                <English>Found documents: %1x %2. Analyse intel at HQ.</English>
+                <German>Dokumente gefunden: %1x %2. Informationen im HQ auswerten.</German>
+                <Spanish>Documentos encontrados: %1x %2. Analiza la inteligencia en el CG.</Spanish>
+                <Chinesesimp>找到文件：%1x %2。前往总部分析情报。</Chinesesimp>
+                <Polish>Znaleziono dokumenty: %1x %2. Przeanalizuj wywiad w HQ.</Polish>
+                <Czech>Nalezeny dokumenty: %1x %2. Zpravodajství analyzuj na HQ.</Czech>
+                <Russian>Найдены документы: %1x %2. Анализируй разведданные в штабе.</Russian>
+                <French>Documents trouvés : %1x %2. Analysez le renseignement au QG.</French>
+                <Chinese>找到文件：%1x %2。前往總部分析情報。</Chinese>
+            </Key>
             <Key ID="STR_DUWS_T_LOOT4">
                 <Original>Found %1 money.</Original>
                 <English>Found %1 money.</English>

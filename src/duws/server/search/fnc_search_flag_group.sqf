@@ -8,15 +8,12 @@ if (!isServer) exitWith {};
 
 params ["_units", "_source"];
 
-private _config = DUWS_searchSources getOrDefault [_source, []];
-if (_config isEqualTo []) exitWith {
+if !(_source in DUWS_searchSources) exitWith {
     ["WARN", "INTEL", format ["search source '%1' is not in DUWS_searchSources; nothing flagged", _source]] call fnc_log;
 };
 
-private _chance = _config select 0;
-
 {
-    if (alive _x && {random 1 < _chance}) then {
+    if (alive _x) then {
         _x setVariable ["DUWS_search_src", _source, true];
         _x setVariable ["GCblackList", true, true];
     };

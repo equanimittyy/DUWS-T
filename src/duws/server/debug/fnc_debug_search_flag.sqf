@@ -8,7 +8,7 @@
 */
 if (!isServer) exitWith {};
 
-params ["_caller", ["_target", objNull], ["_source", "combat"]];
+params ["_caller", ["_target", objNull], "_source"];
 if (isNull _caller) exitWith {};
 
 // Re-checked here rather than trusted to the menu: this is reachable by remoteExec from any

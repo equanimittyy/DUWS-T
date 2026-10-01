@@ -1,13 +1,15 @@
-// Locality: server. Runs the real payout draw and the real payout, and deliberately skips stage
-// one: the flag is rolled when a unit spawns, so exercising it honestly means fighting a garrison
-// per sample. The stage-one chance is reported rather than obeyed. Nothing else is faked, except
-// that _forceIntel skips the kind draw so a reveal can be tested on demand.
+// Locality: server. Never spends a ladder step, so testing does not move the live ladder.
 if (!isServer) exitWith {};
 
 params ["_caller", ["_source", "combat"], ["_forceIntel", false]];
 if (isNull _caller) exitWith {};
 
-private _config = DUWS_searchSources getOrDefault [_source, []];
+private _config = if (_source isEqualTo "combat") then {
+    private _times = (missionNamespace getVariable ["DUWS_searchTimes", []]) select {time - _x < DUWS_searchCooldown};
+    DUWS_searchLadder select ((count _times) min (count DUWS_searchLadder - 1))
+} else {
+    DUWS_searchSources getOrDefault [_source, []]
+};
 if (_config isEqualTo []) exitWith {
     [format ["Intel search (debug)\n\nNo source named '%1' in DUWS_searchSources.", _source]] remoteExec ["hint", _caller];
 };
@@ -44,7 +46,7 @@ if (_kind isEqualTo "intel") then {
 };
 
 [format [
-    "Intel search (debug)\n\nSource '%1', flagged at spawn %2%7 of the time\nWeights: %3\n\n%4\n\nHidden positions: %5 -> %6",
+    "Intel search (debug)\n\nSource '%1', chance %2%7\nWeights: %3\n\n%4\n\nHidden positions: %5 -> %6",
     _source,
     (_config select 0) * 100,
     _config select 1,

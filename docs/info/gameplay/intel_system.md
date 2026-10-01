@@ -146,17 +146,17 @@ player out of one currency still has a route.
 
 | Source | Capped |
 |---|---|
-| Body search | by the flagged materiel on the ground, not by a clock — a third of any combat group, zone garrison and side-mission patrol alike |
+| Body search | not capped; each team search in the last 15 minutes lowers the chance of the next ([§A corpse search walks a ladder](#a-corpse-search-walks-a-ladder)) |
 | Side-mission objective | flagged with certainty; reaching the object is the gate |
 | Walking into a zone or town, or within 100 m of a hardpoint | not applicable; it reveals the ground the player is standing on and rolls nothing |
-| Civilian frisk | flagged with certainty; the arrest is the price, and its payout table carries the odds |
+| Civilian frisk | flagged with certainty; the arrest is the price, and its success chance carries the odds |
 | Intelligence Center | by the odds its level sets, the unbought level included — one roll per OPCOM tick ([§The Intelligence Center](#the-intelligence-center)) |
 
-**A third of a combat group is searchable, so a fight is a reliable route to intel rather than a lottery.**
-A much lower rate read in play as a broken action: a player who cleared a position and found no prompt on
-any body had no way to tell a cold roll from a feature that never worked. What keeps the search from
-collapsing into a kill count is its payout table, where intel is one kind of four, not its flag rate — so
-a combat group pays *something* most of the time and pays intel far less often than that.
+**Every enemy body is searchable, so a fight is a reliable route to intel rather than a lottery.**
+A low rate read in play as a broken action: a player who cleared a position and found no prompt on any body
+had no way to tell a cold roll from a feature that never worked. What keeps the search from collapsing into
+a kill count is the ladder, which thins the odds as the team searches, and the payout table, where intel is
+one kind of three.
 
 The sources draw from one pool, so they compete rather than stack, and the hidden-map phase ends when the
 last hidden position is found however that happened. A fourth source therefore shortens that phase rather
@@ -171,50 +171,61 @@ ran at mission *setup*, deciding whether the intel object existed before the pla
 of the six plant a hold action on a specific object rather than paying on completion, because reaching that
 object is the mission.
 
-## The success roll is spent at spawn, so the price is the fight
+## A flagged source is marked at spawn
 
-An entity that can be searched is decided when it is created, not when it is searched
-(`server/search/fnc_search_flag_group.sqf`). What the player can find is then a function of how much OPFOR the
-campaign put on the ground, rather than of how often a key was pressed, and the price of a search is the
-fight that produced the thing being searched.
+A side-mission objective and a frisked civilian are flagged when they are created
+(`server/search/fnc_search_flag_group.sqf`), without a roll, and pay their own row of `DUWS_searchSources`
+once. The row's chance is rolled at the search. They never enter the ladder below, because reaching the
+object or making the arrest is the price.
 
-**That is what let the clock go.** The body search used to carry a second price, one attempt per player per
-30-minute economy tick, and with it a UID-keyed record, a broadcast copy on the player object and a restore
-routine to reconcile the two across a respawn — a whole apparatus existing only to make a timer survive
-dying. A flag lives on the body and dies with it, so none of it is needed. `DUWS_civ_intel_asked` still rides
-`econ_tick`, because asking a *local* is capped against a finite population rather than against a clock.
+Flags are broadcast, because the action's condition is evaluated on the client that would draw it and an
+unflagged thing offers no action at all.
 
-Only the flagged share carries any state, rather than every corpse the campaign produces. Flags are broadcast,
-because the action's condition is evaluated on the client that would draw it and an unflagged thing offers no
-action at all.
+## A corpse search walks a ladder
 
-**A zone rebuilding its garrison re-rolls, and that is allowed.** A player can leave, wait out the despawn,
-return and search a fresh garrison — but the cycle is not a button press, it is walking out and defeating a
-full garrison again. The pool is finite, so farming buys a faster route through the hidden-map phase and
-nothing after it, and the cost scales with the reward because the garrison that must be beaten is the same
-garrison whose size sets how many flags are in it.
+Any enemy body can be searched once, and the search has no cap. Instead, each search reads one row of
+`DUWS_searchLadder` (`server/server_var_init.sqf`): the row at the number of searches the team made in the
+last `DUWS_searchCooldown` seconds (15 minutes). The chance falls from 90 % in steps of 5 % to a 5 % floor,
+and the last row repeats past the end. A dry search takes its step too. Each search that ages out of the
+window gives its step back, so the chance recovers while the team does not search.
+
+**The payout is U-shaped against the chance.** The first search after a quiet spell pays twice over. The
+middle of the ladder pays one find and never intel. The bottom rows pay two or three times over and weight
+the draw toward intel. A team that stops part of the way down gets the trough, and a team that keeps
+searching through it gets the richest rows, so the shape rewards consistency over the occasional search.
+
+A row's count multiplies the kind that is drawn: that many reveals, that many times the 1–3 money rolls, or
+that many copies of one document. One kind per search keeps the result to one hint.
+
+**Corpse count, not a clock, bounds the volume.** The ladder thins the odds but caps nothing, and the floor
+row repeats without end. The floor's chance × count × intel share therefore sets the long-run rate of a team
+that searches every body.
+
+The tally (`DUWS_searchTimes`) is one for the whole team and lives on the server. It is session state and is
+not saved, so a load starts the ladder at the top.
 
 ## What a search pays is a weighted table per source
 
-Stage two is a draw over `DUWS_searchSources` (`server/server_var_init.sqf`), each row naming a payout kind
-and its weight. Weights rather than a cumulative `if` ladder: every band in a ladder depends on the one above
-it, so adding a kind means re-deriving each constant below it.
+A search pays a draw over a weight table, a flagged source's row of `DUWS_searchSources` or a corpse
+search's ladder row (`server/server_var_init.sqf`), each entry naming a payout kind and its weight. Weights
+rather than a cumulative `if` chain: every band in a chain depends on the one above it, so adding a kind
+means re-deriving each constant below it.
 
 Kinds are drawn **without replacement**. `fnc_intel_payout` is the only kind that can decline — it returns
 false once every position is revealed — and when it does, that kind drops out and the remainder are re-drawn.
 A dry pool therefore costs a search its best outcome rather than its voice, which is the failure this mission
 already paid for once when a dry pool returned quietly.
 
-**When intel is exhausted, the search pays a flat 2 CP in its place.** Reachable only where intel was the last
+**When intel is exhausted, the search pays a document in its place.** Reachable only where intel was the last
 kind standing — an intel-only source such as a mission objective, which hardcore reaches once the map has been
 found and normal mode reaches on every such search. Reaching the objective still pays, so a reveal pool going
 dry costs the search its best outcome rather than its whole worth.
 
-`fnc_search_claim` silences the payout's dry answer, so the flat consolation above answers a decline
+`fnc_search_claim` silences the payout's dry answer, so the document above answers a decline
 without contradiction.
 
-`nothing` is a row rather than the absence of one, and a weight of zero is how a source opts out of a kind.
-The empty-handed line is per-source too, because a body that held nothing and a detainee who was carrying
+A miss comes from the success chance, not from a kind, and a weight of zero is how a source opts out of a
+kind. The empty-handed line is per-source, because a body that held nothing and a detainee who was carrying
 nothing are different sentences.
 
 **Every outcome except a reveal is spoken in the searcher's voice, to the searcher alone.** A frisk spoke in the team's
