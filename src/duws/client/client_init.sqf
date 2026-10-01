@@ -129,6 +129,12 @@ if (((vehiclevarname player) in game_master)) then {
 
 waituntil {sleep 1;WARCOM_init_done;};
 
+fnc_status_bar = compile preprocessFileLineNumbers "duws\client\warcom\fnc_status_bar.sqf";
+private _statusBar = uiNamespace getVariable ["DUWS_statusBarHandle", scriptNull];
+if (isNull _statusBar || {scriptDone _statusBar}) then {
+	uiNamespace setVariable ["DUWS_statusBarHandle", [] spawn fnc_status_bar];
+};
+
 // Each registers a Draw3D handler and returns, so call rather than spawn.
 [] call fnc_killhouse_markers;
 [] call fnc_draw_world_icons;

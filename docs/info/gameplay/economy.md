@@ -39,8 +39,11 @@ One deliberate difference from `fnc_cp_adjust`: an unrecognised side drops the d
 rather than crediting the wrong pool, so a bad call shows up in the RPT instead of corrupting a pool
 or throwing. Display then differs by side. `WARCOM_blufor_ap` carries a live counter — a
 `publicVariableEventHandler` mirrors it to the request-menu AP box (ctrl 1002) on clients
-(`client_init.sqf:138`) while the host refreshes the same control directly (`fnc_economy_init.sqf:86`)
-— and its earned-AP total crossing a force tier fires a card and a sound (`:88-96`). `WARCOM_opfor_ap`
+(`client_init.sqf:151`) while the host refreshes the same control directly (`fnc_economy_init.sqf:94`)
+— and its earned-AP total crossing a force tier fires a card and a sound (`:95-104`). Every player
+also sees a top status bar with BLUFOR's tier, CP, AP and earned AP, and a bar that fills toward the
+next rung (`client/warcom/fnc_status_bar.sqf`, RscTitles `DUWS_StatusBar`). It polls the broadcast
+globals every 0.5 s, because the host's handler never fires for its own broadcast. `WARCOM_opfor_ap`
 has no counter; it surfaces on demand in the map readout and in the request-menu labels of what it now
 buys, not through a pushed update.
 

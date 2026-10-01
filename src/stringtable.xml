@@ -4856,6 +4856,18 @@
                 <Chinese>已獲得 AP</Chinese>
                 <Spanish>AP Ganado</Spanish>
             </Key>
+            <Key ID="STR_DUWS_T_STATUS_BAR">
+                <Original>BLUFOR Tier: %1 | CP: %2 | AP: %3 | AP Earned: %4</Original>
+                <English>BLUFOR Tier: %1 | CP: %2 | AP: %3 | AP Earned: %4</English>
+                <Chinesesimp>BLUFOR 等级：%1 | CP：%2 | AP：%3 | 已获得 AP：%4</Chinesesimp>
+                <German>BLUFOR-Stufe: %1 | CP: %2 | AP: %3 | AP verdient: %4</German>
+                <Polish>Poziom BLUFOR: %1 | CP: %2 | AP: %3 | Zdobyte AP: %4</Polish>
+                <Czech>Úroveň BLUFOR: %1 | CP: %2 | AP: %3 | Získané AP: %4</Czech>
+                <Russian>Уровень BLUFOR: %1 | CP: %2 | AP: %3 | Получено AP: %4</Russian>
+                <French>Palier BLUFOR : %1 | CP : %2 | AP : %3 | AP gagné : %4</French>
+                <Chinese>BLUFOR 等級：%1 | CP：%2 | AP：%3 | 已獲得 AP：%4</Chinese>
+                <Spanish>Nivel BLUFOR: %1 | CP: %2 | AP: %3 | AP Ganado: %4</Spanish>
+            </Key>
             <Key ID="STR_DUWS_T_REQ_COMMAND">
                 <Original>COMMAND AND CONTROL</Original>
                 <English>COMMAND AND CONTROL</English>

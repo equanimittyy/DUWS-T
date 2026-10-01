@@ -180,4 +180,39 @@ class RscTitles {
             };
         };
     };
+
+    // The top status bar (fnc_status_bar).
+    class DUWS_StatusBar {
+        idd = -1;
+        movingEnable = false;
+        duration = 1000000000;
+        fadein = 0;
+        fadeout = 0;
+        onLoad = "uiNamespace setVariable ['DUWS_statusBarDisplay', _this select 0];";
+        class controls {
+            class line: RscText {
+                idc = 8815;
+                style = ST_CENTER;
+                x = 0.1 * safezoneW + safezoneX;
+                y = 0.005 * safezoneH + safezoneY;
+                w = 0.8 * safezoneW;
+                h = 0.04;
+                sizeEx = 0.03;
+                colorText[] = {1,1,1,1};
+            };
+            class track: RscText {
+                idc = 8816;
+                x = 0.4 * safezoneW + safezoneX;
+                y = 0.005 * safezoneH + safezoneY + 0.042;
+                w = 0.2 * safezoneW;
+                h = 0.008;
+                colorBackground[] = {0,0,0,0.5};
+            };
+            class fill: track {
+                idc = 8817;
+                w = 0;
+                colorBackground[] = {0.2,0.5,1,0.9};
+            };
+        };
+    };
 };
