@@ -9515,18 +9515,6 @@
                 <Chinese>一名敵方線人正混跡於本城鎮的平民之中活動。在他乘車逃離該區域前找到並擊斃他。注意，若當地居民抱有敵意，將不會向你提供任何消息，此時建議等待他離開。</Chinese>
                 <Spanish>Un informante enemigo opera entre los civiles de este pueblo. Encuéntralo y mátalo antes de que escape de la zona en coche. Atención: si los locales son hostiles, no te ofrecerán ninguna información, y es recomendable que esperes a su partida.</Spanish>
             </Key>
-            <Key ID="STR_DUWS_T_INTEL_INFORMANT_NOTE">
-                <Original>Killing the informant too close to town (300m) will cause reputational damage with the locals.</Original>
-                <English>Killing the informant too close to town (300m) will cause reputational damage with the locals.</English>
-                <Chinesesimp>在距离城镇过近（300 米内）击毙线人，将损害与当地居民的声望关系。</Chinesesimp>
-                <German>Den Informanten zu nah am Ort (300 m) zu töten, schadet dem Ansehen bei den Einheimischen.</German>
-                <Polish>Zabicie informatora zbyt blisko miejscowości (300 m) spowoduje utratę reputacji u miejscowych.</Polish>
-                <Czech>Zabití informátora příliš blízko města (300 m) poškodí reputaci u místních.</Czech>
-                <Russian>Уничтожение информатора слишком близко к населённому пункту (300 м) нанесёт ущерб репутации у местных жителей.</Russian>
-                <French>Éliminer l'informateur trop près de la localité (300 m) nuira à votre réputation auprès des habitants.</French>
-                <Chinese>在距離城鎮過近（300 公尺內）擊斃線人，將損害與當地居民的聲望關係。</Chinese>
-                <Spanish>Matar al informante demasiado cerca del pueblo (300 m) causará daño reputacional con los locales.</Spanish>
-            </Key>
             <Key ID="STR_DUWS_T_INTEL_INFORMANT_TASK">
                 <Original>An enemy informant is hiding among the civilians. Kill him before he escapes to %1. He will leave at %2, or sooner if shots are fired, in a %3.</Original>
                 <English>An enemy informant is hiding among the civilians. Kill him before he escapes to %1. He will leave at %2, or sooner if shots are fired, in a %3.</English>

@@ -151,8 +151,6 @@ _allUnits pushBack _informant;
 // body only once dead (or a living detainee), so the blended, breathing informant is never a tell.
 [[_informant], "objective"] call fnc_search_flag_group;
 
-// Killed handler here so the rep cost is charged off his death position: a clean kill on the road is
-// free, one in the crowd is not. Nearest town within edge + 300 m pays -1. TUNABLE.
 _informant addEventHandler ["Killed", {
     params ["_unit", "_killer", "_instigator"];
     _unit setVariable ["DUWS_informant_dead", true];
@@ -160,19 +158,11 @@ _informant addEventHandler ["Killed", {
     // is outed the instant a player (or an inventory-access mod like ACE) opens his gear.
     _unit addMagazineGlobal "FileTopSecret";
     // CIVILIAN death triggers the engine's civ-kill rating penalty -- a global rating tank that can turn
-    // the player's own AI hostile. Cancel it (the -1 town rep below is the whole intended cost); only on a
-    // civilian death, since an EAST flip (car gone) was neutral.
+    // the player's own AI hostile. Cancel it only on a civilian death, since an EAST flip (car gone) was
+    // neutral.
     if (side _unit == CIVILIAN) then {
         private _who = _instigator; if (isNull _who) then { _who = _killer };
         if (!isNull _who) then { _who addRating 500 }; // TUNABLE
-    };
-    private _p = getPosATL _unit;
-    private _tl = missionNamespace getVariable ["civ_locations", []];
-    private _tr = missionNamespace getVariable ["civ_radii", []];
-    private _ti = -1; private _bd = 1e9;
-    { private _dd = (getPos _x) distance2D _p; if (_dd < _bd) then { _bd = _dd; _ti = _forEachIndex } } forEach _tl;
-    if (_ti >= 0 && {_bd <= (_tr param [_ti, 200]) + 300}) then {
-        [_ti, -1, "informant_killed_near_town"] call fnc_town_rep_adjust;
     };
 }];
 

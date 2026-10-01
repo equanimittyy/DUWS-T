@@ -155,9 +155,8 @@ state (`duws_town_circles`, the `civ_icon_N` alpha, `CIV_PRESENCE`, `WARCOM_zone
 never the server-only `civ_town_rep`.
 
 **The informant.** A civilian-model unit in an EAST group (side follows the group), `setCaptive true`
-so BLUFOR AI ignores him while he blends. Killing him wins; a kill within townRadius + 300 m of the
-nearest town costs -1 reputation (`fnc_town_rep_adjust`), so a clean kill is on the road, not in the
-crowd.
+so BLUFOR AI ignores him while he blends. Killing him wins, and the kill costs no town reputation
+wherever it happens.
 
 **Two branches, on the town's reputation band** (`fnc_civ_repAt`; enemy = OPFOR band or a standing
 garrison via `fnc_town_garrison_tierAt`):
@@ -178,7 +177,7 @@ clock via `fnc_time_clock`.
 
 Tunables (defaults, all in the thread): leave 4 steps friendly / 2 steps enemy (5-min steps, so 20 /
 10 min), +16 crowd, zone-reach
-60 m, rep-penalty radius +300 m, pistol `hgun_Rook40_F`, shots trigger = `FiredNear`, ask/bribe price
+60 m, pistol `hgun_Rook40_F`, shots trigger = `FiredNear`, ask/bribe price
 3.
 
 ### Recon Enemy Position
