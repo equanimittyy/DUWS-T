@@ -546,7 +546,6 @@ multiplier and the loss condition together.
 
 | Group | Kind | Contents |
 |---|---|---|
-| Town garrisons | outcome | purchased tier per town (`DUWS_townGarrisonTier`) and whose it is (`DUWS_townGarrisonOwner`) |
 | Zone garrisons | outcome | purchased tier per zone (`DUWS_zoneTier_<key>`) |
 | Garrison strength | outcome | per site, `DUWS_garrisonFull_<key>` and `DUWS_garrisonLost_<key>` — the full token multiset and the lost ledger against it |
 | Hardpoints | input | `DUWS_hardpoints`, one row per standing emplacement: `[key, pos, type, side, zoneKey, shown, dir]` |
@@ -579,16 +578,8 @@ has no belt saved and goes with its job. Each belt's variant is saved beside its
 planned mine, so a belt missing from `DUWS_opcom_mineVariants` still restores as what it is
 ([§The commander](#the-commander)).
 
-Town garrison tier is stored because the store already exists: `DUWS_townGarrisonTier` is written the
-moment a town crosses `-10` into the OPFOR band, independently of the commander
-([`info/zones_and_civilians.md`](../info/gameplay/zones_and_civilians.md#garrison-tiers-0-to-iv)), so a restore
-that dropped it would repair every turned town back to ungarrisoned. Its owner rides with it for the
-same reason: a tier and the side it belongs to are one fact, and a restored tier read as the wrong
-side's would hand one army the other's men.
-
-**A tier is not only the enemy's any more.** Both sides garrison ground they hold, so a zone's tier is
-outcome the same way a town's is — it is bought, and a restore that dropped it would take back every
-garrison the player paid for.
+**A tier is not only the enemy's.** Both sides garrison zones they hold, so a zone's tier is outcome:
+it is bought, and a restore that dropped it would take back every garrison the player paid for.
 
 **Strength is stored beside the tier, because the two answer different questions.** A tier is what a
 site fields at full; strength is how much of that is still standing. Attrition is a ledger of lost
@@ -599,7 +590,7 @@ either repairs every mauled garrison for free, wiping the attrition the players 
 one, handing them ground nobody took. Reinforce buys strength back on both sides, which makes it paid
 progress on the same footing as the tier.
 
-Both are flat token lists keyed `zone_<x>_<y>` or `town_<n>`, and a token is a composition name rather
+Both are flat token lists keyed `zone_<x>_<y>`, and a token is a composition name rather
 than a classname, so the group serialises as strings and pins to no mod set. Everything else derives
 from the pair on read: which side holds the site, which tokens sit behind an unearned Army Power rung,
 and what is surviving (full less lost). They are outcomes and go in after the builders, because a raise

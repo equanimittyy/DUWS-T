@@ -1,6 +1,6 @@
 # OPCOM: the opposing commander
 
-OPCOM is one server-side actor that turns the enemy's Army Power into pressure: it garrisons towns, tasks
+OPCOM is one server-side actor that turns the enemy's Army Power into pressure: it garrisons zones, tasks
 squads, builds hardpoints, and lets low-reputation towns fight back. Its wallet and faucets are the economy's
 ([`info/economy.md`](../../info/gameplay/economy.md#faucets)); the hardpoint mechanics it draws from are
 [`info/hardpoints.md`](../../info/gameplay/hardpoints.md); the standalone-siting economics are
@@ -106,8 +106,8 @@ score = archWeight[archetype][action] × P(win) × Value / Cost
 tilts by action ([§Archetype](#archetype-phase-7)); `P(win)` scales to the expected return.
 
 **Only an order that fights for its target carries a `P(win)`** — Attack, QRF included, Patrol and `arty_saturate`.
-`arty_creeping` names none: its objective stands still where a sighting drifts, so there are no odds that it moved. A purchase does not: Reinforce, Fortify, Build and Rapport stock ground OPCOM already holds, and their
-site is gated on being uncontested, so the term would read 1 wherever it was legal to spend. A buy scores
+`arty_creeping` names none: its objective stands still where a sighting drifts, so there are no odds that it moved. A purchase does not: Reinforce, Fortify and Build stock ground OPCOM already holds, and their
+site is gated on being uncontested, so the term would read 1 wherever it was legal to spend. Rapport sends a courier and fights for nothing. A buy scores
 `Value / Cost`. A commit order that fights for nothing names 1 rather than leaving the term out, since its row still
 has to name its Cost past it: a Garrison rests and a Probe observes.
 
@@ -195,13 +195,11 @@ magnitude; above that the best candidate takes most of the probability, and a hi
 | Zone Reinforce | each uncontested OPFOR zone below full strength |
 | Zone Fortify | each uncontested OPFOR zone below tier IV |
 | Zone hardpoint Build | one action per unlocked ring type, its targets every uncontested OPFOR zone with a free hardpoint slot (`fnc_hardpoint_zone_cap`) |
-| Town Reinforce | each OPFOR-band town below full strength |
-| Town Fortify | each OPFOR-band town below tier IV |
-| Rapport | each town above −20 and below +10 that OPFOR's area of influence covers (`fnc_aoi_opfor_covers`) |
+| Rapport | each town above −20, a BLUFOR-banded town included, that OPFOR's area of influence covers (`fnc_aoi_opfor_covers`) |
 | Standalone hardpoint Build | one action per unlocked standalone type, its target the band cell the siting pass picks by cover Value ([§Asset siting](#asset-siting)) |
 | Tower / OP / mortar / battery Build | one action each, under the type's cap, target the band cell the siting pass picks by the type's own rule ([§Asset siting](#asset-siting)) |
 | Minefield | one action per variant (AT, AP), target the band cell the siting pass picks by traffic, a belt 150 m deep and 500 m to 1.5 km long |
-| Attack assault, Attack flank | while no assault or flank is open and the attack cooldown has ended, each BLUFOR-held zone, each town they have garrisoned, the HQ once found (`DUWS_opcom_hqKnown`) while its officer lives, BLUFOR hold no zone, OPFOR stand at Armour or above (`WARCOM_opfor_tier` 4) and BLUFOR at Mechanised or above (`WARCOM_blufor_tier` 3), and each FOB once found (`DUWS_opcom_fobsKnown`) that a capture at its centre takes, so not one inside a held zone or a garrisoned town; and each attack of the row's kind still in buildup that needs more units; flank only below band 2 and from the target's own landmass, and a source across water only as infantry ([§Attack](#attack-phase-5)) |
+| Attack assault, Attack flank | while no assault or flank is open and the attack cooldown has ended, each BLUFOR-held zone, the HQ once found (`DUWS_opcom_hqKnown`) while its officer lives, BLUFOR hold no zone, OPFOR stand at Armour or above (`WARCOM_opfor_tier` 4) and BLUFOR at Mechanised or above (`WARCOM_blufor_tier` 3), and each FOB once found (`DUWS_opcom_fobsKnown`) that a capture at its centre takes, so not one inside a held zone; and each attack of the row's kind still in buildup that needs more units; flank only below band 2 and from the target's own landmass, and a source across water only as infantry ([§Attack](#attack-phase-5)) |
 | Attack QRF | each cluster of BLUFOR sightings inside OPFOR's area of influence and outside the base cells with no QRF on it and no local defense at the ideal bar, and each QRF still in buildup that needs more units ([§QRF](#qrf-an-attack-on-a-moving-cluster)) |
 | Patrol | each of `OPCOM_PATROL_SAMPLES` (3) sampled stale cells outside the base cells, one unit apiece, taken by the recon or land combatant, free or hired, that scores best |
 | Probe | each assault or flank target whose 3×3 block reads stale and has no probe already on it, and that an Attack can source or a buildup stages for, one unit apiece, sourced from Patrol's rows |
@@ -244,7 +242,7 @@ so it moves no faster than a truck delivers.
 
 | Action | Value |
 |---|---|
-| Zone or town Reinforce / Fortify, zone hardpoint | worth × exposure × gain |
+| Zone Reinforce / Fortify, zone hardpoint | worth × exposure × gain |
 | Standalone hardpoint, minefield | Σ over its 5×5 block of need × the cover it adds ([§Need and cover fields](#need-and-cover-fields)) |
 | Radio tower | (Σ worth of the towns it newly brings under OPFOR's area of influence − `OPCOM_TOWER_OVERLAP` (1) × Σ worth of the towns in reach OPFOR covers already), floored at 0, × defend |
 | OP | build price × the share of its 5×5 block (`OP_OBSERVE_K`) that no other OP watches, sea excluded |
@@ -260,8 +258,8 @@ so it moves no faster than a truck delivers.
 
 - **Rapport favours a neutral town.** OPFOR has no passive drift, so Rapport is the only thing that takes a town
   down. The skew is 1 at 0, 0.5 at −10 and the 0.1 floor from −18 out, so a town already in the OPFOR band still
-  draws Rapport to −20. A town from +1 to +9 takes a flat 0.05, under every town at 0 or below; a town at +10 or
-  more is BLUFOR-held and no target.
+  draws Rapport to −20. A town above 0 takes a flat 0.05, under every town at 0 or below, a BLUFOR-banded
+  town (+10 or more) included.
 - **Garrison gathers the QRF pool.** A unit counts once: a worn unit's Value is the larger of defense and heal,
   never the sum, because one unit serves one role at a time. Its defense share shrinks as the zone stacks up, so
   garrisons gather where exposure is high, and a QRF pool forms there with no roster table.
@@ -435,7 +433,7 @@ hardpoint is built or cleared or ground changes hands, and need also moves with 
 
 ### Gate and the savings goal
 
-- **Gate.** A zone or town action drops while that site is contested — the same rule and the same reach for both, so a garrison buy reads one answer wherever it lands. An action that needs a unit drops a
+- **Gate.** A zone action or a Rapport run drops while that site is contested. An action that needs a unit drops a
   target with no source: no eligible unit free, and no eligible row the faction can field under the unit cap
   ([§Sourcing](#sourcing-hire-on-demand-phase-4d)). No action draws a unit garrisoned in a contested zone. Patrol
   draws, free or hired, every unit carrying the `recon` flag, the helicopter included and `noncombat` or not, and
@@ -471,7 +469,7 @@ The debug harness spends outside the pick and is not capped.
 |---|---|---|
 | `OPCOM_CAP_UNITS_PER_ZONE` (8) × zones | every hire source except a truck | every OPCOM unit alive except the supply trucks |
 | `OPCOM_CAP_GARRISON` (2) | a Garrison's zone | the combatants homed at that zone, the set its reserve pool fields |
-| `OPCOM_SUPPLY_CLASS` (1 a class) | every supply action of the class | the trucks out on an errand of the class: town Reinforce and Fortify share one class, Rapport has its own, a standalone hardpoint and a Minefield share one, and a tower, OP, mortar or battery build has its own |
+| `OPCOM_SUPPLY_CLASS` (1 a class) | every supply action of the class | the trucks out on an errand of the class: Rapport has its own class, a standalone hardpoint and a Minefield share one, and a tower, OP, mortar or battery build has its own |
 | `OPCOM_CAP_HP_PER_ZONE` (12) × zones | every Build and Minefield | every standing OPFOR hardpoint of every type, towers, OPs and guns included, seeded ones included, and every build still siting or on its truck |
 | per type × zones | a Build or Minefield of that type | the same, by type, and by variant for a minefield ([§What the commander builds](#what-the-commander-builds)) |
 
@@ -480,8 +478,7 @@ The debug harness spends outside the pick and is not capped.
 - **A supply class rests after an order.** When a truck sets off, a cooldown rolled from `OPCOM_SUPPLY_COOLDOWN`
   (60–360 ticks, 5–30 min) starts on its class, and no action of that class is offered until it ends
   (`DUWS_opcom_supplyReadyTick`), whether the truck delivers or dies.
-- **The garrison cap is a zone's.** Only a zone homes an OPCOM unit: a town is taken by a unit that guards it, never
-  one that garrisons it ([§Attack](#attack-phase-5)).
+- **The garrison cap is a zone's.** Only a zone homes an OPCOM unit.
 - **The hardpoint caps scale with the campaign's zone count,** because the seeded hardpoints count and the seed
   grows with the zones, at about 7 a zone. A flat cap would sit under the seed of a 40-zone campaign and far over
   that of a 10-zone one.
@@ -540,7 +537,7 @@ The distance runs from where the source starts to where the action needs it: the
 | Attack QRF | combatants, air included, less a land unit across water from its target |
 | Garrison | combatants, air included |
 | Patrol, Probe | `recon` rows, the helicopter included, and land combatants |
-| Rapport, town Reinforce / Fortify, standalone and asset Build, Minefield | `supply` rows |
+| Rapport, standalone and asset Build, Minefield | `supply` rows |
 | A land-taxi for an assault's or a flank's staging leg, a QRF member's ride, or a Garrison | `transport` rows on wheels, tracks or a rotor |
 | A ferry | `transport` rows on water or a rotor |
 
@@ -579,8 +576,8 @@ A fire mission fires the guns OPCOM owns, so it sources no unit.
   unit the pool fields at a live zone deposits no `effForce` while it stands (`DUWS_fnc_opcom_defenderStanding`): the
   zone's own deposit counts its men off the roster.
 - **A flip removes every unit garrisoned at the site.** `DUWS_fnc_opcom_siteLost` deletes each `garrison` tasking
-  homed at a zone or town that leaves OPFOR hands, combatant or `noncombat`. A unit still marching in to settle, or on
-  an errand to the site, drops to `guard` where it stands.
+  homed at a zone that leaves OPFOR hands, combatant or `noncombat`. A unit still marching in to settle drops to
+  `guard` where it stands.
 - **A unit heals only at rest in its zone.** Only the `garrison` order heals: never on guard, never on the march in,
   and never while the zone is contested, since a zone under assault is no rest. The heal resumes when the contest
   lifts, and the contested ticks bank nothing. A boat rests and heals at its zone's port, even where the port lies
@@ -814,17 +811,13 @@ alone at `OPCOM_MUSTER_EXPIRY`.
   `DUWS_captureHold` with no BLUFOR within its K, **and only at tier 0** — a zone the player has garrisoned has to be beaten, and the site
   poller standing those men up is what renders the attacker to fight them. OPCOM sends that attack's contact
   report itself. The attacker garrisons the zone once it is virtual.
-  A **town** is attacked on the same terms with one difference: it changes hands only by having its garrison
-  cleared through its own trigger, so it has no virtual shortcut and no undefended case — a town with no tier is
-  never a target, since reputation rather than a fight is what owns it. The attacker that takes one guards the
-  ground instead of garrisoning into it, because the clear took the tier with it and left no pool to home to.
-  The **HQ** is attacked on a town's terms: no virtual shortcut, and no pool for OPFOR to home to. It never changes
+  The **HQ** has no virtual shortcut and no pool for OPFOR to home to. It never changes
   hands, so it falls with its officer (`hq_blu1`), and every attacker then guards where it stands, inside the radius
   or short of it. A **FOB** has no pool for OPFOR to home to either, so its attackers end the same way. It falls when
   overrun: an attacker, live or virtual, that has stood inside its radius for `DUWS_captureHold` with no BLUFOR in
   the ring destroys the building (a virtual one only with no BLUFOR within its K), and `fnc_fob_destroyed` withdraws the respawn, the marker and the site. The hold
   runs per FOB, once a tick after the task step (`DUWS_fnc_opcom_fobOverrun`), and restarts while any BLUFOR stand
-  in the ring. While it runs, `DUWS_overrunHold` on the building closes fast travel to that FOB. A capture resolves its target zones first, then garrisoned towns,
+  in the ring. While it runs, `DUWS_overrunHold` on the building closes fast travel to that FOB. A capture resolves its target zones first,
   then the nearest base (`DUWS_fnc_opcom_captureKey`). **QRF** (`intercept`) — at the sighting's last known position the unit
   reads truth within its own K: nothing there, it drops to `guard` in place; BLUFOR there, it fights them live and
   guards once none remain, until its QRF moves on to another group ([§QRF](#qrf-an-attack-on-a-moving-cluster)). It
@@ -984,15 +977,15 @@ appraisal already bought ([§Sourcing](#sourcing-hire-on-demand-phase-4d)). Spen
 |---|---|---|---|
 | Attack | a BLU-held zone | tasking-spawn | 1–N (assault or flank) |
 | QRF | a cluster of BLUFOR sightings inside OPFOR's area of influence that local defense does not hold at the ideal bar | tasking-spawn | 1–N |
-| Rapport | a town above −20 and below +10 inside OPFOR's area of influence (needs `supply`) | tasking-spawn | 1 courier |
-| Reinforce | an own depleted zone / town garrison | strength purchase | 0 zone / 1 truck town |
+| Rapport | a town above −20 inside OPFOR's area of influence (needs `supply`) | tasking-spawn | 1 courier |
+| Reinforce | an own depleted zone | strength purchase | 0 |
 | Patrol | a recon's or a land combatant's line over stale valuable cells | tasking-spawn | 1 |
 | Probe | an Attack target whose block reads stale | tasking-spawn | 1 |
 | Garrison | an open zone under the garrison cap | tasking-spawn | 1 |
 | Ferry, automatic | a unit stopped at a water leg | tasking-spawn | 1 lift |
 | Arty saturate | an observed target in gun range | bought fire mission | 0 |
 | Arty creeping | a bound offensive's target in gun range | bought fire mission | 0 |
-| Fortify | an own town / zone | tier purchase | 0 zone / 1 truck town |
+| Fortify | an own zone | tier purchase | 0 |
 | Build | an own zone ring or band cell, one action per unlocked type | hardpoint build | 0 zone / 1 truck standalone |
 | Tower Build | a band cell | hardpoint build | 1 truck |
 | OP Build | a band cell | hardpoint build | 1 truck |
@@ -1023,7 +1016,6 @@ zone) and OPFOR's zone and town income of roughly 40–80 AP per 30 min (`fnc_zo
 |---|---|
 | Unit hire | `OPCOM_AP_UNIT` by menu row: rifles 5, weapons team 3, recon foot 3, truck 2, recon car 5, boat 2, car 3, APC 8, IFV 13, MBT 20, recon helicopter 10, transport helicopter 5, attack helicopter 20, jet 30 |
 | Zone Reinforce / Fortify | `OPCOM_AP_REINFORCE` 10 / `OPCOM_AP_FORTIFY` 15, flat |
-| Town Reinforce / Fortify | the same flat price, plus its truck's source price |
 | Zone hardpoint | `OPCOM_AP_HARDPOINT`: roadblock 4, MG 6, GMG 8, AT 8, AA 10 |
 | Standalone hardpoint | as a zone hardpoint, plus its truck's source price |
 | Radio tower / OP / mortar pit / artillery battery | `OPCOM_AP_TOWER` 15 / `OPCOM_AP_OP` 8 / `OPCOM_AP_MORTAR` 13 / `OPCOM_AP_ARTY` 25, plus its truck's source price |
@@ -1033,8 +1025,7 @@ zone) and OPFOR's zone and town income of roughly 40–80 AP per 30 min (`fnc_zo
 | Fire mission | `OPCOM_AP_PER_ROUND` per round: 1 for a mortar, 2 for a battery |
 
 - **A garrison step is flat-priced.** Reinforce and Fortify cost the same wherever they land and whatever they buy
-  back, and a zone and a town charge the same rate for the same order; a town adds only its truck, which is the
-  delivery rather than the step. Pricing the step on the tokens owed made the cost a lottery on whatever happened
+  back. Pricing the step on the tokens owed made the cost a lottery on whatever happened
   to die there. Fortify is the dearer of the two because a tier raise is permanent where a refill is consumed.
 - **Price is its own table, keyed by what OPCOM buys** — a recruit menu row id, a hardpoint type, a garrison step.
   Never derived from force, and never read off the composition: force answers who wins a fight, which is a
@@ -1047,19 +1038,15 @@ zone) and OPFOR's zone and town income of roughly 40–80 AP per 30 min (`fnc_zo
   kills, and the traffic layer's contribution to need. `OPCOM_AP_PER_FORCE` is 1, about twice infantry's hire rate,
   so a free unit's stake reads dear beside a fresh hire and the pick leans toward hiring.
 
-**Supply gates the town-side builds.** A `supply` truck drives from OPFOR ground to its target and is spent on
-arrival, behind four actions: Rapport, standalone Build, and *town* Reinforce / Fortify
+**Supply gates the off-zone buys.** A `supply` truck drives from OPFOR ground to its target and is spent on
+arrival, behind the supply actions: Rapport, standalone Build, asset Build and Minefield
 ([§Shipped](#shipped-the-substrate-the-loop-drives)). The action takes a free truck, or hires one and tasks it in the same commit,
 whichever source scores better ([§Sourcing](#sourcing-hire-on-demand-phase-4d)). A town takes one supply truck at a time: while one drives to it, no supply action
 targets it. One truck of each supply class is out on an errand at a time, and a class rests after each delivery ([§Caps](#caps)). The AP is paid at commit but the result lands only when the *specific* bound truck
 arrives — **kill it en route and the order fails, no refund** (interdiction is the counterplay). **Arrival is the
 only test**: the contest gate keeps OPCOM from ordering a buy into a fight, but a truck already driving is never
-recalled, so a town that turns contested behind it still takes the delivery. A Reinforce landing there returns its
-lost tokens to the ledger and the reserve pool, and the reserve pass favours the sites players stand on, so those
-men feed into the engagement — the commander reinforcing a fight it did not know about when it paid. A town that
-falls first loses it. **Zones need no supply** — zone Reinforce,
-Fortify and hardpoint Build resolve on AP alone the tick they commit, reading as OPFOR trucking matériel outward
-from its zones to the towns.
+recalled, so a town that turns contested behind it still takes the delivery. **Zones need no supply** — zone Reinforce,
+Fortify and hardpoint Build resolve on AP alone the tick they commit.
 
 ## What the commander builds
 
@@ -1207,8 +1194,7 @@ alone picks the type ([§Value](#value)), because a per-type weight would fight 
 no weight of its own: it scores inside the action that sends it, under that action's weight, and the `recruitMix`
 alone leans on its row. A tower, OP, mortar or battery build keeps its own weight and stays out of the mix, so its
 weight sets how soon it builds. The table is relative: weighting every action alike changes no pick, so 1 is the
-baseline. Balanced weighs every action at 1 except the town errands (`rapport`, `town_reinforce`, `town_fortify`),
-at 0.9. 7.1 builds the setting.
+baseline. Balanced weighs every action at 1 except the Rapport errand (`rapport`), at 0.9. 7.1 builds the setting.
 
 | Archetype | Weights toward | Attack lean |
 |---|---|---|
@@ -1244,13 +1230,11 @@ thresholds Phase 5 sets, the patience figures, and the set of archetypes itself,
 the muster on one global set of bars, and 7.2 is what splits them per archetype
 ([§Attack](#attack-phase-5)).
 
-## Town & zone garrisons
+## Zone garrisons
 
-The OPFOR town ladder (tiers 0–IV in `DUWS_townSpawnTiers`, per-town `DUWS_townGarrisonTier` via
-`fnc_town_garrison_setTier`) and the zone tiers are shipped and documented in
-[`info/zones_and_civilians.md`](../../info/gameplay/zones_and_civilians.md#garrison-tiers-0-to-iv). Reputation
-decides *whether* a town garrisons (crossing −10 writes tier I); AP decides *how hard*. Clearing a town drops it to
-tier I at strength 0 (no refund), and it cannot be cleared again until OPCOM resupplies it.
+The zone tiers (0–IV) are shipped and documented in
+[`info/zones_and_civilians.md`](../../info/gameplay/zones_and_civilians.md#zone-tiers). AP decides how hard an OPFOR
+zone is held. Town reputation bands decide town ownership for markers, income and vendors, and a town has no garrison.
 
 BLUFOR garrisons are shipped on the same model
 ([`info/garrison_and_reserves.md`](../../info/gameplay/garrison_and_reserves.md#whose-garrison-it-is)): each side
@@ -1262,7 +1246,7 @@ its garrison renders and renders the attacker in turn.
 
 The player buys both from the View Map readout (`fnc_map_readout_buy`) at `OPCOM_AP_REINFORCE` and `OPCOM_AP_FORTIFY`
 in BLUFOR AP, landed at once with no truck, and refused while `DUWS_fnc_opcom_siteContested` holds for the site.
-OPCOM's own candidate lists skip BLUFOR-held sites, so nothing it buys can reach them.
+OPCOM's own candidate lists skip BLUFOR-held zones, so nothing it buys can reach them.
 
 ## Random events: what a turned town does
 
