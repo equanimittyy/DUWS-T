@@ -333,7 +333,7 @@ territory shows no readout.
 | Squads | `dialog/fnc_request_squad*.sqf` | per squad table |
 | FOB deploy | `client/supports/fnc_request_fob.sqf` | fixed |
 | Operatives | `server/operative/fnc_operator_roster.sqf:69` | 8, once per operative: the team's roster keeps it paid for, so each later deploy is free, a save included |
-| Mobile HQ | `client/dialog/fnc_MHQ_select.sqf` | 10 |
+| Mobile HQ | `client/supports/fnc_supports_init.sqf` (the `mobile_HQ` row) | 20, once for the team |
 | Heli / boat taxi | `supports/taxi/` | fixed |
 | Base repair, HQ, FOB and zone redeploy | `server/supports/fnc_activateBaseRepairStation.sqf`, `server/init_hq/fnc_redeployHQUnits.sqf`, `fnc_redeployFOBUnits.sqf`, `server/init_zones/fnc_zone_build.sqf` | 2 / 2 / 2 / 2 |
 | Garrison reinforce / fortify | `server/missions/fnc_map_readout_buy.sqf` | AP 10 / 15, OPCOM's own prices (`OPCOM_AP_REINFORCE` / `OPCOM_AP_FORTIFY`) |
