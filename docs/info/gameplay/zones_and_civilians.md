@@ -147,8 +147,8 @@ scatter and their crews are not part of it.
 **Tier moves the whole fight, dug-in slots included.** A repeated entry is how a tier fields two of
 something; nothing about the *ground* multiplies a row afterwards, and the one thing that does — the
 campaign's enemy multiplier — scales whole cards and applies to every OPFOR zone alike. The dug-in slots,
-`garrison:garrison_element`, climb from none at tier I to four at tier IV on OPFOR's rows and three on
-BLUFOR's, so only a heavier zone digs in.
+`garrison:garrison_element`, climb from one at tier I to two at tier IV on OPFOR's rows, and from none
+at tier I to two at tier IV on BLUFOR's.
 `fnc_zone_tier_roll` refuses to roll twice, and tests for a missing tier rather than a positive one, so a
 stored 0 never re-rolls. `fnc_createzone` is re-entrant by design — `zone_meta_array`
 exists so a zone can be rebuilt through it — and a rebuild that re-rolled would change what the ground
@@ -211,7 +211,7 @@ Nothing marks a prefab row as garrisonable. `isWeapon` is the only flag one carr
 placement — a gun keeps its Z so it lands on the bunker roof rather than in the dirt.
 
 **So what is built does not scale with tier.** The prefab draw does not read the tier, which is easy
-to misread now that the dug-in half of a garrison is six rows of the tier table: those rows scale the
+to misread now that the dug-in half of a garrison is entries of the tier table: those entries scale the
 men *holding* the ground, never what stands on it. Tiering built defences means either weighting the
 prefab draw by tier, or a composition entry that places an object rather than a group — which is what
 [`hardpoints.md`](hardpoints.md) does.
@@ -585,7 +585,7 @@ more usefully — **which of them cannot be moved alone.**
   the count over the ring holds it until the commander reinforces. Moving either number changes that
   for every capture at once.
 
-**A figure that is arithmetic rather than balance.** OPFOR's tier IV zone row lands on twenty-seven groups,
+**A figure that is arithmetic rather than balance.** OPFOR's tier IV zone row lands on twenty-one groups,
 which at full garrison density is also the site's group ceiling — raising it raises what every tier IV zone on the map costs
 the server, not just the one in front of the player.
 

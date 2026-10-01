@@ -13,25 +13,22 @@
 //
 // Radius does not scale this: a zone is its tier, so scaling by radius would put two zones the map
 // reports at the same tier on the ground at different strengths for no reason the player can read.
-//
-// Tier I has no garrison (dug-in) slots -- balance choice, so the lightest zone stays all mobile and
-// only the heavier ones dig in.
 // --DUWS-UNITCOMP BEGIN name="OPFOR zone tiers" kind=composition rowname="Tier %1" row="tier I..IV"--
 DUWS_zoneSpawnTiers = [
-    ["widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "closepatrol:team", "closepatrol:wp_team", "widepatrol:car"],
-    ["widepatrol:sniper_element", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "closepatrol:team", "closepatrol:wp_team", "closepatrol:wp_team", "widepatrol:car", "widepatrol:car", "closepatrol:apc", "garrison:garrison_element", "garrison:garrison_element"],
-    ["widepatrol:sniper_element", "widepatrol:sniper_element", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "closepatrol:team", "widepatrol:team", "closepatrol:wp_team", "closepatrol:wp_team", "widepatrol:wp_team", "widepatrol:car", "widepatrol:car", "closepatrol:apc", "closepatrol:ifv", "closepatrol:tank", "garrison:garrison_element", "garrison:garrison_element", "garrison:garrison_element"],
-    ["widepatrol:sniper_element", "widepatrol:sniper_element", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "closepatrol:team", "widepatrol:team", "widepatrol:team", "closepatrol:wp_team", "closepatrol:wp_team", "widepatrol:wp_team", "widepatrol:wp_team", "widepatrol:car", "widepatrol:car", "widepatrol:car", "closepatrol:apc", "closepatrol:ifv", "closepatrol:ifv", "closepatrol:tank", "closepatrol:tank", "widepatrol:attackheli", "garrison:garrison_element", "garrison:garrison_element", "garrison:garrison_element", "garrison:garrison_element"]
+    ["widepatrol:patrol", "closepatrol:wp_team", "widepatrol:car", "garrison:garrison_element"],
+    ["widepatrol:sniper_element", "widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "closepatrol:wp_team", "closepatrol:wp_team", "widepatrol:car", "widepatrol:car", "closepatrol:apc", "garrison:garrison_element"],
+    ["widepatrol:sniper_element", "widepatrol:sniper_element", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "widepatrol:team", "closepatrol:wp_team", "closepatrol:wp_team", "widepatrol:wp_team", "widepatrol:car", "widepatrol:car", "closepatrol:apc", "closepatrol:ifv", "garrison:garrison_element", "garrison:garrison_element"],
+    ["widepatrol:sniper_element", "widepatrol:sniper_element", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "closepatrol:team", "widepatrol:team", "widepatrol:team", "closepatrol:wp_team", "closepatrol:wp_team", "widepatrol:wp_team", "widepatrol:wp_team", "widepatrol:car", "widepatrol:car", "closepatrol:ifv", "closepatrol:ifv", "closepatrol:tank", "garrison:garrison_element", "garrison:garrison_element"]
 ];
 // --DUWS-UNITCOMP END--
 
 // Kept weaker than OPFOR's row at every tier.
 // --DUWS-UNITCOMP BEGIN name="BLUFOR zone tiers" kind=composition rowname="Tier %1" row="tier I..IV"--
 DUWS_zoneSpawnTiersBlu = [
-    ["widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "closepatrol:wp_team", "widepatrol:car"],
-    ["widepatrol:sniper_element", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "closepatrol:wp_team", "closepatrol:wp_team", "widepatrol:car", "widepatrol:car", "closepatrol:apc", "garrison:garrison_element"],
-    ["widepatrol:sniper_element", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "widepatrol:team", "closepatrol:wp_team", "closepatrol:wp_team", "widepatrol:wp_team", "widepatrol:car", "widepatrol:car", "closepatrol:apc", "closepatrol:ifv", "closepatrol:tank", "garrison:garrison_element", "garrison:garrison_element"],
-    ["widepatrol:sniper_element", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "widepatrol:team", "widepatrol:team", "closepatrol:wp_team", "closepatrol:wp_team", "widepatrol:wp_team", "widepatrol:wp_team", "widepatrol:car", "widepatrol:car", "closepatrol:apc", "closepatrol:ifv", "closepatrol:ifv", "closepatrol:tank", "closepatrol:tank", "widepatrol:attackheli", "garrison:garrison_element", "garrison:garrison_element", "garrison:garrison_element"]
+    ["widepatrol:patrol", "closepatrol:wp_team", "widepatrol:car"],
+    ["widepatrol:sniper_element", "widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "closepatrol:wp_team", "closepatrol:wp_team", "widepatrol:car", "widepatrol:car", "closepatrol:apc", "garrison:garrison_element"],
+    ["widepatrol:sniper_element", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "widepatrol:team", "closepatrol:wp_team", "closepatrol:wp_team", "widepatrol:wp_team", "widepatrol:car", "widepatrol:car", "closepatrol:apc", "closepatrol:ifv", "garrison:garrison_element", "garrison:garrison_element"],
+    ["widepatrol:sniper_element", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "widepatrol:team", "widepatrol:team", "closepatrol:wp_team", "closepatrol:wp_team", "widepatrol:wp_team", "widepatrol:wp_team", "widepatrol:car", "widepatrol:car", "closepatrol:ifv", "closepatrol:ifv", "closepatrol:tank", "garrison:garrison_element", "garrison:garrison_element"]
 ];
 // --DUWS-UNITCOMP END--
 
