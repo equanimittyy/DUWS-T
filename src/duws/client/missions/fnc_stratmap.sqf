@@ -59,7 +59,7 @@ _handle = [] spawn {
   // Drawn WITHOUT replacement so the offer set holds distinct types; a type that fails to site is
   // dropped and another drawn, so a slot is never left empty on a no-fit.
   private _bag = [];
-  { _bag pushBack _forEachIndex } forEach _missionDefs;
+  { if (_x select 14) then { _bag pushBack _forEachIndex } } forEach _missionDefs;
 
   private _missionDraw = 9 min (count _bag);
 
@@ -88,10 +88,11 @@ _handle = [] spawn {
 	private _wantHard = _hardFilled < _hardWant;
 	private _idx = -1;
 
-	// Debug one-shot: force a chosen type into this draw, still through the normal site finder so a
-	// no-fit drops it as a random draw would -- placement is never faked. Set by the re-roll picker.
+	// Debug one-shot: force a chosen type into this draw, enabled or not, still through the normal site
+	// finder so a no-fit drops it as a random draw would -- placement is never faked. Set by the re-roll
+	// picker.
 	private _forced = missionNamespace getVariable ["DUWS_dbgForceDrawType", -1];
-	if (_forced >= 0 && {(_bag findIf {_x == _forced}) >= 0}) then {
+	if (_forced >= 0) then {
 		_idx = _forced;
 		_wantHard = false;
 		DUWS_dbgForceDrawType = -1;

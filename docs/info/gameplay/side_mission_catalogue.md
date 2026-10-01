@@ -25,7 +25,7 @@ reach-the-marker-and-kill with a bigger garrison (the design bar is in
 | 2 | Eliminate High-Value Target | spot which of three armed convoys carries the HVT, stop it before it reaches a zone | `target_hvt/` |
 | 5 | Hunt Sniper Team | find 1-3 pairs of elite marksmen that patrol between perches on the zone's high ground | `target_sniper/` |
 | 7 | Destroy Vehicle Patrol | break a roving 3-vehicle column that runs speed-limited until first blood | `target_armor/` |
-| 15 | Informant Manhunt | find one disguised target in a live crowd before he flees by car | `informant/` |
+| 15 | Informant Manhunt | find one disguised target in a live crowd before he flees by car | `informant/` (disabled) |
 | 12 | Recon Enemy Position | hold binocular eyes-on a zone from standoff without being drawn into a fight | `recon/` |
 | 11 | Deny Enemy Armor | reach a broken-down MBT before its repair crew convoy does, or intercept the convoy | `deny_armor/` |
 | 0 | Rescue Assault Team | break a cordon to free a captive squad, then cover its evac (heli or on-foot exfil) | `rescue_squad/` |
@@ -58,6 +58,9 @@ playable; they sit apart from *done* only until a play-test signs them off. Desi
 **No mission is stale.** Every type is repriced and either done or in play-testing. Rescue Pilot is the
 lone accepted exception to the distinct-verb bar -- kept as the escort-home shape (fight to the downed
 pilot, carry him out, deliver him near HQ), not reworked into a new verb.
+
+**Disabled:** Informant Manhunt (15). Play-tests found it low on fun, so its `mission_types.hpp` row
+sets `enabled` to false. The strategic map never offers it; the debug start and re-roll tools still do.
 
 ## Architecture: mission-owned site selection
 
@@ -419,7 +422,7 @@ vehicles as OPFOR earns Army Power while its pay stays fixed. The plain ring sti
 | 2 | Eliminate High-Value Target | elimination | cmd | 40/30/0 | 3 | done |
 | 11 | Deny Enemy Armor | elimination | cmd | 20/20/0 | 3 | done |
 | 7 | Destroy Vehicle Patrol | elimination | cmd | 15/20/0 (+tier) | 2-4 | done |
-| 15 | Informant Manhunt | elimination | cmd | 10/25/0 | 3 | done |
+| 15 | Informant Manhunt | elimination | cmd | 10/25/0 | 3 | disabled (low fun in play-tests) |
 | 12 | Recon Enemy Position | recon | cmd | 10/5/0 | 2 | done |
 | 5 | Hunt Sniper Team | elimination | cmd | 15/15/0 | 3 | done |
 | 0 | Rescue Assault Team | rescue | cmd | 25/15/0 | 3 | done |

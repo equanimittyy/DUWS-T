@@ -75,7 +75,8 @@ Add a row to `src/duws/shared/includes/mission_types.hpp`, index-aligned with th
 Columns (full contract in the file header): thread name, cooldown-ready name key, strategic-map
 description key, map icon, English debug label, launcher `{ [N] call fnc_mission_launch }`, base CP,
 AP, REP, deadline `[minHours,maxHours]`, category (`command`/`civilian`), objective archetype, optional
-note key, and a `spawnRule`. CP/AP/REP and the deadline are read only from here — the thread carries no
+note key, a `spawnRule`, and an `enabled` flag (false keeps the type out of the strategic-map offer
+draw; the debug tools still start it). CP/AP/REP and the deadline are read only from here — the thread carries no
 reward literals.
 
 `spawnRule` is `[needDestZone, minCorridor, routeAvoidBlufor, hardEligible, weight, surveyKind]`.
