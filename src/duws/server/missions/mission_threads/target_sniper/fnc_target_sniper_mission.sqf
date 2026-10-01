@@ -4,6 +4,9 @@ private _requester = remoteExecutedOwner;
 
 #define SNIPER_FLUSH_DIST 500   // a player this close, or a hit, releases a team to move
 #define SNIPER_MIN_SEP    400   // teams sited at least this far apart when the ring allows it
+#define PERCH_COUNT       6
+#define PERCH_SEP         150   // so a move is a real relocation, not a shuffle on one hilltop
+#define PERCH_HOLD        180   // a perch is held for 1-2x this many seconds
 
 private _build = {
     params ["_targetpos", "_randomPos", "_radius"];
@@ -13,51 +16,51 @@ private _build = {
     private _allGroups = [];
     private _placedPerches = [];   // perch of each team already sited, to space the next one off them
 
-    for "_t" from 1 to _teamCount do {
-        // Best prone overlook in the ring: score each land sample on height over its 60 m surroundings and
-        // how far it sees down eight bearings (terrain-only rays, generation-time). Track two bests -- the
-        // best clearing SNIPER_MIN_SEP from placed teams (preferred, so they spread), and the best
-        // regardless (used only when the ring is too tight). Elevation is scored, not gated, so a flat AO
-        // does not collapse every team onto _targetpos.
-        private _ring = [0, 45, 90, 135, 180, 225, 270, 315];
-        private _perchAny = _targetpos;  private _dirAny = 0;  private _scoreAny = -1000000;
-        private _perchSep = _targetpos;  private _dirSep = 0;  private _scoreSep = -1000000;
-        for "_i" from 0 to 23 do {
-            private _cand = _targetpos getPos [50 + random (_radius - 50), random 360];
-            if (!(surfaceIsWater _cand)) then {
-                private _z = getTerrainHeightASL _cand;
-                private _ringSum = 0;
-                { _ringSum = _ringSum + getTerrainHeightASL (_cand getPos [60, _x]) } forEach _ring;
-                private _relElev = _z - _ringSum / 8;
-                private _eye = [_cand select 0, _cand select 1, _z + 0.5];
-                private _openSum = 0;
-                private _candBestRay = 0;
-                private _candBestDir = 0;
-                {
-                    private _dir = _x;
-                    private _clear = 700;
-                    for "_d" from 70 to 700 step 70 do {
-                        private _tp = _cand getPos [_d, _dir];
-                        if (terrainIntersectASL [_eye, [_tp select 0, _tp select 1, (getTerrainHeightASL _tp) + 1]]) exitWith {
-                            _clear = _d - 70;
-                        };
-                    };
-                    _openSum = _openSum + _clear;
-                    if (_clear > _candBestRay) then { _candBestRay = _clear; _candBestDir = _dir };
-                } forEach _ring;
-                // Elevation leads; openness is a bounded tie-breaker. Rays cap at 700 m, so a flat plain
-                // reads as open as a hill and raw-weighted out-scored it, putting teams low. Normalise
-                // openness to 0..5 m-equivalent so height decides the perch, openness only breaks ties.
-                private _score = _relElev + 5 * (_openSum / 5600);
-                if (_score > _scoreAny) then { _scoreAny = _score; _perchAny = _cand; _dirAny = _candBestDir };
-                if ((_placedPerches findIf { _cand distance2D _x < SNIPER_MIN_SEP }) < 0) then {
-                    if (_score > _scoreSep) then { _scoreSep = _score; _perchSep = _cand; _dirSep = _candBestDir };
+    private _ring = [0, 45, 90, 135, 180, 225, 270, 315];
+    private _openBearing = {
+        private _eye = [_this select 0, _this select 1, (getTerrainHeightASL _this) + 0.5];
+        private _bestRay = 0;
+        private _bestDir = 0;
+        {
+            private _dir = _x;
+            private _clear = 700;
+            for "_d" from 70 to 700 step 70 do {
+                private _tp = _this getPos [_d, _dir];
+                if (terrainIntersectASL [_eye, [_tp select 0, _tp select 1, (getTerrainHeightASL _tp) + 1]]) exitWith {
+                    _clear = _d - 70;
                 };
             };
+            if (_clear > _bestRay) then { _bestRay = _clear; _bestDir = _dir };
+        } forEach _ring;
+        _bestDir
+    };
+
+    // Best first. Height in the zone leads, so a perch sits on the zone's high ground, not on a bump in a
+    // valley; the rise over a 60 m ring lifts a crest or a plateau rim over flat ground at the same height.
+    private _samples = [];
+    for "_i" from 1 to 64 do {
+        private _cand = _targetpos getPos [_radius * sqrt (random 1), random 360];
+        if (!(surfaceIsWater _cand)) then {
+            private _z = getTerrainHeightASL _cand;
+            private _ringSum = 0;
+            { _ringSum = _ringSum + getTerrainHeightASL (_cand getPos [60, _x]) } forEach _ring;
+            _samples pushBack [_z + (_z - _ringSum / 8), _cand];
         };
-        private _perch = _perchAny;
-        private _perchDir = _dirAny;
-        if (_scoreSep > -1000000) then { _perch = _perchSep; _perchDir = _dirSep };
+    };
+    _samples sort false;
+    private _vacant = [];   // [perch, facing]
+    {
+        private _cand = _x select 1;
+        if ((_vacant findIf { _cand distance2D (_x select 0) < PERCH_SEP }) < 0) then {
+            _vacant pushBack [_cand, _cand call _openBearing];
+        };
+        if (count _vacant == PERCH_COUNT) exitWith {};
+    } forEach _samples;
+
+    for "_t" from 1 to _teamCount do {
+        private _pick = _vacant findIf { private _p = _x select 0; (_placedPerches findIf { _p distance2D _x < SNIPER_MIN_SEP }) < 0 };
+        private _home = _vacant deleteAt (_pick max 0);
+        _home params ["_perch", "_perchDir"];
         _placedPerches pushBack _perch;
 
         // The "sniper_element" token drawn from the faction pools, raised through fnc_spawn_team with
@@ -98,16 +101,33 @@ private _build = {
             };
         };
 
-        // Hold this team prone and still until threatened, then release both to move and fight. Ends
-        // when the pair is dead too, so the monitor cannot outlive the objective it watches.
-        [_group, [_target1, _target2]] spawn {
-            params ["_grp", "_snipers"];
-            waitUntil {
-                sleep 3;
+        // Ends when the pair is dead too, so the loop cannot outlive the objective it watches.
+        [_group, [_target1, _target2], _home, _vacant] spawn {
+            params ["_grp", "_snipers", "_home", "_vacant"];
+            private _flushed = {
                 private _live = _snipers select { alive _x };
                 (_live isEqualTo [])
                 || {_grp getVariable ["DUWS_sniperFlushed", false]}
                 || {_live findIf { private _s = _x; (allPlayers findIf { alive _x && {_x distance2D _s < SNIPER_FLUSH_DIST} }) >= 0 } >= 0}
+            };
+            while { !(call _flushed) } do {
+                private _moveAt = time + PERCH_HOLD + random PERCH_HOLD;
+                waitUntil { sleep 3; (call _flushed) || {time > _moveAt} };
+                // _vacant is shared by every team's loop: no suspension between the check and the take.
+                if (_vacant isNotEqualTo [] && {!(call _flushed)}) then {
+                    private _next = _vacant deleteAt floor random count _vacant;
+                    _vacant pushBack _home;
+                    _home = _next;
+                    _home params ["_perch", "_perchDir"];
+                    { _x enableAI "PATH"; _x setUnitPos "AUTO" } forEach _snipers;
+                    _grp move _perch;
+                    // A pair that cannot path up to the perch settles where it stands and tries the next one.
+                    private _giveUpAt = time + 600;
+                    waitUntil { sleep 3; (call _flushed) || {(leader _grp) distance2D _perch < 15} || {time > _giveUpAt} };
+                    if (call _flushed) exitWith {};
+                    _grp setFormDir _perchDir;
+                    { if (alive _x) then { _x setDir _perchDir; _x setUnitPos "DOWN"; _x disableAI "PATH" } } forEach _snipers;
+                };
             };
             { if (alive _x) then { _x setUnitPos "AUTO"; _x enableAI "PATH" } } forEach _snipers;
             _grp setBehaviour "COMBAT";

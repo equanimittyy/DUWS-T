@@ -2,8 +2,8 @@
 // given a standing bead on that player. Rolled in the Hostile band; the
 // runner holds it off a player inside BLUFOR territory.
 //
-// Perch scoring mirrors the eliminate-sniper mission (fnc_target_sniper_mission), but the sight test adds
-// objects and foliage: a perch that only clears terrain often has no shot at all.
+// The sight test counts objects and foliage, not only terrain: a perch that only clears terrain often has
+// no shot at all.
 // The order is static -- reveal once, hold the perch prone -- so the team does not chase a player who
 // breaks contact.
 if (!isServer) exitWith {};

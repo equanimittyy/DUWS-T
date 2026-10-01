@@ -18,7 +18,7 @@ quick to kill you. Small mission, real problem.
 
 | Mission | The problem it poses | The script that makes it | Thread |
 |---|---|---|---|
-| Hunt Sniper Team | find 1-3 hidden pairs of elite marksmen on open ground | elevation+LOS perch search, sub-skills forced to 1, prone overwatch that flushes on approach or hit | `mission_threads/target_sniper/` |
+| Hunt Sniper Team | find 1-3 pairs of elite marksmen that patrol the zone's high ground | high-ground perch pool, sub-skills forced to 1, prone overwatch that moves perch to perch and flushes on approach or hit | `mission_threads/target_sniper/` |
 | Eliminate High-Value Target | spot which of three armed convoys hides the target and stop it before it reaches a zone | three divergent road approaches, one unarmed car among armed escorts, race-to-zone monitor | `mission_threads/target_hvt/` |
 | Deny Enemy Armor | reach a broken-down MBT before its repair-crew convoy, or intercept on the road | inbound repair convoy, distance-scaled repair timer, tank left unclaimed as the player's prize | `mission_threads/deny_armor/` |
 | Destroy Vehicle Patrol | break a roving vehicle column that stays speed-limited until first blood | tier-rolled 3-vehicle road loop, LIMITED speed until a hit lifts it, tier-scaled reward | `mission_threads/target_armor/` |

@@ -23,7 +23,7 @@ reach-the-marker-and-kill with a bigger garrison (the design bar is in
 | # | Mission | The verb that makes it different | Thread |
 |--:|---------|----------------------------------|--------|
 | 2 | Eliminate High-Value Target | spot which of three armed convoys carries the HVT, stop it before it reaches a zone | `target_hvt/` |
-| 5 | Hunt Sniper Team | find 1-3 hidden pairs of elite marksmen on open ground (elevation+LOS perch search) | `target_sniper/` |
+| 5 | Hunt Sniper Team | find 1-3 pairs of elite marksmen that patrol between perches on the zone's high ground | `target_sniper/` |
 | 7 | Destroy Vehicle Patrol | break a roving 3-vehicle column that runs speed-limited until first blood | `target_armor/` |
 | 15 | Informant Manhunt | find one disguised target in a live crowd before he flees by car | `informant/` |
 | 12 | Recon Enemy Position | hold binocular eyes-on a zone from standoff without being drawn into a fight | `recon/` |
