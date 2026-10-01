@@ -1,5 +1,7 @@
-// Shared offer-time town finder: nearest town centre not in the enemy band, within reach. Runs client-side in
-// the picker, so broadcast state only; civilians off leaves duws_town_circles empty and returns [].
+// Shared offer-time town finder: nearest discovered town centre not in the enemy band, within reach. Runs
+// client-side in the picker, so broadcast state only; civilians off leaves duws_town_circles empty and returns [].
+// Discovery is the town icon's alpha: civ_visible is server-only, but the icon is painted global-effect. An
+// undiscovered town is skipped: an offer there marks a town on the map that the player has not found.
 //
 // Not shared by the raid and informant finders on purpose: those pick the nearest town of ANY allegiance and
 // need the town's radius or list index, neither of which this filters for or returns.
@@ -15,7 +17,7 @@ private _bestPos = [];
 private _bestD = 1e9;
 {
     _x params ["_c", ""];
-    if ((_enemyTowns findIf { _x distance2D _c < 5 }) < 0) then {
+    if (markerAlpha (format ["civ_icon_%1", _forEachIndex]) > 0 && {(_enemyTowns findIf { _x distance2D _c < 5 }) < 0}) then {
         private _d = _c distance2D _pos;
         if (_d < _bestD) then { _bestD = _d; _bestPos = _c };
     };

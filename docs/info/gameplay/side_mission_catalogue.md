@@ -144,12 +144,12 @@ The informant mission is a manhunt, not a building sweep. An OPFOR informant hid
 town's civilians; the player finds and kills him before he leaves by car for a distant zone. Thread:
 `mission_threads/informant/fnc_informant_mission.sqf`.
 
-**Siting.** `fnc_informant_site` accepts a picker candidate only where a live Tomata civil town sits
-within 2.5 km *and* an OPFOR-held zone sits at least 1 km off (the informant's escape), returning that
-town's centre; civilians off / RAVAGE / WBK, or a town with no enemy zone to flee to, reject -- so the
-offer is dropped rather than sited where it cannot play out. The finder reads only broadcast state
-(`duws_town_circles`, `CIV_PRESENCE`, `WARCOM_zones_controled_by_OPFOR`), never the server-only
-`civ_town_rep`.
+**Siting.** `fnc_informant_site` accepts a picker candidate only where a discovered live Tomata civil
+town sits within 2.5 km *and* an OPFOR-held zone sits at least 1 km off (the informant's escape),
+returning that town's centre; civilians off / RAVAGE / WBK, or a town with no enemy zone to flee to, reject
+-- so the offer is dropped rather than sited where it cannot play out. The finder reads only broadcast
+state (`duws_town_circles`, the `civ_icon_N` alpha, `CIV_PRESENCE`, `WARCOM_zones_controled_by_OPFOR`),
+never the server-only `civ_town_rep`.
 
 **The informant.** A civilian-model unit in an EAST group (side follows the group), `setCaptive true`
 so BLUFOR AI ignores him while he blends. Killing him wins; a kill within townRadius + 300 m of the
@@ -281,11 +281,12 @@ deleted: every outcome drops its mission-only `persistent` flag, so it stays as 
 ordinary cleanup.
 
 **Siting.** `surveyKind "map"`, so the truck spawns on contested ground rather than in a town, and
-`fnc_transport_IDAP_site` gates the offer on a neutral/BLUFOR town sitting within 3 km of the sited truck
--- the crew's haven and delivery point. With no such town (civilians off leaves `duws_town_circles`
-empty; every town in reach is in the OPFOR band) the offer is dropped. The finder reads only broadcast
-state (`duws_town_circles`, `DUWS_enemy_town_pos`). The thread re-derives the nearest non-enemy town from
-the same state and aborts (`no_delivery_town`) if the war state flipped the last one hostile in the gap.
+`fnc_transport_IDAP_site` gates the offer on a discovered neutral/BLUFOR town sitting within 3 km of the
+sited truck -- the crew's haven and delivery point. With no such town (civilians off leaves
+`duws_town_circles` empty; every town in reach is undiscovered or in the OPFOR band) the offer is dropped.
+The finder reads only broadcast state (`duws_town_circles`, `DUWS_enemy_town_pos`, the `civ_icon_N` alpha).
+The thread re-derives the nearest discovered non-enemy town (`civ_visible`, `DUWS_enemy_town_pos`) and
+aborts (`no_delivery_town`) if the war state flipped the last one hostile in the gap.
 
 **The crew and hand-over.** Three IDAP aid workers stand idle at a safe spot in the delivery town under a
 green "IDAP" map marker, one of them marshalling the truck in with a held wave pose. The crew is raised by
@@ -357,10 +358,11 @@ which toggles only `MOVE` (follow when in the group, hold-where-dropped when out
 `fnc_squad_leaderLeft` runs the leave for him, so another leader can recruit him. Win: informant alive within 50 m of the town. Fail: informant dead,
 or the deadline. The win polls `alive`/`distance2D` itself, so it stays off the one-shot spine.
 
-**Siting and the delivery town.** `surveyKind "town"` with **no** site finder -- it inherits
-`fnc_site_generic` and re-derives the target town in-thread: the nearest circle in `duws_town_circles`
-that is *not* in `DUWS_enemy_town_pos`, its index (aligned with `civ_locations`) driving the rep call. If
-the war state left no non-enemy town in reach, the thread aborts `no_delivery_town`. The informant spawns
+**Siting and the delivery town.** `surveyKind "town"` with the `fnc_site_civ_town` finder, which snaps
+the offer onto the nearest discovered town within 2.5 km that is *not* in `DUWS_enemy_town_pos`. An
+undiscovered town is never a target, because the offer would mark a town on the map that the player has
+not found. The thread resolves that town by position in `duws_town_circles`, and its index (aligned with
+`civ_locations`) drives the rep call. If no circle matches, the thread aborts `no_delivery_town`. The informant spawns
 on a `BIS_fnc_findSafePos` near HQ.
 
 **Send-off and teardown.** He rides a manhunt-style map marker (`mil_warning`, refreshed every 5 s on a
@@ -385,8 +387,8 @@ within 50 m of the crew's resolved spot (`crewPos`, not the town centre -- else 
 of the drop). Fail: truck destroyed (`> 0.95` damage), crew all dead, or the deadline. The win is a
 delivered-vehicle predicate the thread polls itself.
 
-**Siting** mirrors Escort Informant: `surveyKind "town"`, no finder, the same non-enemy-town re-derivation
-and `no_delivery_town` abort. **Hand-over** mirrors `transport_IDAP`'s theatre: the marshaller drops its
+**Siting** mirrors Escort Informant: `surveyKind "town"`, the same `fnc_site_civ_town` finder (discovered
+non-enemy town), the same by-position town resolve and `no_delivery_town` abort. **Hand-over** mirrors `transport_IDAP`'s theatre: the marshaller drops its
 guide-in pose, IDAP thanks the player in the room (VOICE, naming the town), Overlord signs off over the
 net, then the sacks come off the bed and the truck stays behind, as in `transport_IDAP`. +3 REP on
 delivery, -3 on each fail branch. Spawns no opposition -- like Escort Informant, the difficulty is the war

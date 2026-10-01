@@ -18,7 +18,7 @@ params ["_pos"];
 #define MIN_BUILDINGS 5
 #define SNAP_RADIUS 2500
 
-// Snap to the town the candidate sits in: its centre is the objective, its radius sizes the search.
+// Snap to the nearest discovered town: its centre is the objective, its radius sizes the search.
 // duws_town_circles is the client-safe broadcast of server-only civ_locations/civ_radii
 // (fnc_civ_init_Tomata) and is index-aligned with it, so the thread resolves the same town.
 private _townCentre = [];
@@ -27,7 +27,7 @@ private _bestD = 1e9;
 {
     _x params ["_c", "_r"];
     private _d = _c distance2D _pos;
-    if (_d < _bestD) then { _bestD = _d; _townCentre = _c; _townRad = _r };
+    if (_d < _bestD && {markerAlpha (format ["civ_icon_%1", _forEachIndex]) > 0}) then { _bestD = _d; _townCentre = _c; _townRad = _r };
 } forEach (missionNamespace getVariable ["duws_town_circles", []]);
 if (_townCentre isEqualTo [] || {_bestD > SNAP_RADIUS}) exitWith { [] };
 

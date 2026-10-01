@@ -21,17 +21,18 @@ _messageClose = localize "STR_DUWS_T_idapoverlordclose";
 _messageLost = localize "STR_DUWS_T_idaptruckdown";
 _messageCrewDead = localize "STR_DUWS_T_idapcrewdead";
 
-// The crew's haven: nearest neutral/BLUFOR town, matching what the site-finder vetted (a town in the OPFOR
-// band is no hand-over point). duws_town_circles is index-aligned with civ_locations, so its index is what
-// fnc_town_rep_adjust takes. If the last non-enemy town flipped in the gap, abort.
+// The crew's haven: nearest discovered neutral/BLUFOR town, matching what the site-finder vetted (a town in
+// the OPFOR band is no hand-over point). duws_town_circles is index-aligned with civ_locations, so its index
+// is what fnc_town_rep_adjust takes. If the last non-enemy town flipped in the gap, abort.
 private _enemyTowns = missionNamespace getVariable ["DUWS_enemy_town_pos", []];
 private _circles = missionNamespace getVariable ["duws_town_circles", []];
+private _visible = missionNamespace getVariable ["civ_visible", []];
 private _townIdx = -1;
 private _townPos = [];
 private _bestD = 1e9;
 {
     _x params ["_c", ""];
-    if ((_enemyTowns findIf { _x distance2D _c < 5 }) < 0) then {
+    if ((_visible param [_forEachIndex, true]) && {(_enemyTowns findIf { _x distance2D _c < 5 }) < 0}) then {
         private _d = _c distance2D _MissionPos;
         if (_d < _bestD) then { _bestD = _d; _townPos = _c; _townIdx = _forEachIndex };
     };
