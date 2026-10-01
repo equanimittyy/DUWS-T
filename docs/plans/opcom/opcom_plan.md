@@ -1088,8 +1088,8 @@ minefield cap at 2 a campaign zone, GMG and AT minefield at 1 (`OPCOM_CAP_HP_TYP
 MG and roadblock carry no cap of their own. All types together, the flat-capped three included, cap at
 `OPCOM_CAP_HP_PER_ZONE` (12) a zone ([§Caps](#caps)).
 
-Hardpoint garrisons stay fixed per type (`DUWS_hardpointGarrison`). Knobs (all tune): seed subset 2–3 at init; no
-live cap (bounded by player proximity).
+A standalone hardpoint's garrison stays fixed per type (`DUWS_hardpointGarrison`); a zone hardpoint fields only its
+gun crew. Knobs (all tune): seed subset 2–3 at init; no live cap (bounded by player proximity).
 
 ### Asset siting
 
