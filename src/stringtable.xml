@@ -4425,6 +4425,18 @@
                 <Chinese>正在填充城鎮……&lt;br/&gt;第 %1 / %2 座城鎮</Chinese>
                 <Spanish>Poblando pueblos…&lt;br/&gt;Pueblo %1 de %2</Spanish>
             </Key>
+            <Key ID="STR_DUWS_T_civ_sector">
+                <Original>Civilian Sector %1</Original>
+                <English>Civilian Sector %1</English>
+                <Chinesesimp>平民区 %1</Chinesesimp>
+                <German>Zivilsektor %1</German>
+                <Polish>Sektor cywilny %1</Polish>
+                <Czech>Civilní sektor %1</Czech>
+                <Russian>Гражданский сектор %1</Russian>
+                <French>Secteur civil %1</French>
+                <Chinese>平民區 %1</Chinese>
+                <Spanish>Sector civil %1</Spanish>
+            </Key>
             <Key ID="STR_DUWS_T_CARRY_PLACING">
                 <Original>Placing %1...</Original>
                 <English>Placing %1...</English>

@@ -318,15 +318,22 @@ DUWS_fnc_restoreHardpoints = {
 };
 
 // A position the map no longer names a town at gets a Location of its own: every town record downstream is keyed
-// by its index in this list.
+// by its index in this list. Registration names a building cluster from its saved word.
 DUWS_fnc_restoreTownQueue = {
     private _types = ["NameCityCapital", "NameCity", "NameVillage", "NameLocal"];
     [(DUWS_restore getOrDefault ["towns", []]) apply {
-        _x params ["_pos", "_radius", "_pop"];
-        private _loc = (nearestLocations [_pos, _types, 50]) param [0, locationNull];
-        if (isNull _loc || {((getPos _loc) distance2D _pos) > 1}) then {
-            ["WARN", "SAVE", format ["no town at %1 on this map; standing one in", _pos]] call fnc_log;
-            _loc = createLocation ["NameVillage", _pos, _radius, _radius];
+        _x params ["_pos", "_radius", "_pop", ["_sector", ""]];
+        private _loc = locationNull;
+        if (_sector isEqualTo "") then {
+            _loc = (nearestLocations [_pos, _types, 50]) param [0, locationNull];
+            if (isNull _loc || {((getPos _loc) distance2D _pos) > 1}) then {
+                ["WARN", "SAVE", format ["no town at %1 on this map; standing one in", _pos]] call fnc_log;
+                _loc = createLocation ["NameVillage", _pos, _radius, _radius];
+            };
+        } else {
+            _loc = createLocation ["NameVillage", _pos, 0, 0];
+            _loc setVariable ["DUWS_cluster", true];
+            _loc setVariable ["DUWS_sector", _sector];
         };
         [_loc, _pop, false, [getPos _loc, 2, 350] call fnc_usableBuildings, _radius]
     }, []]

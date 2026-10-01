@@ -6,8 +6,8 @@ dependency runs one way.
 
 - **Enemy zone siting** ("More Urban"): where OPFOR objectives spawn — the red `"Bravo (Outpost)"`
   markers you capture.
-- **Civilian town selection**: a subset of the map's real towns near the fighting, each seeded with a
-  persistent civilian population. Purely civilian — not an objective.
+- **Civilian town selection**: towns near the fighting, each seeded with a persistent civilian
+  population. Purely civilian — not an objective.
 
 Both are server-only and run near campaign start; civilians are registered once zone build-out has
 finished. For the boot order see [`architecture.md`](../architecture.md#boot-flow).
@@ -443,12 +443,15 @@ its position, because its site key carries a netId that a load renews.
 
 ## Civilian town selection
 
-Selects real map towns near the fighting and gives each a persistent civilian population with map
-markers. Gated on `CIV_PRESENCE`; no synthetic locations are created.
+Selects towns near the fighting and gives each a persistent civilian population with map markers.
+Gated on `CIV_PRESENCE`. The `DUWS_TownGeneration` lobby parameter picks the selection: Ranked (the
+default) takes a subset of the map's own towns, and Dynamic takes every one of them plus the building
+clusters that the map does not name ([§Dynamic generation](#dynamic-generation)). Only Dynamic creates
+Locations of its own.
 
 | Stage | File | Produces |
 |---|---|---|
-| 1. Selection | `server/civilian/fnc_civ_selectTowns.sqf` | ranked shortlist of `[Location, buildingCount, hqQuota]` |
+| 1. Selection | `server/civilian/fnc_civ_selectTowns.sqf`, and `fnc_civ_detectClusters.sqf` in Dynamic | shortlist of `[Location, buildingCount, hqQuota]` |
 | 2. Registration | `server/civilian/fnc_civ_init_Tomata.sqf` | `civ_locations` / `civ_radii`, per-town runtime gate and markers |
 | 3. Runtime | `server/civilian/fnc_civ_handler.sqf` (`_ravage` / `_wbk` twins) | fill the town on arrival, empty it after departure |
 
@@ -475,10 +478,12 @@ the heaviest engine work in the civilian pass, and both stages need the same fig
 overlaps the 100 m keep-out around `PosOfBLUHQ` and pulls a stand-in off the replacement queue in its
 place, resolves overlapping towns by shrinking or dropping the smaller, then creates the ellipse
 marker, the population icon, and the town's runtime gate — a streaming thread for plain civilians, a
-presence trigger for RAVAGE and WBK. The overlap loser is dropped from the registry only — never
-`deleteLocation`d, because these are the map's own Locations and removing one takes it away from
-side-mission siting (`fnc_findSafeMissionPos.sqf:30`) and the player's location readout
-(`fnc_bottom_right_message.sqf:152`) for the rest of the mission.
+presence trigger for RAVAGE and WBK. A map town that loses the overlap is dropped from the registry
+only — never `deleteLocation`d, because removing one of the map's own Locations takes it away from
+side-mission siting (`fnc_mission_findSite.sqf`) and the player's location readout
+(`fnc_bottom_right_message.sqf:152`) for the rest of the mission. A building cluster that loses the
+overlap or the HQ keep-out is deleted: it is the mission's own Location, and left standing it would be
+a town to those readers that no registry holds.
 
 The HQ keep-out is disc-against-disc, not centre-against-centre: a civilian area whose edge reaches
 the base still spawns civilians inside it. It sits in registration because that is where the radius
@@ -499,6 +504,41 @@ distance later, because the stand-in swap and the overlap cull both reshuffle th
 opening three are a selection fact, not a geometric one. Hiding is marker alpha and nothing else:
 trigger and population run either way. `civ_visible` holds the state; the reveal machinery
 is in [`intel_system.md`](intel_system.md).
+
+### Dynamic generation
+
+Dynamic generation (`DUWS_paramTownGen` `1`) uses the anchors, the reach and the building survey of
+Ranked. It then takes every surveyed town, with no quota for each anchor and no top-up, so it returns
+no replacement queue: a town that the HQ keep-out rejects has no stand-in. The hardcore HQ quota is the
+HQ's turn of the first wave, so a hardcore start shows the same towns in both modes. The parameter is a
+campaign rule, so a load takes it from the save.
+
+`fnc_civ_detectClusters` then adds the building clusters:
+
+| Rule | Value |
+|---|---|
+| Sample | An 800 m grid from `[0, 0]`, on land, within 5,000 m of an anchor |
+| Clearance | 200 m from the centre of every map town; 800 m from the HQ and from every zone centre |
+| Cluster | At least three usable buildings within 100 m of the grid point |
+| Cap | 100 clusters, taken from the grid points in random order |
+
+A cluster is a `NameVillage` Location at its grid point, flagged `DUWS_cluster`. Its building figure is
+the 100 m count, and its building list is the 350 m survey that a map town carries. A cluster keeps
+800 m off the zone centres because a town in a zone opens on OPFOR's books: a map town there is ground
+the enemy holds, but a cluster there would add a hamlet that the map does not have.
+
+Registration names each cluster that survives the cull "Civilian Sector <word>"
+(`STR_DUWS_T_civ_sector`). The word comes from the zone name pool (`fnc_zone_name`), so no sector
+shares a word with a zone or with another sector. Past twenty-six names the pool pairs two words, as it
+does for zones. Naming waits for the cull so that a dropped cluster takes no word. The save stores the
+word and not the text, so a load on a host in another language names the sector in that language.
+
+The town count grows: every town in reach plus up to 100 clusters, so a large campaign on Altis can
+pass the 160 towns of [§A town streams like a zone](#a-town-streams-like-a-zone). Each consumer that
+works once for each town grows with it: the streaming thread, the overlap cull, the vendor draft and
+OPCOM's town sites. OPFOR also opens with more towns, because every map town that overlaps a zone opens
+at `-20`, not only the three largest for each anchor. A cluster Location exists only on the server, so
+the client's location readout and the side-mission picker do not see it.
 
 ### Ownership bands
 

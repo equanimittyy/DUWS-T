@@ -5,6 +5,8 @@
     [location, buildingCount, hqQuota, buildings] quads -- the towns to register, and a
     replacement queue for those the caller rejects. Draws its own survey progress on the map
     prompt; otherwise no side effects, and the caller does the registration.
+    Dynamic generation (DUWS_paramTownGen 1) takes every surveyed town instead and adds the
+    building clusters of fnc_civ_detectClusters, whose Locations the caller then owns.
 */
 if (!isServer) exitWith {[[], []]};
 
@@ -88,6 +90,29 @@ private _lastPing = 0;
             remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
     };
 } forEach _inReach;
+
+if (DUWS_paramTownGen == 1) exitWith {
+    // The HQ's turn of wave 1 below, so a hardcore start shows the same towns in both modes.
+    private _hqQuota = [];
+    if (count _hqPos > 0) then {
+        private _scored = [];
+        {
+            if ((_x select 1) distance2D _hqPos <= _ANCHOR_RADIUS) then { _scored pushBack [_x select 2, _forEachIndex] };
+        } forEach _pool;
+        _scored sort false;
+        _hqQuota = (_scored select [0, _PER_ANCHOR_CAP]) apply { _x select 1 };
+    };
+    private _selected = [];
+    { _selected pushBack [_x select 0, _x select 2, _forEachIndex in _hqQuota, _x select 3] } forEach _pool;
+
+    private _start = diag_tickTime;
+    private _clusters = [_anchors, _ANCHOR_RADIUS, _MIN_BUILDINGS, _candidates] call fnc_civ_detectClusters;
+    _selected append _clusters;
+    ["INFO", "CIV", format ["Town selection (dynamic): %1 anchors over %2 zones, %3 of %4 map towns within %5m holding %6+ buildings, %7 building clusters in %8s",
+        count _anchors, count _zones, count _pool, count _candidates, _ANCHOR_RADIUS, _MIN_BUILDINGS,
+        count _clusters, round (diag_tickTime - _start)]] call fnc_log;
+    [_selected, []]
+};
 
 // Wave 1: each anchor ranks its own disc by building count and takes its own quota, in turn,
 // skipping what earlier anchors already took. A single ranking over the whole union let one

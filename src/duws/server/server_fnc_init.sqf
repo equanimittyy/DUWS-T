@@ -335,6 +335,7 @@ fnc_civ_mission_give = compile preprocessFileLineNumbers "duws\server\civ_missio
 fnc_civ_init_Tomata = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_init_Tomata.sqf";
 fnc_civ_setup_array = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_setup_array.sqf";
 fnc_civ_selectTowns = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_selectTowns.sqf";
+fnc_civ_detectClusters = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_detectClusters.sqf";
 // Broadcast for the same reason the RAVAGE and WBK handlers are: the town presence trigger names
 // it, and that trigger is global, so every machine evaluates it and every machine runs the body.
 fnc_civ_town_reveal = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_town_reveal.sqf";

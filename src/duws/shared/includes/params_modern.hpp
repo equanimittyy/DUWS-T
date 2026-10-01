@@ -147,4 +147,12 @@ class Params {
         default = 0;
     };
 
+    // Read once, at generation (fnc_civ_selectTowns.sqf): a load replays the towns its save holds.
+    class DUWS_TownGeneration {
+        title = "Civilian Towns";
+        values[] = {0,1};
+        texts[] = {"Ranked (largest towns near the fighting)","Dynamic (every town and building cluster near the fighting)"};
+        default = 0;
+    };
+
 };

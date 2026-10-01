@@ -27,7 +27,8 @@ DUWS_campaignParams = [
     ["DUWS_ArsenalMode", "DUWS_paramArsenal", 0],
     ["DUWS_TrackAmmo", "DUWS_paramTrackAmmo", 0],
     ["DUWS_RestWeather", "DUWS_paramRestWeather", 1],
-    ["DUWS_LoseConditions", "DUWS_paramLoseConditions", 0]
+    ["DUWS_LoseConditions", "DUWS_paramLoseConditions", 0],
+    ["DUWS_TownGeneration", "DUWS_paramTownGen", 0]
 ];
 
 // The input groups: a snapshot without one of these would roll fresh ground under the campaign's name.

@@ -143,7 +143,7 @@ DUWS_fnc_campaignSnapshot = {
     {
         private _p = getPos _x;
         _towns pushBack [[_p select 0, _p select 1], _radii param [_forEachIndex, 100],
-            missionNamespace getVariable [format ["civ_pop_%1", _forEachIndex], 0]];
+            missionNamespace getVariable [format ["civ_pop_%1", _forEachIndex], 0], _x getVariable ["DUWS_sector", ""]];
     } forEach _locs;
     _s set ["towns", _towns];
     _s set ["vendors", missionNamespace getVariable ["DUWS_vendors", []]];

@@ -100,6 +100,7 @@ private _paramsBody = ("MISSION PARAMETERS" call _hdr) + ([
     ["Rest Weather", ["DUWS_RestWeather", 1, ["Off", "On"], [0,1], "DUWS_paramRestWeather"] call _param],
     ["Lose Conditions", ["DUWS_LoseConditions", 0,
         ["Full", "Officer death only", "Escalation only", "Off"], [0,1,2,3], "DUWS_paramLoseConditions"] call _param],
+    ["Civilian Towns", ["DUWS_TownGeneration", 0, ["Ranked", "Dynamic"], [0,1], "DUWS_paramTownGen"] call _param],
     ["Default Garbage Lifetime", format ["%1 min",
         (["DUWS_CleanupLifetime", 300] call BIS_fnc_getParamValue) / 60]],
     ["Autosave", ["DUWS_AutosaveInterval", 900,

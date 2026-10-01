@@ -65,6 +65,7 @@ while { count _queue > 0 } do {
     // before this point -- drop the town and take the next stand-in selection handed over.
     if (_hqDist >= 0 && { _hqDist < _radius + _HQ_RADIUS }) then {
         ["INFO", "CIV", format ["Skipping %1: area (r=%2) overlaps the BLUFOR HQ at %3m", _locationName, _radius, round _hqDist]] call fnc_log;
+        if (_loc getVariable ["DUWS_cluster", false]) then { deleteLocation _loc };
         if (count _spare > 0) then { _queue pushBack (_spare deleteAt 0) };
     } else {
         // A size figure, not a head count: never decremented, and it is what caps the crowd a town
@@ -138,10 +139,10 @@ for "_i" from 0 to (_count - 1) do {
 
 _toDelete = _toDelete arrayIntersect _toDelete;
 
-// The losers are dropped from the registry only. These are the map's own Locations now, and
-// deleteLocation would remove them from the engine for the rest of the mission -- side
-// mission siting (fnc_mission_findSite) and the player's location readout both read them
-// back out of nearestLocations.
+// A map town that loses is dropped from the registry only: deleteLocation would remove it from
+// the engine for the rest of the mission -- side mission siting (fnc_mission_findSite) and the
+// player's location readout both read it back out of nearestLocations. A building cluster is the
+// mission's own, and one left standing would be a town to those readers that no registry holds.
 private _newLocations = [];
 private _newRadii = [];
 private _newPops = [];
@@ -154,12 +155,27 @@ for "_i" from 0 to (_count - 1) do {
         _newPops pushBack (_pops select _i);
         _newVis pushBack (_vis select _i);
         _newBldgs pushBack (_bldgs select _i);
+    } else {
+        private _loser = _locations select _i;
+        if (_loser getVariable ["DUWS_cluster", false]) then { deleteLocation _loser };
     };
 };
 
 _locations = _newLocations;
 _radii = _newRadii;
 _pops = _newPops;
+
+// After the cull, so a dropped cluster takes no word. Every zone is named by now, so none shares one.
+{
+    if (_x getVariable ["DUWS_cluster", false]) then {
+        private _word = _x getVariable ["DUWS_sector", ""];
+        if (_word isEqualTo "") then {
+            _word = [] call fnc_zone_name;
+            _x setVariable ["DUWS_sector", _word];
+        };
+        _x setText format [localize "STR_DUWS_T_civ_sector", _word];
+    };
+} forEach _locations;
 missionNamespace setVariable ["civ_locations", _locations];
 missionNamespace setVariable ["civ_radii", _radii];
 // The same two numbers a client needs to keep a side mission off a town, and nothing else. Those
