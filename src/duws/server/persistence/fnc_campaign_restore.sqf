@@ -189,6 +189,7 @@ DUWS_fnc_restoreApply = {
     DUWS_restorePending = ["bases", "opcom"];
     DUWS_dialogueMuted = true;
     publicVariable "DUWS_dialogueMuted";
+    [{player globalChat localize "STR_DUWS_T_LOAD_PROGRESS"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
     DUWS_campaignID = _id;
     DUWS_campaignStarted = _d getOrDefault ["started", systemTimeUTC];
     DUWS_campaignEnded = _d getOrDefault ["ended", ""];

@@ -3003,6 +3003,18 @@
                 <Chinese>戰役已載入。\n\n未還原：\n%1 個敵方單位\n%2 輛載具\n%3 種繳獲裝備類型\n%4 件軍械庫箱內物品</Chinese>
                 <Spanish>Campaña cargada.\n\nNo restaurado:\n%1 unidades enemigas\n%2 vehículos\n%3 tipos de equipo capturado\n%4 objetos del cajón de arsenal</Spanish>
             </Key>
+            <Key ID="STR_DUWS_T_LOAD_PROGRESS">
+                <Original>Loading campaign...</Original>
+                <English>Loading campaign...</English>
+                <Chinesesimp>正在加载战役……</Chinesesimp>
+                <German>Kampagne wird geladen...</German>
+                <Polish>Wczytywanie kampanii…</Polish>
+                <Czech>Načítám kampaň...</Czech>
+                <Russian>Загрузка кампании...</Russian>
+                <French>Chargement de la campagne...</French>
+                <Chinese>正在載入戰役……</Chinese>
+                <Spanish>Cargando campaña…</Spanish>
+            </Key>
             <Key ID="STR_DUWS_T_ref5pt72">
                 <German>LEGE DIE UMGEBUNGSPARAMETER FEST</German>
                 <Spanish>DEFINE LOS PARÁMETROS DE ENTORNO</Spanish>
