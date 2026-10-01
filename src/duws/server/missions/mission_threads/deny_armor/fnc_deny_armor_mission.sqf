@@ -218,7 +218,7 @@ _arrow setMarkerDir (_convoyStart getDir _targetpos);
 _arrow setMarkerSize [1.1, 1.1];
 _arrow setMarkerAlpha 0.8;
 _arrow setMarkerText localize "STR_DUWS_T_destroyarmour_arrow";
-[localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_destroyarmour_convoy"] remoteExec ["fnc_duws_dialogue", 0];
+[localize "STR_DUWS_T_allseer", [localize "STR_DUWS_T_destroyarmour_convoy"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
 
 private _finish = {
     params ["_status"];
@@ -313,6 +313,9 @@ while { true } do {
         if (_aliveTrucks isEqualTo [] || {(_aliveTrucks findIf { (_x distance2D _tank) < DA_DISEMBARK }) >= 0}) then {
             _dismounted = true;
             deleteMarker _arrow;
+            if !(_aliveTrucks isEqualTo []) then {
+                [localize "STR_DUWS_T_allseer", [localize "STR_DUWS_T_destroyarmour_arrived"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
+            };
             {
                 if (alive _x) then { moveOut _x; unassignVehicle _x; _x doMove _vehpos };
             } forEach _crewUnits;
@@ -351,7 +354,7 @@ while { true } do {
                         private _rtb = _teamGrp addWaypoint [_zonePos, 0];
                         _rtb setWaypointType "MOVE";
                     };
-                    [localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_destroyarmour_repaired"] remoteExec ["fnc_duws_dialogue", 0];
+                    [localize "STR_DUWS_T_allseer", [localize "STR_DUWS_T_destroyarmour_repaired"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
                 };
             } else {
                 _repairAt = -1;   // pushed off the tank -- the work does not carry over

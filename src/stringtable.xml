@@ -12746,6 +12746,18 @@
                 <Chinese>Alpha 1-1，發現搶修車隊，正沿標記路線即將抵達，有武裝護送。</Chinese>
                 <Spanish>Alpha 1-1, contacto visual con el convoy de recuperación, aproximándose por la ruta marcada con escolta armada.</Spanish>
             </Key>
+            <Key ID="STR_DUWS_T_destroyarmour_arrived">
+                <Original>Alpha 1-1, the recovery convoy has reached the tank and the repair crew is dismounting.</Original>
+                <English>Alpha 1-1, the recovery convoy has reached the tank and the repair crew is dismounting.</English>
+                <Chinesesimp>Alpha 1-1，抢修车队已抵达坦克，维修人员正在下车。</Chinesesimp>
+                <German>Alpha 1-1, der Bergungskonvoi hat den Panzer erreicht, die Reparaturmannschaft sitzt ab.</German>
+                <Polish>Alpha 1-1, konwój naprawczy dotarł do czołgu, ekipa naprawcza wysiada.</Polish>
+                <Czech>Alpha 1-1, evakuační konvoj dorazil k tanku, opravárenská četa vysedá.</Czech>
+                <Russian>Alpha 1-1, конвой эвакуации прибыл к танку, ремонтная бригада спешивается.</Russian>
+                <French>Alpha 1-1, le convoi de récupération a atteint le char, l'équipe de réparation débarque.</French>
+                <Chinese>Alpha 1-1，搶修車隊已抵達戰車，維修人員正在下車。</Chinese>
+                <Spanish>Alpha 1-1, el convoy de recuperación ha llegado al tanque y el equipo de reparación está desembarcando.</Spanish>
+            </Key>
             <Key ID="STR_DUWS_T_destroyarmour_arrow">
                 <Original>Enemy repair convoy</Original>
                 <English>Enemy repair convoy</English>
