@@ -1127,6 +1127,7 @@ fnc_custom_faction_parse = compile preprocessFileLineNumbers "duws\shared\factio
 fnc_faction_rqst_list = compile preprocessFileLineNumbers "duws\shared\faction_lib\fnc_faction_rqst_list.sqf";publicVariable "fnc_faction_rqst_list";
 fnc_faction_unit_keylist = compile preprocessFileLineNumbers "duws\shared\faction_lib\fnc_faction_unit_keylist.sqf";
 fnc_faction_class_loadout = compile preprocessFileLineNumbers "duws\shared\faction_lib\fnc_faction_class_loadout.sqf";
+fnc_sniper_stand_in = compile preprocessFileLineNumbers "duws\shared\faction_lib\fnc_sniper_stand_in.sqf";
 
 // =========================================================================================================
 // shared/functions

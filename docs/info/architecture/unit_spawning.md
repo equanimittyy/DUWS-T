@@ -13,7 +13,7 @@ drawn from the detected faction's pools. One call resolves the side, the AI skil
 spawn position and the patrol orders. Use it for any team that patrols or garrisons a zone, a base or a
 mission objective.
 
-Signature: `[_team, _center, _radius, _posture, _spawnPos, _side, _anchors, _floor] call fnc_spawn_team`.
+Signature: `[_team, _center, _radius, _posture, _spawnPos, _side, _anchors, _floor, _standIn] call fnc_spawn_team`.
 
 - **Both armies.** `_side` (`"opfor"` / `"blufor"`, default `"opfor"`) drives the engine side, the
   skill globals and the roster prefix from one string. CIVILIAN is deliberately not a value — only the
@@ -27,6 +27,11 @@ Signature: `[_team, _center, _radius, _posture, _spawnPos, _side, _anchors, _flo
   `garrison` takes, that far from every living player. A band with no clear point raises nothing
   (`grpNull`). Only the zone and town raise pass one, the reserve floor; see
   [`garrison_and_reserves.md`](../gameplay/garrison_and_reserves.md).
+- **A stand-in, on request.** `_standIn` (`[class]` in, class out) swaps each drawn man before the
+  raise. The sniper hunt and the enemy-sniper event pass `fnc_sniper_stand_in`
+  (`shared/faction_lib/`), which raises the vanilla CSAT sniper (`O_sniper_F`) in place of a man without
+  a sniper rifle. The sniper role degrades through marksman and rifleman on a faction with no sniper, and
+  a perch that a rifleman holds has no reach.
 - **Loot is OPFOR's.** Random loot (`fnc_addRandomLoot`) is added only for an OPFOR-side raise: an enemy
   team is the player's to search, a friendly one fought alongside is not. Searchable bodies also feed
   faction detection, so loot must never be added to a group that should carry none — which is why the

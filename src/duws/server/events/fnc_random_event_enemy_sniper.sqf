@@ -44,7 +44,7 @@ for "_i" from 0 to 47 do {
 };
 if (_perch isEqualTo []) exitWith {};
 
-private _grp = ["sniper_element", _perch, 0, "none", _perch, "opfor"] call fnc_spawn_team;
+private _grp = ["sniper_element", _perch, 0, "none", _perch, "opfor", [], 0, fnc_sniper_stand_in] call fnc_spawn_team;
 if (isNull _grp) exitWith {};
 
 {

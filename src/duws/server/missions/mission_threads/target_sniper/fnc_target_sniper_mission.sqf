@@ -66,7 +66,7 @@ private _build = {
         // The "sniper_element" token drawn from the faction pools, raised through fnc_spawn_team with
         // posture none and the perch as _spawnPos: the perch siting below (setPosATL, setDir) is the
         // circuit a posture would otherwise add, which none omits, and the spawn point overrides the band.
-        private _group = ["sniper_element", _perch, 0, "none", _perch, "opfor"] call fnc_spawn_team;
+        private _group = ["sniper_element", _perch, 0, "none", _perch, "opfor", [], 0, fnc_sniper_stand_in] call fnc_spawn_team;
         [_group] call fnc_mission_claim;
         private _target1 = units _group select 0;
         private _target2 = units _group select 1;

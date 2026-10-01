@@ -23,7 +23,7 @@
 // empty, so a caller that names none gets the same team it always did.
 // _floor (m, 0 = none) keeps the band point and a garrison's building that far off every player; a band with no clear
 // point after a few draws raises nothing (grpNull).
-params ["_team", "_center", "_radius", ["_posture", "closepatrol"], ["_spawnPos", []], ["_side", "opfor"], ["_anchors", []], ["_floor", 0]];
+params ["_team", "_center", "_radius", ["_posture", "closepatrol"], ["_spawnPos", []], ["_side", "opfor"], ["_anchors", []], ["_floor", 0], ["_standIn", { _this select 0 }]];
 
 // grpNull rather than an empty group: DUWS_fnc_raiseGarrison already drops nulls, and a group with
 // no men would sit on the zone roster forever holding the capture test open.
@@ -34,7 +34,7 @@ if (_row isEqualTo []) exitWith {
 };
 
 // Not named _roster: callers one frame up use that name for the zone's unit roster.
-private _men = [_team, _side] call DUWS_fnc_teamRoster;
+private _men = ([_team, _side] call DUWS_fnc_teamRoster) apply { [_x] call _standIn };
 // Spawn distance follows the posture: a wide patrol starts on the outer ring, a close one near the
 // objective, from DUWS_postureBands so the spawn and the circuit agree. A posture the table does not
 // name keeps the old 50..radius band. A caller-supplied point overrides the band outright -- a
