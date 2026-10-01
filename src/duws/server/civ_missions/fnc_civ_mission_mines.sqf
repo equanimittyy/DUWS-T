@@ -1,19 +1,18 @@
 // Locality: server, spawned by fnc_civ_mission_request. An old OPFOR field thinned to the few mines it still
 // holds, registered as a revealed standalone hardpoint so its mines show on the map and its row clears on the
 // hardpoint poller's own test. It outlives a failed or canceled job: the field is OPFOR's, not the giver's.
-#define MINES_LEFT_MIN 0.15
-#define MINES_LEFT_MAX 0.22
+#define MINES_LEFT_MIN 0.25
+#define MINES_LEFT_MAX 0.35
 params ["_id"];
 private _e = DUWS_civMissions get _id;
 private _site = _e get "site";
 
-private _variant = selectRandom ["AP", "AT"];
 private _dir = random 360;
 private _key = format ["hpcivmine_%1", _id];
 private _mines = [];
-private _squares = ([_site, _dir, 1 + floor random 2, 1 + floor random 2] call fnc_hardpoint_minefield_grid)
+private _squares = (([_site, _dir] + selectRandom [[1, 2], [2, 1], [2, 2]]) call fnc_hardpoint_minefield_grid)
     select { !surfaceIsWater _x };
-{ _mines append ([_x, _dir, _variant, _key] call fnc_hardpoint_minefield) } forEach _squares;
+{ _mines append ([_x, _dir, "MIX", _key] call fnc_hardpoint_minefield) } forEach _squares;
 if (_mines isEqualTo []) exitWith {
     ["WARN", "CIV", format ["civilian mission %1: no mines laid", _id]] call fnc_log;
     [_id, "FAILED"] call fnc_civ_mission_finish;
@@ -29,7 +28,7 @@ missionNamespace setVariable [format ["DUWS_hpMines_%1", _key], _mines];
 [_squares, _dir, _key] call fnc_hardpoint_minefield_signs;
 [_key, "MINEFIELD", _site, "opfor", "", _dir] call fnc_hardpoint_register;
 ["ONE", _key, true] call fnc_hardpoint_reveal;
-["INFO", "CIV", format ["civilian mission %1: %2 field %3 keeps %4 of %5 mines", _id, _variant, _key, _left, _laid]] call fnc_log;
+["INFO", "CIV", format ["civilian mission %1: field %2 keeps %3 of %4 mines", _id, _key, _left, _laid]] call fnc_log;
 
 _e set ["mines", _mines];
 // Measured now: a cleared mine reads null, and a null's distance is not the field's.
@@ -40,7 +39,7 @@ _e set ["won", { params ["_e"]; ((_e get "mines") findIf { !isNull _x && {mineAc
 _e set ["lost", { false }];
 _e set ["cleared", _e get "won"];
 
-[_id, "STR_DUWS_T_CIVMISSION_MINES_TITLE", ["STR_DUWS_T_CIVMISSION_MINES_AT_DESC", "STR_DUWS_T_CIVMISSION_MINES_AP_DESC"] select (_variant == "AP"), "mine", false] call fnc_civ_mission_present;
+[_id, "STR_DUWS_T_CIVMISSION_MINES_TITLE", "STR_DUWS_T_CIVMISSION_MINES_DESC", "mine", false] call fnc_civ_mission_present;
 
 private _status = "";
 waitUntil { sleep 5; _status = [_id] call fnc_civ_mission_poll; _status != "" || {(_mines findIf { isNull _x || {!mineActive _x} }) >= 0} };

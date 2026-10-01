@@ -143,8 +143,9 @@ Build reads, less the standing ring and any build still siting (`DUWS_opcom_buil
 
 **Minefields are generated, not composed.** `fnc_hardpoint_minefield_plan`
 (`server/init_zones/fnc_hardpoint_minefield.sqf`) plans one 50 m square of vanilla mine objects —
-`ATMine` for the AT variant, `APERSMine` for AP. Each 10 m cell of the square carries a fractional mine
-count rolled per cell: AT runs at 0.36, so an AT square averages 9 mines, and AP at 0.44, averaging 11.
+`ATMine` for the AT variant, `APERSMine` for AP, and either one drawn per mine for MIX. Each 10 m cell of the
+square carries a fractional mine count rolled per cell: AT runs at 0.36, so an AT square averages 9 mines, AP at
+0.44, averaging 11, and MIX at 0.4, averaging 10.
 The density is deliberately thin. What a crossing vehicle meets is the mines down the whole depth of the
 belt, so depth carries the lethality and keeps fewer mines standing at once than a shallow dense field.
 A mine lands anywhere within 5 m of its cell's centre on each axis, so it stays inside its own cell. A

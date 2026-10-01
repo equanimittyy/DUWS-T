@@ -503,13 +503,13 @@ player carries and the money that the giver still needs. `fnc_civ_mission_give` 
 so it is unscheduled, and two players who give at the same time cannot both pay the same shortfall. Any
 player can give, and the gift that meets the target is the report.
 
-**Clear Minefield lays a real OPFOR field** (`fnc_civ_mission_mines.sqf`). The field is 1-2 by 1-2 squares of
-50 m, AP or AT at random, laid by `fnc_hardpoint_minefield`. Only 15-22 % of the mines are kept, and at least
-one. The field is registered as a standalone `MINEFIELD` hardpoint and revealed at once, so every mine shows on
-the map and the hardpoint poller removes the row when the last mine is gone
-([`hardpoints.md`](hardpoints.md)). The objective reads the same mines. The field belongs to OPFOR, not to the
-giver, so a cancel or the giver's death leaves it on the map. An AT mine does not fire under a man on foot, so
-the AT roll is the easier job.
+**Clear Minefield lays a real OPFOR field** (`fnc_civ_mission_mines.sqf`). The field is 1 by 2, 2 by 1 or 2 by 2
+squares of 50 m of the MIX variant, laid by `fnc_hardpoint_minefield`, so each mine is AT or AP at even odds.
+Only 25-35 % of the mines are kept, and at least one. The field is registered as a standalone `MINEFIELD`
+hardpoint and revealed at once, so every mine shows on the map and the hardpoint poller removes the row when the
+last mine is gone ([`hardpoints.md`](hardpoints.md)). The objective reads the same mines. The field belongs to
+OPFOR, not to the giver, so a cancel or the giver's death leaves it on the map. An AT mine does not fire under a
+man on foot, so the AT mines threaten only a vehicle that drives in.
 
 **The first mine to go brings a fight.** When the first mine is disarmed or set off, OPFOR raises 0-1 `team` and
 0-2 `patrol` groups (`fnc_spawn_team`), and the bandits roll their own 0-1 and 0-4 of the same rosters in bandit

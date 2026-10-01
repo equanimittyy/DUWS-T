@@ -35,12 +35,13 @@ DUWS_mineStreamOut = 450;
 // crosses, so depth buys the same bite for fewer mines standing at once.
 DUWS_mineVariants = [
     ["AT", ["ATMine"], 0.36],
-    ["AP", ["APERSMine"], 0.44]
+    ["AP", ["APERSMine"], 0.44],
+    ["MIX", ["ATMine", "APERSMine"], 0.4]
 ];
 
 // [_center, _dir, _variant] call fnc_hardpoint_minefield_plan -> [[[x,y], class], ...]
 //   _dir     degrees     clockwise like setDir
-//   _variant "AT" | "AP" resolved through DUWS_mineVariants; an unknown token falls to AT
+//   _variant "AT" | "AP" | "MIX" resolved through DUWS_mineVariants; an unknown token falls to AT
 fnc_hardpoint_minefield_plan = {
     params ["_center", "_dir", ["_variant", "AT"]];
 

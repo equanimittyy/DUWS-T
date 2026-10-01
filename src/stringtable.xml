@@ -8975,29 +8975,17 @@
                 <Chinese>城鎮外有一片舊雷區，地下還埋著幾顆地雷。沒人敢在那裡耕種。如果你能清除剩下的地雷，我們就能重新耕種那片土地了。</Chinese>
                 <Spanish>Hay un antiguo campo de minas justo a las afueras del pueblo, y todavía quedan algunas minas enterradas. Nadie se atreve a cultivar allí. Si pudieras despejar lo que queda, podríamos volver a trabajar esa tierra.</Spanish>
             </Key>
-            <Key ID="STR_DUWS_T_CIVMISSION_MINES_AP_DESC">
-                <Original>The locals need an old anti-personnel minefield outside town cleared. The remaining mines are marked. Disarm or destroy every mine, then report back to the local.</Original>
-                <English>The locals need an old anti-personnel minefield outside town cleared. The remaining mines are marked. Disarm or destroy every mine, then report back to the local.</English>
-                <Chinesesimp>当地居民需要清除城镇外一片旧的杀伤人员雷区。剩余地雷已标出。拆除或摧毁每一颗地雷，然后向当地居民回报。</Chinesesimp>
-                <German>Die Einheimischen brauchen ein altes Antipersonenminenfeld vor dem Ort geräumt. Die verbliebenen Minen sind markiert. Entschärft oder zerstört jede Mine und meldet euch dann beim Einheimischen zurück.</German>
-                <Polish>Miejscowi potrzebują oczyszczenia starego pola min przeciwpiechotnych za miejscowością. Pozostałe miny są zaznaczone. Rozbrój lub zniszcz każdą minę, a następnie zdaj raport miejscowemu.</Polish>
-                <Czech>Místní potřebují vyčistit staré protipěchotní minové pole za městem. Zbývající miny jsou označeny. Znehodnoť nebo znič každou minu a poté podej hlášení místnímu.</Czech>
-                <Russian>Местным нужно, чтобы старое противопехотное минное поле за пределами населённого пункта было разминировано. Оставшиеся мины отмечены. Обезвредь или уничтожь каждую мину, а затем доложи местному жителю.</Russian>
-                <French>Les habitants ont besoin qu'un vieux champ de mines antipersonnel à l'extérieur de la localité soit déminé. Les mines restantes sont marquées. Désamorcez ou détruisez chaque mine, puis faites un rapport à l'habitant.</French>
-                <Chinese>當地居民需要清除城鎮外一片舊的殺傷人員雷區。剩餘地雷已標出。拆除或摧毀每一顆地雷，然後向當地居民回報。</Chinese>
-                <Spanish>Los locales necesitan que se despeje un antiguo campo de minas antipersona a las afueras del pueblo. Las minas restantes están marcadas. Desarma o destruye todas las minas y luego informa al local.</Spanish>
-            </Key>
-            <Key ID="STR_DUWS_T_CIVMISSION_MINES_AT_DESC">
-                <Original>The locals need an old anti-tank minefield outside town cleared. The remaining mines are marked. Disarm or destroy every mine, then report back to the local.</Original>
-                <English>The locals need an old anti-tank minefield outside town cleared. The remaining mines are marked. Disarm or destroy every mine, then report back to the local.</English>
-                <Chinesesimp>当地居民需要清除城镇外一片旧的反坦克雷区。剩余地雷已标出。拆除或摧毁每一颗地雷，然后向当地居民回报。</Chinesesimp>
-                <German>Die Einheimischen brauchen ein altes Panzerminenfeld vor dem Ort geräumt. Die verbliebenen Minen sind markiert. Entschärft oder zerstört jede Mine und meldet euch dann beim Einheimischen zurück.</German>
-                <Polish>Miejscowi potrzebują oczyszczenia starego pola min przeciwpancernych za miejscowością. Pozostałe miny są zaznaczone. Rozbrój lub zniszcz każdą minę, a następnie zdaj raport miejscowemu.</Polish>
-                <Czech>Místní potřebují vyčistit staré protitankové minové pole za městem. Zbývající miny jsou označeny. Znehodnoť nebo znič každou minu a poté podej hlášení místnímu.</Czech>
-                <Russian>Местным нужно, чтобы старое противотанковое минное поле за пределами населённого пункта было разминировано. Оставшиеся мины отмечены. Обезвредь или уничтожь каждую мину, а затем доложи местному жителю.</Russian>
-                <French>Les habitants ont besoin qu'un vieux champ de mines antichar à l'extérieur de la localité soit déminé. Les mines restantes sont marquées. Désamorcez ou détruisez chaque mine, puis faites un rapport à l'habitant.</French>
-                <Chinese>當地居民需要清除城鎮外一片舊的反戰車雷區。剩餘地雷已標出。拆除或摧毀每一顆地雷，然後向當地居民回報。</Chinese>
-                <Spanish>Los locales necesitan que se despeje un antiguo campo de minas anticarro a las afueras del pueblo. Las minas restantes están marcadas. Desarma o destruye todas las minas y luego informa al local.</Spanish>
+            <Key ID="STR_DUWS_T_CIVMISSION_MINES_DESC">
+                <Original>The locals need an old minefield of anti-personnel and anti-tank mines outside town cleared. The remaining mines are marked. Disarm or destroy every mine, then report back to the local.</Original>
+                <English>The locals need an old minefield of anti-personnel and anti-tank mines outside town cleared. The remaining mines are marked. Disarm or destroy every mine, then report back to the local.</English>
+                <Chinesesimp>当地居民需要清除城镇外一片旧雷区，里面有杀伤人员地雷和反坦克地雷。剩余地雷已标出。拆除或摧毁每一颗地雷，然后向当地居民回报。</Chinesesimp>
+                <German>Die Einheimischen brauchen ein altes Minenfeld aus Antipersonen- und Panzerminen vor dem Ort geräumt. Die verbliebenen Minen sind markiert. Entschärft oder zerstört jede Mine und meldet euch dann beim Einheimischen zurück.</German>
+                <Polish>Miejscowi potrzebują oczyszczenia starego pola min przeciwpiechotnych i przeciwpancernych za miejscowością. Pozostałe miny są zaznaczone. Rozbrój lub zniszcz każdą minę, a następnie zdaj raport miejscowemu.</Polish>
+                <Czech>Místní potřebují vyčistit staré minové pole s protipěchotními a protitankovými minami za městem. Zbývající miny jsou označeny. Znehodnoť nebo znič každou minu a poté podej hlášení místnímu.</Czech>
+                <Russian>Местным нужно, чтобы старое минное поле с противопехотными и противотанковыми минами за пределами населённого пункта было разминировано. Оставшиеся мины отмечены. Обезвредь или уничтожь каждую мину, а затем доложи местному жителю.</Russian>
+                <French>Les habitants ont besoin qu'un vieux champ de mines antipersonnel et antichar à l'extérieur de la localité soit déminé. Les mines restantes sont marquées. Désamorcez ou détruisez chaque mine, puis faites un rapport à l'habitant.</French>
+                <Chinese>當地居民需要清除城鎮外一片舊雷區，裡面有殺傷人員地雷和反戰車地雷。剩餘地雷已標出。拆除或摧毀每一顆地雷，然後向當地居民回報。</Chinese>
+                <Spanish>Los locales necesitan que se despeje un antiguo campo de minas antipersona y anticarro a las afueras del pueblo. Las minas restantes están marcadas. Desarma o destruye todas las minas y luego informa al local.</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_CIVMISSION_MINES_THANKS">
                 <Original>Thank you. We can work that field again. It's not much, but take this.</Original>
