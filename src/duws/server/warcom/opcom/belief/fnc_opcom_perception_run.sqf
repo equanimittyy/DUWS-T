@@ -83,11 +83,12 @@ while {true} do {
         // this loop's own tasking store, so it rolls on the clock that moved them. Odds are the levels bought, and
         // a hit pays through the one intel payout point rather than a channel of its own. Silent on a dry pool --
         // a support standing for hours cannot report "nothing" each time it rolls, where a player who searched a
-        // body asked the question and is owed the answer.
+        // body asked the question and is owed the answer. The unbought centre plots contacts only: a free
+        // hourly reveal would end hardcore's hidden-map phase with no player effort.
         "intel" call _enter;
         private _intelLevel = missionNamespace getVariable ["DUWS_intelLevel", 0];
         if (random 1 < (DUWS_intel_roll_by_level param [_intelLevel, 0])) then {
-            [[], objNull, true] call fnc_intel_payout;
+            [[], objNull, true, 0, _intelLevel > 0] call fnc_intel_payout;
         };
 
         // friCells/eneCells: cells holding force; belief: live sighting stamps; fresh: groups sensed this

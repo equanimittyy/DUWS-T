@@ -47,8 +47,8 @@ fnc_support_catalogue = {
 		["garage4",   "PERM", 50, "support_garage4_available",     "STR_DUWS_T_garage_exp4_row",      "",           false, 25],
 
 		// Intelligence Center: each level raises the odds of the OPCOM tick's intel roll
-		// (server/warcom/opcom/belief/fnc_opcom_perception_run.sqf), which pays through the one intel
-		// payout point. No comm item -- the centre runs on that clock, so there is nothing to fire.
+		// (server/warcom/opcom/belief/fnc_opcom_perception_run.sqf) and the contact share of every intel
+		// payout. No comm item -- the centre runs on that clock, so there is nothing to fire.
 		["intel1",    "PERM", 10, "support_intel1_available",      "STR_DUWS_T_intel_center_1",       "",           false],
 		["intel2",    "PERM", 15, "support_intel2_available",      "STR_DUWS_T_intel_center_2",       "",           false, 15],
 		["intel3",    "PERM", 25, "support_intel3_available",      "STR_DUWS_T_intel_center_3",       "",           false, 20],

@@ -86,7 +86,8 @@ search, all six side-mission sites, the civilian menu when it lands, and the Int
 plots a random share of the eligible OPCOM units where they are marching. They answer different questions — *where is
 the war*, and *what is the enemy doing right now* — so making them compete for a single draw only ever
 starved whichever mattered more that hour. Either half can come up empty; the payout reports having nothing
-only when both do.
+only when both do. The one exception is the unbought Intelligence Center's report, which pays the contact half
+alone ([§The Intelligence Center](#the-intelligence-center)).
 
 **A source can be scoped to its own ground.** `_radius` limits both halves to what lies within reach of
 where the intel was earned. Zero is the whole map, and every faucet but the civilian menu passes zero. The
@@ -149,7 +150,7 @@ player out of one currency still has a route.
 | Side-mission objective | flagged with certainty; reaching the object is the gate |
 | Walking into a zone or town, or within 100 m of a hardpoint | not applicable; it reveals the ground the player is standing on and rolls nothing |
 | Civilian frisk | flagged with certainty; the arrest is the price, and its payout table carries the odds |
-| Intelligence Center | by the odds its levels buy — one roll per OPCOM tick ([§The Intelligence Center](#the-intelligence-center)) |
+| Intelligence Center | by the odds its level sets, the unbought level included — one roll per OPCOM tick ([§The Intelligence Center](#the-intelligence-center)) |
 
 **A third of a combat group is searchable, so a fight is a reliable route to intel rather than a lottery.**
 A much lower rate read in play as a broken action: a player who cleared a position and found no prompt on
@@ -161,7 +162,7 @@ The sources draw from one pool, so they compete rather than stack, and the hidde
 last hidden position is found however that happened. A fourth source therefore shortens that phase rather
 than enriching it, and the Intelligence Center is that fourth source knowingly: it is paid for, it is the
 only source that pays while the player does nothing else, and a faster route through the hidden map is
-exactly what the purchase buys. What keeps it from being only that is the contact bucket, which refills — a
+exactly what the purchase buys. The unbought report plots contacts only, so the hidden map is never free. What keeps it from being only that is the contact bucket, which refills — a
 center standing over a mapped campaign still has the enemy's movements to report.
 
 Side missions are uncapped *and* unrolled. The old design put a campaign-wide throttle in front of them, so a
@@ -301,11 +302,22 @@ at the unit's current position, and the fade starts again. `DUWS_intel_contacts`
 marker that plots it now. Each plot takes a new marker name, so the thread of a replaced marker sees that it
 no longer owns the unit and stops.
 
-**One payout plots a random share of the eligible units, from 20% to all of them, rounded up.** The share
-is drawn again for each payout, and the units in it are picked at random. The floor matters because an older
-draw started at zero: two identical payouts could then be worth anything from nothing to the whole picture,
-which read as an unreliable source rather than as a quiet sector. A unit that plots nothing does not use up a
-place in the share. The batch is announced once rather than per contact: eight Allseer lines queued behind
+**One payout plots a random share of the eligible units, inside a window that the Intelligence Center's level
+sets.** The window applies to every source, not only to the center's own report: a private term for the center
+is how "one place decides what intel is worth" stops being true.
+
+| Level | Share (`DUWS_intel_share_by_level`) |
+|---|---|
+| Unbought | 0–25% |
+| I | 25–50% |
+| II | 50–75% |
+| III | 75–100% |
+| IV | all |
+
+The share is drawn again for each payout, and the units in it are picked at random. The share is rounded up,
+so a payout with any eligible unit plots at least one. An older draw could pay nothing while something was
+there to find, which read as an unreliable source rather than as a quiet sector. A unit that plots nothing
+does not use up a place in the share. The batch is announced once rather than per contact: eight Allseer lines queued behind
 each other would still be arriving minutes later.
 
 **The half is gated on the player knowing where at least one OPFOR-held zone is.** A march plotted across
@@ -317,7 +329,8 @@ against `WARCOM_zones_controled_by_OPFOR`, so a zone the player has taken does n
 ## The Intelligence Center
 
 Four permanent support levels, `intel1` to `intel4`, gated in order like the radio towers and the vehicle
-garage, on the AP tier ladder at 2/3/4/5. Each level is bought once for the team and never refunds.
+garage, on the AP tier ladder at 2/3/4/5. Each level is bought once for the team and never refunds. Below
+them, the unbought centre is level 0: BLUFOR still report on their own, rarely and thinly.
 
 `fnc_support_perm_grant` recomputes `DUWS_intelLevel` from `DUWS_support_permanent` on every unlock, rather
 than incrementing a counter — gated buying means the count equals the level, so it cannot drift, and a
@@ -330,15 +343,19 @@ so the intel is sampled on the clock that moved the units. Last in the tick for 
 forces are: a fault there costs OPCOM's own stages nothing, and the loop's per-tick `catch` names the stage.
 
 The roll is per five seconds, so the table's figures are small and the mean wait is what to tune by — 60,
-30, 16 and 10 minutes at levels I to IV. It is a table rather than one rate multiplied by the level,
-because that curve bought 4x the find rate for 8x the cumulative price: every level after the first was
-worse value than the one below it, and the top two were never worth buying. The table's rate climbs with
-what the levels cost, so the ladder reads as an investment rather than a tax.
+30, 20, 15 and 12 minutes from the unbought centre to level IV. The rate climbs by one report per hour per
+level, which alone pays each level less per CP than the one below it. The share window carries the rest of
+the climb ([§A contact is a snapshot](#a-contact-is-a-snapshot)), so a level buys more reports and fuller
+ones, and the ladder reads as an investment rather than a tax.
 
 A winning roll calls `fnc_intel_payout` with no origin and no earner, which is to say it pays both halves
 on the same terms every other source gets: one hidden position, and whatever OPCOM has moving. The center is a faucet, never a
 channel of its own — giving it private payouts is how "one place decides what intel is worth" stops being
 true.
+
+The unbought centre is the one exception: its report skips the pool half (`_pool` false) and plots contacts
+only. A free hourly reveal would end hardcore's hidden-map phase with no player effort, and finding that map
+is the game there.
 
 It rolls silently on a dry pool. A support that rolls every five seconds for hours cannot answer
 *"Nothing we don't already know"* each time; a player who searched a body asked the question and is owed

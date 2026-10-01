@@ -1015,15 +1015,16 @@ DUWS_econ_period = 1800;
 // OPFOR's last economy payout, 0 until the first. OPCOM's savings goal adds it to the drip to read an income rate.
 WARCOM_opfor_lastIncome = 0;
 
-// The Intelligence Center's odds by level owned, rolled once per OPCOM tick, and how long a plotted
-// OPCOM contact stands before its markers are pulled. Server-only: both the roll and the markers are
-// server work. Indexed by level, so index 0 is the unbought centre and never fires.
+// The Intelligence Center by level owned: the odds of a report, rolled once per OPCOM tick; the
+// [low, high] share of eligible OPCOM units that every intel payout plots; and how long a plotted
+// contact stands before its marker is pulled. Server-only: the roll, the payout and the markers are
+// server work. Index 0 is the unbought centre, so BLUFOR still report on their own, rarely and thinly.
 //
 // Per OPCOM tick, so the figures are small and the mean wait is what to read them by: at
-// OPCOM_TICK_PERIOD 5 the levels average a find every 60 / 30 / 16 / 10 minutes. A table rather than
-// one rate times the level, because that curve paid 4x the rate for 8x the cumulative price and the
-// top two levels were never worth buying; this one climbs with what they cost.
-DUWS_intel_roll_by_level = [0, 0.0014, 0.0028, 0.0052, 0.0083];
+// OPCOM_TICK_PERIOD 5 the levels average a report every 60 / 30 / 20 / 15 / 12 minutes. That rate alone
+// pays each level less per CP than the one below it; the share window carries the rest of the climb.
+DUWS_intel_roll_by_level = [0.0014, 0.0028, 0.0042, 0.0056, 0.0069];
+DUWS_intel_share_by_level = [[0, 0.25], [0.25, 0.5], [0.5, 0.75], [0.75, 1], [1, 1]];
 DUWS_intel_contact_life = 600;
 
 // Campaign-size throttle on every passive faucet (zone AP trickle, town income, both sides). Computed

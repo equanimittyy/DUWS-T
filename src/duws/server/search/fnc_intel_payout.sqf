@@ -16,7 +16,7 @@
 //
 // _radius is how far the source's knowledge reaches, 0 for the whole map. A source that knows only
 // its own ground passes one and takes whatever falls inside it, including nothing.
-params [["_origin", []], ["_earner", objNull], ["_silent", false], ["_radius", 0]];
+params [["_origin", []], ["_earner", objNull], ["_silent", false], ["_radius", 0], ["_pool", true]];
 
 if (!isServer) exitWith {false};
 
@@ -76,7 +76,7 @@ private _hiddenHPs = DUWS_hardpoints select {
 };
 if !(_hiddenHPs isEqualTo []) then { _kinds pushBack "HP" };
 
-if (_kinds isNotEqualTo []) then {
+if (_pool && {_kinds isNotEqualTo []}) then {
     switch (selectRandom _kinds) do {
 
         // Random, and from the unrevealed set only. A zone is a target the campaign points the player
@@ -130,10 +130,11 @@ if (_knownOpfor) then {
     private _contacts = DUWS_opcom_taskings select {
         ([_x] call DUWS_fnc_opcom_marching) && {[_x get "pos"] call _fnc_inReach}
     };
-    // Floored above zero: a draw from zero could pay nothing while there was something to find, which
-    // reads as an unreliable source rather than as a quiet sector. Walked rather than cut to length, so
-    // a unit that plots nothing does not use up a place in the share.
-    private _want = ceil ((0.2 + random 0.8) * count _contacts);
+    // Rounded up, so a payout with anything eligible plots at least one unit: a payout of nothing reads
+    // as an unreliable source rather than as a quiet sector. Walked rather than cut to length, so a unit
+    // that plots nothing does not use up a place in the share.
+    (DUWS_intel_share_by_level select (missionNamespace getVariable ["DUWS_intelLevel", 0])) params ["_lo", "_hi"];
+    private _want = ceil ((_lo + random (_hi - _lo)) * count _contacts);
     private _n = 0;
     {
         if (_n >= _want) exitWith {};
