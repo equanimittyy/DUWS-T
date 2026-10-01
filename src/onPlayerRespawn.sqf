@@ -26,6 +26,12 @@ player_fatigue = missionNamespace getVariable ["DUWS_paramFatigue", 1];
 player enableStamina (player_fatigue != 0);
 player addRating 10000000;
 
+// The traits client_init.sqf grants stay on the old body, and the slot's class has none of them.
+player setUnitTrait ["Medic",true];
+player setUnitTrait ["Engineer",true];
+player setUnitTrait ["uavHacker",true];
+player setUnitTrait ["explosiveSpecialist",true];
+
 // The earplug action was attached to the old body, but fadeSound survives respawn: without
 // this re-add a player who died with earplugs in has no way to turn the volume back up.
 player addaction [ACT_UTIL("STR_DUWS_T_2rc0nvug"),fnc_earplugs, [], 20, true, true, "", "_this == player && {profileNamespace getVariable ['DUWS_T_showEarplugs', true]}"];
@@ -45,7 +51,7 @@ if (!isNil "apocalypse_mode" && apocalypse_mode) then {
 
 sleep 10;
 // Scroll-menu action opens the disguise panel (see client_init) -- re-added because
-// respawn spawns a fresh unit that carries no prior actions. Guard cleared first.
+// respawn spawns a fresh unit that carries no prior actions.
 player setVariable ["DUWS_disguiseMenu_actionAdded", nil];
 player addAction [
     ACT_EQUIP("STR_DUWS_T_DISGUISE_MENU_ACTION"),

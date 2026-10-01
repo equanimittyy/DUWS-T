@@ -228,6 +228,10 @@ Once a unit dies the engine reports it on side `civilian`, whatever it fought as
 
 An action added to the player stays on the body after death. In a condition string, `_this` is the unit viewing the action, not the object that carries it, so a `_this == player` gate is true for the respawned player standing near the old body: the scroll menu lists the earplugs and the debug menu twice. The engine also keeps polling the conditions of actions on any object near a player, so each body left carrying them adds its conditions to that poll for the rest of the campaign. Fix: `removeAllActions player` in `onPlayerKilled.sqf`, and add fresh actions in `onPlayerRespawn.sqf`.
 
+## A trait set with `setUnitTrait` stays on the old body after respawn
+
+A trait belongs to the unit object, and a respawn creates a new unit that has only the traits of its class. The mission grants every player the Medic, Engineer, uavHacker and explosiveSpecialist traits, but the player slots are `B_Soldier_SL_F`, so after a respawn the player could no longer disarm a mine. Fix: grant the traits again in `onPlayerRespawn.sqf`, in the same way as the actions (`client/client_init.sqf`).
+
 ## A captive unit's `side` reads civilian, but its `side group` does not
 
 `setCaptive true` makes `side _unit` report `civilian`, but the unit stays in its group, and `side group _unit` still reports the group's side. Both disguises set the player captive (`server/disguise/fnc_disguiseAsEnemy.sqf`, `server/civilian/fnc_disguiseAsCivilian.sqf`). The site poller built its BLUFOR pre-gate on `side _x == WEST`, so a lone disguised player never woke an OPFOR zone or hardpoint, and a site that was already awake stowed around the player when its grace ran out. Fix: filter BLUFOR presence on `side group _x`, which captive state does not change (`server/misc/fnc_site_stream_init.sqf`).
