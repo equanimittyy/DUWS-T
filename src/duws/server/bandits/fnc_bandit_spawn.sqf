@@ -33,7 +33,7 @@ _group deleteGroupWhenEmpty true;
     [[_x], "IND", ["opfor", "blufor"], _specs get (_known select _forEachIndex), [false]] call fnc_civ_arm;
     for "_j" from 1 to 2 do { _x addMagazine "HandGrenade"; _x addItem "FirstAidKit" };
     // Last, because addMagazine drops what does not fit: a full inventory loses money, never kit.
-    for "_j" from 1 to floor random 6 do { _x addMagazine "Money_roll" };
+    if (random 1 < 0.5) then { _x addMagazine "Money_roll" };
 } forEach units _group;
 
 _group

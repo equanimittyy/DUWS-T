@@ -236,8 +236,8 @@ a cheaper way to liquidate a slate, which inverts what the death penalty is for.
 | Civilian side mission | `server/civ_missions/fnc_civ_mission_finish.sqf` | on the report: CP `reward × cp_reward_multiplier` (10, 5 or 15), 0-8 `Money_roll` into the reporter's inventory, at their feet if it does not fit, +3 or +5 reputation to the giver's town; no AP ([`side_mission_catalogue.md`](side_mission_catalogue.md#civilian-side-missions)) |
 | Recruit rescued civilian | `server/civilian/fnc_recruit_civilian_server.sqf` | +5 (+8 in WBK mode) |
 | Intel analysis (terminal) | `server/search/fnc_intelAnalysis.sqf` | per document, always paid: 1 CP (`MobilePhone`/`Wallet_ID`), 2 (`SmartPhone`), 3 (`FlashDisk`), 4 (`Files`), 5 (`FilesSecret`/`FileTopSecret`); each also rolls a per-item chance to reveal one hidden position. A turn-in made before a pending award lands joins that award, so one card pays the batch with ≤1 reveal |
-| Enemy corpse loot | `server/search/fnc_addRandomLoot.sqf` | ~60% of enemies carry 0–2 `Money_roll` (personal cash); intel documents no longer dropped here |
-| Bandit corpse loot | `server/bandits/fnc_bandit_spawn.sqf` | every bandit carries 0–5 `Money_roll`, less when the inventory is full |
+| Enemy corpse loot | `server/search/fnc_addRandomLoot.sqf` | half of enemies carry 1 `Money_roll` (personal cash); intel documents no longer dropped here |
+| Bandit corpse loot | `server/bandits/fnc_bandit_spawn.sqf` | half of bandits carry 1 `Money_roll`, none when the inventory is full |
 | Search payout (`pool` kind) | `server/search/fnc_search_claim.sqf` | +1–3 CP, on a flagged body or objective whose payout draw lands on `pool` |
 | Vehicle recycle | `server/supports/fnc_activateBaseRecycleStation.sqf` | `DUWS_fnc_calculateVehicleValue` per empty vehicle, summed then rounded |
 | Kill income | `server/server_init.sqf:275-361` | +1 per 10 hostile kills, swept on the economy tick; the remainder carries |
