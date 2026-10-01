@@ -1238,7 +1238,7 @@ zone is held. Town reputation bands decide town ownership for markers, income an
 
 BLUFOR garrisons are shipped on the same model
 ([`info/garrison_and_reserves.md`](../../info/gameplay/garrison_and_reserves.md#whose-garrison-it-is)): each side
-fields its own tier rows, BLUFOR's weaker, through its own hulls and its own AP rungs, a flip in either direction zeroes the tier
+fields the same tier rows through its own hulls and its own AP rungs, a flip in either direction zeroes the tier
 and forgets the ledger, and buying tier I at held ground *creates* a garrison at a tenth of that tier rather than
 inheriting anything. The presence latch carries over; the `Mobilising` hold does not, since a BLUFOR garrison never
 arrives on ground it owns. A BLUFOR-held site also wakes for an OPCOM attacker, live or virtual, inside its ring, so
