@@ -78,7 +78,7 @@ _e set ["cleared", { params ["_e"]; ((_e get "hostages") findIf { alive _x && {!
 _e set ["won", { params ["_e"]; (_e get "freed") > 0 && {[_e] call (_e get "cleared")} }];
 _e set ["lost", { params ["_e"]; (_e get "freed") == 0 && {((_e get "hostages") findIf { alive _x }) < 0} }];
 
-[_id, "STR_DUWS_T_CIVMISSION_HOSTAGES_TITLE", "STR_DUWS_T_CIVMISSION_HOSTAGES_DESC", "help", false] call fnc_civ_mission_present;
+[_id, "STR_DUWS_T_CIVMISSION_HOSTAGES_TITLE", "STR_DUWS_T_CIVMISSION_HOSTAGES_DESC", "help", false, "STR_DUWS_T_CIVMISSION_HOSTAGES_NOTE"] call fnc_civ_mission_present;
 // Paid per hostage as each is freed, so the report pays none; the offer and the task still show the most it can pay.
 (_e get "reward") set [2, 0];
 

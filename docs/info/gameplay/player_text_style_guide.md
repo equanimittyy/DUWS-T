@@ -103,7 +103,9 @@ re-addressing every line reads as stilted.
 
 **Avoid:**
 
-- **Theatrics.** No exclamation marks, no words shouted mid-sentence (`Targeting FAILED`).
+- **Theatrics.** No exclamation marks outside spoken lines, and no words shouted mid-sentence
+  (`Targeting FAILED`). A spoken line may end on one where the speaker would raise their voice (*You got
+  our people out!*). A hint, a card, task text or a label never takes one.
 - **Shooter idiom for a kill** — never *take him down*, *tango down*, or *he's down*.
 - **A bare appended callsign as self-identification** — `Alpha 1-1, Overlord. ...`. The speaker
   label already carries who is talking, so a callsign tacked on with only a comma reads as a label,
