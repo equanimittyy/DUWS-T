@@ -1,8 +1,8 @@
 // Locality: server, spawned by fnc_civ_mission_request.
 #define PAY_WINDOW 1200
 #define REP_KEPT -15
-#define EXTRA_MIN 5
-#define EXTRA_MAX 15
+#define EXTRA_MIN 3
+#define EXTRA_MAX 8
 #define CRATE_MAX 20
 params ["_id"];
 private _e = DUWS_civMissions get _id;
@@ -49,7 +49,7 @@ _e set ["cleared", { params ["_e"]; (_e get "payBy") >= 0 }];
 _e set ["won", { params ["_e"]; (_e get "raised") >= (_e get "target") }];
 _e set ["lost", { params ["_e"]; (_e get "payBy") >= 0 && {time > (_e get "payBy")} }];
 
-[_id, "STR_DUWS_T_CIVMISSION_CACHE_TITLE", "STR_DUWS_T_CIVMISSION_CACHE_DESC", "attack"] call fnc_civ_mission_present;
+[_id, "STR_DUWS_T_CIVMISSION_CACHE_TITLE", "STR_DUWS_T_CIVMISSION_CACHE_DESC", "attack", true, "STR_DUWS_T_CIVMISSION_CACHE_NOTE"] call fnc_civ_mission_present;
 
 private _status = "";
 waitUntil {

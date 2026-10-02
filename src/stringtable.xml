@@ -9156,40 +9156,52 @@
                 <Spanish>Recuperar alijo de los bandidos</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_CIVMISSION_CACHE_BRIEF">
-                <Original>Bandits keep a stash of money just outside of town. Take it from them, bring us %1 of it, and the rest is yours.</Original>
-                <English>Bandits keep a stash of money just outside of town. Take it from them, bring us %1 of it, and the rest is yours.</English>
-                <Chinesesimp>强盗在城镇外藏了一笔钱。从他们手里夺过来，把我们的那份 %1 带回来，剩下的都归你。</Chinesesimp>
-                <German>Banditen horten direkt vor dem Ort einen Haufen Geld. Nehmt es ihnen ab und bringt uns unseren Anteil: %1. Der Rest gehört euch.</German>
-                <Polish>Bandyci trzymają pieniądze w skrytce tuż za miejscowością. Odbierz im je i przynieś nam naszą część: %1. Reszta jest twoja.</Polish>
-                <Czech>Bandité mají hned za městem schované peníze. Seber jim je a přines nám náš podíl: %1. Zbytek je tvůj.</Czech>
-                <Russian>Бандиты прячут деньги прямо за городом. Забери их и принеси нам нашу долю: %1. Остальное твоё.</Russian>
-                <French>Des bandits cachent de l'argent juste à l'extérieur de la localité. Prenez-le-leur et rapportez-nous notre part : %1. Le reste est à vous.</French>
-                <Chinese>強盜在城鎮外藏了一筆錢。從他們手裡奪過來，把我們的那份 %1 帶回來，剩下的都歸你。</Chinese>
-                <Spanish>Unos bandidos esconden dinero justo a las afueras del pueblo. Quítaselo y tráenos nuestra parte: %1. El resto es tuyo.</Spanish>
+                <Original>I hear some bandits keep a stash of money just outside of town. If you can take it from them, and bring us %1 of it, the rest is yours.</Original>
+                <English>I hear some bandits keep a stash of money just outside of town. If you can take it from them, and bring us %1 of it, the rest is yours.</English>
+                <Chinesesimp>听说有些强盗在城镇外藏了一笔钱。如果你能从他们手里夺过来，把其中的 %1 带给我们，剩下的都归你。</Chinesesimp>
+                <German>Ich habe gehört, ein paar Banditen horten direkt vor dem Ort einen Haufen Geld. Wenn ihr es ihnen abnehmt und uns unseren Anteil bringt, gehört der Rest euch. Unser Anteil: %1.</German>
+                <Polish>Podobno jacyś bandyci trzymają pieniądze w skrytce tuż za miejscowością. Jeśli zdołasz im je odebrać i przynieść nam naszą część, reszta jest twoja. Nasza część: %1.</Polish>
+                <Czech>Prý mají nějací bandité hned za městem schované peníze. Jestli jim je dokážeš sebrat a přinést nám náš podíl, zbytek je tvůj. Náš podíl: %1.</Czech>
+                <Russian>Говорят, какие-то бандиты прячут деньги прямо за городом. Если сможешь забрать их и принести нам нашу долю, остальное твоё. Наша доля: %1.</Russian>
+                <French>Il paraît que des bandits cachent de l'argent juste à l'extérieur de la localité. Si vous pouvez le leur prendre et nous rapporter notre part, le reste est à vous. Notre part : %1.</French>
+                <Chinese>聽說有些強盜在城鎮外藏了一筆錢。如果你能從他們手裡奪過來，把其中的 %1 帶給我們，剩下的都歸你。</Chinese>
+                <Spanish>He oído que unos bandidos esconden dinero justo a las afueras del pueblo. Si puedes quitárselo y traernos nuestra parte, el resto es tuyo. Nuestra parte: %1.</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_CIVMISSION_CACHE_DESC">
-                <Original>Bandits guard a stash of money outside town. The crates hold more than the local's cut of %1 money. Give the cut to the local and keep the rest. Once the money leaves the crates, the local waits 20 minutes for it; if the job then fails or is canceled, the town's reputation drops by 15.</Original>
-                <English>Bandits guard a stash of money outside town. The crates hold more than the local's cut of %1 money. Give the cut to the local and keep the rest. Once the money leaves the crates, the local waits 20 minutes for it; if the job then fails or is canceled, the town's reputation drops by 15.</English>
-                <Chinesesimp>强盗守着城镇外的一笔藏钱。箱子里的钱多于当地居民应得的 %1。把这份交给当地居民，剩下的归你。钱一离开箱子，当地居民会等 20 分钟；之后若任务失败或被取消，城镇声望降低 15。</Chinesesimp>
-                <German>Banditen bewachen vor dem Ort ein Geldversteck. Die Kisten enthalten mehr als den Anteil des Einheimischen: %1 Geld. Gebt ihm seinen Anteil und behaltet den Rest. Sobald das Geld die Kisten verlässt, wartet der Einheimische 20 Minuten darauf; scheitert der Auftrag danach oder wird er abgebrochen, sinkt das Ansehen des Ortes um 15.</German>
-                <Polish>Bandyci pilnują skrytki z pieniędzmi za miejscowością. Skrzynie zawierają więcej niż część miejscowego: %1. Przekaż mu jego część, a resztę zatrzymaj. Gdy pieniądze opuszczą skrzynie, miejscowy czeka na nie 20 minut; jeśli potem zadanie się nie powiedzie lub zostanie anulowane, reputacja miejscowości spadnie o 15.</Polish>
-                <Czech>Bandité hlídají skrýš s penězi za obcí. Bedny obsahují víc než podíl místního: %1. Předej mu jeho podíl a zbytek si nech. Jakmile peníze opustí bedny, místní na ně čeká 20 minut; pokud poté úkol selže nebo bude zrušen, reputace obce klesne o 15.</Czech>
-                <Russian>Бандиты охраняют тайник с деньгами за населённым пунктом. В ящиках больше, чем доля местного жителя: %1. Отдай ему его долю, а остальное оставь себе. Как только деньги покинут ящики, местный житель ждёт их 20 минут; если после этого задание провалится или будет отменено, репутация населённого пункта снизится на 15.</Russian>
-                <French>Des bandits gardent une cache d'argent à l'extérieur de la localité. Les caisses contiennent plus que la part de l'habitant : %1. Donnez-lui sa part et gardez le reste. Dès que l'argent quitte les caisses, l'habitant l'attend 20 minutes ; si la mission échoue ou est annulée ensuite, la réputation de la localité baisse de 15.</French>
-                <Chinese>強盜守著城鎮外的一筆藏錢。箱子裡的錢多於當地居民應得的 %1。把這份交給當地居民，剩下的歸你。錢一離開箱子，當地居民會等 20 分鐘；之後若任務失敗或被取消，城鎮聲望降低 15。</Chinese>
-                <Spanish>Unos bandidos guardan un alijo de dinero a las afueras del pueblo. Las cajas contienen más que la parte del local: %1. Dale su parte y quédate con el resto. En cuanto el dinero sale de las cajas, el local lo espera 20 minutos; si después el encargo fracasa o se cancela, la reputación del pueblo baja en 15.</Spanish>
+                <Original>Bandits guard a stash of money outside of town. The crates hold more than enough to make the local's asking cut of %1 money. Give the cut to the local and you can keep the rest.</Original>
+                <English>Bandits guard a stash of money outside of town. The crates hold more than enough to make the local's asking cut of %1 money. Give the cut to the local and you can keep the rest.</English>
+                <Chinesesimp>强盗守着城镇外的一笔藏钱。箱子里的钱足够支付当地居民要求的 %1。把这份交给当地居民，剩下的你可以留着。</Chinesesimp>
+                <German>Banditen bewachen vor dem Ort ein Geldversteck. Die Kisten enthalten mehr als genug für den Anteil, den der Einheimische verlangt: %1 Geld. Gebt ihm seinen Anteil, dann könnt ihr den Rest behalten.</German>
+                <Polish>Bandyci pilnują skrytki z pieniędzmi za miejscowością. Skrzynie zawierają aż nadto, by pokryć część, której żąda miejscowy: %1. Przekaż mu jego część, a resztę możesz zatrzymać.</Polish>
+                <Czech>Bandité hlídají skrýš s penězi za obcí. Bedny obsahují víc než dost na podíl, který místní žádá: %1. Předej mu jeho podíl a zbytek si můžeš nechat.</Czech>
+                <Russian>Бандиты охраняют тайник с деньгами за населённым пунктом. В ящиках более чем достаточно, чтобы покрыть долю, которую просит местный житель: %1. Отдай ему его долю, и остальное можешь оставить себе.</Russian>
+                <French>Des bandits gardent une cache d'argent à l'extérieur de la localité. Les caisses contiennent largement de quoi couvrir la part que demande l'habitant : %1. Donnez-lui sa part et vous pourrez garder le reste.</French>
+                <Chinese>強盜守著城鎮外的一筆藏錢。箱子裡的錢足夠支付當地居民要求的 %1。把這份交給當地居民，剩下的你可以留著。</Chinese>
+                <Spanish>Unos bandidos guardan un alijo de dinero a las afueras del pueblo. Las cajas contienen dinero de sobra para cubrir la parte que pide el local: %1. Dale su parte y podrás quedarte con el resto.</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_CIVMISSION_CACHE_NOTE">
+                <Original>Once the money leaves the crate(s), you have 20 minutes to deliver the cut to the local. If the job fails between then and the 20 minute deadline, you lose 15 REP with the town.</Original>
+                <English>Once the money leaves the crate(s), you have 20 minutes to deliver the cut to the local. If the job fails between then and the 20 minute deadline, you lose 15 REP with the town.</English>
+                <Chinesesimp>钱一离开箱子，你有 20 分钟时间把这份交给当地居民。若在此后至 20 分钟期限之间任务失败，你在该城镇的声望将降低 15。</Chinesesimp>
+                <German>Sobald das Geld die Kisten verlässt, habt ihr 20 Minuten Zeit, dem Einheimischen seinen Anteil zu bringen. Scheitert der Auftrag zwischen diesem Zeitpunkt und dem Ablauf der 20 Minuten, verliert ihr 15 Ansehen beim Ort.</German>
+                <Polish>Gdy pieniądze opuszczą skrzynie, masz 20 minut, by przekazać miejscowemu jego część. Jeśli zadanie nie powiedzie się przed upływem tych 20 minut, stracisz 15 reputacji w miejscowości.</Polish>
+                <Czech>Jakmile peníze opustí bedny, máš 20 minut na předání podílu místnímu. Pokud úkol selže před uplynutím těchto 20 minut, ztratíš u obce 15 reputace.</Czech>
+                <Russian>Как только деньги покинут ящики, у тебя будет 20 минут, чтобы передать местному жителю его долю. Если задание провалится до истечения этих 20 минут, ты потеряешь 15 репутации в населённом пункте.</Russian>
+                <French>Dès que l'argent quitte les caisses, vous avez 20 minutes pour remettre sa part à l'habitant. Si la mission échoue avant la fin de ces 20 minutes, vous perdez 15 de réputation auprès de la localité.</French>
+                <Chinese>錢一離開箱子，你有 20 分鐘時間把這份交給當地居民。若在此後至 20 分鐘期限之間任務失敗，你在該城鎮的聲望將降低 15。</Chinese>
+                <Spanish>En cuanto el dinero sale de las cajas, tienes 20 minutos para entregarle su parte al local. Si el encargo fracasa antes de que se cumplan esos 20 minutos, pierdes 15 de reputación con el pueblo.</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_CIVMISSION_CACHE_THANKS">
-                <Original>You kept your word. Here, take this.</Original>
-                <English>You kept your word. Here, take this.</English>
-                <Chinesesimp>你说话算话。拿着这个吧。</Chinesesimp>
-                <German>Du hast Wort gehalten. Hier, nimm das.</German>
-                <Polish>Słowo dotrzymane. Proszę, weź to.</Polish>
-                <Czech>Slovo dodrženo. Tady, vezmi si tohle.</Czech>
-                <Russian>Слово сдержано. Вот, возьми.</Russian>
-                <French>Vous avez tenu parole. Tenez, prenez ça.</French>
-                <Chinese>你說話算話。拿著這個吧。</Chinese>
-                <Spanish>Has cumplido tu palabra. Toma, quédate con esto.</Spanish>
+                <Original>You kept your word. Thanks, we really needed this money.</Original>
+                <English>You kept your word. Thanks, we really needed this money.</English>
+                <Chinesesimp>你说话算话。谢谢，我们真的很需要这笔钱。</Chinesesimp>
+                <German>Du hast Wort gehalten. Danke, wir haben dieses Geld wirklich gebraucht.</German>
+                <Polish>Słowo dotrzymane. Dziękuję, naprawdę potrzebowaliśmy tych pieniędzy.</Polish>
+                <Czech>Slovo dodrženo. Díky, ty peníze jsme opravdu potřebovali.</Czech>
+                <Russian>Слово сдержано. Спасибо, нам очень нужны были эти деньги.</Russian>
+                <French>Vous avez tenu parole. Merci, nous avions vraiment besoin de cet argent.</French>
+                <Chinese>你說話算話。謝謝，我們真的很需要這筆錢。</Chinese>
+                <Spanish>Has cumplido tu palabra. Gracias, de verdad necesitábamos este dinero.</Spanish>
             </Key>
         </Container>
         <Container name="Informants">

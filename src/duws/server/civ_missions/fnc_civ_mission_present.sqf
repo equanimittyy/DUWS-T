@@ -1,5 +1,5 @@
 // Locality: server. No operation name, title card or music: those announce an HQ operation (fnc_missionTaskCreate).
-params ["_id", "_titleKey", "_descKey", "_taskType", ["_search", true]];
+params ["_id", "_titleKey", "_descKey", "_taskType", ["_search", true], ["_noteKey", ""]];
 private _e = DUWS_civMissions get _id;
 
 // A job with nothing to find pins its site exactly.
@@ -30,7 +30,8 @@ private _pay = if (_money > 0) then {
 } else {
     format [localize "STR_DUWS_T_CIVMISSION_CP", floor (_cp * cp_reward_multiplier)]
 };
-private _desc = (format [localize _descKey, _e get "target"]) + "<br />" + (localize "STR_DUWS_T_mission_divider")
-    + _pay + format [localize "STR_DUWS_T_mission_rep", _rep];
+private _desc = format [localize _descKey, _e get "target"];
+if (_noteKey != "") then { _desc = _desc + "<br />" + format [localize "STR_DUWS_T_mission_note_line", localize _noteKey] };
+_desc = _desc + "<br />" + (localize "STR_DUWS_T_mission_divider") + _pay + format [localize "STR_DUWS_T_mission_rep", _rep];
 // Server-side, never remoteExec'd (arma_engine_gotchas.md). "CREATED" leaves the HQ mission the current task.
 [west, [_taskId], [_desc, _title, ""], [_centre select 0, _centre select 1], "CREATED", 1, true, _taskType, false] call BIS_fnc_taskCreate;

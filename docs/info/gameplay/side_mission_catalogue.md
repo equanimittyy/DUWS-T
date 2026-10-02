@@ -540,13 +540,13 @@ and pays only the CP and the money. If every hostage dies before one is freed, t
 
 **Recover Bandit Cache makes the players choose between money and reputation** (`fnc_civ_mission_cache.sqf`).
 The props are those of Destroy Ammo Cache, without its guns, and the two crates stand where that mission puts its
-own. The cut is rolled with the offer, so the brief names it. The crates hold the cut plus 5-15 money, split
+own. The cut is rolled with the offer, so the brief names it. The crates hold the cut plus 3-8 money, split
 between them with no crate over 20, so they always hold the cut. They cannot be damaged, so a stray grenade cannot
 burn it. The giver takes the cut through the Give Money row of Raise Funds, and the gift that meets it is the
 report: it pays 15 CP and 3 reputation, and the players keep the rest of the money. When the crates first hold less
 than the cut, the task pin moves to the giver and a 20 min clock starts. From then on, any end but the payment costs
 the town 15 reputation: the clock running out, the giver's death or a cancel. A player who keeps all the money makes
-25-40 and pays that price. Before the cut leaves the crates, the job ends like any other.
+23-33 and pays that price. Before the cut leaves the crates, the job ends like any other.
 
 **The giver goes indoors and stays** (`fnc_civ_mission_accept.sqf`). On the accept, the giver walks to a
 ground-floor position in the nearest enterable building within 150 m, off the street where traffic could
