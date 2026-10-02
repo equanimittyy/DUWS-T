@@ -152,6 +152,8 @@ fnc_town_rep_announce = {
 		case "protect_civ_success":   { "STR_DUWS_T_civ_rep_why_escort" };
 		case "protect_civ_casualty":  { "STR_DUWS_T_civ_rep_why_escort_lost" };
 		case "vehicle_stolen":        { "STR_DUWS_T_civ_rep_why_vehicle" };
+		case "civ_hostage_freed":     { "STR_DUWS_T_civ_rep_why_hostages_freed" };
+		case "civ_hostages_lost":     { "STR_DUWS_T_civ_rep_why_hostages_lost" };
 		default                       { "STR_DUWS_T_civ_rep_why_other" };
 	});
 

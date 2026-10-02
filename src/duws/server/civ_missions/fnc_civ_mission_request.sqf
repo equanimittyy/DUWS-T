@@ -43,24 +43,26 @@ if (_force || {count DUWS_civMissions < CIV_MISSION_CAP}) then {
 _civ disableAI "PATH";
 sleep 3;
 
-// [thread, brief key, cp, [money min, money max], rep, gate, [target min, target max], site check]. A target is
-// money the players raise at the giver's feet, so that job's site is the town centre, not ground outside town.
-// The optional site check vets each outside-town draw.
+// [thread, brief key, cp, [money min, money max], rep, gate, [target min, target max], site check, on a house]. A
+// target is money the players raise at the giver's feet, so that job's site is the town centre, not ground outside
+// town. The optional site check vets each outside-town draw.
 private _types = [
     ["fnc_civ_mission_camp",   "STR_DUWS_T_CIVMISSION_CAMP_BRIEF",   10, [3, 5], 3, { true }, []],
     ["fnc_civ_mission_stolen", "STR_DUWS_T_CIVMISSION_STOLEN_BRIEF",  5, [5, 8], 3, { (missionNamespace getVariable ["civ_veh_array", []]) isNotEqualTo [] }, []],
     ["fnc_civ_mission_funds",  "STR_DUWS_T_CIVMISSION_FUNDS_BRIEF",  15, [0, 0], 5, { true }, [9, 15]],
     // 100 m off the centre keeps the widest field's mines about 25 m clear of a road, out of the traffic.
-    ["fnc_civ_mission_mines",  "STR_DUWS_T_CIVMISSION_MINES_BRIEF",  10, [3, 5], 3, { true }, [], { params ["_p"]; (_p nearRoads 100) isEqualTo [] }]
+    ["fnc_civ_mission_mines",  "STR_DUWS_T_CIVMISSION_MINES_BRIEF",  10, [3, 5], 3, { true }, [], { params ["_p"]; (_p nearRoads 100) isEqualTo [] }],
+    // REP is the most it pays, one per hostage. The check is the thread's HOSTAGES houses within CLUSTER_RADIUS.
+    ["fnc_civ_mission_hostages", "STR_DUWS_T_CIVMISSION_HOSTAGES_BRIEF", 15, [1, 5], 5, { true }, [], { params ["_p"]; count ([_p, 3, 150] call fnc_usableBuildings) >= 5 }, true]
 ] select { call (_x select 5) };
-(selectRandom _types) params ["_thread", "_briefKey", "_cp", "_money", "_rep", "", "_target", ["_siteOk", { true }]];
+(selectRandom _types) params ["_thread", "_briefKey", "_cp", "_money", "_rep", "", "_target", ["_siteOk", { true }], ["_onHouse", false]];
 private _town = _civ getVariable ["civ_locIndex", -1];
 
 // A flat chance, not the reputation curve: a hostile town is where the player most needs the reputation a
 // mission pays, and the curve offers nothing at -20.
 private _site = [];
 if (_id >= 0 && {alive _civ} && {_town >= 0} && {_force || {random 1 < CIV_MISSION_OFFER_CHANCE}}) then {
-    _site = if (_target isEqualTo []) then { [_town, _siteOk] call fnc_civ_mission_site } else {
+    _site = if (_target isEqualTo []) then { [_town, _siteOk, _onHouse] call fnc_civ_mission_site } else {
         getPos ((missionNamespace getVariable ["civ_locations", []]) select _town)
     };
 };

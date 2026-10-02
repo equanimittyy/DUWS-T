@@ -478,6 +478,7 @@ slot. The code is in `src/duws/server/civ_missions/`.
 | Recover Stolen Car | 4-6, plus 0-2 pairs | the car stands within 30 m of the giver | the giver dies, or the car is destroyed | 5 | 5-8 | +3 |
 | Raise Funds | none | the players give the giver 9-15 money between them | the giver dies | 15 | none | +5 |
 | Clear Minefield | 0-10, once the first mine goes | no mine in the field is still armed | the giver dies | 10 | 3-5 | +3 |
+| Rescue Hostages | 15 in five house teams, plus 0-4 pairs | no hostage is still held, and at least one was freed | the giver dies, or every hostage dies before one is freed | 15 | 1-5 | +1 per hostage freed; -3 if none is |
 
 The main group walks `closepatrol` round the site at a 100 m radius, as an HQ mission's objective guard
 does. The pairs are two riflemen each (`fnc_bandit_pairs`) on `widepatrol` at a 250 m radius, inside the
@@ -486,7 +487,8 @@ site's 300 m clearance from every zone. A pair does not count toward the camp's 
 The CP is scaled by `cp_reward_multiplier`. The money goes into the inventory of the player who reported
 the job, and at their feet if it does not fit (`fnc_loot_grant`) — for Raise Funds that is whoever's gift
 met the target. A reporter who has left the session is paid at the giver's feet instead. The reputation goes to the giver's town (`fnc_town_rep_adjust`). A cancel ends the mission with no pay
-and no other cost, except that money given to Raise Funds is not refunded.
+and no other cost, except that money given to Raise Funds is not refunded, and reputation that Rescue Hostages
+paid during the job stays paid.
 
 **The offer is a flat 90 %, not the reaction curve** (`fnc_civ_mission_request.sqf`). A hostile town is
 where the player most needs the reputation that a mission pays, and the curve offers nothing at -20. A
@@ -523,6 +525,18 @@ the one within 40° of its flank that the fewest of those players can see, and e
 from it. Both sides `hunt` the field, so they meet there and fight each other and the players. Neither side
 counts toward the objective. The mines are revealed to OPFOR alone, so the bandits walk the field blind.
 
+**Rescue Hostages is the covert rescue of the HQ mission Rescue Hostage, in five houses**
+(`fnc_civ_mission_hostages.sqf`). The houses are the five enterable houses nearest the site, all within 150 m.
+Each house holds one hostage and a team of three bandits (rifleman, autogunner, grenadier) spread through it,
+and a blue `Hostage` marker pins each hostage, so the task pins the site with no search area. When the team of a
+house is dead, its hostage is free: the town gains 1 reputation at once, the marker goes, and the hostage walks
+home, still captive so that nobody shoots him, until the map sweep takes him. One alarm serves every house. When
+any bandit, a house team or a pair, holds a live sighting of a player for 3 s, a 300 s clock starts that nothing
+stops, and when it runs out, every hostage still held is executed. The sighting test and the execution are those
+of `fnc_rescue_hostage_mission.sqf`. Report goes live when no hostage is still held and at least one was freed,
+and pays only the CP and the money. If every hostage dies before one is freed, the job fails and the town loses
+3. The offer and the task show +5, the most that the job can pay.
+
 **The giver goes indoors and stays** (`fnc_civ_mission_accept.sqf`). On the accept, the giver walks to a
 ground-floor position in the nearest enterable building within 150 m, off the street where traffic could
 run them over, and `PATH` goes off when they arrive. The accept also takes the giver off the town's crowd
@@ -549,8 +563,10 @@ also stops a player getting out, so the thread first puts out the crew. Any othe
 **The site keeps the fight for the player** (`fnc_civ_mission_site.sqf`). It is 300-1200 m beyond the
 town's edge, outside every zone's radius + 300 m, outside `AOI_HQ_REACH` of the HQ, and 500 m from any
 other live site. A Clear Minefield site is also 100 m or more from any road, so that traffic cannot reach a mine
-in the largest field. Bandits fight both armies, and the objective counts every camp bandit dead, whoever killed
-them. A town close to HQ often finds no site, so there only a Raise Funds draw becomes a job.
+in the largest field. A Rescue Hostages site is an enterable house in the same band, not open ground, with five
+enterable houses within 150 m of it; drawing houses, not points, is what finds the clusters. Bandits fight both
+armies, and the objective counts every camp bandit dead, whoever killed them. A town close to HQ often finds no
+site, so there only a Raise Funds draw becomes a job.
 
 A live civilian mission is not saved. The registry, `DUWS_civMissions`, holds unit handles. The Debug
 menu's *Force civilian mission* row makes the civilian under the cursor offer a job, with no roll and no

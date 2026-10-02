@@ -5332,6 +5332,30 @@
                 <Chinese>一輛平民載具被奪取</Chinese>
                 <Spanish>se requisó un vehículo civil</Spanish>
             </Key>
+            <Key ID="STR_DUWS_T_civ_rep_why_hostages_freed">
+                <Original>hostages were freed</Original>
+                <English>hostages were freed</English>
+                <Chinesesimp>人质获救</Chinesesimp>
+                <German>Geiseln wurden befreit</German>
+                <Polish>zakładnicy zostali uwolnieni</Polish>
+                <Czech>rukojmí byla osvobozena</Czech>
+                <Russian>заложники освобождены</Russian>
+                <French>des otages ont été libérés</French>
+                <Chinese>人質獲救</Chinese>
+                <Spanish>se liberó a rehenes</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_civ_rep_why_hostages_lost">
+                <Original>hostages were lost</Original>
+                <English>hostages were lost</English>
+                <Chinesesimp>人质遇害</Chinesesimp>
+                <German>Geiseln kamen ums Leben</German>
+                <Polish>zakładnicy zginęli</Polish>
+                <Czech>rukojmí zahynula</Czech>
+                <Russian>заложники погибли</Russian>
+                <French>des otages sont morts</French>
+                <Chinese>人質遇害</Chinese>
+                <Spanish>se perdió a rehenes</Spanish>
+            </Key>
             <Key ID="STR_DUWS_T_civ_rep_why_other">
                 <Original>recent events</Original>
                 <English>recent events</English>
@@ -9046,6 +9070,66 @@
                 <French>Merci. Nous pouvons à nouveau exploiter ce champ. Ce n'est pas grand-chose, mais prenez ceci.</French>
                 <Chinese>謝謝你。我們又能耕種那片地了。不多，但拿著吧。</Chinese>
                 <Spanish>Gracias. Podemos volver a trabajar ese campo. No es mucho, pero toma esto.</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_CIVMISSION_HOSTAGES_TITLE">
+                <Original>Rescue Hostages</Original>
+                <English>Rescue Hostages</English>
+                <Chinesesimp>解救人质</Chinesesimp>
+                <German>Geiseln befreien</German>
+                <Polish>Uwolnij zakładników</Polish>
+                <Czech>Osvobodit rukojmí</Czech>
+                <Russian>Освободить заложников</Russian>
+                <French>Libérer les otages</French>
+                <Chinese>解救人質</Chinese>
+                <Spanish>Rescatar rehenes</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_CIVMISSION_HOSTAGES_BRIEF">
+                <Original>Bandits took five of our people and hold them in the houses just outside of town. If they see you coming, they will kill them all. Please, get them out.</Original>
+                <English>Bandits took five of our people and hold them in the houses just outside of town. If they see you coming, they will kill them all. Please, get them out.</English>
+                <Chinesesimp>强盗抓走了我们五个人，把他们关在城镇外的房子里。如果他们发现你过来，就会把人全杀了。求你把他们救出来。</Chinesesimp>
+                <German>Banditen haben fünf von uns verschleppt und halten sie in den Häusern direkt vor dem Ort fest. Wenn sie euch kommen sehen, bringen sie alle um. Bitte holt sie da raus.</German>
+                <Polish>Bandyci porwali pięcioro naszych i trzymają ich w domach tuż za miejscowością. Jeśli zobaczą, że nadchodzisz, zabiją wszystkich. Proszę, wydostań ich stamtąd.</Polish>
+                <Czech>Bandité unesli pět našich lidí a drží je v domech hned za městem. Jestli tě uvidí přicházet, všechny je zabijí. Prosím, dostaň je odtamtud.</Czech>
+                <Russian>Бандиты схватили пятерых наших и держат их в домах прямо за городом. Если они увидят, что ты идёшь, они всех убьют. Прошу, вытащи их оттуда.</Russian>
+                <French>Des bandits ont enlevé cinq des nôtres et les retiennent dans les maisons juste à l'extérieur de la localité. S'ils vous voient arriver, ils les tueront tous. Je vous en prie, sortez-les de là.</French>
+                <Chinese>強盜抓走了我們五個人，把他們關在城鎮外的房子裡。如果他們發現你過來，就會把人全殺了。求你把他們救出來。</Chinese>
+                <Spanish>Unos bandidos se llevaron a cinco de los nuestros y los retienen en las casas justo a las afueras del pueblo. Si te ven llegar, los matarán a todos. Por favor, sácalos de allí.</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_CIVMISSION_HOSTAGES_DESC">
+                <Original>Bandits hold five locals in the houses outside town, three guards to each house. Kill a house's guards to free its hostage; each one freed raises the town's reputation by 1 at once. If the bandits spot you, they execute every hostage still held 5 minutes later. Losing all five lowers the town's reputation by 3. Report back to the local once no hostage is left in bandit hands.</Original>
+                <English>Bandits hold five locals in the houses outside town, three guards to each house. Kill a house's guards to free its hostage; each one freed raises the town's reputation by 1 at once. If the bandits spot you, they execute every hostage still held 5 minutes later. Losing all five lowers the town's reputation by 3. Report back to the local once no hostage is left in bandit hands.</English>
+                <Chinesesimp>强盗把五名当地居民关在城镇外的房屋里，每栋房屋有三名守卫。消灭一栋房屋的守卫即可解救其中的人质；每解救一名，城镇声望立即提高 1。若强盗发现你，将在 5 分钟后处决所有仍被关押的人质。五名人质全部遇害，城镇声望降低 3。待人质不再落在强盗手中后，向当地居民回报。</Chinesesimp>
+                <German>Banditen halten fünf Einheimische in den Häusern vor dem Ort fest, drei Wachen pro Haus. Schaltet die Wachen eines Hauses aus, um seine Geisel zu befreien; jede befreite Geisel hebt das Ansehen des Ortes sofort um 1. Entdecken euch die Banditen, richten sie 5 Minuten später jede Geisel hin, die sie noch festhalten. Sterben alle fünf, sinkt das Ansehen des Ortes um 3. Meldet euch beim Einheimischen zurück, sobald keine Geisel mehr in der Hand der Banditen ist.</German>
+                <Polish>Bandyci przetrzymują pięciu miejscowych w domach za miejscowością, po trzech strażników w każdym domu. Zlikwiduj strażników w domu, aby uwolnić jego zakładnika; każdy uwolniony zakładnik od razu podnosi reputację miejscowości o 1. Jeśli bandyci cię wykryją, po 5 minutach stracą każdego zakładnika, którego wciąż przetrzymują. Utrata wszystkich pięciu obniża reputację miejscowości o 3. Zdaj raport miejscowemu, gdy żaden zakładnik nie pozostanie w rękach bandytów.</Polish>
+                <Czech>Bandité drží pět místních v domech za obcí, v každém domě tři stráže. Zabij stráže v domě a osvoboď tak jeho rukojmí; každé osvobozené rukojmí ihned zvýší reputaci obce o 1. Pokud tě bandité odhalí, za 5 minut popraví každé rukojmí, které ještě drží. Ztráta všech pěti sníží reputaci obce o 3. Podej hlášení místnímu, jakmile žádné rukojmí nezůstane v rukou banditů.</Czech>
+                <Russian>Бандиты держат пятерых местных жителей в домах за населённым пунктом, по три охранника в каждом доме. Уничтожь охрану дома, чтобы освободить его заложника; каждый освобождённый заложник сразу повышает репутацию населённого пункта на 1. Если бандиты тебя обнаружат, через 5 минут они казнят всех заложников, которых ещё удерживают. Гибель всех пятерых снижает репутацию населённого пункта на 3. Доложи местному жителю, когда в руках бандитов не останется ни одного заложника.</Russian>
+                <French>Des bandits retiennent cinq habitants dans les maisons à l'extérieur de la localité, trois gardes par maison. Éliminez les gardes d'une maison pour libérer son otage ; chaque otage libéré augmente aussitôt la réputation de la localité de 1. Si les bandits vous repèrent, ils exécuteront 5 minutes plus tard chaque otage encore retenu. La perte des cinq otages baisse la réputation de la localité de 3. Faites un rapport à l'habitant une fois qu'aucun otage ne reste aux mains des bandits.</French>
+                <Chinese>強盜把五名當地居民關在城鎮外的房屋裡，每棟房屋有三名守衛。消滅一棟房屋的守衛即可解救其中的人質；每解救一名，城鎮聲望立即提高 1。若強盜發現你，將在 5 分鐘後處決所有仍被關押的人質。五名人質全部遇害，城鎮聲望降低 3。待人質不再落在強盜手中後，向當地居民回報。</Chinese>
+                <Spanish>Unos bandidos retienen a cinco locales en las casas a las afueras del pueblo, con tres guardias en cada casa. Elimina a los guardias de una casa para liberar a su rehén; cada rehén liberado sube al instante la reputación del pueblo en 1. Si los bandidos te detectan, ejecutarán 5 minutos después a todos los rehenes que sigan retenidos. Perder a los cinco baja la reputación del pueblo en 3. Informa al local cuando no quede ningún rehén en manos de los bandidos.</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_CIVMISSION_HOSTAGES_THANKS">
+                <Original>You got our people out. Here, take this. It's all we can spare.</Original>
+                <English>You got our people out. Here, take this. It's all we can spare.</English>
+                <Chinesesimp>你把我们的人救出来了。拿着这个吧。这是我们能拿出的全部了。</Chinesesimp>
+                <German>Du hast unsere Leute da rausgeholt. Hier, nimm das. Mehr können wir nicht entbehren.</German>
+                <Polish>Nasi ludzie są wolni dzięki tobie. Proszę, weź to. Więcej nie możemy dać.</Polish>
+                <Czech>Naši lidé jsou díky tobě volní. Tady, vezmi si tohle. Víc dát nemůžeme.</Czech>
+                <Russian>Благодаря тебе наши люди на свободе. Держи. Больше нам дать нечего.</Russian>
+                <French>Vous avez sorti les nôtres de là. Tenez, prenez ça. C'est tout ce que nous pouvons donner.</French>
+                <Chinese>你把我們的人救出來了。拿著這個吧。這是我們能拿出的全部了。</Chinese>
+                <Spanish>Has sacado a los nuestros de allí. Toma, quédate con esto. Es todo lo que podemos darte.</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_CIVMISSION_HOSTAGES_ALARM">
+                <Original>Alarm raised. The bandits will execute the hostages in %1s.</Original>
+                <English>Alarm raised. The bandits will execute the hostages in %1s.</English>
+                <Chinesesimp>警报已拉响。强盗将在 %1 秒后处决人质。</Chinesesimp>
+                <German>Alarm ausgelöst. Die Banditen erschießen die Geiseln in %1s.</German>
+                <Polish>Alarm podniesiony. Bandyci stracą zakładników za %1 s.</Polish>
+                <Czech>Vyhlášen poplach. Bandité popraví rukojmí za %1 s.</Czech>
+                <Russian>Поднята тревога. Бандиты казнят заложников через %1 с.</Russian>
+                <French>Alarme déclenchée. Les bandits exécuteront les otages dans %1 s.</French>
+                <Chinese>警報已拉響。強盜將在 %1 秒後處決人質。</Chinese>
+                <Spanish>Alarma activada. Los bandidos ejecutarán a los rehenes en %1 s.</Spanish>
             </Key>
         </Container>
         <Container name="Informants">
