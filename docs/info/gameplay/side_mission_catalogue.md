@@ -468,8 +468,8 @@ slot. The code is in `src/duws/server/civ_missions/`.
 | Issued by | the strategic map | the **Work** row, first in the civilian menu |
 | At one time | one (`Mission_available`) | up to three (`CIV_MISSION_CAP`) |
 | Name | a generated operation name | the giver's town, then the type's name (*Kavala: Clear Bandit Camp*); no title card and no music |
-| Deadline | a band per type | none |
-| Ends | on the objective | when a player reports to the giver, or cancels; Raise Funds ends on the gift that meets its target |
+| Deadline | a band per type | none, except the pay clock of Recover Bandit Cache |
+| Ends | on the objective | when a player reports to the giver, or cancels; Raise Funds and Recover Bandit Cache end on the gift that meets the target |
 | Pays | CP and AP | CP, money and town reputation |
 
 | Type | Bandits | Won when | Lost when | CP | Money | REP |
@@ -479,6 +479,7 @@ slot. The code is in `src/duws/server/civ_missions/`.
 | Raise Funds | none | the players give the giver 9-15 money between them | the giver dies | 15 | none | +5 |
 | Clear Minefield | 0-10, once the first mine goes | no mine in the field is still armed | the giver dies | 10 | 3-5 | +3 |
 | Rescue Hostages | 15 in five house teams, plus 0-4 pairs | no hostage is still held, and at least one was freed | the giver dies, or every hostage dies before one is freed | 15 | 1-5 | +1 per hostage freed; -3 if none is |
+| Recover Bandit Cache | 6-9, plus 0-2 pairs | the players give the giver their cut of 20-25 money | the giver dies, or the cut goes unpaid for 20 min after it leaves the crates | 15 | none | +3; -15 if lost or canceled after the cut leaves the crates |
 
 The main group walks `closepatrol` round the site at a 100 m radius, as an HQ mission's objective guard
 does. The pairs are two riflemen each (`fnc_bandit_pairs`) on `widepatrol` at a 250 m radius, inside the
@@ -487,8 +488,8 @@ site's 300 m clearance from every zone. A pair does not count toward the camp's 
 The CP is scaled by `cp_reward_multiplier`. The money goes into the inventory of the player who reported
 the job, and at their feet if it does not fit (`fnc_loot_grant`) — for Raise Funds that is whoever's gift
 met the target. A reporter who has left the session is paid at the giver's feet instead. The reputation goes to the giver's town (`fnc_town_rep_adjust`). A cancel ends the mission with no pay
-and no other cost, except that money given to Raise Funds is not refunded, and reputation that Rescue Hostages
-paid during the job stays paid.
+and no other cost, except that money given to Raise Funds is not refunded, reputation that Rescue Hostages
+paid during the job stays paid, and Recover Bandit Cache costs the town 15 once the cut has left the crates.
 
 **The offer is a flat 90 %, not the reaction curve** (`fnc_civ_mission_request.sqf`). A hostile town is
 where the player most needs the reputation that a mission pays, and the curve offers nothing at -20. A
@@ -537,6 +538,16 @@ of `fnc_rescue_hostage_mission.sqf`. Report goes live when no hostage is still h
 and pays only the CP and the money. If every hostage dies before one is freed, the job fails and the town loses
 3. The offer and the task show +5, the most that the job can pay.
 
+**Recover Bandit Cache makes the players choose between money and reputation** (`fnc_civ_mission_cache.sqf`).
+The props are those of Destroy Ammo Cache, without its guns, and the two crates stand where that mission puts its
+own. The cut is rolled with the offer, so the brief names it. The crates hold the cut plus 5-15 money, split
+between them with no crate over 20, so they always hold the cut. They cannot be damaged, so a stray grenade cannot
+burn it. The giver takes the cut through the Give Money row of Raise Funds, and the gift that meets it is the
+report: it pays 15 CP and 3 reputation, and the players keep the rest of the money. When the crates first hold less
+than the cut, the task pin moves to the giver and a 20 min clock starts. From then on, any end but the payment costs
+the town 15 reputation: the clock running out, the giver's death or a cancel. A player who keeps all the money makes
+25-40 and pays that price. Before the cut leaves the crates, the job ends like any other.
+
 **The giver goes indoors and stays** (`fnc_civ_mission_accept.sqf`). On the accept, the giver walks to a
 ground-floor position in the nearest enterable building within 150 m, off the street where traffic could
 run them over, and `PATH` goes off when they arrive. The accept also takes the giver off the town's crowd
@@ -564,8 +575,9 @@ also stops a player getting out, so the thread first puts out the crew. Any othe
 town's edge, outside every zone's radius + 300 m, outside `AOI_HQ_REACH` of the HQ, and 500 m from any
 other live site. A Clear Minefield site is also 100 m or more from any road, so that traffic cannot reach a mine
 in the largest field. A Rescue Hostages site is an enterable house in the same band, not open ground, with five
-enterable houses within 150 m of it; drawing houses, not points, is what finds the clusters. Bandits fight both
-armies, and the objective counts every camp bandit dead, whoever killed them. A town close to HQ often finds no
+enterable houses within 150 m of it; drawing houses, not points, is what finds the clusters. A Recover Bandit Cache
+site passes the level-ground gate of the HQ cache (`fnc_site_terrain`). Bandits fight both armies, and the objective
+counts every camp bandit dead, whoever killed them. A town close to HQ often finds no
 site, so there only a Raise Funds draw becomes a job.
 
 A live civilian mission is not saved. The registry, `DUWS_civMissions`, holds unit handles. The Debug
