@@ -18,6 +18,9 @@
 #define MINE_SPREAD 5
 // Half a square's diagonal plus the spread past its edge: no mine is made under somebody standing there.
 #define MINE_NO_POP 50
+// The engine offers its disarm action only on a mine BLUFOR knows, and draws a known mine's 3D icon, so a
+// revealed field's mines become known only this close to a player.
+#define MINE_KNOW 10
 
 DUWS_mineSquare = 50;
 
@@ -211,6 +214,21 @@ fnc_hardpoint_minefield_reveal = {
     DUWS_revealedMines = ((missionNamespace getVariable ["DUWS_revealedMines", []]) select { !isNull _x }) + _mines;
 };
 
+// [_key] call fnc_hardpoint_minefield_know -- server.
+fnc_hardpoint_minefield_know = {
+    params ["_key"];
+    private _mines = +(missionNamespace getVariable [format ["DUWS_hpMines_%1", _key], []]);
+    { _mines append (_x select 2) } forEach (missionNamespace getVariable [format ["DUWS_hpMineSquares_%1", _key], []]);
+    private _players = (call BIS_fnc_listPlayers) select { alive _x };
+    {
+        private _m = _x;
+        if (!isNull _m && {mineActive _m} && {!(_m mineDetectedBy west)} && {(_players findIf { (_x distance _m) < MINE_KNOW }) > -1}) then {
+            // Every machine: revealMine's locality is undocumented.
+            [west, _m] remoteExec ["revealMine", 0];
+        };
+    } forEach _mines;
+};
+
 // [] spawn fnc_hardpoint_minefield_map_icons -- client. Draws each revealed mine on the main map with the
 // engine's own detected-mine icon.
 fnc_hardpoint_minefield_map_icons = {
@@ -220,11 +238,13 @@ fnc_hardpoint_minefield_map_icons = {
     DUWS_mineIconColour = (getArray (configFile >> "CfgInGameUI" >> "Cursor" >> "explosiveColor"))
         apply { if (_x isEqualType "") then { call compile _x } else { _x } };
     DUWS_mineIconColour set [3, 0.5];
+    // A mine BLUFOR knows gets the engine's own map icon, unless the difficulty never shows detected mines.
+    DUWS_engineDrawsMines = (difficultyOption "detectedMines") > 0;
     waitUntil { !isNull findDisplay 12 };
     (findDisplay 12 displayCtrl 51) ctrlAddEventHandler ["Draw", {
         params ["_map"];
         {
-            if (!isNull _x && {mineActive _x}) then {
+            if (!isNull _x && {mineActive _x} && {!(DUWS_engineDrawsMines && {_x mineDetectedBy west})}) then {
                 _map drawIcon [DUWS_mineIcon, DUWS_mineIconColour, getPosATL _x, 12, 12, 0, ""];
             };
         } forEach (missionNamespace getVariable ["DUWS_revealedMines", []]);
