@@ -243,7 +243,7 @@ a cheaper way to liquidate a slate, which inverts what the death penalty is for.
 | Bandit corpse loot | `server/bandits/fnc_bandit_spawn.sqf` | half of bandits carry 1 `Money_roll`, none when the inventory is full |
 | Search payout (`money` kind) | `server/search/fnc_search_claim.sqf` | 1–3 `Money_roll` into the searcher's inventory; a corpse search multiplies it by its ladder row's count, 1–3 ([`intel_system.md`](intel_system.md#a-corpse-search-walks-a-ladder)) |
 | Vehicle recycle | `server/supports/fnc_activateBaseRecycleStation.sqf` | `DUWS_fnc_calculateVehicleValue` per empty vehicle, summed then rounded |
-| Kill income | `server/server_init.sqf:306-426` | `kill_cp_award` (2) CP + `kill_ap_award` (1) AP per 10 hostile kills, swept every 60 seconds (`kill_cp_period`) with a hint to each player paid; the AP credits BLUFOR's tier; the remainder carries |
+| Kill income | `server/server_init.sqf:306-426` | `kill_cp_award` (2) CP + `kill_ap_award` (1) AP per 10 hostile kills, swept every 15 minutes (`kill_cp_period`) with one `kill_income` card to each player paid; the AP credits BLUFOR's tier; the remainder carries |
 | Killhouse training | `server/killhouse/fnc_createKillhouse.sqf:303-304` | +1 for clearing 10 targets, or +3 for clearing 20 challenge enemies, once per run |
 | Rare-zombie kill (WBK) | `server/civilian/fnc_civ_handler_wbk.sqf:359` | +10, or +30 for the Goliath |
 | Support refund | `client/supports/fnc_supports_init.sqf` | the recorded charge in full; `support_death_refund` of the slate when its holder dies |
@@ -277,7 +277,7 @@ CP and zone AP taken, with each pool's total; the throttle cut as the subtitle w
 cutting the faucets; and each revealed town whose reputation rose, with BLUFOR's radio push and the
 town's CP income if it is in the BLUFOR band. The readout leaves out OPFOR's side of the tick. Allseer
 cues it on SUB-NET with a line that carries no figures, so the tick is not announced twice. Kill
-income has its own one-minute sweep and stays out of the readout. It is announced only to the player
+income has its own 15-minute sweep and stays out of the readout. It is announced only to the player
 who earned it, because naming attrition in a campaign-wide report would advertise kill farming as an
 income route.
 

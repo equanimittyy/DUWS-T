@@ -113,7 +113,7 @@ cp_reward_multiplier = 1;publicVariable "cp_reward_multiplier";
 kill_cp_kills = 10;
 kill_cp_award = 2;
 kill_ap_award = 1;
-kill_cp_period = 60;
+kill_cp_period = 900;
 
 // Distance at which a FOB or HQ garrison stops being simulated -- nothing culled it before, so every
 // base ran pathing and targeting for the whole campaign regardless of distance. Server-only.

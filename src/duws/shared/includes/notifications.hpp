@@ -179,6 +179,16 @@ class CfgNotifications
         difficulty[] = {};
     };
 
+    // No badge: iconText holds one figure, and this card pays two.
+    class kill_income
+    {
+        title = "$STR_DUWS_T_CPATTRITION_TITLE";
+        description = "$STR_DUWS_T_CPATTRITION_MSG";
+        color[] = {0.5,1,1,1};
+        priority = 0;
+        difficulty[] = {};
+    };
+
     // BLUFOR's force reached a new capability tier (WARCOM_blufor_tier, fnc_economy_init). Team news
     // like a zone capture, so a card, not a hint. Blue = something gained. The rank chevron is the
     // grayscale (_gs) glyph, tinted by the class colour; %1 is the new tier's capability name

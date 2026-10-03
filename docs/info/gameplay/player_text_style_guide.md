@@ -199,7 +199,9 @@ could say (radio).
 
 **A card is team news.** Reach for it when the audience is the whole team, whether or not they were
 the one who triggered it; if the audience is one player, it is a hint or a radio line by the rule
-above. Its ceiling is a hard ~60 characters that clips mid-sentence with no error
+above. Kill income is the one exception: its card goes only to the player paid
+(`server/server_init.sqf`), because a team-wide line would advertise kill farming as an income
+route. A card's ceiling is a hard ~60 characters that clips mid-sentence with no error
 ([`arma_engine_gotchas.md`](../architecture/arma_engine_gotchas.md#a-cfgnotifications-description-is-clipped-not-wrapped-past-roughly-60-characters)),
 so keep it to a headline. A card's direction is carried by its colour class, not its wording — blue
 for something gained, red for something lost or a critical the player must act on, white for neutral

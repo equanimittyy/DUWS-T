@@ -396,7 +396,7 @@ if (isServer) then {
     addMissionEventHandler ["Ended", { ["mission end"] call DUWS_fnc_campaignSave }];
     addMissionEventHandler ["MPEnded", { ["mission end"] call DUWS_fnc_campaignSave }];
 
-    // Swept, not paid per batch, so a burst of kills lands as one hint per player.
+    // Swept, not paid per batch, so a burst of kills lands as one card per player.
     [] spawn {
         while {true} do {
             sleep kill_cp_period;
@@ -411,7 +411,7 @@ if (isServer) then {
                     [_cp, "kill_income"] call fnc_cp_adjust;
                     ["BLU", _ap, "kill_income", _ap] call fnc_ap_adjust;
                     playerKillCount set [_uid, _kills - _batches * kill_cp_kills];
-                    [format [localize "STR_DUWS_T_CPATTRITION_MSG", _cp, _ap]] remoteExec ["hint", _x];
+                    ["kill_income", [_cp, _ap]] remoteExec ["BIS_fnc_showNotification", _x];
                 };
             } forEach allPlayers;
 

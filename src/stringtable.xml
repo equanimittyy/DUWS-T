@@ -10530,17 +10530,29 @@
                 <French>Le BLUFOR a reçu %1 CP.</French>
                 <Chinese>BLUFOR 已獲得 %1 CP。</Chinese>
             </Key>
+            <Key ID="STR_DUWS_T_CPATTRITION_TITLE">
+                <Original>Kill Bonus</Original>
+                <English>Kill Bonus</English>
+                <Chinesesimp>击杀奖励</Chinesesimp>
+                <German>Abschussbonus</German>
+                <Polish>Premia za zabójstwa</Polish>
+                <Czech>Bonus za zabití</Czech>
+                <Russian>Бонус за убийства</Russian>
+                <French>Bonus d'élimination</French>
+                <Chinese>擊殺獎勵</Chinese>
+                <Spanish>Bonificación por bajas</Spanish>
+            </Key>
             <Key ID="STR_DUWS_T_CPATTRITION_MSG">
-                <Original>Due to your efforts, BLUFOR was awarded %1 CP and %2 AP.</Original>
-                <English>Due to your efforts, BLUFOR was awarded %1 CP and %2 AP.</English>
-                <Chinesesimp>由于你的努力，BLUFOR 获得了 %1 CP 和 %2 AP。</Chinesesimp>
-                <German>Durch deinen Einsatz wurden BLUFOR %1 CP und %2 AP gutgeschrieben.</German>
-                <Polish>Dzięki waszym staraniom BLUFOR otrzymał %1 CP i %2 AP.</Polish>
-                <Czech>Díky tvému úsilí obdržel BLUFOR %1 CP a %2 AP.</Czech>
-                <Russian>Благодаря вашим действиям BLUFOR получил %1 CP и %2 AP.</Russian>
-                <French>Grâce à vos efforts, le BLUFOR a reçu %1 CP et %2 AP.</French>
-                <Chinese>由於你的努力，BLUFOR 獲得了 %1 CP 和 %2 AP。</Chinese>
-                <Spanish>Gracias a vuestro esfuerzo, BLUFOR ha recibido %1 CP y %2 AP.</Spanish>
+                <Original>Your efforts earned BLUFOR %1 CP and %2 AP</Original>
+                <English>Your efforts earned BLUFOR %1 CP and %2 AP</English>
+                <Chinesesimp>你的努力为 BLUFOR 赢得了 %1 CP 和 %2 AP</Chinesesimp>
+                <German>Dein Einsatz brachte BLUFOR %1 CP und %2 AP ein</German>
+                <Polish>Twoje starania dały BLUFOR %1 CP i %2 AP</Polish>
+                <Czech>Tvé úsilí vyneslo BLUFOR %1 CP a %2 AP</Czech>
+                <Russian>Твои усилия принесли BLUFOR %1 CP и %2 AP</Russian>
+                <French>Vos efforts ont rapporté %1 CP et %2 AP au BLUFOR</French>
+                <Chinese>你的努力為 BLUFOR 贏得了 %1 CP 和 %2 AP</Chinese>
+                <Spanish>Tu esfuerzo ha dado a BLUFOR %1 CP y %2 AP</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_k1glh3eb">
                 <German>CP-Bonus: Zone eingenommen</German>
