@@ -43,6 +43,7 @@ _soldier setskill ["spotTime",_selected_soldier_spotting];
 _soldier setskill ["courage",_selected_soldier_courage];
 _soldier setskill ["reloadSpeed",_selected_soldier_reload];
 _soldier setskill ["commanding",_selected_soldier_comms];
+_soldier setskill ["general",(_selected_soldier select [0, 6]) call BIS_fnc_arithmeticMean];
 
 // The soldier's stored hat (index 11 of duws_operator_list) is not applied; recruited operatives spawn bare-headed.
 
