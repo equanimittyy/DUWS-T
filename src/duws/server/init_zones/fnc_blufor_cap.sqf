@@ -30,8 +30,6 @@ if (_opfreward > 0) then {
     ["OPF", _opfreward, "zone_lost_consolation"] remoteExec ["fnc_ap_adjust", 2];
 };
 
-[] spawn fnc_operative_mission_complete; 
-
 // Blue for the same reason as the first capture: green is Independent, not friendly.
 str(_markername) setMarkerColor "ColorBlue";
 str(_markername2) setMarkerColor "ColorBlue";

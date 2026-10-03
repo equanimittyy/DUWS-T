@@ -228,12 +228,12 @@ a cheaper way to liquidate a slate, which inverts what the death penalty is for.
 
 | Source | File | Amount |
 |---|---|---|
-| Zone first capture | `server/init_zones/fnc_captured.sqf:37-43` | once ever per zone: `zone_first_capture_cp` (25) CP + `zone_first_capture_ap` (50) AP; the AP credits BLUFOR's tier |
-| Zone recapture | `server/init_zones/fnc_blufor_cap.sqf` | nothing — a zone's reward is earned once, so trading it back and forth is not a faucet |
+| Zone first capture | `server/init_zones/fnc_captured.sqf:34-41` | once ever per zone: `zone_first_capture_cp` (25) CP + `zone_first_capture_ap` (50) AP; the AP credits BLUFOR's tier. It also grows the operatives (`fnc_operative_mission_complete`), the same as a side-mission win |
+| Zone recapture | `server/init_zones/fnc_blufor_cap.sqf` | nothing, operative growth included — a zone's reward is earned once, so trading it back and forth is not a faucet |
 | Zone hold (AP trickle) | `server/warcom/fnc_zonesundercontrol.sqf:71-87` | AP each side: `zones_held × zone_ap_trickle` (5), throttled, every 30 min; credits BLUFOR's tier in full and OPFOR's by `DUWS_opfor_payout_tier` (0.33) |
 | Town income | `server/warcom/fnc_zonesundercontrol.sqf:44-81` (`fnc_civ_townIncome`) | each banded town's worth (1–5 by size, `civ_town_ap`) to its holder every 30 min, throttled — CP to a BLUFOR town, AP to an OPFOR one; `DUWS_opfor_payout_tier` (0.33) of OPFOR's town AP credits its tier |
 | OPCOM drip | `server/warcom/opcom/belief/fnc_opcom_perception_run.sqf` | AP to OPFOR: 1 every `OPCOM_AP_DRIP_TICKS` (5) OPCOM ticks, so every 25 s, while OPFOR holds every zone; `OPCOM_AP_DRIP_FLOOR` (0.5) of it is kept with no zone left; unthrottled; `OPCOM_AP_DRIP_TIER` (0.1) of it credits OPFOR's tier |
-| OPFOR capture consolation | `fnc_captured.sqf:48-51`, `fnc_blufor_cap.sqf:32-35` | AP to OPFOR on every BLUFOR capture: `worth × zone_ap_consolation` (0.15), wallet only |
+| OPFOR capture consolation | `fnc_captured.sqf:46-49`, `fnc_blufor_cap.sqf:28-31` | AP to OPFOR on every BLUFOR capture: `worth × zone_ap_consolation` (0.15), wallet only |
 | Zone-loss swing | `server/init_zones/fnc_opfor_cap.sqf:51-53` | AP: `worth × zone_ap_swing` (0.15) to OPFOR, the same figure removed from BLUFOR |
 | Side-mission reward | `server/missions/fnc_mission_reward.sqf` | CP `reward × cp_reward_multiplier` (×1.5 when civs-off), plus a BLUFOR AP reward that credits the tier |
 | Civilian side mission | `server/civ_missions/fnc_civ_mission_finish.sqf` | on the report: CP `reward × cp_reward_multiplier` (10, 5 or 15), 0-8 `Money_roll` into the reporter's inventory, at their feet if it does not fit, +3 or +5 reputation to the giver's town; no AP ([`side_mission_catalogue.md`](side_mission_catalogue.md#civilian-side-missions)) |

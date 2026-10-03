@@ -24,11 +24,11 @@ if (_triggerPos in WARCOM_zones_controled_by_BLUFOR) exitWith {};
 ["us_takencontrol",[_place,""]] remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated,false];
 [localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_takencontrol", _place]] remoteExec ["fnc_duws_dialogue", 0];
 
-// First-ever capture pays a flat liberation bonus in both currencies, once per zone. The key is
-// recorded in DUWS_zone_first_captured so a reload -- or this zone lost and later retaken through
-// fnc_blufor_cap -- never pays it again: a zone's reward is earned exactly once, which is what
-// makes the anti-farm invariant structural rather than arithmetic. A recapture (fnc_blufor_cap)
-// pays BLUFOR nothing at all.
+// First-ever capture pays a flat liberation bonus in both currencies and grows the operatives, once
+// per zone. The key is recorded in DUWS_zone_first_captured so a reload -- or this zone lost and later
+// retaken through fnc_blufor_cap -- never pays it again: a zone's reward is earned exactly once, which
+// is what makes the anti-farm invariant structural rather than arithmetic. A recapture
+// (fnc_blufor_cap) pays BLUFOR nothing at all.
 private _zoneKey = [_triggerPos] call fnc_zone_key;
 private _firstEver = !(_zoneKey in DUWS_zone_first_captured);
 if (_firstEver) then {
@@ -37,6 +37,7 @@ if (_firstEver) then {
     // Liberating a zone is earned ground, so the bonus AP credits the tier counter (4th arg). Paid
     // once ever per zone (DUWS_zone_first_captured), so a recapture adds nothing to the ladder either.
     ["BLU", zone_first_capture_ap, "zone_first_capture", zone_first_capture_ap] remoteExec ["fnc_ap_adjust", 2];
+    [] spawn fnc_operative_mission_complete;
 };
 
 // OPFOR is paid a consolation whenever it loses a zone -- a share of the worth, so losing a big

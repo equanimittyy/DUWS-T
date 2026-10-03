@@ -1,4 +1,4 @@
-// Locality: server -- called from fnc_blufor_cap and fnc_mission_reward, both server-side.
+// Locality: server -- called from fnc_captured and fnc_mission_reward, both server-side.
 
 {
 _selected_soldier_aim = _x select 0;
