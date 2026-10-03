@@ -62,15 +62,24 @@ while { _parked < _nPark && _tries < _nPark * 3 } do {
     _car allowDamage true;
     // Stamped for the EH: its {} does not close over this scope, so town and site key travel on the
     // car. The car is server-local (createVehicle here), so a server-added GetIn fires here when any
-    // player takes it. Removed on the first player in, so a passenger after does not charge twice.
+    // player takes it. Removed once charged, so a passenger after does not charge twice; the grace
+    // flag holds one window at a time for the same reason.
     _car setVariable ["DUWS_civCarTown", _locIndex];
     _car setVariable ["DUWS_civCarKey", _key];
     _car addEventHandler ["GetIn", {
         params ["_veh", "", "_unit"];
-        if (!isPlayer _unit) exitWith {};
-        _veh removeEventHandler ["GetIn", _thisEventHandler];
-        [_veh getVariable ["DUWS_civCarKey", ""], _veh, "crowd"] call fnc_site_roster_drop;
-        [_veh getVariable ["DUWS_civCarTown", -1], -1, "vehicle_stolen"] call fnc_town_rep_adjust;
+        if (!isPlayer _unit || {_veh getVariable ["DUWS_civCarGrace", false]}) exitWith {};
+        _veh setVariable ["DUWS_civCarGrace", true];
+        [localize "STR_DUWS_T_civ_car_theft_warn"] remoteExec ["hint", _unit];
+        [_veh, _thisEventHandler] spawn {
+            params ["_veh", "_eh"];
+            sleep 5;
+            _veh setVariable ["DUWS_civCarGrace", nil];
+            if (!alive _veh || {(crew _veh) findIf {isPlayer _x} < 0}) exitWith {};
+            _veh removeEventHandler ["GetIn", _eh];
+            [_veh getVariable ["DUWS_civCarKey", ""], _veh, "crowd"] call fnc_site_roster_drop;
+            [_veh getVariable ["DUWS_civCarTown", -1], -1, "vehicle_stolen"] call fnc_town_rep_adjust;
+        };
     }];
     _roster pushBack _car;
     _parked = _parked + 1;
