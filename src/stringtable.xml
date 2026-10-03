@@ -5333,16 +5333,16 @@
                 <Spanish>se requisó un vehículo civil</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_civ_car_theft_warn">
-                <Original>This vehicle belongs to a civilian. Get out within 5 seconds or the town's reputation drops.</Original>
-                <English>This vehicle belongs to a civilian. Get out within 5 seconds or the town's reputation drops.</English>
-                <Chinesesimp>这辆载具属于平民。5 秒内下车，否则城镇声望会下降。</Chinesesimp>
-                <German>Dieses Fahrzeug gehört einem Zivilisten. Steig innerhalb von 5 Sekunden aus, sonst sinkt das Ansehen des Ortes.</German>
-                <Polish>Ten pojazd należy do cywila. Wysiądź w ciągu 5 sekund, inaczej reputacja miejscowości spadnie.</Polish>
-                <Czech>Toto vozidlo patří civilistovi. Vystup do 5 sekund, jinak reputace obce klesne.</Czech>
-                <Russian>Эта техника принадлежит гражданскому. Выйди в течение 5 секунд, иначе репутация населённого пункта упадёт.</Russian>
-                <French>Ce véhicule appartient à un civil. Sortez dans les 5 secondes, sinon la réputation de la localité baissera.</French>
-                <Chinese>這輛載具屬於平民。5 秒內下車，否則城鎮聲望會下降。</Chinese>
-                <Spanish>Este vehículo pertenece a un civil. Bájate en menos de 5 segundos o la reputación del pueblo bajará.</Spanish>
+                <Original>This vehicle belongs to a civilian. Get out within 5 seconds or the vehicle is considered stolen.</Original>
+                <English>This vehicle belongs to a civilian. Get out within 5 seconds or the vehicle is considered stolen.</English>
+                <Chinesesimp>这辆载具属于平民。5 秒内下车，否则该载具将被视为被盗。</Chinesesimp>
+                <German>Dieses Fahrzeug gehört einem Zivilisten. Steig innerhalb von 5 Sekunden aus, sonst gilt das Fahrzeug als gestohlen.</German>
+                <Polish>Ten pojazd należy do cywila. Wysiądź w ciągu 5 sekund, inaczej pojazd zostanie uznany za skradziony.</Polish>
+                <Czech>Toto vozidlo patří civilistovi. Vystup do 5 sekund, jinak bude vozidlo považováno za ukradené.</Czech>
+                <Russian>Эта техника принадлежит гражданскому. Выйди в течение 5 секунд, иначе техника будет считаться угнанной.</Russian>
+                <French>Ce véhicule appartient à un civil. Sortez dans les 5 secondes, sinon le véhicule sera considéré comme volé.</French>
+                <Chinese>這輛載具屬於平民。5 秒內下車，否則該載具將被視為被盜。</Chinese>
+                <Spanish>Este vehículo pertenece a un civil. Bájate en menos de 5 segundos o el vehículo se considerará robado.</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_civ_rep_why_hostages_freed">
                 <Original>hostages were freed</Original>
