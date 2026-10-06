@@ -774,14 +774,15 @@ restoring a name that resolves to nothing. It joins the snapshot as one key.
 | Limited | every class count-tracked, no unlimited floor | the whole arsenal, friendly classes included |
 
 **In Limited the friendly counts are campaign progress, not a starting stock.** Boot seeds every class
-of `DUWS_friendlyArsenal` into the pool at `DUWS_limitedSeed` (`fnc_create_ammo_lists.sqf:59-61`), and
+of `DUWS_friendlyArsenal` into the pool at a count rolled per class (`fnc_captured_pool_seedCount`), and
 `fnc_captured_pool_setCount` overwrites a class outright rather than filling a gap
 (`fnc_economy_init.sqf:437-447`), so a seed that runs over a restored pool resets a whole campaign's
 spend-down to full stock. The seed therefore covers only the classes that the campaign never seeded,
 which a Limited snapshot lists: a class spent down to nothing leaves the pool, so the pool alone cannot
 tell it from a class that a mod added between sessions. The mod's classes have no saved count to come
-back to, so they are seeded. `fnc_buildQuickKits.sqf:123` and `fnc_scanCivilianGear.sqf:94` already seed newly discovered
-classes alone.
+back to, so they are seeded. `fnc_buildQuickKits.sqf` and `fnc_scanCivilianGear.sqf` apply the same rule.
+The boot snapshot never holds the classes that they fold into the friendly set, so these classes read as
+new on every load.
 
 **Ammo tracking rides with the mode.** `DUWS_TrackAmmo` decides whether magazines are pooled at all,
 so a campaign reloaded with it flipped either finds its magazine counts meaningless or starts counting
