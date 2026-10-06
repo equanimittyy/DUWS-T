@@ -43,16 +43,20 @@ fnc_vendor_lists = {
 	["civilian", "blufor", "opfor", "all"]
 };
 
-// Whether a vehicle dealer of this kind may sell the class. StaticWeapon is a LandVehicle in config,
-// and a mortar is not something a car dealer drives off the lot.
+// Whether a vehicle dealer of this kind may sell the class. StaticWeapon is a LandVehicle in config and
+// ParachuteBase is a Helicopter, and neither a mortar nor a canopy is something a dealer sells as a hull.
 fnc_vendor_hullFits = {
 	params ["_kind", "_class"];
 	private _cv = configFile >> "CfgVehicles";
-	switch (_kind) do {
-		case "car":  { _class isKindOf ["LandVehicle", _cv] && {!(_class isKindOf ["StaticWeapon", _cv])} };
+	private _fits = switch (_kind) do {
+		case "car":  {
+			(_class isKindOf ["LandVehicle", _cv] && {!(_class isKindOf ["StaticWeapon", _cv])})
+			|| {_class isKindOf ["Helicopter", _cv] && {!(_class isKindOf ["ParachuteBase", _cv])}}
+		};
 		case "boat": { _class isKindOf ["Ship", _cv] };
 		default      { false };
 	};
+	_fits && {!([_cv >> _class] call DUWS_fnc_vehArmed)}
 };
 
 // One town's vendor records: [type, position, direction, cooldown seconds] each. That is the whole of

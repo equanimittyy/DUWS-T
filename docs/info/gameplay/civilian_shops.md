@@ -28,8 +28,12 @@ vendor.
 | Type | Marker | Sells | Building |
 |---|---|---|---|
 | Arms Dealer | `loc_Rifle` | Weapons and gear | A random surveyed building |
-| Car Dealer | `loc_car` | Every `LandVehicle` that is not a `StaticWeapon`, tanks included | The building nearest a `"FUELSTATION"` terrain object; a random one in a town with none |
-| Boat Dealer | `loc_boat` | Every `Ship` | The building nearest water. Only a town with water inside its radius can host one |
+| Car Dealer | `loc_car` | Every unarmed `LandVehicle` that is not a `StaticWeapon`, and every unarmed `Helicopter` that is not a `ParachuteBase`. No plane | The building nearest a `"FUELSTATION"` terrain object; a random one in a town with none |
+| Boat Dealer | `loc_boat` | Every unarmed `Ship` | The building nearest water. Only a town with water inside its radius can host one |
+
+No vendor sells an armed vehicle. `fnc_vendor_hullFits` applies `DUWS_fnc_vehArmed`, the armed test of
+the CP price classifier: a hull is armed when it has a turret weapon other than a smoke or flare
+launcher, or a pylon.
 
 ## Placement
 
@@ -149,7 +153,7 @@ An Arms Dealer offers three lists. A Car or Boat Dealer offers four, filtered to
 
 | List | Arms Dealer | Car and Boat Dealers |
 |---|---|---|
-| Civilian | — | The town's own traffic: `civ_veh_array` or `civ_boat_array` |
+| Civilian | — | The town's own traffic: `civ_veh_array` and `civ_heli_array`, or `civ_boat_array` |
 | BLUFOR | The config kit of every BLUFOR man key | Every BLUFOR `vehicle` key and its spawn pool, plus the request menu's vehicles |
 | OPFOR | The config kit of every OPFOR man key | Every OPFOR `vehicle` key and its spawn pool |
 | Everything | Every scope-2 class in `CfgWeapons`, `CfgMagazines` and `CfgGlasses`, plus `Bag_Base` backpacks | Every scope-2 class in `CfgVehicles` |

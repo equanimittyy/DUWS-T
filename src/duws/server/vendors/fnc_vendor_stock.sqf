@@ -55,8 +55,11 @@ if (_kind isNotEqualTo "gear") exitWith {
         // The civilian pools the ambient traffic already draws from, so a dealer sells what the town
         // itself drives and a civ mod's vehicles reach the forecourt with no second detection path.
         case "civilian": {
-            private _pool = ["civ_veh_array", "civ_boat_array"] select (_kind isEqualTo "boat");
-            _classes = +(missionNamespace getVariable [_pool, []]);
+            _classes = if (_kind isEqualTo "boat") then {
+                +(missionNamespace getVariable ["civ_boat_array", []])
+            } else {
+                (missionNamespace getVariable ["civ_veh_array", []]) + (missionNamespace getVariable ["civ_heli_array", []])
+            };
         };
         case "blufor";
         case "opfor": {

@@ -41,7 +41,7 @@ private _base = call {
     };
 
     // Anything left that is not gear has no band, so it has no price and cannot be sold -- which is
-    // what keeps an aircraft off a forecourt even if one reached this far.
+    // what keeps a plane off a forecourt even if one reached this far.
     if (!isClass (configFile >> "CfgWeapons" >> _class)) exitWith { -1 };
 
     // CfgWeapons holds the guns and everything worn or clipped to one. type is the engine's own split:
