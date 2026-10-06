@@ -242,7 +242,7 @@ DUWS_fnc_restoreApply = {
         if (_i >= 0) then {
             private _row = duws_operator_list select _i;
             { _row set [_forEachIndex, _x] } forEach _stats;
-            _row set [13, _points];
+            _row set [12, _points];
             if (_paid) then { _row set [7, "Healed"] };
         };
     } forEach (_d getOrDefault ["operators", []]);

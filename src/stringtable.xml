@@ -14039,18 +14039,6 @@
                 <French>Groupe HALO (IA uniquement)</French>
                 <Chinese>HALO 編隊（僅限 AI）</Chinese>
             </Key>
-            <Key ID="STR_DUWS_T_OPERATOR_HEALED">
-                <Original>Operator Healed</Original>
-                <English>Operator Healed</English>
-                <Chinesesimp>作战人员已治疗</Chinesesimp>
-                <German>Operator geheilt</German>
-                <Polish>Operator wyleczony</Polish>
-                <Czech>Operátor vyléčen</Czech>
-                <Russian>Оператор вылечен</Russian>
-                <French>Opérateur soigné</French>
-                <Chinese>作戰人員已治療</Chinese>
-                <Spanish>Operador curado</Spanish>
-            </Key>
             <Key ID="STR_DUWS_T_recycleaction">
                 <German>Fahrzeug verwerten</German>
                 <Spanish>Reciclar vehículo</Spanish>
@@ -19404,16 +19392,16 @@
                 <Chinese>你的大多數行動都會收到以字幕顯示的電台回覆。Overlord 是你在總部的指揮官，Alpha 1-1 是所有玩家共用的呼號。</Chinese>
             </Key>
             <Key ID="STR_DUWS_T_m267zqr7">
-                <German>Operatives sind Spezialisten, die sich deiner Gruppe anschließen. Jeder Spieler kann sie am HQ oder einer FOB für je 8 CP rekrutieren. Wird ein Operative getötet, kannst du ihn eine Minute später im selben Menü kostenlos zurückholen.</German>
-                <Spanish>Los operativos son soldados especialistas que se unen a tu escuadra. Cualquier jugador puede reclutarlos en el CG o un FOB por 8 CP cada uno. Si matan a un operativo, puedes recuperarlo gratis en el mismo menú un minuto después.</Spanish>
-                <Chinesesimp>干员是加入你小队的专业士兵。任何玩家都可以在总部或 FOB 花费 8 CP 招募一名干员。若干员阵亡，一分钟后你可以在同一菜单中免费将其召回。</Chinesesimp>
-                <Original>Operatives are specialist soldiers who join your squad. Any player can recruit them at HQ or a FOB for 8 CP each. If an operative is killed, you can bring them back for free from the same menu a minute later.</Original>
-                <English>Operatives are specialist soldiers who join your squad. Any player can recruit them at HQ or a FOB for 8 CP each. If an operative is killed, you can bring them back for free from the same menu a minute later.</English>
-                <Polish>Operatorzy to żołnierze specjaliści, którzy dołączają do twojej drużyny. Każdy gracz może zwerbować ich w HQ lub na FOB-ie za 8 CP za sztukę. Jeśli operator zginie, możesz go przywrócić za darmo z tego samego menu minutę później.</Polish>
-                <Czech>Operativci jsou specialisté, kteří se připojí k tvému družstvu. Kterýkoli hráč je může naverbovat na HQ nebo FOB za 8 CP za kus. Pokud je operativec zabit, můžeš ho zdarma přivolat zpět ve stejné nabídce o minutu později.</Czech>
-                <Russian>Оперативники — это солдаты-специалисты, присоединяющиеся к отряду. Любой игрок может завербовать их в штабе или на FOB за 8 CP каждого. Если оперативник погиб, вернуть его в том же меню можно бесплатно спустя минуту.</Russian>
-                <French>Les opérateurs sont des soldats spécialisés qui rejoignent votre escouade. N'importe quel joueur peut en recruter au QG ou dans un FOB pour 8 CP chacun. Si un opérateur est tué, vous pouvez le ramener gratuitement depuis le même menu une minute plus tard.</French>
-                <Chinese>幹員是加入你小隊的專業士兵。任何玩家都可以在總部或 FOB 花費 8 CP 招募一名幹員。若幹員陣亡，一分鐘後你可以在同一選單中免費將其召回。</Chinese>
+                <German>Operatives sind Spezialisten, die sich deiner Gruppe anschließen. Jeder Spieler kann sie am HQ oder einer FOB für je 8 CP rekrutieren. Wird ein Operative getötet, kannst du ihn sofort im selben Menü für bis zu 4 CP zurückholen. Ein fähigerer Operative kostet mehr.</German>
+                <Spanish>Los operativos son soldados especialistas que se unen a tu escuadra. Cualquier jugador puede reclutarlos en el CG o un FOB por 8 CP cada uno. Si matan a un operativo, puedes recuperarlo al instante en el mismo menú por hasta 4 CP. Un operativo más hábil cuesta más.</Spanish>
+                <Chinesesimp>干员是加入你小队的专业士兵。任何玩家都可以在总部或 FOB 花费 8 CP 招募一名干员。若干员阵亡，你可以立即在同一菜单中花费最多 4 CP 将其召回。技能越高的干员费用越高。</Chinesesimp>
+                <Original>Operatives are specialist soldiers who join your squad. Any player can recruit them at HQ or a FOB for 8 CP each. If an operative is killed, you can bring them back at once from the same menu for up to 4 CP. A more skilled operative costs more.</Original>
+                <English>Operatives are specialist soldiers who join your squad. Any player can recruit them at HQ or a FOB for 8 CP each. If an operative is killed, you can bring them back at once from the same menu for up to 4 CP. A more skilled operative costs more.</English>
+                <Polish>Operatorzy to żołnierze specjaliści, którzy dołączają do twojej drużyny. Każdy gracz może zwerbować ich w HQ lub na FOB-ie za 8 CP za sztukę. Jeśli operator zginie, możesz go od razu przywrócić z tego samego menu za maksymalnie 4 CP. Bardziej wyszkolony operator kosztuje więcej.</Polish>
+                <Czech>Operativci jsou specialisté, kteří se připojí k tvému družstvu. Kterýkoli hráč je může naverbovat na HQ nebo FOB za 8 CP za kus. Pokud je operativec zabit, můžeš ho ihned přivolat zpět ve stejné nabídce až za 4 CP. Schopnější operativec stojí víc.</Czech>
+                <Russian>Оперативники — это солдаты-специалисты, присоединяющиеся к отряду. Любой игрок может завербовать их в штабе или на FOB за 8 CP каждого. Если оперативник погиб, вернуть его в том же меню можно сразу, максимум за 4 CP. Более опытный оперативник стоит дороже.</Russian>
+                <French>Les opérateurs sont des soldats spécialisés qui rejoignent votre escouade. N'importe quel joueur peut en recruter au QG ou dans un FOB pour 8 CP chacun. Si un opérateur est tué, vous pouvez le ramener immédiatement depuis le même menu pour 4 CP au plus. Un opérateur plus compétent coûte plus cher.</French>
+                <Chinese>幹員是加入你小隊的專業士兵。任何玩家都可以在總部或 FOB 花費 8 CP 招募一名幹員。若幹員陣亡，你可以立即在同一選單中花費最多 4 CP 將其召回。技能越高的幹員費用越高。</Chinese>
             </Key>
             <Key ID="STR_DUWS_T_supportguide">
                 <German>Ausführliche Erklärung der überarbeiteten Unterstützungsoptionen</German>

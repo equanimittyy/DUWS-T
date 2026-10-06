@@ -41,9 +41,9 @@ _x set [5,_selected_soldier_reload_new];
 {
 _status = _x select 7;
 	if (_status == "Operating") then {
-	_spendable_pts = _x select 13;
+	_spendable_pts = _x select 12;
 	_spendable_pts_new = _spendable_pts + 20;
-	_x set [13,_spendable_pts_new];
+	_x set [12,_spendable_pts_new];
 	};
 } forEach duws_operator_list;
 call DUWS_fnc_operatorPublish;

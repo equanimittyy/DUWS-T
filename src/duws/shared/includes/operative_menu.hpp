@@ -246,10 +246,10 @@ class operative_status_value: RscTextWhite
 	w = 6.5 * GUI_GRID_W;
 	h = 1 * GUI_GRID_H;
 };
-class operative_time_remaining: RscTextWhite
+class operative_redeploy_cost: RscTextWhite
 {
 	idc = 1012;
-	text = "Wait time:";
+	text = "Redeploy:";
 	x = 28.5 * GUI_GRID_W + GUI_GRID_X;
 	y = 10 * GUI_GRID_H + GUI_GRID_Y;
 	w = 6.5 * GUI_GRID_W;
@@ -264,7 +264,7 @@ class operative_role_value: RscTextWhite
 	w = 6.5 * GUI_GRID_W;
 	h = 1.5 * GUI_GRID_H;
 };
-class operative_time_remaining_value: RscTextWhite
+class operative_redeploy_cost_value: RscTextWhite
 {
 	idc = 1016;
 	text = "xxxx";

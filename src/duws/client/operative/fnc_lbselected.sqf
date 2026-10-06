@@ -11,10 +11,8 @@ _selected_soldier_spotting = (_selected_soldier select 2)*100;
 _selected_soldier_courage = (_selected_soldier select 3)*100;
 _selected_soldier_comms = (_selected_soldier select 4)*100;
 _selected_soldier_reload = (_selected_soldier select 5)*100;
-_selected_soldier_spendable_pts = (_selected_soldier select 13);
-
-
-_selected_soldier_timeheal = _selected_soldier select 12;
+_selected_soldier_spendable_pts = (_selected_soldier select 12);
+_redeploy_cost = [_selected_soldier] call DUWS_fnc_operatorRedeployCost;
 
 
 _selected_soldier_role = _selected_soldier select 6;
@@ -31,10 +29,10 @@ _selected_soldier_status = _selected_soldier select 7;
 
  ctrlSetText [1014, format["%1",_selected_soldier_role]];
  ctrlSetText [1013, format["%1",_selected_soldier_status]];
- ctrlSetText [1016, format["%1 seconds",_selected_soldier_timeheal]];
+ ctrlSetText [1016, format["%1 CP",_redeploy_cost]];
  
 
-private _colorOf = { [[1, 1, 1, 1], [1, 0, 0, 1], [0, 1, 0, 1]] select (1 + (["Injured", "Operating"] find _this)) };
+private _colorOf = { [[1, 1, 1, 1], [0, 1, 0, 1]] select (_this == "Operating") };
 { lbSetColor [1500, _forEachIndex, (_x select 7) call _colorOf] } forEach duws_operator_list;
 
 switch (_selected_soldier_status) do
@@ -44,11 +42,6 @@ switch (_selected_soldier_status) do
 	ctrlSetText [1601, format ["DEPLOY (%1 CP)", [8] call fnc_escalation_cost]];
   };
   
-  case "Injured": {
-	buttonSetAction [1601, "hint ""This operative must be fully healed before deploying."""]; 
-	ctrlSetText [1601, "CANNOT DEPLOY"];	
-  };
-  
   case "Operating": {
 	buttonSetAction [1601, "hint ""This operative is already deployed."""]; 
 	ctrlSetText [1601, "ALREADY DEPLOYED"];	
@@ -56,7 +49,7 @@ switch (_selected_soldier_status) do
   
   case "Healed": {
 	buttonSetAction [1601, "[lbCurSel 1500, player] remoteExecCall ['DUWS_fnc_operatorClaim', 2]"]; 
-	ctrlSetText [1601, "REDEPLOY (0 CP)"];	
+	ctrlSetText [1601, format ["REDEPLOY (%1 CP)", _redeploy_cost]];	
   };  
 };
 ((uiNamespace getVariable ["duws_operative_display", displayNull]) displayCtrl 1013) ctrlSetTextColor (_selected_soldier_status call _colorOf);

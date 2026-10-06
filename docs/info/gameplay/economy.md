@@ -332,7 +332,7 @@ territory shows no readout.
 | Vehicles | `dialog/fnc_request_vehicle*.sqf` | CP only today, from `DUWS_fnc_vehPrice` (`shared/functions/fnc_veh_price.sqf`): a kind band set by role, a heaviness score placing the vehicle inside it |
 | Squads | `dialog/fnc_request_squad*.sqf` | per squad table |
 | FOB deploy | `client/supports/fnc_request_fob.sqf` | fixed |
-| Operatives | `server/operative/fnc_operator_roster.sqf:69` | 8, once per operative: the team's roster keeps it paid for, so each later deploy is free, a save included |
+| Operatives | `server/operative/fnc_operator_roster.sqf:75` | 8 for the first deploy, once per operative: the team's roster keeps it paid for, a save included. Each redeploy after a death costs 4 × the mean of the operative's six skills, rounded down (`DUWS_fnc_operatorRedeployCost`): 1 for a fresh operative, and 4 only when all six skills are full, the price of the dearest regular soldier |
 | Mobile HQ | `client/supports/fnc_supports_init.sqf` (the `mobile_HQ` row) | 20, once for the team |
 | Heli / boat taxi | `supports/taxi/` | fixed |
 | Base repair, HQ, FOB and zone redeploy | `server/supports/fnc_activateBaseRepairStation.sqf`, `server/init_hq/fnc_redeployHQUnits.sqf`, `fnc_redeployFOBUnits.sqf`, `server/init_zones/fnc_zone_build.sqf` | 2 / 2 / 2 / 2 |
