@@ -460,6 +460,12 @@ fnc_captured_pool_setCount = {
 	};
 };
 
+// Server-only: the seed rows are not broadcast.
+fnc_captured_pool_seedCount = {
+	params ["_cls"];
+	round random ([DUWS_limitedSeed, DUWS_limitedSeedAmmo] select (isClass (configFile >> "CfgMagazines" >> _cls)))
+};
+
 
 // Arsenal close (server). Diffs the loadout the player opened with against the one they closed with,
 // per foreign class: a class present at close but not open (or in a greater count) was withdrawn from

@@ -114,10 +114,10 @@ private _newFriendly = _addedClasses select { !(_x in _friendly) };
 if (count _newFriendly > 0) then {
     DUWS_friendlyArsenal = _friendly + _newFriendly;
     publicVariable "DUWS_friendlyArsenal";
-    // Limited has no unlimited floor: seed the new standard-issue classes into the pool at the boot
-    // seed count, matching fnc_create_ammo_lists, so they start stocked instead of at zero.
+    // Limited has no unlimited floor: seed the new standard-issue classes into the pool as
+    // fnc_create_ammo_lists does, so they start stocked instead of at zero.
     if (DUWS_arsenalLimited) then {
-        { [_x, DUWS_limitedSeed] call fnc_captured_pool_setCount; } forEach _newFriendly;
+        { [_x, [_x] call fnc_captured_pool_seedCount] call fnc_captured_pool_setCount; } forEach _newFriendly;
         publicVariable "DUWS_capturedPool";
     };
 };

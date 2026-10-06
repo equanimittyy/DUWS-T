@@ -60,7 +60,7 @@ _snapFriendly = {
     if (DUWS_arsenalLimited) then {
         private _seeded = createHashMapFromArray (DUWS_limitedSeeded apply { [_x, true] });
         {
-            if !(_x in _seeded) then { [_x, DUWS_limitedSeed] call fnc_captured_pool_setCount };
+            if !(_x in _seeded) then { [_x, [_x] call fnc_captured_pool_seedCount] call fnc_captured_pool_setCount };
         } forEach DUWS_friendlyArsenal;
         publicVariable "DUWS_capturedPool";
     };

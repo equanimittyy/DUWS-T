@@ -86,9 +86,11 @@ DUWS_paramTownGen = ["DUWS_TownGeneration", 0] call BIS_fnc_getParamValue;public
 DUWS_arsenalLimited = DUWS_paramArsenal == 2;publicVariable "DUWS_arsenalLimited";
 DUWS_trackAmmo = DUWS_paramTrackAmmo == 1;publicVariable "DUWS_trackAmmo";
 
-// Limited's starting armoury: every standard-issue class is seeded into the pool at this count at
-// boot, since Limited removes the unlimited friendly floor. Tunable; a playtest value.
-DUWS_limitedSeed = 100;
+// Limited's starting armoury: every standard-issue class is seeded into the pool at boot, since Limited
+// removes the unlimited friendly floor. Each class rolls its own count from [min, mid, max], so the shelf
+// starts uneven. Tunable; playtest values.
+DUWS_limitedSeed = [15, 30, 45];
+DUWS_limitedSeedAmmo = [25, 50, 75];
 // The classes a loaded campaign already seeded, so a count it spent to nothing is not stocked again.
 DUWS_limitedSeeded = [];
 
