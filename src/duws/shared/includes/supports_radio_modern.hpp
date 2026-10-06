@@ -155,7 +155,7 @@ class CfgCommunicationMenu
     {
         text = "$STR_DUWS_T_1ptvv5b1"; // Text displayed in the menu and in a notification
         submenu = ""; // Submenu opened upon activation
-        expression = "if (['helo_taxi', true] call fnc_support_comm_used) then { ['helo_taxi', fnc_helotaxi, [getpos player,100, 0]] spawn fnc_support_run }"; 
+        expression = "if (['helo_taxi', true] call fnc_support_comm_used) then { ['helo_taxi', fnc_helotaxi, []] spawn fnc_support_run }"; 
         icon = "\A3\ui_f\data\Map\VehicleIcons\iconHelicopter_ca.paa";
         cursor = ""; // Custom cursor displayed when the item is selected
         enable = "1"; // Simple expression condition for enabling the item
@@ -175,7 +175,7 @@ class CfgCommunicationMenu
     {
         text = "$STR_DUWS_T_evqwlyhz"; // Text displayed in the menu and in a notification
         submenu = ""; // Submenu opened upon activation
-        expression = "if (['boat_taxi', true] call fnc_support_comm_used) then { ['boat_taxi', fnc_boattaxi, [getpos player,10, 0]] spawn fnc_support_run }"; 
+        expression = "if (['boat_taxi', true] call fnc_support_comm_used) then { ['boat_taxi', fnc_boattaxi, []] spawn fnc_support_run }"; 
         icon = "\A3\ui_f\data\Map\VehicleIcons\iconShip_ca.paa";
         cursor = ""; // Custom cursor displayed when the item is selected
         enable = "1"; // Simple expression condition for enabling the item

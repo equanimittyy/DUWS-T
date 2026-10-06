@@ -3,20 +3,21 @@
 
 #include "..\..\..\shared\includes\action_style.hpp"
 
-_posplayer = _this select 0;
-_radius = _this select 1;
-_foundPickupPos = [];
 taxiCanTakeOff = false;
 _helo_maxDamage = 0.7;
 _helo_minFuel = 0.4;
 _music = [] call fnc_taxi_music;
 
-_foundPickupPos = [_posplayer, 20,_radius,20,0,0.5,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos;
+// The destination LZ's test (fnc_mapclickhelo.sqf). The snapped spot leaves through a global because
+// findSafePos samples at random, so a second call can land elsewhere or find nothing.
+_pick = [localize "STR_DUWS_T_helotaxi_pickup", {
+	DUWS_taxiPickup = [_this, 0,100,20,0,0.2,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos;
+	DUWS_taxiPickup isNotEqualTo [0,0]
+}, localize "STR_DUWS_T_helotaxiwp_nolz"] call fnc_map_pick_pos;
+if (_pick isEqualTo []) exitWith {};
+_foundPickupPos = DUWS_taxiPickup;
 
-if (0 == _foundPickupPos select 0 && 0 == _foundPickupPos select 1) exitWith {hint localize "STR_DUWS_T_nolz"; sleep 10; ["helo_taxi"] call fnc_support_comm_add;};
-
-// One-time use: an LZ was found and the taxi is committed, so spend it. Deferred to here so the
-// no-LZ exit above leaves the item for the player to keep.
+// One-time use: deferred to here so closing the map above leaves the item for the player to keep.
 ["helo_taxi"] call fnc_support_consume;
 
 _speakeracteam = localize "STR_DUWS_T_actionteam";
@@ -37,10 +38,7 @@ str(_markerpickup) setMarkerType "hd_end";
 str(_markerpickup) setMarkerColor "ColorGreen";
 str(_markerpickup) setMarkerText "LZ";
 
-_vehpos = _posplayer;
-_vec =[random [-1,0,1], random [-1,0,1], 0];
-_dist = 2000;
-_vehpos = ((vectorNormalized _vec) vectorMultiply _dist) vectorAdd _vehpos;
+_vehpos = _foundPickupPos getPos [2000, random 360];
 
 _veh = [_vehpos,0,blufor_TRANS_HELI_X,WEST] call bis_fnc_spawnvehicle;
 
@@ -60,7 +58,6 @@ _pilot disableAI "Target";
 _pilot disableAI "AUTOTARGET";
 _heloGroup setCombatMode "BLUE";
 
-// Disable VCOM on CREW
 {
 	_x setVariable ["Vcm_Disable",true];
 } forEach units _heloGroup;

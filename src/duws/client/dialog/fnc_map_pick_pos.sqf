@@ -1,6 +1,6 @@
 // Locality: client. Hold the open map, wait on a click, return the picked position [x,y,z], or [] if
-// the player cancelled by closing the map. Must run in a scheduled environment (it waitUntils), so
-// callers reach it from inside a spawn.
+// the player cancelled by closing the map or another map-click mode holds the slot. Must run in a
+// scheduled environment (it waitUntils), so callers reach it from inside a spawn.
 //   _prompt     structured-text banner shown while the map is open (drawn by fnc_map_prompt).
 //   _validate   code taking the clicked position as _this, returning bool; false rejects the click and
 //               re-prompts. Default accepts any click.
@@ -18,11 +18,11 @@ if (!hasInterface) exitWith {[]};
 DUWS_mapPickClicked = false;
 DUWS_mapPickPos = [];
 
+if !(["MAPPICK", "DUWS_mapPickPos = _pos; DUWS_mapPickClicked = true; true"] call fnc_mapclick_claim) exitWith {[]};
 openMap [true, false];
 waitUntil { !isNull (findDisplay 12) };
 // Banner, not hint: the hint box draws beneath the open map (fnc_map_prompt.sqf).
 [_prompt] call fnc_map_prompt;
-onMapSingleClick "DUWS_mapPickPos = _pos; DUWS_mapPickClicked = true; onMapSingleClick ''; true";
 
 private _done = false;
 while {visibleMap && {!_done}} do {
@@ -31,17 +31,14 @@ while {visibleMap && {!_done}} do {
         if (DUWS_mapPickPos call _validate) then {
             _done = true;
         } else {
-            // The handler self-clears after firing, so a rejected click must re-arm it.
             DUWS_mapPickClicked = false;
             [format ["%1<br/><t color='#ff1111'>%2</t>", _prompt, _rejectLine]] call fnc_map_prompt;
-            onMapSingleClick "DUWS_mapPickPos = _pos; DUWS_mapPickClicked = true; onMapSingleClick ''; true";
         };
     };
 };
 
-onMapSingleClick "";
-[""] call fnc_map_prompt;
-if (!_done) exitWith {[]};  // player closed the map to cancel
+["MAPPICK"] call fnc_mapclick_release;
+if (!_done) exitWith {[]};
 if (!_keepOpen) then { openMap [false, false] };
 
 DUWS_mapPickPos

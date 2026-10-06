@@ -2,20 +2,20 @@
 // here (invoked from the comm menu, shared/includes/supports_radio_modern.hpp:177).
 #include "..\..\..\shared\includes\action_style.hpp"
 
-_posplayer = _this select 0;
-_radius = _this select 1;
-
-_foundPickupPos = [];
 taxiCanTakeOff = false;
 
 _music = [] call fnc_taxi_music;
 
-_foundPickupPos = [_posplayer, 0,_radius,10,2,5,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos;
+// The drop point's test (fnc_mapclickboat.sqf). The snapped spot leaves through a global because
+// findSafePos samples at random, so a second call can land elsewhere or find nothing.
+_pick = [localize "STR_DUWS_T_boattaxi_pickup", {
+	DUWS_taxiPickup = [_this, 0,50,10,2,5,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos;
+	DUWS_taxiPickup isNotEqualTo [0,0]
+}, localize "STR_DUWS_T_boattaxiwp_bad"] call fnc_map_pick_pos;
+if (_pick isEqualTo []) exitWith {};
+_foundPickupPos = DUWS_taxiPickup;
 
-if (0 == _foundPickupPos select 0 && 0 == _foundPickupPos select 1) exitWith {hint localize "STR_DUWS_T_boattaxi_noshore"; sleep 10; ["boat_taxi"] call fnc_support_comm_add;};
-
-// One-time use: a shore was found and the taxi is committed, so spend it. Deferred to here so the
-// no-shore exit above leaves the item for the player to keep.
+// One-time use: deferred to here so closing the map above leaves the item for the player to keep.
 ["boat_taxi"] call fnc_support_consume;
 
 _markerpickup = format["lz%1%2",_foundPickupPos];
@@ -35,7 +35,7 @@ _speaker = localize "STR_DUWS_T_swordfish";
 _message = localize "STR_DUWS_T_boattaxicall";
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 
-_spawnPos = [_posplayer, 400,500,10,2,5,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos;
+_spawnPos = [_foundPickupPos, 400,500,10,2,5,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos;
 if (0 == _spawnPos select 0 && 0 == _spawnPos select 1) then { _spawnPos = _foundPickupPos };
 
 _boat = createVehicle [blufor_BOAT_TRANS_X, _spawnPos,[], 0, "NONE"];
@@ -59,7 +59,7 @@ _abort = {
     [_boat, _boatgroup, 45, false] call fnc_support_despawn;
 };
 
-_wp = _boatgroup addWaypoint [[_foundPickupPos select 0, (_foundPickupPos select 1)-75], 0];
+_wp = _boatgroup addWaypoint [_foundPickupPos, 0];
 _wp setWaypointType "MOVE";
 [_boatgroup, 1] setWaypointCombatMode "BLUE";
 

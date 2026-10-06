@@ -16233,17 +16233,17 @@
                 <Chinese>空中接駁待命中。打開地圖以繼續。</Chinese>
                 <Spanish>Taxi aéreo a la espera. Abre el mapa para continuar.</Spanish>
             </Key>
-            <Key ID="STR_DUWS_T_boattaxi_noshore">
-                <Original>No clear shoreline at your position. Move to open water or a clear beach. Boat taxi available again in ten seconds.</Original>
-                <English>No clear shoreline at your position. Move to open water or a clear beach. Boat taxi available again in ten seconds.</English>
-                <Chinesesimp>你的位置没有合适的海岸线。移动到开阔水域或空旷海滩。船艇接驳将在十秒后再次可用。</Chinesesimp>
-                <German>Keine freie Küste an deiner Position. Bewege dich zu offenem Wasser oder einem freien Strand. Boots-Taxi wieder verfügbar in zehn Sekunden.</German>
-                <Polish>Brak czystego brzegu przy waszej pozycji. Przejdźcie na otwartą wodę lub czystą plażę. Taxi łodzią znów dostępne za dziesięć sekund.</Polish>
-                <Czech>U tvé pozice není volné pobřeží. Přesuň se na volnou vodu nebo čistou pláž. Člunové taxi bude opět k dispozici za deset sekund.</Czech>
-                <Russian>У вашей позиции нет чистого берега. Выйдите на открытую воду или чистый пляж. Лодочное такси снова доступно через десять секунд.</Russian>
-                <French>Aucun rivage dégagé à votre position. Déplacez-vous vers le large ou une plage dégagée. Taxi maritime de nouveau disponible dans dix secondes.</French>
-                <Chinese>你的位置沒有合適的海岸線。移動到開闊水域或空曠海灘。船艇接駁將在十秒後再次可用。</Chinese>
-                <Spanish>No hay costa despejada en vuestra posición. Desplazaos a mar abierto o a una playa despejada. El taxi en barco volverá a estar disponible en diez segundos.</Spanish>
+            <Key ID="STR_DUWS_T_boattaxi_pickup">
+                <Original>Mark the pickup point on the map. Close the map to cancel.</Original>
+                <English>Mark the pickup point on the map. Close the map to cancel.</English>
+                <Chinesesimp>在地图上标出接载点。关闭地图以取消。</Chinesesimp>
+                <German>Markiere den Abholpunkt auf der Karte. Schließe die Karte, um abzubrechen.</German>
+                <Polish>Zaznacz punkt odbioru na mapie. Zamknij mapę, by anulować.</Polish>
+                <Czech>Vyznač na mapě bod vyzvednutí. Zavři mapu pro zrušení.</Czech>
+                <Russian>Отметь на карте точку подбора. Закрой карту для отмены.</Russian>
+                <French>Marquez le point d'embarquement sur la carte. Fermez la carte pour annuler.</French>
+                <Chinese>在地圖上標出接載點。關閉地圖以取消。</Chinese>
+                <Spanish>Marca el punto de recogida en el mapa. Cierra el mapa para cancelar.</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_boattaxi_rtbdown">
                 <Original>This is Overlord. Swordfish 1-1 went down on the return leg. Your extraction is complete, Alpha 1-1 — no further action required. Out.</Original>
@@ -16461,17 +16461,17 @@
                 <French>Point de passage 1 défini. Définissez le point suivant.</French>
                 <Chinese>航點 1 已設置。設置下一個航點。</Chinese>
             </Key>
-            <Key ID="STR_DUWS_T_nolz">
-                <German>Keine freie Fläche in der Nähe für die Landung. Lufttaxi wieder verfügbar in zehn Sekunden.</German>
-                <Spanish>No hay ninguna zona despejada cerca para que aterrice el helicóptero. El taxi aéreo volverá a estar disponible en diez segundos.</Spanish>
-                <Chinesesimp>附近没有可供直升机降落的空地。空中接驳将在十秒后再次可用。</Chinesesimp>
-                <Original>No open area nearby for the helicopter to land. Air taxi available again in ten seconds.</Original>
-                <English>No open area nearby for the helicopter to land. Air taxi available again in ten seconds.</English>
-                <Polish>Brak otwartego terenu w pobliżu do lądowania śmigłowca. Taxi powietrzne znów dostępne za dziesięć sekund.</Polish>
-                <Czech>Poblíž není žádná otevřená plocha pro přistání vrtulníku. Letecké taxi bude opět k dispozici za deset sekund.</Czech>
-                <Russian>Рядом нет открытой площадки для посадки вертолёта. Вертолётное такси снова доступно через десять секунд.</Russian>
-                <French>Aucune zone dégagée à proximité pour que l'hélicoptère atterrisse. Taxi aérien de nouveau disponible dans dix secondes.</French>
-                <Chinese>附近沒有可供直升機降落的空地。空中接駁將在十秒後再次可用。</Chinese>
+            <Key ID="STR_DUWS_T_helotaxi_pickup">
+                <Original>Mark the pickup LZ on the map. Close the map to cancel.</Original>
+                <English>Mark the pickup LZ on the map. Close the map to cancel.</English>
+                <Chinesesimp>在地图上标出接载 LZ。关闭地图以取消。</Chinesesimp>
+                <German>Markiere die Abhol-LZ auf der Karte. Schließe die Karte, um abzubrechen.</German>
+                <Polish>Zaznacz LZ odbioru na mapie. Zamknij mapę, by anulować.</Polish>
+                <Czech>Vyznač na mapě LZ pro vyzvednutí. Zavři mapu pro zrušení.</Czech>
+                <Russian>Отметь на карте LZ для подбора. Закрой карту для отмены.</Russian>
+                <French>Marquez la LZ d'embarquement sur la carte. Fermez la carte pour annuler.</French>
+                <Chinese>在地圖上標出接載 LZ。關閉地圖以取消。</Chinese>
+                <Spanish>Marca la LZ de recogida en el mapa. Cierra el mapa para cancelar.</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_helotaxi2wpmarked">
                 <German>Wegpunkt 2 gesetzt. Endgültige Landezone setzen.</German>
