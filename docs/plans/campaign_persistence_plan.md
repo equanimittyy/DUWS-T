@@ -742,9 +742,9 @@ unit count is of enemy units.
 **The operative roster is team state, so it is saved.** The server holds one roster for the whole team
 (`server/operative/fnc_operator_roster.sqf`), and every change to it goes through the server. The save
 keeps each operative's skills, unspent points and whether the team has paid its first deploy. It does not
-keep whether the operative is deployed or injured, because a deployed operative is live AI and does not
-survive a restart. So a load returns every paid operative as healed, ready for a free deploy, and every
-unpaid one as ready. The rows are keyed by the operative's identity, not by position, so a roster that
+keep whether the operative is deployed, because a deployed operative is live AI and does not survive a
+restart. So a load returns every paid operative as healed, ready to redeploy at its skill-based price, and
+every unpaid one as ready. The rows are keyed by the operative's identity, not by position, so a roster that
 changes between versions cannot give one operative another's record. An identity that the roster no longer
 has is dropped.
 
