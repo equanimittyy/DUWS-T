@@ -115,9 +115,10 @@ if (count _newFriendly > 0) then {
     DUWS_friendlyArsenal = _friendly + _newFriendly;
     publicVariable "DUWS_friendlyArsenal";
     // Limited has no unlimited floor: seed the new standard-issue classes into the pool as
-    // fnc_create_ammo_lists does, so they start stocked instead of at zero.
+    // fnc_create_ammo_lists does, so they start stocked instead of at zero. The boot snapshot never
+    // holds these folded classes, so they read new on every load; a loaded campaign's count stands.
     if (DUWS_arsenalLimited) then {
-        { [_x, [_x] call fnc_captured_pool_seedCount] call fnc_captured_pool_setCount; } forEach _newFriendly;
+        { [_x, [_x] call fnc_captured_pool_seedCount] call fnc_captured_pool_setCount; } forEach (_newFriendly - DUWS_limitedSeeded);
         publicVariable "DUWS_capturedPool";
     };
 };

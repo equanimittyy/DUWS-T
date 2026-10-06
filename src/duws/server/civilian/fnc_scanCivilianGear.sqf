@@ -90,14 +90,14 @@ if (count _newFriendly > 0) then {
     DUWS_friendlyArsenal = _friendly + _newFriendly;
     publicVariable "DUWS_friendlyArsenal";
     // Limited has no unlimited floor: seed the new classes as fnc_create_ammo_lists does, so they
-    // start stocked instead of at zero.
+    // start stocked instead of at zero. The boot snapshot never holds these folded classes, so they
+    // read new on every load; a loaded campaign's count stands.
     if (DUWS_arsenalLimited) then {
-        { [_x, [_x] call fnc_captured_pool_seedCount] call fnc_captured_pool_setCount; } forEach _newFriendly;
+        { [_x, [_x] call fnc_captured_pool_seedCount] call fnc_captured_pool_setCount; } forEach (_newFriendly - DUWS_limitedSeeded);
         publicVariable "DUWS_capturedPool";
     };
 };
 
-// Log unconditionally (even when 0 new) so an RPT proves this fold ran: a stale build lacking it
-// prints no such line, making "did the civ-gear fix load?" answerable from the log alone.
+// Unconditional, even at 0 new, so the RPT shows whether this fold ran.
 ["INFO", "CIV", format ["friendly set: folded %1 new of %2 civilian classes (mode: %3)",
     count _newFriendly, count _civAdded, ["Hybrid", "Limited"] select DUWS_arsenalLimited]] call fnc_log;
