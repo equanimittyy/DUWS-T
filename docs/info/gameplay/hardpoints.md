@@ -52,7 +52,7 @@ globals and the static-role table every zone garrison uses
 ([`faction_system.md#static-weapons-resolve-at-placement`](faction_system.md#static-weapons-resolve-at-placement))
 — hardcoding a unit or turret classname is the one change that breaks mod-free operation and faction
 auto-detection. `opfor_ARTY_X` is the one core that is a vehicle rather than a static, resolved and
-crewed on a separate path in `fnc_hardpoint_garrison` (`fnc_hardpoint_place.sqf:54-104`): thawed and
+crewed on a separate path in `fnc_hardpoint_garrison` (`fnc_hardpoint_place.sqf:58-109`): thawed and
 crewed in place rather than dropped and settled, because it already sits on its own tracks.
 
 `MG`, `AT`, `GMG`, `AA` and `ROADBLOCK` are the types the weight tables roll
@@ -111,9 +111,9 @@ unit-tested independently of the terrain read that feeds it:
   flat and open for AA, defilade for a mortar, a symmetric crest for a radio mast — plus a mutual-support
   bonus for sitting within interlock range of a hardpoint already down.
 
-**Type is rolled before ground is read.** `fnc_hardpoint_lay` (`fnc_hardpoint_place.sqf:169-197`)
+**Type is rolled before ground is read.** `fnc_hardpoint_lay` (`fnc_hardpoint_place.sqf:175-203`)
 draws the whole slate of types for a pass up front from the pass's base-weight map, then hunts each
-rolled type a handful of candidate sites (`HP_TYPE_DRAWS` = 18, `:108`), scores each with
+rolled type a handful of candidate sites (`HP_TYPE_DRAWS` = 18, `:113`), scores each with
 `fnc_hardpoint_score`, and weight-picks among whatever scored above zero. A type that finds no site
 in its draw budget is dropped, logged, and never swapped for another. This inverts an earlier order
 that scored ground first and rolled a type for the winning site: that let the highest-scoring
@@ -127,7 +127,7 @@ square across its road and takes whichever of its two headings faces the approac
 for a zone ring, toward BLU HQ for the corridor pass and for an OPCOM truck build, which the siting loop
 places within half a grid cell of where it is delivered, `DUWS_fnc_opcom_buildCand`), MG/AT/GMG face down the fall line when one is
 pronounced enough to trust, everything else keeps the outward-radial bearing the siting loop hands in. `fnc_hardpoint_build`
-(`fnc_hardpoint_place.sqf:10-48`) then rotates every composition offset around that heading
+(`fnc_hardpoint_place.sqf:10-52`) then rotates every composition offset around that heading
 (`fnc_hardpoint_rotate`, `:5-8`) before placing each object, so the heading is baked into each
 prop's own position and direction at creation rather than stored beside it. Stowing a hardpoint later
 records that same per-object transform — `[typeOf, getPosWorld, [vectorDir, vectorUp], ...]`
@@ -215,12 +215,12 @@ is not rolled: generation retries it until it stands, and gives up only on a map
 A hardpoint registers as a site the same way a zone does — `fnc_site_register`,
 `fnc_site_occupant_register`, `fnc_site_hooks_set` (`server/misc/fnc_site_stream_init.sqf:19,49,87`)
 — so the shared poller tests it against the same per-pass player list rather than paying a spatial
-query per hardpoint (`fnc_hardpoint_register`, `server/init_zones/fnc_hardpoint_stream.sqf:406-513`).
+query per hardpoint (`fnc_hardpoint_register`, `server/init_zones/fnc_hardpoint_stream.sqf:410-517`).
 What differs from a zone is the lifecycle: one gun-and-garrison emplacement that wakes, sleeps and
 can be cleared, never captured or retaken.
 
 **A zone-child hardpoint mirrors its zone rather than streaming on its own ring.**
-`DUWS_fnc_hardpointZoneAwake` (`:21-24`) reads the zone's own garrison occupant and answers awake or
+`DUWS_fnc_hardpointZoneAwake` (`:23-26`) reads the zone's own garrison occupant and answers awake or
 raising; a standalone hardpoint instead wakes on its own presence ring
 (`DUWS_hardpointStreaming`'s `spawnRadius`/`grace` per type) and, for `AA`, an additional 5,000 m
 *air* ring so a jet is noticed before its ground ring would ever fire — the streaming answer to the
@@ -248,11 +248,11 @@ composition's own deploy rebuilds members with `createVehicle`, which would hand
 A minefield instead streams on its own path, square by square ([Siting](#siting)).
 On registration, every member of their
 composition is re-filed through `fnc_duws_keep` with `_pinned = true`
-(`fnc_hardpoint_stream.sqf:479`), which sets `DUWS_noStow` and excludes the object from
+(`fnc_hardpoint_stream.sqf:483`), which sets `DUWS_noStow` and excludes the object from
 `fnc_duws_stow`'s crewed-member refusal and its delete pass
 (`server/misc/fnc_composition_stream_init.sqf:38-46,93-100`). Every other type stows and redeploys
 like an ordinary composition: garrisons are raised fresh from `DUWS_fnc_teamRoster` on each raise
-(`fnc_hardpoint_garrison`, `fnc_hardpoint_place.sqf:54-104`), a fixed per-type token — the same team
+(`fnc_hardpoint_garrison`, `fnc_hardpoint_place.sqf:58-109`), a fixed per-type token — the same team
 composition and size whether the hardpoint is razed and rebuilt in hour one or hour five. Nothing in
 the codebase scales hardpoint garrison size to `WARCOM_opfor_ap`.
 
@@ -284,7 +284,7 @@ burst's clear keeps any belief in those cells. Otherwise a post near a base woul
 
 ## Clearance
 
-`DUWS_fnc_hardpointClearCheck` (`fnc_hardpoint_stream.sqf:84-129`) runs on the shared per-hardpoint
+`DUWS_fnc_hardpointClearCheck` (`fnc_hardpoint_stream.sqf:84-133`) runs on the shared per-hardpoint
 tick and branches on type family:
 
 | Family | Cleared when |
@@ -292,24 +292,29 @@ tick and branches on type family:
 | `MINEFIELD` | no mine is left: its plan for a streamed field, its filed hazard list for one laid whole |
 | `MORTAR`, `ARTY` | no piece in its composition is alive — crew alone is not enough, since the pieces are pinned resident and a crew killed off an intact gun would otherwise clear a battery that still stands |
 | `RADIO` | its mast (the one live, damageable member) is destroyed, whatever the garrison's state |
-| everything else | its site roster — gun crew plus any loose defenders — is down to zero alive |
+| everything else | no gun in its composition is manned and no unit of its side stands on the ground within 100 m (`HP_CLEAR_RADIUS`) |
+
+A gun counts as manned while anyone alive sits in its gunner seat, so a defender who remounts it holds the
+position. The 100 m test is `fnc_side_count_at`, owner-blind as a zone's numbers test is: a passing patrol holds
+the position, and so does a zone's own garrison near a zone hardpoint. An aircraft overhead holds nothing. An
+observation post has no gun, so only the 100 m test applies to it.
 
 Judged only while the hardpoint is deployed (`DUWS_hpPeak_<key>` present), so a stowed emplacement's
 empty roster is never read as one beaten — the same guard a zone's own capture test uses.
 
 Clearing is latched and destructive to the record, not a flag: `DUWS_fnc_hardpointClear`
-(`:156-213`) deletes the row from `DUWS_hardpoints` outright (`:167`) rather than marking it cleared
+(`:160-217`) deletes the row from `DUWS_hardpoints` outright (`:171`) rather than marking it cleared
 in place, so a re-manned gun cannot un-clear what the player already took. Survivors are left where
-they fell, flagged for the cleanup sweep once the player is clear (`DUWS_binMe`, `:182`, on the
-default lifetime) rather than deleted in front of anyone — a radio tower in particular can fall with
-defenders still alive, since its clear condition is the mast, not the garrison. The composition is
-released through `fnc_duws_release` (`:187`) like any other, so wrecks stay for the sweep rather than
+they fell, flagged for the cleanup sweep once the player is clear (`DUWS_binMe`, `:186`, on the
+default lifetime) rather than deleted in front of anyone — a hardpoint can fall with defenders still
+alive, since no clear condition asks for the whole garrison dead. The composition is
+released through `fnc_duws_release` (`:191`) like any other, so wrecks stay for the sweep rather than
 vanish with the clear.
 
 ## Reveal
 
 Every hardpoint gets a marker on registration: shape `"ICON"`, type `"loc_Bunker"`, coloured by side,
-with the type token as its text (`fnc_hardpoint_stream.sqf:437-444`) — one icon shape for every type,
+with the type token as its text (`fnc_hardpoint_stream.sqf:441-448`) — one icon shape for every type,
 distinguished by label rather than by symbol. The marker's alpha and the revealed flag start at the rule
 in [`intel_system.md`](intel_system.md#what-is-hidden-depends-on-when-it-came-into-existence): a hardpoint
 laid by campaign generation is shown outside hardcore and hidden under it, and one built in play
@@ -355,7 +360,7 @@ anything back. Every hardpoint except a minefield pays, zone and standalone alik
 artillery or mortar hardpoint, of which a radio also pays `10 AP` and artillery `5 AP`. CP runs
 through `fnc_cp_adjust` and any AP through `fnc_ap_adjust`, each on its own carded notification naming
 the type and nearest zone or town — a single combined card buried the AP gain in the CP badge
-(`DUWS_fnc_hardpointClear`, `fnc_hardpoint_stream.sqf:204-212`; `notifications.hpp`, `HPdestroyed` /
+(`DUWS_fnc_hardpointClear`, `fnc_hardpoint_stream.sqf:208-216`; `notifications.hpp`, `HPdestroyed` /
 `HPdestroyedAP`). A zone hardpoint's bounty is paid on top of the zone's own capture bounty. A minefield
 pays nothing, a hazard removed rather than a garrison beaten, but its clear is still carded without a
 bounty badge (`HPcleared`).

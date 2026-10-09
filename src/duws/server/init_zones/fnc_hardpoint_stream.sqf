@@ -12,6 +12,8 @@ if (!isServer) exitWith {};
 // Tighter than any streaming ring, so a hardpoint reveals about when it comes into view, not when its garrison streams in.
 #define HP_REVEAL_RADIUS 100
 
+#define HP_CLEAR_RADIUS 100
+
 // The chance rolls per tick rather than firing every one, so the fix is a risk to break out of, not a certain reveal.
 #define OP_OBSERVE_CHANCE 0.02     // per OPCOM tick; ~0.24/min at OPCOM_TICK_PERIOD 5
 
@@ -75,8 +77,6 @@ DUWS_fnc_hardpointStow = {
     missionNamespace setVariable [format ["DUWS_hpPeak_%1", _key], nil];
 };
 
-// Cleared when the roster (crew + loose defenders) hits zero, not by proximity -- a passing patrol
-// does not man the gun, and a spatial scan per hardpoint per pass is what the poller forbids inline.
 // Judged only while deployed (peak present), so a stowed emplacement's empty roster never reads as beaten.
 //
 // A minefield has no garrison: it is spent when no armed mine is left, judged on its own branch since
@@ -124,7 +124,11 @@ DUWS_fnc_hardpointClearCheck = {
         if (_standing > -1) exitWith {};
         [_key, _o] call DUWS_fnc_hardpointClear;
     };
-    if (([_key] call fnc_site_alive) > 0) exitWith {};
+    // Seat test first, so the poller makes the spatial query only once every gun is empty.
+    if ((DUWS_compositions getOrDefault [_key, []]) findIf { !isNull _x && {_x isKindOf "StaticWeapon"} && {alive gunner _x} } > -1) exitWith {};
+    // Owner-blind, as a zone's numbers test is: a passing patrol holds the ground too.
+    private _side = [EAST, WEST] select ((_o get "hpSide") isEqualTo "blufor");
+    if (([([_key] call fnc_site_at) get "pos", HP_CLEAR_RADIUS, _side, true] call fnc_side_count_at) > 0) exitWith {};
     [_key, _o] call DUWS_fnc_hardpointClear;
 };
 
