@@ -8486,41 +8486,269 @@
                 <Chinese>全部</Chinese>
                 <Spanish>Todo</Spanish>
             </Key>
-            <Key ID="STR_DUWS_T_VENDOR_MONEY">
-                <Original>You have %1 money</Original>
-                <English>You have %1 money</English>
-                <Chinesesimp>你有 %1 现金</Chinesesimp>
-                <German>Du hast %1 Geld</German>
-                <Polish>Masz %1 gotówki</Polish>
-                <Czech>Máš %1 peněz</Czech>
-                <Russian>У тебя %1 денег</Russian>
-                <French>Vous avez %1 argent</French>
-                <Chinese>你有 %1 現金</Chinese>
-                <Spanish>Tienes %1 de dinero</Spanish>
+            <Key ID="STR_DUWS_T_VENDOR_BOX_MONEY">
+                <Original>Money</Original>
+                <English>Money</English>
+                <Chinesesimp>现金</Chinesesimp>
+                <German>Geld</German>
+                <Polish>Gotówka</Polish>
+                <Czech>Peníze</Czech>
+                <Russian>Деньги</Russian>
+                <French>Argent</French>
+                <Chinese>現金</Chinese>
+                <Spanish>Dinero</Spanish>
             </Key>
-            <Key ID="STR_DUWS_T_VENDOR_PRICE">
-                <Original>%1 money. You have %2</Original>
-                <English>%1 money. You have %2</English>
-                <Chinesesimp>%1 现金。你有 %2</Chinesesimp>
-                <German>%1 Geld. Du hast %2</German>
-                <Polish>%1 gotówki. Masz %2</Polish>
-                <Czech>%1 peněz. Máš %2</Czech>
-                <Russian>%1 денег. У тебя %2</Russian>
-                <French>%1 argent. Vous avez %2</French>
-                <Chinese>%1 現金。你有 %2</Chinese>
-                <Spanish>%1 de dinero. Tienes %2</Spanish>
+            <Key ID="STR_DUWS_T_VENDOR_BOX_PRICE">
+                <Original>Price</Original>
+                <English>Price</English>
+                <Chinesesimp>价格</Chinesesimp>
+                <German>Preis</German>
+                <Polish>Cena</Polish>
+                <Czech>Cena</Czech>
+                <Russian>Цена</Russian>
+                <French>Prix</French>
+                <Chinese>價格</Chinese>
+                <Spanish>Precio</Spanish>
             </Key>
-            <Key ID="STR_DUWS_T_VENDOR_PRICE_DISCOUNT">
-                <Original>%1 money (%2%3 discount). You have %4</Original>
-                <English>%1 money (%2%3 discount). You have %4</English>
-                <Chinesesimp>%1 现金（%2%3 折扣）。你有 %4</Chinesesimp>
-                <German>%1 Geld (%2%3 Rabatt). Du hast %4</German>
-                <Polish>%1 gotówki (%2%3 rabatu). Masz %4</Polish>
-                <Czech>%1 peněz (sleva %2%3). Máš %4</Czech>
-                <Russian>%1 денег (скидка %2%3). У тебя %4</Russian>
-                <French>%1 argent (remise de %2%3). Vous avez %4</French>
-                <Chinese>%1 現金（%2%3 折扣）。你有 %4</Chinese>
-                <Spanish>%1 de dinero (%2%3 de descuento). Tienes %4</Spanish>
+            <Key ID="STR_DUWS_T_VENDOR_BOX_DISCOUNT">
+                <Original>Discount</Original>
+                <English>Discount</English>
+                <Chinesesimp>折扣</Chinesesimp>
+                <German>Rabatt</German>
+                <Polish>Rabat</Polish>
+                <Czech>Sleva</Czech>
+                <Russian>Скидка</Russian>
+                <French>Remise</French>
+                <Chinese>折扣</Chinese>
+                <Spanish>Descuento</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_CAT_ALL">
+                <Original>All</Original>
+                <English>All</English>
+                <Chinesesimp>全部</Chinesesimp>
+                <German>Alle</German>
+                <Polish>Wszystkie</Polish>
+                <Czech>Vše</Czech>
+                <Russian>Все</Russian>
+                <French>Tout</French>
+                <Chinese>全部</Chinese>
+                <Spanish>Todo</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_CAT_PRIMARY">
+                <Original>Primary weapons</Original>
+                <English>Primary weapons</English>
+                <Chinesesimp>主武器</Chinesesimp>
+                <German>Primärwaffen</German>
+                <Polish>Broń główna</Polish>
+                <Czech>Primární zbraně</Czech>
+                <Russian>Основное оружие</Russian>
+                <French>Armes principales</French>
+                <Chinese>主武器</Chinese>
+                <Spanish>Armas principales</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_CAT_HANDGUN">
+                <Original>Handguns</Original>
+                <English>Handguns</English>
+                <Chinesesimp>手枪</Chinesesimp>
+                <German>Pistolen</German>
+                <Polish>Pistolety</Polish>
+                <Czech>Pistole</Czech>
+                <Russian>Пистолеты</Russian>
+                <French>Armes de poing</French>
+                <Chinese>手槍</Chinese>
+                <Spanish>Pistolas</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_CAT_LAUNCHER">
+                <Original>Launchers</Original>
+                <English>Launchers</English>
+                <Chinesesimp>发射器</Chinesesimp>
+                <German>Werfer</German>
+                <Polish>Wyrzutnie</Polish>
+                <Czech>Odpalovače</Czech>
+                <Russian>Пусковые установки</Russian>
+                <French>Lanceurs</French>
+                <Chinese>發射器</Chinese>
+                <Spanish>Lanzadores</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_CAT_MAGAZINE">
+                <Original>Magazines</Original>
+                <English>Magazines</English>
+                <Chinesesimp>弹匣</Chinesesimp>
+                <German>Magazine</German>
+                <Polish>Magazynki</Polish>
+                <Czech>Zásobníky</Czech>
+                <Russian>Магазины</Russian>
+                <French>Chargeurs</French>
+                <Chinese>彈匣</Chinese>
+                <Spanish>Cargadores</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_CAT_EXPLOSIVE">
+                <Original>Grenades and explosives</Original>
+                <English>Grenades and explosives</English>
+                <Chinesesimp>手雷和爆炸物</Chinesesimp>
+                <German>Granaten und Sprengstoff</German>
+                <Polish>Granaty i materiały wybuchowe</Polish>
+                <Czech>Granáty a výbušniny</Czech>
+                <Russian>Гранаты и взрывчатка</Russian>
+                <French>Grenades et explosifs</French>
+                <Chinese>手榴彈與爆裂物</Chinese>
+                <Spanish>Granadas y explosivos</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_CAT_ATTACHMENT">
+                <Original>Attachments</Original>
+                <English>Attachments</English>
+                <Chinesesimp>配件</Chinesesimp>
+                <German>Zubehör</German>
+                <Polish>Dodatki</Polish>
+                <Czech>Doplňky</Czech>
+                <Russian>Обвесы</Russian>
+                <French>Accessoires</French>
+                <Chinese>配件</Chinese>
+                <Spanish>Accesorios</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_CAT_UNIFORM">
+                <Original>Uniforms</Original>
+                <English>Uniforms</English>
+                <Chinesesimp>军服</Chinesesimp>
+                <German>Uniformen</German>
+                <Polish>Mundury</Polish>
+                <Czech>Uniformy</Czech>
+                <Russian>Форма</Russian>
+                <French>Uniformes</French>
+                <Chinese>軍服</Chinese>
+                <Spanish>Uniformes</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_CAT_VEST">
+                <Original>Vests</Original>
+                <English>Vests</English>
+                <Chinesesimp>背心</Chinesesimp>
+                <German>Westen</German>
+                <Polish>Kamizelki</Polish>
+                <Czech>Vesty</Czech>
+                <Russian>Жилеты</Russian>
+                <French>Gilets</French>
+                <Chinese>背心</Chinese>
+                <Spanish>Chalecos</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_CAT_HEADGEAR">
+                <Original>Headgear</Original>
+                <English>Headgear</English>
+                <Chinesesimp>头饰</Chinesesimp>
+                <German>Kopfbedeckungen</German>
+                <Polish>Nakrycia głowy</Polish>
+                <Czech>Pokrývky hlavy</Czech>
+                <Russian>Головные уборы</Russian>
+                <French>Coiffes</French>
+                <Chinese>頭飾</Chinese>
+                <Spanish>Coberturas</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_CAT_FACEWEAR">
+                <Original>Facewear</Original>
+                <English>Facewear</English>
+                <Chinesesimp>面部装备</Chinesesimp>
+                <German>Gesichtsbekleidung</German>
+                <Polish>Okulary i maski</Polish>
+                <Czech>Brýle a masky</Czech>
+                <Russian>Очки и маски</Russian>
+                <French>Lunettes et masques</French>
+                <Chinese>面部裝備</Chinese>
+                <Spanish>Gafas y máscaras</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_CAT_BACKPACK">
+                <Original>Backpacks</Original>
+                <English>Backpacks</English>
+                <Chinesesimp>背包</Chinesesimp>
+                <German>Rucksäcke</German>
+                <Polish>Plecaki</Polish>
+                <Czech>Batohy</Czech>
+                <Russian>Рюкзаки</Russian>
+                <French>Sacs à dos</French>
+                <Chinese>背包</Chinese>
+                <Spanish>Mochilas</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_CAT_ITEM">
+                <Original>Items</Original>
+                <English>Items</English>
+                <Chinesesimp>物品</Chinesesimp>
+                <German>Gegenstände</German>
+                <Polish>Przedmioty</Polish>
+                <Czech>Předměty</Czech>
+                <Russian>Предметы</Russian>
+                <French>Objets</French>
+                <Chinese>物品</Chinese>
+                <Spanish>Objetos</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_CAT_CAR">
+                <Original>Cars</Original>
+                <English>Cars</English>
+                <Chinesesimp>汽车</Chinesesimp>
+                <German>Autos</German>
+                <Polish>Samochody</Polish>
+                <Czech>Auta</Czech>
+                <Russian>Автомобили</Russian>
+                <French>Voitures</French>
+                <Chinese>汽車</Chinese>
+                <Spanish>Coches</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_CAT_LOGI">
+                <Original>Logistics</Original>
+                <English>Logistics</English>
+                <Chinesesimp>后勤</Chinesesimp>
+                <German>Logistik</German>
+                <Polish>Logistyka</Polish>
+                <Czech>Logistika</Czech>
+                <Russian>Логистика</Russian>
+                <French>Logistique</French>
+                <Chinese>後勤</Chinese>
+                <Spanish>Logística</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_CAT_ARMOR">
+                <Original>Armored</Original>
+                <English>Armored</English>
+                <Chinesesimp>装甲载具</Chinesesimp>
+                <German>Gepanzerte Fahrzeuge</German>
+                <Polish>Pojazdy opancerzone</Polish>
+                <Czech>Obrněná vozidla</Czech>
+                <Russian>Бронетехника</Russian>
+                <French>Véhicules blindés</French>
+                <Chinese>裝甲載具</Chinese>
+                <Spanish>Vehículos blindados</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_CAT_HELI">
+                <Original>Helicopters</Original>
+                <English>Helicopters</English>
+                <Chinesesimp>直升机</Chinesesimp>
+                <German>Hubschrauber</German>
+                <Polish>Śmigłowce</Polish>
+                <Czech>Vrtulníky</Czech>
+                <Russian>Вертолёты</Russian>
+                <French>Hélicoptères</French>
+                <Chinese>直升機</Chinese>
+                <Spanish>Helicópteros</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_CAT_DRONE">
+                <Original>Drones</Original>
+                <English>Drones</English>
+                <Chinesesimp>无人机</Chinesesimp>
+                <German>Drohnen</German>
+                <Polish>Drony</Polish>
+                <Czech>Drony</Czech>
+                <Russian>БПЛА</Russian>
+                <French>Drones</French>
+                <Chinese>無人機</Chinese>
+                <Spanish>Drones</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_CAT_BOAT">
+                <Original>Boats</Original>
+                <English>Boats</English>
+                <Chinesesimp>船艇</Chinesesimp>
+                <German>Boote</German>
+                <Polish>Łodzie</Polish>
+                <Czech>Čluny</Czech>
+                <Russian>Лодки</Russian>
+                <French>Bateaux</French>
+                <Chinese>船艇</Chinese>
+                <Spanish>Barcos</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_VENDOR_TAKE">
                 <Original>Buy</Original>

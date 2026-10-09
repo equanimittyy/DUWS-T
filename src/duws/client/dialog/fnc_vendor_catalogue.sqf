@@ -37,12 +37,13 @@ if (_inTown) then { [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_VENDOR_GREE
 // The dialog's controls run outside this scope and have no access to the addAction's _target, so the
 // vendor is handed over through a global.
 DUWS_vendor_target = _vendor;
+// [category, name, class, price, picture] per row, sorted so each category's rows are contiguous.
 duws_vendor_rows = [];
-// The list the shown rows came from, not the combo's pick: a new pick shows old rows until its fetch
-// answers, and those rows must keep their own list's price.
+// The list the shown rows came from, not the combo's pick; "" while a fetch is in flight.
 duws_vendor_list = "";
 duws_vendor_discount = 0;
-// Read by the painter below, which branches the preview, the second destination and its cap on it.
+// An index into the kind's DUWS_vendorCategories list, or -1 for All.
+duws_vendor_cat = -1;
 duws_vendor_kind = [_type] call fnc_vendor_kind;
 
 // Asked of this display, never by bare IDC: a bare command would resolve against whatever display
@@ -54,19 +55,23 @@ duws_vendor_ctrl = {
     _display displayCtrl _idc
 };
 
-// Price, affordability and the two destinations, repainted from whichever row is selected.
 duws_vendor_paint = {
-    private _classCtrl = [8907] call duws_vendor_ctrl;
-    if (isNull _classCtrl) exitWith {};
-    private _class = _classCtrl lbData (lbCurSel _classCtrl);
+    private _listCtrl = [8907] call duws_vendor_ctrl;
+    if (isNull _listCtrl) exitWith {};
+    private _sel = lbCurSel _listCtrl;
+    private _class = _listCtrl lbData _sel;
     private _money = [player] call fnc_money_funds;
+
+    ([8911] call duws_vendor_ctrl) ctrlSetText str _money;
+    private _discountCtrl = [8916] call duws_vendor_ctrl;
+    _discountCtrl ctrlSetText format ["%1%2", duws_vendor_discount, "%"];
+    _discountCtrl ctrlSetTextColor ([[1, 1, 1, 1], [0.2, 0.5, 1, 1]] select (duws_vendor_discount > 0));
 
     if (_class isEqualTo "") exitWith {
         ([8908] call duws_vendor_ctrl) ctrlSetText "#(argb,8,8,3)color(0,0,0,0.5)";
         ([8909] call duws_vendor_ctrl) ctrlSetStructuredText parseText "";
         ([8910] call duws_vendor_ctrl) ctrlSetStructuredText parseText "";
-        ([8911] call duws_vendor_ctrl) ctrlSetText format [localize "STR_DUWS_T_VENDOR_MONEY", _money];
-        ([8911] call duws_vendor_ctrl) ctrlSetTextColor [1, 1, 1, 1];
+        ([8915] call duws_vendor_ctrl) ctrlSetText "--";
         { ([_x] call duws_vendor_ctrl) ctrlEnable false } forEach [8913, 8914];
     };
 
@@ -83,22 +88,14 @@ duws_vendor_paint = {
             localize "STR_DUWS_T_faction_edit_nopreview"]
     } else {""});
 
-    private _name = getText (_cfg >> "displayName");
-    ([8910] call duws_vendor_ctrl) ctrlSetStructuredText parseText format ["<t size='0.8'>%1</t>",
-        if (_name isEqualTo "") then {_class} else {format ["%1  --  %2", _name, _class]}];
+    ([8910] call duws_vendor_ctrl) ctrlSetStructuredText parseText format [
+        "<t align='left' size='1.3'>%1</t><br/><t align='left' color='#a0a0a0'>%2</t><br/><br/><t align='left'>%3</t>",
+        _listCtrl lbText _sel, _class, getText (_cfg >> "descriptionShort")];
 
-    private _price = [_class, duws_vendor_list, duws_vendor_discount] call fnc_vendor_price;
-    private _priceCtrl = [8911] call duws_vendor_ctrl;
-    if (duws_vendor_discount > 0) then {
-        _priceCtrl ctrlSetText format [localize "STR_DUWS_T_VENDOR_PRICE_DISCOUNT",
-            _price, duws_vendor_discount, "%", _money];
-        _priceCtrl ctrlSetTextColor [0.2, 0.5, 1, 1];
-    } else {
-        _priceCtrl ctrlSetText format [localize "STR_DUWS_T_VENDOR_PRICE", _price, _money];
-        _priceCtrl ctrlSetTextColor [1, 1, 1, 1];
-    };
+    private _price = _listCtrl lbValue _sel;
+    ([8915] call duws_vendor_ctrl) ctrlSetText str _price;
 
-    private _afford = _price >= 0 && {_money >= _price};
+    private _afford = _money >= _price;
     ([8913] call duws_vendor_ctrl) ctrlEnable _afford;
     // The second destination is offered only where it would actually take the thing: the arsenal
     // counts a class only in Limited mode or when it is foreign, and each of the three garage pools
@@ -112,31 +109,99 @@ duws_vendor_paint = {
     ([8914] call duws_vendor_ctrl) ctrlEnable (_afford && _canStore);
 };
 
+// Callers run it unscheduled: a scheduled rebuild can be suspended straight after lbClear and draw a
+// half-built list.
 duws_vendor_fill = {
-    private _rows = [[8907] call duws_vendor_ctrl, [8905] call duws_vendor_ctrl, duws_vendor_rows]
-        call fnc_class_rows_fill;
+    private _listCtrl = [8907] call duws_vendor_ctrl;
+    if (isNull _listCtrl) exitWith {};
+    private _keep = _listCtrl lbData (lbCurSel _listCtrl);
+    lbClear _listCtrl;
+    if (duws_vendor_list isEqualTo "") exitWith {
+        _listCtrl lbAdd (localize "STR_DUWS_T_faction_edit_working");
+        [] call duws_vendor_paint;
+    };
+
+    private _filter = toLower (ctrlText ([8905] call duws_vendor_ctrl));
+    private _money = [player] call fnc_money_funds;
+    private _labels = DUWS_vendorCategories get duws_vendor_kind;
+    private _heading = -1;
+    private _first = -1;
+    private _sel = -1;
+    {
+        _x params ["_cat", "_name", "_class", "_price", "_pic"];
+        // Case-insensitive substring over both the display name and the classname, so a filter
+        // matches either what the player reads or the raw class they already know.
+        if ((duws_vendor_cat < 0 || {_cat == duws_vendor_cat}) && {_filter isEqualTo ""
+            || {(toLower _name) find _filter >= 0} || {(toLower _class) find _filter >= 0}}) then {
+            // Headings only in the All view: a single category is already named on its picker.
+            if (duws_vendor_cat < 0 && {_cat != _heading}) then {
+                _heading = _cat;
+                private _h = _listCtrl lbAdd format ["--- %1 ---", toUpper (localize (_labels select _cat))];
+                _listCtrl lbSetColor [_h, [0.5, 0.5, 0.5, 1]];
+            };
+            private _i = _listCtrl lbAdd _name;
+            _listCtrl lbSetData [_i, _class];
+            _listCtrl lbSetValue [_i, _price];
+            _listCtrl lbSetPicture [_i, _pic];
+            _listCtrl lbSetTextRight [_i, str _price];
+            if (_price > _money) then {
+                _listCtrl lbSetColor [_i, [0.5, 0.5, 0.5, 1]];
+                _listCtrl lbSetColorRight [_i, [0.5, 0.5, 0.5, 1]];
+            };
+            if (_first < 0) then { _first = _i };
+            if (_class isEqualTo _keep) then { _sel = _i };
+        };
+    } forEach duws_vendor_rows;
+
     // lbSetCurSel raises no LBSelChanged on an empty list, so the panel has to be repainted here.
-    if (_rows isEqualTo []) then { [] call duws_vendor_paint };
+    if (_first < 0) exitWith { [] call duws_vendor_paint };
+    _listCtrl lbSetCurSel ([_sel, _first] select (_sel < 0));
 };
 
-// Spawned: the ask blocks on the server, and LBSelChanged is unscheduled.
 duws_vendor_fetch = {
     params ["_list"];
-    // Held up while the answer is in flight: the Everything list is a whole-config sweep and takes
-    // long enough that an unlabelled empty panel would read as a shop with nothing to sell.
-    ([8911] call duws_vendor_ctrl) ctrlSetText (localize "STR_DUWS_T_faction_edit_working");
+    duws_vendor_list = "";
+    duws_vendor_rows = [];
+    [] call duws_vendor_fill;
+    // Spawned: the ask blocks on the server, and LBSelChanged is unscheduled.
     [_list] spawn {
         params ["_list"];
         ([duws_vendor_kind, _list, DUWS_vendor_target] call fnc_vendor_ask) params ["_rows", "_discount"];
-        private _stockCtrl = [8903] call duws_vendor_ctrl;
-        if (isNull _stockCtrl) exitWith {};
-        // A slow answer must not overwrite a newer pick: the player can change list while the first
-        // sweep is still running.
-        if ((_stockCtrl lbData (lbCurSel _stockCtrl)) != _list) exitWith {};
-        duws_vendor_rows = _rows;
-        duws_vendor_list = _list;
-        duws_vendor_discount = _discount;
-        [] call duws_vendor_fill;
+        // Priced once per list rather than per redraw: the Everything list runs to thousands of rows,
+        // and the filter redraws on every keystroke.
+        private _shown = _rows apply {
+            _x params ["_name", "_class", "_cat"];
+            [_cat, _name, _class, [_class, _list, _discount] call fnc_vendor_price,
+                getText (([_class] call fnc_vendor_classCfg) >> "picture")]
+        };
+        _shown sort true;
+        private _present = [];
+        { _present pushBackUnique (_x select 0) } forEach _shown;
+
+        isNil {
+            private _stockCtrl = [8903] call duws_vendor_ctrl;
+            // A slow answer must not overwrite a newer pick: the player can change list while the
+            // first sweep is still running.
+            if (isNull _stockCtrl || {(_stockCtrl lbData (lbCurSel _stockCtrl)) != _list}) exitWith {};
+            duws_vendor_rows = _shown;
+            duws_vendor_list = _list;
+            duws_vendor_discount = _discount;
+
+            // Only the categories this list stocks, so no pick comes up empty. Its LBSelChanged does
+            // the fill.
+            private _catCtrl = [8906] call duws_vendor_ctrl;
+            lbClear _catCtrl;
+            _catCtrl lbSetValue [_catCtrl lbAdd (localize "STR_DUWS_T_VENDOR_CAT_ALL"), -1];
+            private _pick = 0;
+            {
+                if (_forEachIndex in _present) then {
+                    private _i = _catCtrl lbAdd (localize _x);
+                    _catCtrl lbSetValue [_i, _forEachIndex];
+                    if (_forEachIndex == duws_vendor_cat) then { _pick = _i };
+                };
+            } forEach (DUWS_vendorCategories get duws_vendor_kind);
+            _catCtrl lbSetCurSel _pick;
+        };
     };
 };
 
@@ -161,7 +226,6 @@ private _gear = duws_vendor_kind isEqualTo "gear";
 (_display displayCtrl 8914) ctrlSetTooltip
     (localize (["STR_DUWS_T_VENDOR_STORE_TT_VEH", "STR_DUWS_T_VENDOR_STORE_TT"] select _gear));
 
-// The faction browser's left-hand combo, repurposed from a faction picker to a stock picker.
 private _listLabels = createHashMapFromArray [
     ["civilian", "STR_DUWS_T_VENDOR_STOCK_CIV"],
     ["blufor",   "STR_DUWS_T_VENDOR_STOCK_BLUFOR"],
@@ -176,8 +240,8 @@ private _stockCtrl = _display displayCtrl 8903;
 
 private _fnc_buy = {
     params ["_store"];
-    private _classCtrl = [8907] call duws_vendor_ctrl;
-    private _class = _classCtrl lbData (lbCurSel _classCtrl);
+    private _listCtrl = [8907] call duws_vendor_ctrl;
+    private _class = _listCtrl lbData (lbCurSel _listCtrl);
     if (_class isEqualTo "") exitWith {};
     [DUWS_vendor_target, player, _class, duws_vendor_list, _store] remoteExec ["fnc_vendor_buy", 2];
 
@@ -191,7 +255,8 @@ private _fnc_buy = {
             ([player] call fnc_money_funds) != _before || {diag_tickTime > _deadline}
         };
         if !(isNull (uiNamespace getVariable ["duws_vendor_display", displayNull])) then {
-            [] call duws_vendor_paint;
+            // Refilled, not just repainted: rows the purchase put out of reach turn grey.
+            isNil { [] call duws_vendor_fill };
         };
     };
 };
@@ -202,6 +267,11 @@ uiNamespace setVariable ["duws_vendor_buy", _fnc_buy];
     params ["_ctrl", "_idx"];
     [_ctrl lbData _idx] call duws_vendor_fetch;
 }];
+(_display displayCtrl 8906) ctrlAddEventHandler ["LBSelChanged", {
+    params ["_ctrl", "_idx"];
+    duws_vendor_cat = _ctrl lbValue _idx;
+    [] call duws_vendor_fill;
+}];
 (_display displayCtrl 8907) ctrlAddEventHandler ["LBSelChanged", { [] call duws_vendor_paint }];
 (_display displayCtrl 8905) ctrlAddEventHandler ["KeyUp", { [] call duws_vendor_fill }];
 (_display displayCtrl 8913) ctrlAddEventHandler ["ButtonClick", {
@@ -211,5 +281,4 @@ uiNamespace setVariable ["duws_vendor_buy", _fnc_buy];
     [true] call (uiNamespace getVariable "duws_vendor_buy");
 }];
 
-[] call duws_vendor_paint;
 _stockCtrl lbSetCurSel 0;

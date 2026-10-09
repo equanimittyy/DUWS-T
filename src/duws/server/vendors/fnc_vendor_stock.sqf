@@ -2,7 +2,8 @@
 // fnc_faction_query enforces for the faction browser.
 /*
     One stock list. Params: [kind ("gear" | "car" | "boat"), list ("civilian" | "blufor" | "opfor" |
-    "all" | "hq")]. Returns [[displayName, class], ...] sorted by display name.
+    "all" | "hq")]. Returns [[displayName, class, category], ...] sorted by display name, where
+    category indexes the kind's DUWS_vendorCategories list.
 
     Built once per list and cached. The "all" sweep walks whole configs, which is far too much to pay on
     every menu open, and no list can change once built: the role keys the side lists read and the
@@ -20,6 +21,61 @@ if (_cached isNotEqualTo []) exitWith { _cached };
 
 private _scope2 = "getNumber (_x >> 'scope') == 2";
 private _classes = [];
+
+// What the engine's Throw and Put muzzles load is hand-thrown or hand-placed by definition, so a mod's
+// grenade or charge files with the vanilla ones.
+private _handHeld = createHashMap;
+{
+    private _weapon = configFile >> "CfgWeapons" >> _x;
+    {
+        { _handHeld set [toLower _x, true] } forEach getArray (_weapon >> _x >> "magazines");
+    } forEach getArray (_weapon >> "muzzles");
+} forEach ["Throw", "Put"];
+
+// Gear files by the engine's own item typing, so a modded server's kit sorts with no table to keep; a
+// hull files by the classifier that prices it.
+private _order = DUWS_vendorCategories get _kind;
+private _fnc_category = {
+    params ["_class"];
+    _order find (call {
+        if (_kind isEqualTo "boat") exitWith { "STR_DUWS_T_VENDOR_CAT_BOAT" };
+        if (_kind isEqualTo "car") exitWith {
+            switch ([_class] call DUWS_fnc_vehKind) do {
+                case "logi": { "STR_DUWS_T_VENDOR_CAT_LOGI" };
+                case "apcIfv";
+                case "tank": { "STR_DUWS_T_VENDOR_CAT_ARMOR" };
+                case "heliTransport": { "STR_DUWS_T_VENDOR_CAT_HELI" };
+                case "uav": { "STR_DUWS_T_VENDOR_CAT_DRONE" };
+                default { "STR_DUWS_T_VENDOR_CAT_CAR" };
+            }
+        };
+        if (toLower _class in _handHeld) exitWith { "STR_DUWS_T_VENDOR_CAT_EXPLOSIVE" };
+        ([_class] call BIS_fnc_itemType) params ["_cat", "_sub"];
+        if (_cat isEqualTo "Mine") exitWith { "STR_DUWS_T_VENDOR_CAT_EXPLOSIVE" };
+        if (_cat isEqualTo "Magazine") exitWith { "STR_DUWS_T_VENDOR_CAT_MAGAZINE" };
+        if (_cat isEqualTo "Weapon") exitWith {
+            switch (_sub) do {
+                case "Handgun": { "STR_DUWS_T_VENDOR_CAT_HANDGUN" };
+                case "Launcher";
+                case "MissileLauncher";
+                case "RocketLauncher": { "STR_DUWS_T_VENDOR_CAT_LAUNCHER" };
+                default { "STR_DUWS_T_VENDOR_CAT_PRIMARY" };
+            }
+        };
+        switch (_sub) do {
+            case "AccessoryMuzzle";
+            case "AccessoryPointer";
+            case "AccessorySights";
+            case "AccessoryBipod": { "STR_DUWS_T_VENDOR_CAT_ATTACHMENT" };
+            case "Uniform": { "STR_DUWS_T_VENDOR_CAT_UNIFORM" };
+            case "Vest": { "STR_DUWS_T_VENDOR_CAT_VEST" };
+            case "Headgear": { "STR_DUWS_T_VENDOR_CAT_HEADGEAR" };
+            case "Glasses": { "STR_DUWS_T_VENDOR_CAT_FACEWEAR" };
+            case "Backpack": { "STR_DUWS_T_VENDOR_CAT_BACKPACK" };
+            default { "STR_DUWS_T_VENDOR_CAT_ITEM" };
+        }
+    })
+};
 
 private _fnc_rows = {
     params ["_classes"];
@@ -43,7 +99,7 @@ private _fnc_rows = {
         if (!isNull _cfg && {!(toLower _x in _taken)} && {getNumber (_cfg >> "scope") == 2}
             && {([_x, _list] call fnc_vendor_price) > 0}) then {
             private _name = getText (_cfg >> "displayName");
-            _rows pushBack [if (_name isEqualTo "") then {_x} else {_name}, _x];
+            _rows pushBack [if (_name isEqualTo "") then {_x} else {_name}, _x, [_x] call _fnc_category];
         };
     } forEach _classes;
     _rows sort true;

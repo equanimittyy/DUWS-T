@@ -133,11 +133,26 @@ it.
 
 ## Catalogue
 
-The `vendor_catalogue` dialog uses idc block 8900-8914. Its layout is the faction class browser's
-(`startup_faction_key_edit` in `faction_confirm.hpp`), because it does the same job: it picks one
-class out of thousands. The two dialogs share the row build and the filter in
-`shared/functions/fnc_class_rows_fill.sqf`. The browser's left combo is the stock picker. The
-preview shows `editorPreview` for a vehicle and the `picture` icon for gear.
+The `vendor_catalogue` dialog uses idc block 8901-8916. Its layout is the request dialog's
+(`request_menu.hpp`), so that the two menus look alike: the item window is where the main window is,
+and the stock list is the strip on the right. The item window shows three boxes (Money, Price and
+Discount), the preview and the details. The preview shows `editorPreview` for a vehicle and the
+`picture` icon for gear. The details show the name, the class and the config's `descriptionShort`.
+
+The strip holds the stock picker, the category picker and the filter above the list. Each row shows
+the icon, the name and the price. A row that the player cannot pay for is grey. The category picker
+lists only the categories that the current stock list has, plus All. In the All view, a grey heading
+starts each category.
+
+| Kind | Categories | Classifier |
+|---|---|---|
+| Gear | Primary weapons, Handguns, Launchers, Magazines, Grenades and explosives, Attachments, Uniforms, Vests, Headgear, Facewear, Backpacks, Items | `BIS_fnc_itemType`; a magazine that a `Throw` or `Put` muzzle loads is a grenade or an explosive |
+| Car | Cars, Logistics, Armored, Helicopters, Drones | `DUWS_fnc_vehKind` |
+| Boat | Boats | None |
+
+`DUWS_vendorCategories` (`fnc_vendor_state_init.sqf`) holds the order of each kind's categories.
+`fnc_vendor_stock` files each row once, when it builds and caches the list. The row carries its
+category as an index into that order.
 
 The catalogue greys what the server would refuse, but only as advice: the money count is a local
 snapshot, and `fnc_vendor_buy` tests everything again.
@@ -145,7 +160,9 @@ snapshot, and `fnc_vendor_buy` tests everything again.
 The client fetches each stock list when the player picks it (`fnc_vendor_ask`). The server does not
 broadcast the lists, because the Everything list is a whole-config sweep, too large to send to every
 client for a shop that most never open. The server builds a list on its scheduler, so the sweep does
-not hold a frame. The ask gives up after 30 s, because a server-side error sends no reply.
+not hold a frame. The ask gives up after 30 s, because a server-side error sends no reply. The client
+prices each row once for each fetch, not for each redraw, because the filter redraws the list on each
+keystroke.
 
 ## Stock
 
@@ -207,7 +224,7 @@ markup would round away to nothing on single-digit prices.
 
 Town reputation gives a discount at every shop in the town (`fnc_vendor_discount`): 10% at 10 and
 20% at 20, the reputation cap. The server sends the discount with each stock list, and the
-catalogue shows it on the price line in BLUFOR blue.
+catalogue shows it in the Discount box in BLUFOR blue.
 
 The price is `max(1, floor(base × markup × (100 − discount) / 100))`. One rounding covers every
 rate, so a marked-up, discounted vehicle does not round down twice, and the floor of 1 stops a

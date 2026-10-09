@@ -54,9 +54,8 @@ duws_faction_fetch_classes = {
     };
 };
 
-// The row build and the filter are fnc_class_rows_fill's, shared with the vendor catalogue, which
-// browses classes the same way. What stays here is the one-shot pick: duws_faction_edit_pick asks the
-// next fill to land on a named class and is consumed by it, so a later refill does not jump back.
+// duws_faction_edit_pick asks the next fill to land on a named class and is consumed by it, so a later
+// refill does not jump back.
 duws_faction_fill_classes = {
     private _rows = [[8625] call duws_faction_edit_ctrl, [8632] call duws_faction_edit_ctrl,
         duws_faction_class_rows, duws_faction_edit_pick] call fnc_class_rows_fill;

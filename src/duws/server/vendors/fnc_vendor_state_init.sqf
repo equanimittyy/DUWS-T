@@ -14,6 +14,22 @@ DUWS_vendorTypes = createHashMapFromArray [
 	["hq",   ["STR_DUWS_T_VENDOR_HQ",   "",          0, "gear", "hq"]]
 ];
 
+// A stock row carries its category as an index into its kind's list (fnc_vendor_stock), which keeps
+// the label keys off the wire.
+DUWS_vendorCategories = createHashMapFromArray [
+	["gear", [
+		"STR_DUWS_T_VENDOR_CAT_PRIMARY", "STR_DUWS_T_VENDOR_CAT_HANDGUN", "STR_DUWS_T_VENDOR_CAT_LAUNCHER",
+		"STR_DUWS_T_VENDOR_CAT_MAGAZINE", "STR_DUWS_T_VENDOR_CAT_EXPLOSIVE", "STR_DUWS_T_VENDOR_CAT_ATTACHMENT",
+		"STR_DUWS_T_VENDOR_CAT_UNIFORM", "STR_DUWS_T_VENDOR_CAT_VEST", "STR_DUWS_T_VENDOR_CAT_HEADGEAR",
+		"STR_DUWS_T_VENDOR_CAT_FACEWEAR", "STR_DUWS_T_VENDOR_CAT_BACKPACK", "STR_DUWS_T_VENDOR_CAT_ITEM"
+	]],
+	["car", [
+		"STR_DUWS_T_VENDOR_CAT_CAR", "STR_DUWS_T_VENDOR_CAT_LOGI", "STR_DUWS_T_VENDOR_CAT_ARMOR",
+		"STR_DUWS_T_VENDOR_CAT_HELI", "STR_DUWS_T_VENDOR_CAT_DRONE"
+	]],
+	["boat", ["STR_DUWS_T_VENDOR_CAT_BOAT"]]
+];
+
 // Open and closed. Colour alone carries the state: marker alpha is already the reveal channel, set
 // from civ_visible in fnc_civ_town_reveal, and dimming a dead vendor as well would make one number
 // mean both "undiscovered" and "closed". Open is the town icon's band colour (fnc_civ_townBand), as a

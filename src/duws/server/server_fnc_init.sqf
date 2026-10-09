@@ -39,7 +39,9 @@ publicVariable "fnc_civ_moveToPlayerServer";
 // registered as a second occupant of each town's site.
 [] call compile preprocessFileLineNumbers "duws\server\vendors\fnc_vendor_state_init.sqf";
 // The catalogue runs on the buyer's machine: it names the shop, resolves each class's config for the
-// preview, prices the row and greys the arsenal button. The reply lands there too.
+// preview, prices the row, labels its category and greys the arsenal button. The reply lands there too.
+publicVariable "DUWS_vendorTypes";
+publicVariable "DUWS_vendorCategories";
 publicVariable "fnc_vendor_type";
 publicVariable "fnc_vendor_kind";
 publicVariable "fnc_vendor_lists";
@@ -1144,8 +1146,7 @@ fnc_sniper_stand_in = compile preprocessFileLineNumbers "duws\shared\faction_lib
 fnc_captured_loadout_counts = compile preprocessFileLineNumbers "duws\shared\functions\fnc_captured_loadout_counts.sqf";
 fnc_arsenal_weapon_row = compile preprocessFileLineNumbers "duws\shared\functions\fnc_arsenal_weapon_row.sqf";
 fnc_loadout_attachments = compile preprocessFileLineNumbers "duws\shared\functions\fnc_loadout_attachments.sqf";
-// Broadcast: both class browsers that call it -- the faction key editor and the vendor catalogue --
-// run on the player's machine.
+// Broadcast: the faction key editor that calls it runs on the player's machine.
 fnc_class_rows_fill = compile preprocessFileLineNumbers "duws\shared\functions\fnc_class_rows_fill.sqf";
 publicVariable "fnc_class_rows_fill";
 fnc_cs = compile preprocessFileLineNumbers "duws\shared\functions\fnc_cs.sqf";

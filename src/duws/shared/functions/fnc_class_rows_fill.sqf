@@ -1,11 +1,11 @@
-// Locality: client -- pure UI, shared by the faction class browser and the vendor catalogue.
+// Locality: client -- pure UI, for the faction class browser.
 /*
     Fills a class list from [displayName, className] rows, narrowed by a filter box.
     Params: [_classCtrl, _filterCtrl, _rows, _pick].
 
     Returns the rows that survived the filter, so a caller can tell an empty result from a full one:
-    lbSetCurSel raises no LBSelChanged on an empty list, and whatever the selection drives -- a
-    preview, a price -- has to be told itself.
+    lbSetCurSel raises no LBSelChanged on an empty list, and the preview the selection drives has to
+    be told itself.
 */
 params ["_classCtrl", "_filterCtrl", ["_rows", []], ["_pick", ""]];
 if (isNull _classCtrl) exitWith { [] };

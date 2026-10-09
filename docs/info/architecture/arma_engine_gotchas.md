@@ -104,7 +104,7 @@ Two `class Foo { ... }` blocks at the same scope in the merged `description.ext`
 
 ## `format` does not print a literal `%` written in its string
 
-A bare `%` in a `format` string is dropped: the shop price line `"%1 money (%2% discount)"` rendered `20 discount`, with no error. Fix: pass the sign as an argument — `"(%2%3 discount)"` on `[_price, _pct, "%", _money]` (`client/dialog/fnc_vendor_catalogue.sqf`, `client/missions/fnc_recon_observe_layer.sqf`).
+A bare `%` in a `format` string is dropped: the shop price line `"%1 money (%2% discount)"` rendered `20 discount`, with no error. Fix: pass the sign as an argument — `format ["%1%2", _pct, "%"]` (`client/dialog/fnc_vendor_catalogue.sqf`, `client/missions/fnc_recon_observe_layer.sqf`).
 
 ## Config text is shown verbatim, so a `%N` in it reaches the player unsubstituted
 
