@@ -487,7 +487,7 @@ them, or the allocator would hand a second zone a name already on the map.
 building's positions and each facing from the town centre, and it already treats the result as the
 campaign's fixed answer: its own header says a town's shops have to stand in the same place after a
 save and restore, and a killed shop's countdown is held as remaining seconds for that reason
-(`server/vendors/fnc_vendor_init.sqf:170-173`). Re-running the draft would move every shop in every
+(`server/vendors/fnc_vendor_init.sqf:179-181`). Re-running the draft would move every shop in every
 town. The registry is keyed by town index, so it restores beside the town list and in the same order
 the towns do; that order is the snapshot's, which is what makes the index stable across a restore
 when `civ_locations` is not.
