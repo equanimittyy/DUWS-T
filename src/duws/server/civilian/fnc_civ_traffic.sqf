@@ -2,9 +2,9 @@
 // thread, which is server-only.
 // Puts civilian cars on a town's roads: a few driving town-to-town, the rest parked.
 // Parked cars ride the town's crowd roster, so the site poller's sleep sweep collects them; a player
-// getting into one takes it off the roster (costing a reputation point) and the map cleanup reaps it once
-// abandoned. Driving cars must NOT ride the roster -- deleting them on their origin town's sleep would pop
-// them in front of whoever they drove up to; they carry DUWS_binMe instead, reaped by map cleanup only
+// getting into one takes it off the roster and the map cleanup reaps it once abandoned. Driving cars
+// must NOT ride the roster -- deleting them on their origin town's sleep would pop them in front of
+// whoever they drove up to; they carry DUWS_binMe instead, reaped by map cleanup only
 // when no player is within its keep radius. Models from civ_veh_array; drivers are full civilians
 // (fnc_civ_spawnUnit), so running one down costs reputation as shooting one on foot does.
 if (!isServer) exitWith {};
@@ -60,26 +60,15 @@ while { _parked < _nPark && _tries < _nPark * 3 } do {
     sleep 0.5;
     if !([_car, _pos] call _fnc_settledClean) then { deleteVehicle _car; continue };
     _car allowDamage true;
-    // Stamped for the EH: its {} does not close over this scope, so town and site key travel on the
-    // car. The car is server-local (createVehicle here), so a server-added GetIn fires here when any
-    // player takes it. Removed once charged, so a passenger after does not charge twice; the grace
-    // flag holds one window at a time for the same reason.
-    _car setVariable ["DUWS_civCarTown", _locIndex];
+    // Stamped for the EH: its {} does not close over this scope, so the site key travels on the car.
+    // The car is server-local (createVehicle here), so a server-added GetIn fires here when any player
+    // takes it.
     _car setVariable ["DUWS_civCarKey", _key];
     _car addEventHandler ["GetIn", {
         params ["_veh", "", "_unit"];
-        if (!isPlayer _unit || {_veh getVariable ["DUWS_civCarGrace", false]}) exitWith {};
-        _veh setVariable ["DUWS_civCarGrace", true];
-        [localize "STR_DUWS_T_civ_car_theft_warn"] remoteExec ["hint", _unit];
-        [_veh, _thisEventHandler] spawn {
-            params ["_veh", "_eh"];
-            sleep 5;
-            _veh setVariable ["DUWS_civCarGrace", nil];
-            if (!alive _veh || {(crew _veh) findIf {isPlayer _x} < 0}) exitWith {};
-            _veh removeEventHandler ["GetIn", _eh];
-            [_veh getVariable ["DUWS_civCarKey", ""], _veh, "crowd"] call fnc_site_roster_drop;
-            [_veh getVariable ["DUWS_civCarTown", -1], -1, "vehicle_stolen"] call fnc_town_rep_adjust;
-        };
+        if (!isPlayer _unit) exitWith {};
+        _veh removeEventHandler ["GetIn", _thisEventHandler];
+        [_veh getVariable ["DUWS_civCarKey", ""], _veh, "crowd"] call fnc_site_roster_drop;
     }];
     _roster pushBack _car;
     _parked = _parked + 1;
@@ -108,7 +97,6 @@ for "_i" from 1 to _nDrive do {
     _grp setSpeedMode "LIMITED";
     _veh limitSpeed 50;
 
-    // Head for another town where the map has one, otherwise loop this town's own roads.
     private _dest = if (count _centres > 1) then { selectRandom (_centres - [_ownCentre]) } else { _ownCentre };
     private _legs = [[_dest, 30], [_ownCentre, 30]];
     {

@@ -5320,30 +5320,6 @@
                 <Chinese>護送中平民傷亡</Chinese>
                 <Spanish>se perdió a civiles durante la escolta</Spanish>
             </Key>
-            <Key ID="STR_DUWS_T_civ_rep_why_vehicle">
-                <Original>a civilian vehicle was taken</Original>
-                <English>a civilian vehicle was taken</English>
-                <Chinesesimp>一辆平民载具被夺取</Chinesesimp>
-                <German>ein ziviles Fahrzeug wurde genommen</German>
-                <Polish>zabrano cywilny pojazd</Polish>
-                <Czech>bylo odcizeno civilní vozidlo</Czech>
-                <Russian>был угнан гражданский автомобиль</Russian>
-                <French>un véhicule civil a été pris</French>
-                <Chinese>一輛平民載具被奪取</Chinese>
-                <Spanish>se requisó un vehículo civil</Spanish>
-            </Key>
-            <Key ID="STR_DUWS_T_civ_car_theft_warn">
-                <Original>This vehicle belongs to a civilian. Get out within 5 seconds or the vehicle is considered stolen.</Original>
-                <English>This vehicle belongs to a civilian. Get out within 5 seconds or the vehicle is considered stolen.</English>
-                <Chinesesimp>这辆载具属于平民。5 秒内下车，否则该载具将被视为被盗。</Chinesesimp>
-                <German>Dieses Fahrzeug gehört einem Zivilisten. Steig innerhalb von 5 Sekunden aus, sonst gilt das Fahrzeug als gestohlen.</German>
-                <Polish>Ten pojazd należy do cywila. Wysiądź w ciągu 5 sekund, inaczej pojazd zostanie uznany za skradziony.</Polish>
-                <Czech>Toto vozidlo patří civilistovi. Vystup do 5 sekund, jinak bude vozidlo považováno za ukradené.</Czech>
-                <Russian>Эта техника принадлежит гражданскому. Выйди в течение 5 секунд, иначе техника будет считаться угнанной.</Russian>
-                <French>Ce véhicule appartient à un civil. Sortez dans les 5 secondes, sinon le véhicule sera considéré comme volé.</French>
-                <Chinese>這輛載具屬於平民。5 秒內下車，否則該載具將被視為被盜。</Chinese>
-                <Spanish>Este vehículo pertenece a un civil. Bájate en menos de 5 segundos o el vehículo se considerará robado.</Spanish>
-            </Key>
             <Key ID="STR_DUWS_T_civ_rep_why_hostages_freed">
                 <Original>hostages were freed</Original>
                 <English>hostages were freed</English>
