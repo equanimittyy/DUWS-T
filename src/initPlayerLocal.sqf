@@ -96,19 +96,20 @@ DUWS_fnc_loadout_keep = {
     _l
 };
 
-// items force-removed from a loadout: money and intel
-DUWS_forcedRemoveItems = [
-    "Money_roll", "Files", "Wallet_ID", "SmartPhone", "MobilePhone",
+DUWS_intelItems = [
+    "Files", "Wallet_ID", "SmartPhone", "MobilePhone",
     "FlashDisk", "FileTopSecret", "FilesSecret"
 ];
+DUWS_forcedRemoveItems = ["Money_roll"] + DUWS_intelItems;
 
 // The player's balance IS the Money_roll (plus intel) they carry, so any operation that rewrites the
-// whole inventory -- an arsenal edit, a quick-kit setUnitLoadout -- would delete it. Stash pulls
-// every carried money/intel class out and returns [[class, n], ...]; regrant hands that back, into
+// whole inventory -- a quick-kit setUnitLoadout, an arsenal edit for intel -- would delete it. Stash pulls
+// every carried class of _classes out and returns [[class, n], ...]; regrant hands that back, into
 // inventory where it fits and dropped at the player's feet where it does not, so a full pack loses
 // none. All or nothing across the whole stash: money landing in two places needs one hint to name
 // both. Both run client-local on player; the overflow drop is a server-side remoteExec.
 DUWS_fnc_money_stash = {
+    params ["_classes"];
     private _stash = [];
     {
         private _cls = _x;
@@ -117,7 +118,7 @@ DUWS_fnc_money_stash = {
             _stash pushBack [_cls, _n];
             for "_i" from 1 to _n do { player removeItem _cls; player removeMagazine _cls; };
         };
-    } forEach DUWS_forcedRemoveItems;
+    } forEach _classes;
     _stash
 };
 
@@ -178,7 +179,7 @@ DUWS_fnc_dropped_line = {
     _msg
 };
 
-// restricted-arsenal handler: whitelist filter plus forced money/intel removal
+// restricted-arsenal handler: whitelist filter plus forced intel removal
 DUWS_fnc_arsenal_restricted = {
     // Whitelist is every virtual shelf, not just weapons: the strip below runs on all categories, so
     // a weapons-only whitelist would strip every friendly uniform, vest and item. The foreign pool is
@@ -217,7 +218,7 @@ DUWS_fnc_arsenal_restricted = {
     // force-removed items first
     {
         private _className = _x;
-        if (_className in DUWS_forcedRemoveItems) then {
+        if (_className in DUWS_intelItems) then {
             private _itemData = ([_className] call BIS_fnc_itemType);
             private _category = _itemData select 0;
             private _subcategory = _itemData select 1;
@@ -367,7 +368,9 @@ DUWS_fnc_arsenal_stock = {
     private _friendly = missionNamespace getVariable ["DUWS_friendlyArsenal", []];
     private _pool = missionNamespace getVariable ["DUWS_capturedPool", []];
 
-    private _addedForeign = [];
+    // The bank's row is shelved even when empty, or a player could not deposit into an empty bank.
+    ["Money_roll", "magazine", true] call DUWS_fnc_shelfForeign;
+    private _addedForeign = [["Money_roll", "magazine"]];
     private _hiddenFriendly = [];
     private _ammoList = [];
 
@@ -376,7 +379,7 @@ DUWS_fnc_arsenal_stock = {
     // truly-foreign classes are added here.
     {
         _x params ["_cls", "_cnt"];
-        if (_cnt > 0 && {!(_cls in _friendly)}) then {
+        if (_cnt > 0 && {!(_cls in _friendly)} && {_cls != "Money_roll"}) then {
             private _type = [_cls] call DUWS_fnc_cargoType;
             [_cls, _type, true] call DUWS_fnc_shelfForeign;
             _addedForeign pushBack [_cls, _type];
@@ -416,16 +419,16 @@ DUWS_fnc_arsenal_stock = {
     [_addedForeign, _hiddenFriendly, _ammoList]
 };
 
-// Close a restricted arsenal: settle the captured pool (server strips the overdrawn foreign), then
-// undo the shelf edits DUWS_fnc_arsenal_stock made. Takes the open-time baseline loadout and the three
-// edit lists it returned. Caller guards on restricted mode. Returns the stripped excess [[cls, n], ...]
-// -- gear the player drew but the shared pool ran out of -- so the caller can report it.
+// Close an arsenal: settle the captured pool (server strips the overdrawn foreign), then undo the shelf
+// edits DUWS_fnc_arsenal_stock made. Takes the open-time baseline loadout and the three edit lists it
+// returned; Full passes them empty with _moneyOnly. Returns the stripped excess [[cls, n], ...] -- gear
+// the player drew but the shared pool ran out of -- so the caller can report it.
 DUWS_fnc_arsenal_unstock = {
-    params ["_openLoadout", "_addedForeign", "_hiddenFriendly", "_ammoList"];
+    params ["_openLoadout", "_addedForeign", "_hiddenFriendly", "_ammoList", ["_moneyOnly", false]];
 
     duws_pool_seq = (missionNamespace getVariable ["duws_pool_seq", 0]) + 1;
     private _replyVar = format ["duws_pool_reply_%1", duws_pool_seq];
-    [_openLoadout, getUnitLoadout player, player, _replyVar] remoteExec ["fnc_captured_pool_settle", 2];
+    [_openLoadout, getUnitLoadout player, player, _replyVar, _moneyOnly] remoteExec ["fnc_captured_pool_settle", 2];
     private _deadline = diag_tickTime + 5;
     waitUntil { !isNil _replyVar || {diag_tickTime > _deadline} };
     private _excess = (missionNamespace getVariable [_replyVar, [false, []]]) select 1;
@@ -448,13 +451,13 @@ DUWS_fnc_arsenal_unstock = {
 
         private _isRestricted = player getVariable ["DUWS_isRestrictedArsenal", false];
 
-        // Money/intel out of the editable loadout for the whole session, then restored on close. The
-        // arsenal deletes items on edit and the player's balance IS the Money_roll they carry, so
-        // leaving it in would burn it. Both modes -- this is the money bug, independent of the pool.
-        private _moneyStash = call DUWS_fnc_money_stash;
+        // Intel out of the editable loadout for the whole session, then restored on close: the arsenal
+        // deletes items on edit. Money stays in, because the close settle banks any money that leaves the
+        // loadout, so an edit that deletes it deposits it instead of burning it.
+        private _intelStash = [DUWS_intelItems] call DUWS_fnc_money_stash;
 
-        // Close-diff baseline: taken after money removal, so neither money nor intel can register as a
-        // foreign withdrawal. Never reassigned; _refLoadout tracks live edits separately.
+        // Close-diff baseline: taken after the intel removal, so intel cannot register as a foreign
+        // withdrawal. Never reassigned; _refLoadout tracks live edits separately.
         private _openLoadout = getUnitLoadout player;
 
         // Stock the shelf (restricted only) and keep the returned edit lists for the close cleanup.
@@ -589,16 +592,14 @@ DUWS_fnc_arsenal_unstock = {
             removeMissionEventHandler ["EachFrame", _paintEH];
         };
 
-        private _excess = if (_isRestricted) then {
-            [_openLoadout, _addedForeign, _hiddenFriendly, _ammoList] call DUWS_fnc_arsenal_unstock
-        } else { [] };
+        private _excess = [_openLoadout, _addedForeign, _hiddenFriendly, _ammoList, !_isRestricted] call DUWS_fnc_arsenal_unstock;
 
-        // Hand the money back into inventory, overflow dropped at the player's feet.
-        private _dropPairs = [_moneyStash] call DUWS_fnc_money_regrant;
+        // Hand the intel back into inventory, overflow dropped at the player's feet.
+        private _dropPairs = [_intelStash] call DUWS_fnc_money_regrant;
 
         // Close news to the player's own hint box (per-player), never a team card: gear the shared pool
-        // ran out of before this player's draw settled (stripped on close), then any money or intel that
-        // would not fit back into inventory. Built as one string -- a second hint call would replace the box.
+        // ran out of before this player's draw settled (stripped on close), then any intel that would not
+        // fit back into inventory. Built as one string -- a second hint call would replace the box.
         private _msg = "";
         if (count _excess > 0) then {
             _msg = localize "STR_DUWS_ARSENAL_UNOBTAINED";

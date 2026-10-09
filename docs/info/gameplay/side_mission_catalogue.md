@@ -507,7 +507,7 @@ a lost client would hold it for the session.
 **Raise Funds is paid for at the giver** (`fnc_civ_mission_funds.sqf`). The target is rolled with the
 offer, so the brief names it. Its site is the town centre, and the task pins it with no search area. On the
 giver, the first row reads Give Money and opens `civ_give_dialog`, a slider capped at the money that the
-player carries and the money that the giver still needs. `fnc_civ_mission_give` runs by `remoteExecCall`,
+player can spend (carried plus the bank) and the money that the giver still needs. `fnc_civ_mission_give` runs by `remoteExecCall`,
 so it is unscheduled, and two players who give at the same time cannot both pay the same shortfall. Any
 player can give, and the gift that meets the target is the report.
 

@@ -1,10 +1,10 @@
 // Locality: the player giving, from the civilian menu's first row on a Raise Funds giver. The slider is capped at
-// what the player carries and what the giver still needs; the server re-reads both before it takes the money.
+// what the player can spend and what the giver still needs; the server re-reads both before it takes the money.
 if (!hasInterface) exitWith {};
 
 params ["_civilian"];
 (_civilian getVariable ["DUWS_civMission_funds", [0, 0]]) params ["_raised", "_target"];
-private _max = ([player] call fnc_money_count) min (_target - _raised);
+private _max = ([player] call fnc_money_funds) min (_target - _raised);
 
 if (!createDialog "civ_give_dialog") exitWith {};
 waitUntil { dialog };

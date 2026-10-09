@@ -256,10 +256,15 @@ fnc_money_count = {
 	{ _x == "Money_roll" } count (itemsWithMagazines _unit)
 };
 
+fnc_money_funds = {
+	params ["_unit"];
+	([_unit] call fnc_money_count) + (["Money_roll"] call fnc_captured_pool_getCount)
+};
+
 // Server-only, and the caller says nothing about the price until this returns: a client's count
 // is a snapshot, and in co-op two players can spend the same money, so this read and the removal
-// are adjacent statements on the one machine that owns the inventory -- the same reason
-// fnc_pool_try_spend exists for CP.
+// are adjacent statements on the one machine that owns the inventory and the pool -- the same
+// reason fnc_pool_try_spend exists for CP.
 //
 // Both slots are counted, so both removals run. removeItem is local-effect and no-ops for a player
 // not local to the server, so issue it at the unit's owner; removeMagazineGlobal already lands
@@ -267,8 +272,10 @@ fnc_money_count = {
 fnc_money_spend = {
 	if (!isServer) exitWith { false };
 	params ["_unit", ["_amount", 0]];
-	if (([_unit] call fnc_money_count) < _amount) exitWith { false };
-	private _left = _amount;
+	private _held = [_unit] call fnc_money_count;
+	private _bank = ["Money_roll"] call fnc_captured_pool_getCount;
+	if (_held + _bank < _amount) exitWith { false };
+	private _left = _amount min _held;
 	{
 		if (_x == "Money_roll" && _left > 0) then {
 			if (local _unit) then { _unit removeItem "Money_roll"; }
@@ -283,7 +290,12 @@ fnc_money_spend = {
 		};
 	} forEach (magazines _unit);
 	// Fail loud rather than half-charge: a caller that gets false must not deliver the goods.
-	_left <= 0
+	if (_left > 0) exitWith { false };
+	if (_amount > _held) then {
+		["Money_roll", _bank - (_amount - _held)] call fnc_captured_pool_setCount;
+		publicVariable "DUWS_capturedPool";
+	};
+	true
 };
 
 // Drops [class, count] pairs into one ground holder at a position. Server-only: createVehicle is
@@ -471,9 +483,10 @@ fnc_captured_pool_seedCount = {
 // the shelf; a lesser count was deposited. net = close - open. A friendly class is skipped -- it is
 // unlimited and never touches the pool. Overdraw (net beyond what the pool held) is answered by
 // replying the excess back to the client to strip, which is what makes a count-1 rifle yield one.
+// _moneyOnly settles the bank alone, for the Full arsenal, where all other gear is unlimited.
 fnc_captured_pool_settle = {
 	if (!isServer) exitWith {};
-	params [["_openLoadout", []], ["_closeLoadout", []], ["_requester", objNull], ["_replyVar", ""]];
+	params [["_openLoadout", []], ["_closeLoadout", []], ["_requester", objNull], ["_replyVar", ""], ["_moneyOnly", false]];
 	// Close is read on the client, like open, not re-read here: getUnitLoadout on the remote requester
 	// lagged its replication, so a grab just before close settled against a stale loadout and stripped
 	// gear off an honest co-op player. Trusting the client is the price; the accepted cheat is in the doc.
@@ -488,18 +501,26 @@ fnc_captured_pool_settle = {
 		if (_c in DUWS_friendlyArsenal) exitWith { true };
 		count (([[_c]] call fnc_arsenal_base_weapons) arrayIntersect DUWS_friendlyArsenal) > 0
 	};
+	// Ammo untracked: magazines never touch the pool. Hybrid keeps friendly as the unlimited floor and
+	// skips it; Limited tracks friendly too, so that skip is dropped. Money is the bank, so it is never
+	// unlimited, though Money_roll is a magazine.
+	private _unpooled = {
+		params ["_c"];
+		_c != "Money_roll" && {
+			(!DUWS_trackAmmo && {isClass (configFile >> "CfgMagazines" >> _c)})
+			|| {!DUWS_arsenalLimited && {[_c] call _friendlyHit}}
+		}
+	};
 	private _openC = [_openLoadout] call fnc_captured_loadout_counts;
 	private _closeC = [_closeLoadout] call fnc_captured_loadout_counts;
 	private _classes = (keys _openC) + (keys _closeC);
 	_classes = _classes arrayIntersect _classes;
+	if (_moneyOnly) then { _classes = _classes arrayIntersect ["Money_roll"] };
 	private _excess = [];
 	private _ledger = [];
 	{
 		private _cls = _x;
-		// Ammo untracked: magazines never touch the pool. Hybrid keeps friendly as the unlimited
-		// floor and skips it; Limited tracks friendly too, so that skip is dropped.
-		if (!DUWS_trackAmmo && {isClass (configFile >> "CfgMagazines" >> _cls)}) then { continue };
-		if (!DUWS_arsenalLimited && {[_cls] call _friendlyHit}) then { continue };
+		if ([_cls] call _unpooled) then { continue };
 		private _net = (_closeC getOrDefault [_cls, 0]) - (_openC getOrDefault [_cls, 0]);
 		if (_net == 0) then { continue };
 		private _cur = [_cls] call fnc_captured_pool_getCount;
@@ -530,8 +551,7 @@ fnc_captured_pool_settle = {
 		if (_idx < 0) then { continue };   // not a worn container (headgear/goggles/loose item)
 		{
 			_x params ["_cc", ["_cn", 1]];
-			if (!DUWS_trackAmmo && {isClass (configFile >> "CfgMagazines" >> _cc)}) then { continue };
-			if (!DUWS_arsenalLimited && {[_cc] call _friendlyHit}) then { continue };
+			if ([_cc] call _unpooled) then { continue };
 			private _keep = _cn - (_exMap getOrDefault [_cc, 0]);
 			if (_keep > 0) then {
 				[_cc, ([_cc] call fnc_captured_pool_getCount) + _keep] call fnc_captured_pool_setCount;

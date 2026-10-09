@@ -930,8 +930,8 @@ is free of commitment; if the roll comes back `bribe`, a second dialog states th
 answers it — on `onUnload` rather than a send on each button, so closing with Escape answers too, since
 an offer left hanging would block the civilian silently.
 
-The prompt carries the demand, an **In Inventory: X** readout of the player's `Money_roll` count, and
-Accept / Refuse, with Accept disabled when the count falls short so an unaffordable demand reads as
+The prompt carries the demand, a **You have X money** readout of the player's carried money plus the
+bank (`fnc_money_funds`), and Accept / Refuse, with Accept disabled when the count falls short so an unaffordable demand reads as
 unaffordable instead of failing on click. Refusing, and being unable to pay, both close the civilian:
 what the prompt buys is knowing the price before losing the contact, not a free look.
 

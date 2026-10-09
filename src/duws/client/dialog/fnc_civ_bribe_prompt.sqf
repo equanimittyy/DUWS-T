@@ -32,7 +32,7 @@ if (_job isNotEqualTo []) exitWith {
     ctrlSetText [8421, localize "STR_DUWS_T_CIVMISSION_DECLINE"];
 };
 
-private _money = [player] call fnc_money_count;
+private _money = [player] call fnc_money_funds;
 ctrlSetText [8410, format [localize "STR_DUWS_T_CIV_BRIBE_DEMAND", _bribe]];
 ctrlSetText [8411, format [localize "STR_DUWS_T_CIV_MENU_MONEY", _money]];
 

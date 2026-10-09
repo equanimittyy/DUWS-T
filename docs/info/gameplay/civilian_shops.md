@@ -1,9 +1,9 @@
 Vendors are shopkeeper civilians that stand in towns and sell gear and vehicles to the player. The
 currency is the `Money_roll` inventory item, not CP or AP, so the shop economy is separate from the
-war economy. Money is per-player, because each co-op player carries a separate stack of the item.
-Every count and every charge goes through `fnc_money_count` and `fnc_money_spend`
-(`server/warcom/fnc_economy_init.sqf:240,254`); there is no second money path. Paths are relative
-to `src/duws/`.
+war economy. A charge takes the buyer's carried money first, and the team's bank pays the rest
+([Money: carried and banked](economy.md#money-carried-and-banked)). Every count and every charge goes
+through `fnc_money_funds` and `fnc_money_spend` (`server/warcom/fnc_economy_init.sqf:259,272`); there
+is no second money path. Paths are relative to `src/duws/`.
 
 Vendors are a vanilla-mode feature, like the disguise. `fnc_vendor_init` does nothing when
 `CIV_PRESENCE` is `NONE`, `RAVAGE` or `WBK`, and no vendor code runs on the RAVAGE or WBK path
@@ -227,7 +227,7 @@ the price to be wrong. It refuses on the first check that fails:
 5. The destination is the arsenal and the arsenal does not count the class.
 6. The destination is the garage and that domain's pool is full. Land, air and boat have separate
    caps.
-7. `fnc_money_spend` finds too little money.
+7. `fnc_money_spend` finds too little money, carried and banked together.
 
 Each purchase offers two destinations:
 

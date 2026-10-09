@@ -23,7 +23,9 @@
 [] call compile preprocessFileLineNumbers "duws\server\warcom\fnc_economy_init.sqf";
 publicVariable "fnc_escalation_cost";
 publicVariable "fnc_money_count";
+publicVariable "fnc_money_funds";
 publicVariable "fnc_money_spend";
+publicVariable "fnc_captured_pool_getCount";
 publicVariable "fnc_pool_spend";
 publicVariable "fnc_pool_reply";
 // Ahead of both state files below, which are its consumers: zones and towns share one attrition model.

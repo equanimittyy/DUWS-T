@@ -19,7 +19,7 @@ if (_loadouts isEqualTo []) exitWith { hint localize "STR_DUWS_T_QUICK_KITS_NONE
                 // The money/intel the player carries IS their balance, and setUnitLoadout would wipe it.
                 // Stash it out and re-grant after, the same shape the arsenal enforcer uses. Stashed
                 // before the settle so cash is out of both loadouts and never banks as captured gear.
-                private _moneyStash = call DUWS_fnc_money_stash;
+                private _moneyStash = [DUWS_forcedRemoveItems] call DUWS_fnc_money_stash;
 
                 private _old = getUnitLoadout player;
                 player setUnitLoadout _loadout;

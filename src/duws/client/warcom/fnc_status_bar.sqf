@@ -13,7 +13,8 @@ while {true} do {
         _shownTier = 0;
     } else {
         private _earned = WARCOM_blufor_ap_earned;
-        private _state = [commandpointsblu1, WARCOM_blufor_ap, _earned];
+        private _bank = ["Money_roll"] call fnc_captured_pool_getCount;
+        private _state = [commandpointsblu1, WARCOM_blufor_ap, _earned, _bank];
         if (_state isNotEqualTo _shown) then {
             _shown = _state;
             // Derived from the earned counter, not WARCOM_blufor_tier, so the tier name can never
@@ -24,7 +25,7 @@ while {true} do {
             private _to = _rungs param [_tier - 1, -1];
             private _earnedText = if (_to < 0) then { str _earned } else { format ["%1 (%2)", _earned, _to] };
             (_disp displayCtrl 8815) ctrlSetText format [localize "STR_DUWS_T_STATUS_BAR",
-                [_tier] call DUWS_fnc_tierName, commandpointsblu1, WARCOM_blufor_ap, _earnedText];
+                [_tier] call DUWS_fnc_tierName, commandpointsblu1, WARCOM_blufor_ap, _earnedText, _bank];
 
             private _pos = ctrlPosition (_disp displayCtrl 8816);
             _pos set [2, (_pos select 2) * (if (_to < 0) then { 1 } else { (_earned - _from) / (_to - _from) })];

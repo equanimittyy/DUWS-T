@@ -41,8 +41,8 @@ or throwing. Display then differs by side. `WARCOM_blufor_ap` carries a live cou
 `publicVariableEventHandler` mirrors it to the request-menu AP box (ctrl 1002) on clients
 (`client_init.sqf:151`) while the host refreshes the same control directly (`fnc_economy_init.sqf:94`)
 — and its earned-AP total crossing a force tier fires a card and a sound (`:95-104`). Every player
-also sees a top status bar with BLUFOR's tier, CP, AP and earned AP, and a bar that fills toward the
-next rung (`client/warcom/fnc_status_bar.sqf`, RscTitles `DUWS_StatusBar`). It polls the broadcast
+also sees a top status bar with BLUFOR's tier, CP, AP, earned AP and the money
+[bank](#money-carried-and-banked), and a bar that fills toward the next rung (`client/warcom/fnc_status_bar.sqf`, RscTitles `DUWS_StatusBar`). It polls the broadcast
 globals every 0.5 s, because the host's handler never fires for its own broadcast. `WARCOM_opfor_ap`
 has no counter; it surfaces on demand in the map readout and in the request-menu labels of what it now
 buys, not through a pushed update.
@@ -224,6 +224,33 @@ Both constants are in `server/server_var_init.sqf` and broadcast because clients
 is half so that walking an item back to a base still beats dying with it — a bigger share makes dying
 a cheaper way to liquidate a slate, which inverts what the death penalty is for.
 
+## Money: carried and banked
+
+Money is the `Money_roll` item. A player carries it, and the team can bank it. The bank is the
+`Money_roll` row of the captured-materiel pool (`DUWS_capturedPool`), so the campaign save keeps it
+with the pool and it needs no key of its own. The top status bar shows it as **Money**.
+
+The arsenal is the only way into and out of the bank. Carried money stays in the loadout when the
+arsenal opens, and `DUWS_fnc_arsenal_stock` (`initPlayerLocal.sqf`) always puts `Money_roll` on the
+shelf, so the row shows the bank count even when the bank is empty. Money that leaves the loadout is a
+deposit, and money that the player takes is a withdrawal. The close settle
+(`server/warcom/fnc_economy_init.sqf:487`, `fnc_captured_pool_settle`) nets the two and strips a
+withdrawal that is larger than the bank. An arsenal edit that deletes carried money therefore
+deposits it and does not burn it.
+
+The bank is never unlimited. The settle counts `Money_roll` in every arsenal mode: it is never a free
+magazine when ammo is untracked, and never a friendly class in Hybrid. Full mode settles no other gear,
+so it settles the bank alone, and it paints no count on the shelf row.
+
+Every money charge goes through `fnc_money_spend` (`fnc_economy_init.sqf:272`): vendor purchases,
+bribes and Raise Funds gifts. It takes the buyer's carried money first, and the bank pays the rest.
+The count, the removal and the bank debit are adjacent statements on the server, so two players cannot
+spend the same money. Each client readout shows `fnc_money_funds` (`:259`), the carried money plus the
+bank.
+
+A quick-kit swap stashes the carried money and gives it back, so a swap never deposits money. A
+respawn never copies money from the death loadout.
+
 ## Faucets
 
 | Source | File | Amount |
@@ -338,8 +365,8 @@ territory shows no readout.
 | Base repair, HQ, FOB and zone redeploy | `server/supports/fnc_activateBaseRepairStation.sqf`, `server/init_hq/fnc_redeployHQUnits.sqf`, `fnc_redeployFOBUnits.sqf`, `server/init_zones/fnc_zone_build.sqf` | 2 / 2 / 2 / 2 |
 | Garrison reinforce / fortify | `server/missions/fnc_map_readout_buy.sqf` | AP 10 / 15, OPCOM's own prices (`OPCOM_AP_REINFORCE` / `OPCOM_AP_FORTIFY`) |
 | Death | `client/client_init.sqf:166,175` | `DUWSMP_CP_death_cost` (0–10, default 2), plus the holder's consumable slate |
-| Raise Funds (money) | `server/civ_missions/fnc_civ_mission_give.sqf` | 9-15 `Money_roll`, pooled by the players at the giver; not refunded on a cancel or the giver's death |
-| Vendor purchase (money) | `server/vendors/fnc_vendor_buy.sqf` | 1-7 `Money_roll` for gear, 1.2 per CP of the request-menu price for a vehicle; more on the OPFOR, Everything and HQ lists, less in a town with good reputation ([`civilian_shops.md`](civilian_shops.md#prices)) |
+| Raise Funds (money) | `server/civ_missions/fnc_civ_mission_give.sqf` | 9-15 `Money_roll`, pooled by the players at the giver, carried money first and then the bank; not refunded on a cancel or the giver's death |
+| Vendor purchase (money) | `server/vendors/fnc_vendor_buy.sqf` | carried money first and then the bank: 1-7 `Money_roll` for gear, 1.2 per CP of the request-menu price for a vehicle; more on the OPFOR, Everything and HQ lists, less in a town with good reputation ([`civilian_shops.md`](civilian_shops.md#prices)) |
 
 ## Who may spend
 

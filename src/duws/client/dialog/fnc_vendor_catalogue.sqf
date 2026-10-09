@@ -59,7 +59,7 @@ duws_vendor_paint = {
     private _classCtrl = [8907] call duws_vendor_ctrl;
     if (isNull _classCtrl) exitWith {};
     private _class = _classCtrl lbData (lbCurSel _classCtrl);
-    private _money = [player] call fnc_money_count;
+    private _money = [player] call fnc_money_funds;
 
     if (_class isEqualTo "") exitWith {
         ([8908] call duws_vendor_ctrl) ctrlSetText "#(argb,8,8,3)color(0,0,0,0.5)";
@@ -183,12 +183,12 @@ private _fnc_buy = {
 
     // Money leaves on the server, so the count here only moves once the removal replicates back. The
     // panel waits for that rather than repainting a figure the player has already spent.
-    [[player] call fnc_money_count] spawn {
+    [[player] call fnc_money_funds] spawn {
         params ["_before"];
         private _deadline = diag_tickTime + 3;
         waitUntil {
             sleep 0.2;
-            ([player] call fnc_money_count) != _before || {diag_tickTime > _deadline}
+            ([player] call fnc_money_funds) != _before || {diag_tickTime > _deadline}
         };
         if !(isNull (uiNamespace getVariable ["duws_vendor_display", displayNull])) then {
             [] call duws_vendor_paint;

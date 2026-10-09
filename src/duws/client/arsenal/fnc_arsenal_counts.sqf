@@ -35,16 +35,17 @@ DUWS_fnc_arsenal_countFor = {
     // case. `in`, isEqualTo and the HashMap key are all case-sensitive, so a lowercased class missed
     // every check below and read [0]. Canonicalise to the declared case before any of them.
     _cls = [_cls] call DUWS_fnc_arsenal_canon;
+    private _bank = _cls == "Money_roll";
     // Startup kit stays the player's to re-draw in Hybrid: the gear deployed with is unlimited there,
     // including a BLUFOR default class the detected faction never fields -- absent from the friendly
     // snapshot, it would otherwise read as an empty pool ([0]). Limited tracks everything and has no
     // unlimited floor, so the kit counts down like any other gear; its friendly classes are pool-seeded
     // at boot, so only a rare non-fielded default reads [0] there.
-    if (!(missionNamespace getVariable ["DUWS_arsenalLimited", false]) && {_cls in (player getVariable ["DUWS_startupKit", []])}) exitWith { -1 };
+    if (!_bank && {!(missionNamespace getVariable ["DUWS_arsenalLimited", false])} && {_cls in (player getVariable ["DUWS_startupKit", []])}) exitWith { -1 };
     // Ammo untracked (the default): magazines are free in every mode, so never counted.
-    if ((isClass (configFile >> "CfgMagazines" >> _cls)) && {!(missionNamespace getVariable ["DUWS_trackAmmo", false])}) exitWith { -1 };
+    if (!_bank && {isClass (configFile >> "CfgMagazines" >> _cls)} && {!(missionNamespace getVariable ["DUWS_trackAmmo", false])}) exitWith { -1 };
     // Hybrid keeps standard-issue gear unlimited; Limited tracks it too, so only Hybrid short-circuits.
-    if ((_cls in (missionNamespace getVariable ["DUWS_friendlyArsenal", []])) && {!(missionNamespace getVariable ["DUWS_arsenalLimited", false])}) exitWith { -1 };
+    if (!_bank && {_cls in (missionNamespace getVariable ["DUWS_friendlyArsenal", []])} && {!(missionNamespace getVariable ["DUWS_arsenalLimited", false])}) exitWith { -1 };
     // Count-tracked: pool is [[class, n], ...], zero-count classes dropped so absence reads zero. It
     // only settles on arsenal close; this session's takes/returns are reflected live by subtracting
     // the open-time loadout delta the enforcer keeps in DUWS_arsenalTaken (held now but not at open =
