@@ -215,7 +215,7 @@ is not rolled: generation retries it until it stands, and gives up only on a map
 A hardpoint registers as a site the same way a zone does — `fnc_site_register`,
 `fnc_site_occupant_register`, `fnc_site_hooks_set` (`server/misc/fnc_site_stream_init.sqf:19,49,87`)
 — so the shared poller tests it against the same per-pass player list rather than paying a spatial
-query per hardpoint (`fnc_hardpoint_register`, `server/init_zones/fnc_hardpoint_stream.sqf:407-514`).
+query per hardpoint (`fnc_hardpoint_register`, `server/init_zones/fnc_hardpoint_stream.sqf:406-513`).
 What differs from a zone is the lifecycle: one gun-and-garrison emplacement that wakes, sleeps and
 can be cleared, never captured or retaken.
 
@@ -248,7 +248,7 @@ composition's own deploy rebuilds members with `createVehicle`, which would hand
 A minefield instead streams on its own path, square by square ([Siting](#siting)).
 On registration, every member of their
 composition is re-filed through `fnc_duws_keep` with `_pinned = true`
-(`fnc_hardpoint_stream.sqf:480`), which sets `DUWS_noStow` and excludes the object from
+(`fnc_hardpoint_stream.sqf:479`), which sets `DUWS_noStow` and excludes the object from
 `fnc_duws_stow`'s crewed-member refusal and its delete pass
 (`server/misc/fnc_composition_stream_init.sqf:38-46,93-100`). Every other type stows and redeploys
 like an ordinary composition: garrisons are raised fresh from `DUWS_fnc_teamRoster` on each raise
@@ -309,7 +309,7 @@ vanish with the clear.
 ## Reveal
 
 Every hardpoint gets a marker on registration: shape `"ICON"`, type `"loc_Bunker"`, coloured by side,
-with the type token as its text (`fnc_hardpoint_stream.sqf:438-445`) — one icon shape for every type,
+with the type token as its text (`fnc_hardpoint_stream.sqf:437-444`) — one icon shape for every type,
 distinguished by label rather than by symbol. The marker's alpha and the revealed flag start at the rule
 in [`intel_system.md`](intel_system.md#what-is-hidden-depends-on-when-it-came-into-existence): a hardpoint
 laid by campaign generation is shown outside hardcore and hidden under it, and one built in play
@@ -336,10 +336,11 @@ each player's main map draws every mine with the engine's own detected-mine icon
 `CfgInGameUI >> Cursor >> explosive` (`fnc_hardpoint_minefield_map_icons`). The reveal does not run
 `west revealMine`: that also draws the engine's 3D mine icons, at a range that only the difficulty's
 detected-mines option sets. As a result, BLUFOR AI does not steer clear of a revealed field. The engine
-offers its "Deactivate mine" action only on a mine that BLUFOR knows, so after the reveal each site pass runs
-`west revealMine` on every mine of the field within 10 m of a player (`MINE_KNOW`,
-`fnc_hardpoint_minefield_know`). The engine then draws the 3D icon and its own map icon for that mine only,
-and the script map icon skips any mine that BLUFOR knows, unless the difficulty's detected-mines option is
+offers its "Deactivate mine" action only on a mine that BLUFOR knows, so each client runs `west revealMine`
+once a second on every revealed mine within 10 m of its own player (`MINE_KNOW`,
+`fnc_hardpoint_minefield_know`). The reveal runs on that player's machine, not on the server for every player,
+so the engine draws the 3D icon and its own map icon for that mine only, and only for that player.
+The script map icon skips any mine that BLUFOR knows, unless the difficulty's detected-mines option is
 off and the engine draws none. Clearing the
 field removes the JIP entry. A streamed field is not JIP-queued: its objects live only while somebody is
 near, so a queue entry would outlive them. The squares standing at the moment of reveal are marked then — a field is

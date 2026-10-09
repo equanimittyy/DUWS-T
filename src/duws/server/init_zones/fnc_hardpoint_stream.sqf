@@ -290,7 +290,6 @@ DUWS_hardpointHooks = createHashMapFromArray [["tick", {
         private _r = DUWS_hardpoints findIf { (_x select 0) isEqualTo _key };
         private _revealed = _r > -1 && {(DUWS_hardpoints select _r) select 5};
         _o set ["minesUp", [_key, _here, _revealed] call fnc_hardpoint_minefield_cycle];
-        if (_here && {_revealed}) then { [_key] call fnc_hardpoint_minefield_know };
     };
 
     [_key, _o] call DUWS_fnc_hardpointClearCheck;

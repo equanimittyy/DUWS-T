@@ -143,6 +143,7 @@ if (isNull _statusBar || {scriptDone _statusBar}) then {
 [] call fnc_random_event_ied_markers;
 
 [] spawn fnc_hardpoint_minefield_map_icons;
+[] spawn fnc_hardpoint_minefield_know;
 
 if (isMultiplayer) then {
 

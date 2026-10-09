@@ -232,6 +232,7 @@ publicVariable "fnc_faction_reply";
 publicVariable "DUWS_mineSquare";
 publicVariable "fnc_hardpoint_minefield_reveal";
 publicVariable "fnc_hardpoint_minefield_map_icons";
+publicVariable "fnc_hardpoint_minefield_know";
 // Layout data the placer reads by name (DUWS_hardpointComp_<type>). Ahead of the placer so no build
 // finds an empty composition and stands a hardpoint up as bare men on open ground.
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\hardpoint_compositions.sqf";

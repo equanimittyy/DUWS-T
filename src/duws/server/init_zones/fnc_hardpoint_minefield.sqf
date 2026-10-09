@@ -214,23 +214,23 @@ fnc_hardpoint_minefield_reveal = {
     DUWS_revealedMines = ((missionNamespace getVariable ["DUWS_revealedMines", []]) select { !isNull _x }) + _mines;
 };
 
-// [_key] call fnc_hardpoint_minefield_know -- server.
+// [] spawn fnc_hardpoint_minefield_know -- client. Run here for this machine's own player, not from the
+// server for every player at once, so the 3D icon shows only to the player standing near the mine.
 fnc_hardpoint_minefield_know = {
-    params ["_key"];
-    private _mines = +(missionNamespace getVariable [format ["DUWS_hpMines_%1", _key], []]);
-    { _mines append (_x select 2) } forEach (missionNamespace getVariable [format ["DUWS_hpMineSquares_%1", _key], []]);
-    private _players = (call BIS_fnc_listPlayers) select { alive _x };
-    {
-        private _m = _x;
-        if (!isNull _m && {mineActive _m} && {!(_m mineDetectedBy west)} && {(_players findIf { (_x distance _m) < MINE_KNOW }) > -1}) then {
-            // Every machine: revealMine's locality is undocumented.
-            [west, _m] remoteExec ["revealMine", 0];
+    if (!hasInterface) exitWith {};
+    while { true } do {
+        sleep 1;
+        if (alive player) then {
+            {
+                if (!isNull _x && {mineActive _x} && {!(_x mineDetectedBy west)} && {(player distance _x) < MINE_KNOW}) then {
+                    west revealMine _x;
+                };
+            } forEach (missionNamespace getVariable ["DUWS_revealedMines", []]);
         };
-    } forEach _mines;
+    };
 };
 
-// [] spawn fnc_hardpoint_minefield_map_icons -- client. Draws each revealed mine on the main map with the
-// engine's own detected-mine icon.
+// [] spawn fnc_hardpoint_minefield_map_icons -- client.
 fnc_hardpoint_minefield_map_icons = {
     if (!hasInterface) exitWith {};
     DUWS_mineIcon = getText (configFile >> "CfgInGameUI" >> "Cursor" >> "explosive");
