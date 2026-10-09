@@ -1,5 +1,5 @@
 // Locality: all machines; the addAction body below runs on the machine that triggers it, not here
-// (fnc_civ_spawnUnit remoteExecs this to target 0 with the unit as the JIP id).
+// (fnc_civ_spawnUnit and fnc_BluHQinit remoteExec this to target 0 with a JIP id).
 #include "..\includes\action_style.hpp"
 
 params ["_unit"];

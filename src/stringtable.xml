@@ -8359,6 +8359,18 @@
                 <Chinese>船艇商</Chinese>
                 <Spanish>Vendedor de Barcos</Spanish>
             </Key>
+            <Key ID="STR_DUWS_T_VENDOR_HQ">
+                <Original>Quartermaster</Original>
+                <English>Quartermaster</English>
+                <Chinesesimp>军需官</Chinesesimp>
+                <German>Quartiermeister</German>
+                <Polish>Kwatermistrz</Polish>
+                <Czech>Intendant</Czech>
+                <Russian>Интендант</Russian>
+                <French>Intendant</French>
+                <Chinese>軍需官</Chinese>
+                <Spanish>Intendente</Spanish>
+            </Key>
             <Key ID="STR_DUWS_T_VENDOR_STOCK_CIV">
                 <Original>Civilian</Original>
                 <English>Civilian</English>

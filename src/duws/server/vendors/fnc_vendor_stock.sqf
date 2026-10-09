@@ -2,7 +2,7 @@
 // fnc_faction_query enforces for the faction browser.
 /*
     One stock list. Params: [kind ("gear" | "car" | "boat"), list ("civilian" | "blufor" | "opfor" |
-    "all")]. Returns [[displayName, class], ...] sorted by display name.
+    "all" | "hq")]. Returns [[displayName, class], ...] sorted by display name.
 
     Built once per list and cached. The "all" sweep walks whole configs, which is far too much to pay on
     every menu open, and no list can change once built: the role keys the side lists read and the
@@ -10,6 +10,9 @@
 */
 if (!isServer) exitWith { [] };
 params [["_kind", "gear"], ["_list", "all"]];
+
+// The HQ list is the BLUFOR list under another name: the name is what carries its markup.
+if (_list isEqualTo "hq") exitWith { [_kind, "blufor"] call fnc_vendor_stock };
 
 private _cacheVar = format ["DUWS_vendorStock_%1_%2", _kind, _list];
 private _cached = missionNamespace getVariable [_cacheVar, []];

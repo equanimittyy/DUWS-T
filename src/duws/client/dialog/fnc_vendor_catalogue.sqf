@@ -21,15 +21,18 @@ private _type = _vendor getVariable ["DUWS_vendor_type", ""];
 // town centre duws_town_circles already broadcasts. The refusal is the whole exchange: no catalogue
 // is shown behind it. An employer keeps working in a hostile town, which is why that gate is a
 // property of the shop rather than of the vendor framework.
-private _centre = ((missionNamespace getVariable ["duws_town_circles", []])
-    param [_town, [[0,0,0], 0]]) select 0;
-if (((missionNamespace getVariable ["DUWS_enemy_town_pos", []]) findIf {
-    _x distance2D _centre < 1
-}) >= 0) exitWith {
+private _inTown = _town >= 0;
+if (_inTown && {
+    private _centre = ((missionNamespace getVariable ["duws_town_circles", []])
+        param [_town, [[0,0,0], 0]]) select 0;
+    ((missionNamespace getVariable ["DUWS_enemy_town_pos", []]) findIf {
+        _x distance2D _centre < 1
+    }) >= 0
+}) exitWith {
     hint format [localize "STR_DUWS_T_VENDOR_HOSTILE", _vendor getVariable ["DUWS_vendor_townName", ""]];
 };
 
-[localize "STR_DUWS_T_civ", localize "STR_DUWS_T_VENDOR_GREET"] call fnc_duws_dialogue;
+if (_inTown) then { [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_VENDOR_GREET"] call fnc_duws_dialogue };
 
 // The dialog's controls run outside this scope and have no access to the addAction's _target, so the
 // vendor is handed over through a global.
@@ -163,7 +166,8 @@ private _listLabels = createHashMapFromArray [
     ["civilian", "STR_DUWS_T_VENDOR_STOCK_CIV"],
     ["blufor",   "STR_DUWS_T_VENDOR_STOCK_BLUFOR"],
     ["opfor",    "STR_DUWS_T_VENDOR_STOCK_OPFOR"],
-    ["all",      "STR_DUWS_T_VENDOR_STOCK_ALL"]
+    ["all",      "STR_DUWS_T_VENDOR_STOCK_ALL"],
+    ["hq",       "STR_DUWS_T_VENDOR_STOCK_BLUFOR"]
 ];
 private _stockCtrl = _display displayCtrl 8903;
 {

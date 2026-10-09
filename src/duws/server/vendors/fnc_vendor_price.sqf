@@ -14,8 +14,8 @@ params ["_class", ["_list", ""], ["_discount", 0]];
 
 // Money per CP. The lowest CP band starts at 1, so a floored price never reaches 0 and delists a hull.
 #define VEHICLE_RATE 1.2
-// A premium on stock that is not BLUFOR's own issue. Gear prices are single digits, so a hull-sized
-// markup would floor away to nothing on them.
+// A premium on stock that is not BLUFOR's own issue, and on the HQ list, which spares the trip to a
+// town. Gear prices are single digits, so a hull-sized markup would floor away to nothing on them.
 #define FOREIGN_MARKUP_HULL 1.1
 #define FOREIGN_MARKUP_GEAR 1.5
 
@@ -57,4 +57,4 @@ if (_base < 0) exitWith { -1 };
 
 // One floor over every rate, so a marked-up, discounted hull is not rounded down twice. Never below 1:
 // a discounted single-money item would otherwise go free.
-1 max floor (_base * ([1, _markup] select (_list in ["opfor", "all"])) * (100 - _discount) / 100)
+1 max floor (_base * ([1, _markup] select (_list in ["opfor", "all", "hq"])) * (100 - _discount) / 100)

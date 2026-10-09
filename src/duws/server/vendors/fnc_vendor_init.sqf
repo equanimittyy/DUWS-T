@@ -57,8 +57,11 @@ for "_i" from 0 to (_count - 1) do {
 // a landlocked map has no boat dealer.
 private _fnc_canHost = {
     params ["_town", "_type"];
-    if ((([_type] call fnc_vendor_type) select 4) isNotEqualTo "water") exitWith { true };
-    (_water select _town) isNotEqualTo []
+    switch (([_type] call fnc_vendor_type) select 4) do {
+        case "hq":    { false };
+        case "water": { (_water select _town) isNotEqualTo [] };
+        default       { true };
+    }
 };
 
 // Largest town first, so the guaranteed pass below seeds each type into the town most able to host it

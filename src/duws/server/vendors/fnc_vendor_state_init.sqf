@@ -6,11 +6,12 @@
 // [name key, marker icon, draft weight, kind, site].
 //   weight -- that type's share of a second-pass slot roll in fnc_vendor_init.
 //   kind   -- what the shop deals in, which decides its stock, its price band and its delivery.
-//   site   -- how its building is picked, and for "water" the one hard location gate there is.
+//   site   -- how its building is picked; "water" needs a shore, and "hq" (the HQ crate) is never drafted.
 DUWS_vendorTypes = createHashMapFromArray [
 	["arms", ["STR_DUWS_T_VENDOR_ARMS", "loc_Rifle", 1, "gear", "any"]],
 	["car",  ["STR_DUWS_T_VENDOR_CAR",  "loc_car",   1, "car",  "fuel"]],
-	["boat", ["STR_DUWS_T_VENDOR_BOAT", "loc_boat",  1, "boat", "water"]]
+	["boat", ["STR_DUWS_T_VENDOR_BOAT", "loc_boat",  1, "boat", "water"]],
+	["hq",   ["STR_DUWS_T_VENDOR_HQ",   "",          0, "gear", "hq"]]
 ];
 
 // Open and closed. Colour alone carries the state: marker alpha is already the reveal channel, set
@@ -39,6 +40,7 @@ fnc_vendor_discount = {
 // unless the class is on the list it was priced from. A vehicle dealer opens on its own town's traffic.
 fnc_vendor_lists = {
 	params ["_type"];
+	if (_type isEqualTo "hq") exitWith { ["hq"] };
 	if (([_type] call fnc_vendor_kind) isEqualTo "gear") exitWith { ["blufor", "opfor", "all"] };
 	["civilian", "blufor", "opfor", "all"]
 };

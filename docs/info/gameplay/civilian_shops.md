@@ -6,7 +6,8 @@ Every count and every charge goes through `fnc_money_count` and `fnc_money_spend
 to `src/duws/`.
 
 Vendors are a vanilla-mode feature, like the disguise. `fnc_vendor_init` does nothing when
-`CIV_PRESENCE` is `NONE`, `RAVAGE` or `WBK`, and no vendor code runs on the RAVAGE or WBK path.
+`CIV_PRESENCE` is `NONE`, `RAVAGE` or `WBK`, and no vendor code runs on the RAVAGE or WBK path
+except the [HQ counter](#hq-counter).
 
 | Part | File |
 |---|---|
@@ -21,7 +22,7 @@ Vendors are a vanilla-mode feature, like the disguise. `fnc_vendor_init` does no
 
 ## Types
 
-`DUWS_vendorTypes` (`fnc_vendor_state_init.sqf:10`) holds one row per type. An unknown type resolves
+`DUWS_vendorTypes` (`fnc_vendor_state_init.sqf:11`) holds one row per type. An unknown type resolves
 to the name "Vendor" and the `c_unknown` marker, so one bad row cannot fault a pass over every
 vendor.
 
@@ -77,12 +78,12 @@ points at.
 ## Streaming and respawn
 
 Vendors are an occupant kind of their own, `vendors`, on each town's site, with the `town_crowd`
-presence profile (`fnc_vendor_init.sqf:233`). They appear and disappear on the crowd's clock, but
+presence profile (`fnc_vendor_init.sqf:241`). They appear and disappear on the crowd's clock, but
 they do not count against the crowd: `fnc_civ_liveTarget` sizes the crowd from `civ_pop_<n>` and the
 density setting, never from live units.
 
 The kind is separate because only a kind of its own can declare a `tick` hook
-(`fnc_vendor_init.sqf:237`). A `tick` hook runs on every poller pass, where a wake or sleep hook runs
+(`fnc_vendor_init.sqf:245`). A `tick` hook runs on every poller pass, where a wake or sleep hook runs
 only on a transition. On each pass the hook:
 
 1. Counts down each vendor's cooldown by the elapsed time.
@@ -96,7 +97,7 @@ as a `diag_tickTime` stamp, because an absolute stamp does not survive a save an
 
 ## Markers
 
-`fnc_vendor_init.sqf:215` creates one global marker per vendor, named `civ_vendor_<town>_<slot>`,
+`fnc_vendor_init.sqf:223` creates one global marker per vendor, named `civ_vendor_<town>_<slot>`,
 with the type's icon and the type's name as its text. The text identifies the shop, because the
 task-glyph icons are only close to each trade.
 
@@ -104,7 +105,7 @@ Alpha is the reveal channel. The marker starts at 0 and `fnc_civ_town_reveal.sqf
 with the town, so the map does not show every shop on the island at start, and hardcore mode needs no
 separate path.
 
-Colour is the state channel. `fnc_vendor_markerPaint` (`fnc_vendor_state_init.sqf:74`) paints
+Colour is the state channel. `fnc_vendor_markerPaint` (`fnc_vendor_state_init.sqf:81`) paints
 `ColorGrey` during a cooldown, and otherwise the town's band colour from `fnc_civ_townBand`, so a
 shop in an enemy-held town shows the OPFOR red that explains its refusal. The paint reads the stored
 cooldown and the town's reputation, never a unit handle, so it stays correct while the town sleeps.
@@ -159,7 +160,7 @@ An Arms Dealer offers three lists. A Car or Boat Dealer offers four, filtered to
 | Everything | Every scope-2 class in `CfgWeapons`, `CfgMagazines` and `CfgGlasses`, plus `Bag_Base` backpacks | Every scope-2 class in `CfgVehicles` |
 
 Each class appears on one list only. OPFOR drops the classes that BLUFOR sells, and Everything drops
-the classes that every other list sells (`fnc_vendor_stock.sqf:25-32`), so one item never shows at
+the classes that every other list sells (`fnc_vendor_stock.sqf:28-37`), so one item never shows at
 two prices.
 
 The side lists come from `fnc_faction_unit_keylist`. A man key's kit is read from config:
@@ -201,7 +202,7 @@ class, so it is the one sellability gate. `Money_roll` itself is never sellable.
 | Launcher | 5 |
 | Vehicle | 1.2 × its request-menu CP price (`DUWS_fnc_vehPrice`) |
 
-The OPFOR and Everything lists carry a markup: 1.1 on a vehicle and 1.5 on gear. A smaller gear
+The OPFOR, Everything and HQ lists carry a markup: 1.1 on a vehicle and 1.5 on gear. A smaller gear
 markup would round away to nothing on single-digit prices.
 
 Town reputation gives a discount at every shop in the town (`fnc_vendor_discount`): 10% at 10 and
@@ -259,6 +260,24 @@ A bought vehicle has no live original, so its garage spec is built in factory st
 
 The carry for a vehicle taken now passes `_baseBound` as false: the buyer stands in a town, not
 inside the base-keep ring.
+
+## HQ counter
+
+The HQ supply crate (`DUWS_hqCrate`) carries the Arms Dealer's **Browse Stock** action and
+catalogue. `fnc_BluHQinit` marks the crate as a vendor of type `hq` and sends it
+`fnc_vendor_menuAction`. The catalogue title is "Quartermaster".
+
+The `hq` row of `DUWS_vendorTypes` has the site `hq`, and `_fnc_canHost` refuses that site, so the
+draft never puts the type in a town.
+
+The counter offers one list, `hq`. Its stock is the BLUFOR list of the Arms Dealer, from the same
+build and cache (`fnc_vendor_stock.sqf:15`). Its price takes the 1.5 gear markup of the OPFOR list,
+so a friendly town's Arms Dealer stays the cheaper source of BLUFOR's own issue. Because `hq` is the
+counter's only list, a hand-made `remoteExec` that names the BLUFOR list at the crate is refused.
+
+The crate has no town, so the counter never refuses as hostile, gives no reputation discount and has
+no greeting. It works in every `CIV_PRESENCE` mode, because the crate and the money exist in each.
+It has no state to save.
 
 ## Vendor registry
 

@@ -319,6 +319,8 @@ if (!isNull _supplyCrate) then {
     // second broadcast against the same object would silently evict the first. Each prop takes
     // one adder today, and the suffix is what keeps that true if one ever takes two.
     [_supplyCrate] remoteExec ["fnc_addQuickChangeActions", 0, format ["hq_quickchange_%1", netId _supplyCrate]];
+    _supplyCrate setVariable ["DUWS_vendor_type", "hq", true];
+    [_supplyCrate] remoteExec ["fnc_vendor_menuAction", 0, format ["hq_vendor_%1", netId _supplyCrate]];
 };
 
 if (!isNull _medTent) then {
