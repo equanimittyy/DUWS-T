@@ -769,9 +769,9 @@ restoring a name that resolves to nothing. It joins the snapshot as one key.
 
 | `DUWS_ArsenalMode` | The shelf | The pool holds |
 |---|---|---|
-| Hybrid (default) | the player's own faction unlimited, foreign gear count-tracked | the enemy gear the player banked |
-| Full | everything unlimited | nothing reads it, so it restores inert |
-| Limited | every class count-tracked, no unlimited floor | the whole arsenal, friendly classes included |
+| Hybrid (default) | the player's own faction unlimited, foreign gear count-tracked | the enemy gear the player banked, and the money bank |
+| Full | everything unlimited except the money bank | only the money bank row is read |
+| Limited | every class count-tracked, no unlimited floor | the whole arsenal, friendly classes included, and the money bank |
 
 **In Limited the friendly counts are campaign progress, not a starting stock.** Boot seeds every class
 of `DUWS_friendlyArsenal` into the pool at a count rolled per class (`fnc_captured_pool_seedCount`), and
