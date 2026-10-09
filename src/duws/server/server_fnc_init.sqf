@@ -703,6 +703,7 @@ fnc_destroy_air_mission = compile preprocessFileLineNumbers "duws\server\mission
 fnc_escort_informant_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\escort_informant\fnc_escort_informant_mission.sqf";
 // Broadcast: the informant's Join/Leave Group actions remoteExec this from clients.
 fnc_escort_informant_group = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\escort_informant\fnc_escort_informant_group.sqf";publicVariable "fnc_escort_informant_group";
+fnc_escort_informant_release = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\escort_informant\fnc_escort_informant_release.sqf";
 fnc_deliver_supplies_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\deliver_supplies\fnc_deliver_supplies_mission.sqf";
 fnc_raid_safehouse_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\raid_safehouse\fnc_raid_safehouse_mission.sqf";
 // Broadcast: the site-finder runs client-side in the offer picker (fnc_stratmap); undefined there, findSite

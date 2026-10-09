@@ -5,7 +5,7 @@
 // usable. The leader check is client-side in the action, so this runs only for a legitimate recruit.
 if (!isServer) exitWith {};
 params ["_inf", "_caller", ["_join", true]];
-if (isNull _inf || { !alive _inf } || { _join && { isNull _caller } }) exitWith {};
+if (isNull _inf || { !alive _inf } || { _join && { isNull _caller || { _inf getVariable ["DUWS_escortOver", false] } } }) exitWith {};
 
 if (_join) then {
     [_inf] joinSilent (group _caller);

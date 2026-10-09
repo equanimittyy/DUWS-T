@@ -368,10 +368,12 @@ on a `BIS_fnc_findSafePos` near HQ.
 
 **Send-off and teardown.** He rides a manhunt-style map marker (`mil_warning`, refreshed every 5 s on a
 drone-ping cadence, not per frame) and reuses `protect_civ`'s `DUWS_float_informant` global and client
-drawer -- safe because one side mission runs at a time. On a win he is released from the player's group,
-set captive so nobody guns down a now-harmless civilian, and walks the Tomata civil stroll into town
-(`fnc_civ_wp_Tomata`); on a live timeout he makes his own way there on foot; dead, the corpse rides the
-dead-owned census. The +1 REP is paid on a win, -1 on any fail. Spawns no opposition of its own -- the
+drawer -- safe because one side mission runs at a time. When the mission ends, `DUWS_escortOver` hides his
+Join Group action and `fnc_escort_informant_group` refuses a join, so nobody can recruit him again. If he
+is alive, `fnc_escort_informant_release` takes him out of any vehicle and out of the player's group; Rescue
+Hostage uses the same flag and release. On a win he is then set captive so nobody guns down a now-harmless
+civilian, and he despawns after 300 s. On a live timeout he is deleted at once. If he is dead, the corpse
+rides the dead-owned census. The +1 REP is paid on a win, -1 on any fail. Spawns no opposition of its own -- the
 fight is whatever OPFOR already sits between HQ and the town. See the [engine
 gotchas](../architecture/arma_engine_gotchas.md) for the localise-a-finished-sentence trap the win
 line hit: the close line names the town, so it is spoken at the call site and `fnc_mission_finish` is

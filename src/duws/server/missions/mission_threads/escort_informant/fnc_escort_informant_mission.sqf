@@ -61,7 +61,7 @@ _trackMarker setMarkerText "Informant";
         if (_caller != leader group _caller) exitWith { hint localize "STR_DUWS_T_escortinformant_notleader" };
         [_target, _caller, true] remoteExec ["fnc_escort_informant_group", 2];
     },
-    [], 1.5, false, false, "", "_this distance _target < 6 && !(_target in units group _this)"]
+    [], 1.5, false, false, "", "_this distance _target < 6 && !(_target in units group _this) && !(_target getVariable ['DUWS_escortOver', false])"]
 ] remoteExec ["addAction", [0, -2] select isDedicated, _inf];
 
 [_inf, [localize "STR_DUWS_T_escortinformant_leave",
@@ -85,6 +85,7 @@ waitUntil {
     sleep 2;
     (!alive _inf) || (_inf distance2D _townPos < _deliverDist) || ([_deadline] call fnc_time_expired)
 };
+_inf setVariable ["DUWS_escortOver", true, true];
 
 // Common teardown; each outcome adds its own informant send-off below.
 private _cleanup = {
@@ -92,14 +93,13 @@ private _cleanup = {
     deleteMarker _trackMarker;
 };
 
-// Handed-friendly cleanup (like rescue_hostage): peel a live informant out of the player's group and
-// despawn him after a grace. Never claimed -- a player-side unit must not ride the enemy-cleanup sweep --
-// and the grace lets a recruited informant walk off rather than blink out of the squad mid-stride.
+// A handed friendly is never claimed -- a player-side unit must not ride the enemy-cleanup sweep -- and the
+// grace lets a recruited informant walk off rather than blink out of the squad mid-stride.
 private _despawn = {
     params ["_u"];
     [_u] spawn {
         params ["_h"];
-        [_h] joinSilent (createGroup [WEST, true]);
+        [_h] call fnc_escort_informant_release;
         _h setCaptive true;
         _h setUnitPos "AUTO";
         sleep 300;
@@ -126,6 +126,7 @@ call _cleanup;
 
 if (alive _inf) exitWith {
     // Timed out but alive: a failed escort earns no graceful walk-off, unlike the win path.
+    [_inf] call fnc_escort_informant_release;
     deleteVehicle _inf;
     [_mission_name, _taskId, "FAILED", _townPos, _radius, [_marker]] call fnc_mission_finish;
 };

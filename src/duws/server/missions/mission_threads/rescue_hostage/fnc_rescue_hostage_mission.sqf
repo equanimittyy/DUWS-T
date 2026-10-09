@@ -122,7 +122,7 @@ private _markername = [_MissionPos, _radius, _VARtaskgeneratedName, localize "ST
 // Recruit gated on DUWS_hostage_freed (stamped when the garrison dies), so it can't be used through a wall
 // while the guards are up. Leader check sits in the body, not the condition, so a non-leader is told why it
 // did nothing. Reuses the Escort Informant handler -- it carries no informant-only side effects.
-private _joinCond = "_target getVariable ['DUWS_hostage_freed', false] && {_this distance _target < 6} && {!(_target in units group _this)}";
+private _joinCond = "_target getVariable ['DUWS_hostage_freed', false] && {_this distance _target < 6} && {!(_target in units group _this)} && {!(_target getVariable ['DUWS_escortOver', false])}";
 private _leaveCond = "_target getVariable ['DUWS_hostage_freed', false] && {_this distance _target < 6} && {_target in units group _this}";
 [_hostage, [localize "STR_DUWS_T_escortinformant_join",
     {
@@ -264,6 +264,7 @@ waitUntil {
     sleep 1;
     (!alive _hostage) || { (_hostage distance PosOfBLUHQ) < 20 } || { [_deadline] call fnc_time_expired }
 };
+_hostage setVariable ["DUWS_escortOver", true, true];
 
 if (!alive _hostage) exitWith {
     call _clearIcons;
@@ -271,7 +272,7 @@ if (!alive _hostage) exitWith {
 };
 if ([_deadline] call fnc_time_expired) exitWith {
     call _clearIcons;
-    if (alive _hostage) then { deleteVehicle _hostage };   // unclaimed, so the token sweep never takes him
+    if (alive _hostage) then { [_hostage] call fnc_escort_informant_release; deleteVehicle _hostage };   // unclaimed, so the token sweep never takes him
     // _line empty + _notify true: speak the shared "out of time" call, since a missed deadline is exactly that.
     [_mission_name, _VARtaskgeneratedName, "FAILED", _MissionPos, _radius, [_markername], [], false, "mission_rescue_hostage", false, true] call fnc_mission_finish;
 };
@@ -282,12 +283,7 @@ call _clearIcons;
 if (_townIdx >= 0) then { [_townIdx, DUWS_curReward select 2, "rescue_hostage_success"] call fnc_town_rep_adjust };
 [_hostage] spawn {
     params ["_h"];
-    [_h] joinSilent (createGroup [WEST, true]);
-    if (vehicle _h != _h) then {
-        moveOut _h;
-        private _outBy = time + 1;
-        waitUntil { vehicle _h == _h || time > _outBy };
-    };
+    [_h] call fnc_escort_informant_release;
     _h enableAI "MOVE";
     _h setUnitPos "AUTO";
     private _tent = objectFromNetId (missionNamespace getVariable ["HQ_medTent_netId", ""]);
