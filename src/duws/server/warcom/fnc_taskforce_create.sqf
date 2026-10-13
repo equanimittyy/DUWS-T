@@ -1,7 +1,7 @@
 // Locality: server only. Callers: client/dialog/fnc_giveHC.sqf (remoteExec target 2), the PlayerDisconnected handler in
-// server/server_init.sqf, and DUWS_fnc_restoreTaskforces with the saved name.
+// server/server_init.sqf, fnc_taskforce_spawn, and DUWS_fnc_restoreTaskforces with the saved name.
 if (!isServer) exitWith {};
-params ["_group", ["_tfName", ""]];
+params ["_group", ["_tfName", ""], ["_spawned", false]];
 if (isNull _group) exitWith {};
 _group setVariable ["DUWS_hcCommander", nil];
 
@@ -26,9 +26,11 @@ _marker setMarkerType _markerType;
 _marker setMarkerColor "ColorBLUFOR";
 _marker setMarkerText _label;
 
-// Marker and name ride in the entry, not on the group: an emptied group is deleted with its variables.
+// Marker, name and spawned flag ride in the entry, not on the group: an emptied group is deleted with its variables.
 private _taskforces = missionNamespace getVariable ["DUWS_taskforces", []];
-_taskforces pushBack [_group, _marker, _tfName];
+_taskforces pushBack [_group, _marker, _tfName, _spawned];
 missionNamespace setVariable ["DUWS_taskforces", _taskforces, true];
 
-[localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_TASKFORCE_TAKEN", _oldName, _tfName]] remoteExec ["fnc_duws_dialogue", 0];
+if (!_spawned) then {
+	[localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_TASKFORCE_TAKEN", _oldName, _tfName]] remoteExec ["fnc_duws_dialogue", 0];
+};

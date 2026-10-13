@@ -514,7 +514,7 @@ DUWS_fnc_restoreBases = {
 DUWS_fnc_restoreTaskforces = {
     params ["_fnc_spawnSpec"];
     {
-        _x params ["_tfName", "_hulls", "_men"];
+        _x params ["_tfName", "_hulls", "_men", ["_spawned", false]];
         private _vehs = _hulls apply { _x call _fnc_spawnSpec };
         private _group = createGroup [west, true];
         {
@@ -540,8 +540,9 @@ DUWS_fnc_restoreTaskforces = {
             };
         } forEach _men;
         { if (!isNull _x) then { _group addVehicle _x } } forEach _vehs;
-        if (units _group isEqualTo []) then { deleteGroup _group } else { [_group, _tfName] call fnc_taskforce_create };
+        if (units _group isEqualTo []) then { deleteGroup _group } else { [_group, _tfName, _spawned] call fnc_taskforce_create };
     } forEach (DUWS_restore getOrDefault ["taskforces", []]);
+    if ("taskforceSpawnIn" in DUWS_restore) then { DUWS_taskforce_spawnAt = time + (DUWS_restore get "taskforceSpawnIn") };
 };
 
 // After fnc_WARCOM_init's seed, which would derive the tiers from a wallet since spent down.

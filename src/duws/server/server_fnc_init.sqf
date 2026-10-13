@@ -830,6 +830,7 @@ fnc_escalation_watch = compile preprocessFileLineNumbers "duws\server\warcom\fnc
 fnc_WARCOM_init = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_init.sqf";
 fnc_taskforce_create = compile preprocessFileLineNumbers "duws\server\warcom\fnc_taskforce_create.sqf";
 fnc_taskforce_tick = compile preprocessFileLineNumbers "duws\server\warcom\fnc_taskforce_tick.sqf";
+fnc_taskforce_spawn = compile preprocessFileLineNumbers "duws\server\warcom\fnc_taskforce_spawn.sqf";
 fnc_opcom_belief_init = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_belief_init.sqf";
 fnc_opcom_belief_upsert = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_belief_upsert.sqf";
 fnc_opcom_belief_deleteAt = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_belief_deleteAt.sqf";

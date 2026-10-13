@@ -86,7 +86,7 @@ DUWS_fnc_campaignParked = {
 // Men and hulls rather than the group, which does not outlive the session. No objective: the tick derives it again.
 DUWS_fnc_campaignTaskforces = {
     ((missionNamespace getVariable ["DUWS_taskforces", []]) select { !isNull (_x select 0) }) apply {
-        _x params ["_group", "", "_tfName"];
+        _x params ["_group", "", "_tfName", "_spawned"];
         private _men = (units _group) select { alive _x };
         private _hulls = [];
         {
@@ -99,7 +99,7 @@ DUWS_fnc_campaignTaskforces = {
                 (((fullCrew _veh) select { (_x select 0) isEqualTo _man }) apply { [_hulls find _veh, _x select 1, _x select 2, _x select 3] }) param [0, []]
             };
             [typeOf _man, getUnitLoadout _man, damage _man, skill _man, getPosASL _man, _seat]
-        }]
+        }, _spawned]
     }
 };
 
@@ -196,6 +196,7 @@ DUWS_fnc_campaignSnapshot = {
     _s set ["garage", DUWS_garage_stored];
     _s set ["parked", call DUWS_fnc_campaignParked];
     _s set ["taskforces", call DUWS_fnc_campaignTaskforces];
+    if (!isNil "DUWS_taskforce_spawnAt") then { _s set ["taskforceSpawnIn", (DUWS_taskforce_spawnAt - time) max 0] };
     // Null once a game master deletes it; a load then leaves the rebuilt crate empty.
     if (!isNull DUWS_hqCrate) then { _s set ["hqCrate", [DUWS_hqCrate] call DUWS_fnc_campaignCargo] };
     private _lockout = ((missionNamespace getVariable ["MHQ_lockout_until", 0]) - time) max 0;

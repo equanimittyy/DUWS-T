@@ -9,9 +9,10 @@ about how often code runs and what it touches; a figure that was measured says s
 All three growth terms this tree carried are gone now, and the shape of the fix is worth
 knowing because the symptom they shared was a mission that plays well for an hour and worse at four,
 with no single call to point at. The original BLUFOR task forces — the player-directed assault force and the
-waypoint slot it wrote — were removed entirely, so neither the permanently simulated AI an ignored
-one left standing beside the base, nor that waypoint list only index 0 was ever read from,
-accumulates any longer. The enemy gear scan no longer hooks every created unit for the session: it
+waypoint slot it wrote — were removed, so that waypoint list, of which only index 0 was ever read,
+accumulates no longer. The free task force that Overlord now spawns on a timer is capped at one alive
+(`server/warcom/fnc_taskforce_tick.sqf`) and is always under orders, so the permanently simulated AI
+that an ignored one left standing beside the base cannot pile up. The enemy gear scan no longer hooks every created unit for the session: it
 builds `DUWS_enemyKit` once from the OPFOR roster (`server/disguise/fnc_scanEnemyGear.sqf`).
 
 ## The pattern that costs the most: timed scans anchored on `allUnits`

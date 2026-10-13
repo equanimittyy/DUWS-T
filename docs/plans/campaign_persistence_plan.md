@@ -674,7 +674,7 @@ restore with the settings group, not here.
 | Support unlocks | input | `DUWS_support_permanent`, the team's permanent unlocks in purchase order |
 | Reveal | outcome | positions of revealed zones and revealed towns |
 | Arsenal crate | outcome | the contents of the arsenal crate at the HQ, piece by piece, with the contents of each stored uniform, vest and backpack |
-| Task forces | outcome | each task force's name, its men (class, loadout, damage, skill, position and seat) and its vehicles (the garage's vehicle spec, position and direction) |
+| Task forces | outcome | each task force's name, its men (class, loadout, damage, skill, position and seat), its vehicles (the garage's vehicle spec, position and direction) and whether Overlord spawned it; the seconds left until the next free task force is due |
 | Operatives | input | each operative's six skills, unspent points and whether the team has paid for it, keyed by its identity |
 
 **Nothing per-player is saved.** No loadouts, no per-player cooldowns, and no per-player record of
@@ -728,7 +728,9 @@ Making reveal personal is a design change to the intel system, not a persistence
 would mean per-player markers everywhere.
 
 **Task forces are the one kind of live AI that the save keeps.** A task force is a squad that the
-team paid for and handed to Overlord, or that a leaving player's High Command left behind. Nothing
+team paid for and handed to Overlord, that a leaving player's High Command left behind, or the one
+free task force that Overlord spawns. The free one is saved with a flag, so a load keeps its losses and
+it still fills the cap of one, and the time left until the next one is saved with it. Nothing
 else brings it back, and the reconciliation pass does not refund it
 ([§What live state costs](#what-live-state-costs-and-who-pays-it-back)), so a restart without it
 would lose the team's investment. The save records the men and the vehicles, not the group, because a

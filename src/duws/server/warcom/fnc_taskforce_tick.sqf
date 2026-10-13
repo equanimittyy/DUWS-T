@@ -3,6 +3,14 @@
 #define STAGE_WAIT   30
 // A town centre often sits deep in streets a vehicle never threads.
 #define PATROL_ARRIVE 100
+#define FIRST_SPAWN   300
+#define RESPAWN       1800
+
+// One free task force alive at a time, so an ignored one cannot pile up as permanently simulated AI.
+if (isNil "DUWS_taskforce_spawnAt") then { DUWS_taskforce_spawnAt = time + FIRST_SPAWN };
+if (time >= DUWS_taskforce_spawnAt && {((missionNamespace getVariable ["DUWS_taskforces", []]) findIf {_x select 3}) < 0}) then {
+	call fnc_taskforce_spawn;
+};
 
 private _taskforces = missionNamespace getVariable ["DUWS_taskforces", []];
 if (_taskforces isEqualTo []) exitWith {};
@@ -76,10 +84,11 @@ private _fnc_hold = {
 
 private _live = [];
 {
-	_x params ["_group", "_marker", "_tfName"];
+	_x params ["_group", "_marker", "_tfName", "_spawned"];
 	private _alive = if (isNull _group) then { [] } else { (units _group) select {alive _x} };
 	if (_alive isEqualTo []) then {
 		deleteMarker _marker;
+		if (_spawned) then { DUWS_taskforce_spawnAt = time + RESPAWN };
 		[localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_TASKFORCE_LOST", _tfName]] remoteExec ["fnc_duws_dialogue", 0];
 	} else {
 		_live pushBack _x;
