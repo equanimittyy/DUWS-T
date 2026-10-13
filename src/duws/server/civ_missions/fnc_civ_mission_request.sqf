@@ -7,6 +7,7 @@
 //   _force  debug only: skips the roll and the cap.
 #define CIV_MISSION_CAP 3
 #define CIV_MISSION_OFFER_CHANCE 0.9
+#define CIV_MISSION_AP 5
 if (!isServer) exitWith {};
 params ["_civ", "_caller", ["_row", "WORK"], ["_force", false]];
 if (isNull _civ || {isNull _caller} || {!alive _civ}) exitWith {};
@@ -75,7 +76,7 @@ if (_site isEqualTo []) exitWith {
 };
 
 private _roll = { params ["_min", "_max"]; _min + floor random (_max - _min + 1) };
-private _reward = [_cp, _money call _roll, _rep];
+private _reward = [_cp, _money call _roll, _rep, CIV_MISSION_AP];
 private _goal = 0;
 if (_target isNotEqualTo []) then { _goal = _target call _roll };
 private _e = DUWS_civMissions get _id;
@@ -90,7 +91,7 @@ private _e = DUWS_civMissions get _id;
 // row to fnc_civ_mission_accept. Keys and numbers, not text, so the prompt reads in the asker's language.
 _civ setVariable ["DUWS_civMission_id", _id];
 _civ setVariable ["DUWS_civ_pending", [_caller, "WORK", 0]];
-[netId _civ, 0, [_briefKey, floor (_cp * cp_reward_multiplier), _reward select 1, _rep, _goal]] remoteExec ["fnc_civ_bribe_prompt", _caller];
+[netId _civ, 0, [_briefKey, floor (_cp * cp_reward_multiplier), floor (CIV_MISSION_AP * cp_reward_multiplier), _reward select 1, _rep, _goal]] remoteExec ["fnc_civ_bribe_prompt", _caller];
 [localize "STR_DUWS_T_civ", format [localize _briefKey, _goal]] remoteExec ["fnc_duws_dialogue", _caller];
 ["INFO", "CIV", format ["civilian mission %1 (%2) offered in town %3 at %4", _id, _thread, _town, _site]] call fnc_log;
 

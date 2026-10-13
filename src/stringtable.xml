@@ -9136,17 +9136,17 @@
                 <Chinese>一些強盜偷走了我的車，把它弄到了城鎮外的營地裡。如果你能幫我把它帶回來，我會非常感激。</Chinese>
                 <Spanish>Unos bandidos me robaron el coche y se lo llevaron a su campamento a las afueras del pueblo. Si pudieras traérmelo de vuelta, te lo agradecería mucho.</Spanish>
             </Key>
-            <Key ID="STR_DUWS_T_CIVMISSION_CPMONEY">
-                <Original>&lt;br /&gt;CP: %1&lt;br /&gt;Money: %2</Original>
-                <English>&lt;br /&gt;CP: %1&lt;br /&gt;Money: %2</English>
-                <Chinesesimp>&lt;br /&gt;CP：%1&lt;br /&gt;现金：%2</Chinesesimp>
-                <German>&lt;br /&gt;CP: %1&lt;br /&gt;Geld: %2</German>
-                <Polish>&lt;br /&gt;CP: %1&lt;br /&gt;Gotówka: %2</Polish>
-                <Czech>&lt;br /&gt;CP: %1&lt;br /&gt;Peníze: %2</Czech>
-                <Russian>&lt;br /&gt;CP: %1&lt;br /&gt;Деньги: %2</Russian>
-                <French>&lt;br /&gt;CP : %1&lt;br /&gt;Argent : %2</French>
-                <Chinese>&lt;br /&gt;CP：%1&lt;br /&gt;現金：%2</Chinese>
-                <Spanish>&lt;br /&gt;CP: %1&lt;br /&gt;Dinero: %2</Spanish>
+            <Key ID="STR_DUWS_T_CIVMISSION_MONEY">
+                <Original>&lt;br /&gt;Money: %1</Original>
+                <English>&lt;br /&gt;Money: %1</English>
+                <Chinesesimp>&lt;br /&gt;现金：%1</Chinesesimp>
+                <German>&lt;br /&gt;Geld: %1</German>
+                <Polish>&lt;br /&gt;Gotówka: %1</Polish>
+                <Czech>&lt;br /&gt;Peníze: %1</Czech>
+                <Russian>&lt;br /&gt;Деньги: %1</Russian>
+                <French>&lt;br /&gt;Argent : %1</French>
+                <Chinese>&lt;br /&gt;現金：%1</Chinese>
+                <Spanish>&lt;br /&gt;Dinero: %1</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_CIVMISSION_THANKS">
                 <Original>Thank you. Here, have this. It's not much, but it's what I owe you.</Original>
@@ -9185,16 +9185,16 @@
                 <Spanish>Trabajo ofrecido</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_CIVMISSION_OFFER_REWARD">
-                <Original>Reward: %1 CP, %2 money, +%3 town reputation</Original>
-                <English>Reward: %1 CP, %2 money, +%3 town reputation</English>
-                <Chinesesimp>奖励：%1 CP，%2 现金，+%3 城镇声望</Chinesesimp>
-                <German>Belohnung: %1 CP, %2 Geld, +%3 Ansehen im Ort</German>
-                <Polish>Nagroda: %1 CP, %2 gotówki, +%3 reputacji miejscowości</Polish>
-                <Czech>Odměna: %1 CP, %2 peníze, +%3 reputace města</Czech>
-                <Russian>Награда: %1 CP, %2 денег, +%3 репутации населённого пункта</Russian>
-                <French>Récompense : %1 CP, %2 argent, +%3 réputation locale</French>
-                <Chinese>獎勵：%1 CP，%2 現金，+%3 城鎮聲望</Chinese>
-                <Spanish>Recompensa: %1 CP, %2 dinero, +%3 reputación del pueblo</Spanish>
+                <Original>Reward: %1 CP, %2 AP, %3 money, +%4 town reputation</Original>
+                <English>Reward: %1 CP, %2 AP, %3 money, +%4 town reputation</English>
+                <Chinesesimp>奖励：%1 CP，%2 AP，%3 现金，+%4 城镇声望</Chinesesimp>
+                <German>Belohnung: %1 CP, %2 AP, %3 Geld, +%4 Ansehen im Ort</German>
+                <Polish>Nagroda: %1 CP, %2 AP, %3 gotówki, +%4 reputacji miejscowości</Polish>
+                <Czech>Odměna: %1 CP, %2 AP, %3 peníze, +%4 reputace města</Czech>
+                <Russian>Награда: %1 CP, %2 AP, %3 денег, +%4 репутации населённого пункта</Russian>
+                <French>Récompense : %1 CP, %2 AP, %3 argent, +%4 réputation locale</French>
+                <Chinese>獎勵：%1 CP，%2 AP，%3 現金，+%4 城鎮聲望</Chinese>
+                <Spanish>Recompensa: %1 CP, %2 AP, %3 dinero, +%4 reputación del pueblo</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_CIVMISSION_ACCEPT">
                 <Original>Accept</Original>
@@ -9232,24 +9232,17 @@
                 <Chinese>我理解。你在外面注意安全。</Chinese>
                 <Spanish>Lo entiendo. Ten cuidado ahí fuera.</Spanish>
             </Key>
-            <Key ID="STR_DUWS_T_CIVMISSION_CP">
-                <Original>&lt;br /&gt;CP: %1</Original>
-                <English>&lt;br /&gt;CP: %1</English>
-                <Chinesesimp>&lt;br /&gt;CP：%1</Chinesesimp>
-                <French>&lt;br /&gt;CP : %1</French>
-                <Chinese>&lt;br /&gt;CP：%1</Chinese>
-            </Key>
             <Key ID="STR_DUWS_T_CIVMISSION_OFFER_REWARD_CP">
-                <Original>Reward: %1 CP, +%2 town reputation</Original>
-                <English>Reward: %1 CP, +%2 town reputation</English>
-                <Chinesesimp>奖励：%1 CP，+%2 城镇声望</Chinesesimp>
-                <German>Belohnung: %1 CP, +%2 Ansehen im Ort</German>
-                <Polish>Nagroda: %1 CP, +%2 reputacji miejscowości</Polish>
-                <Czech>Odměna: %1 CP, +%2 reputace města</Czech>
-                <Russian>Награда: %1 CP, +%2 репутации населённого пункта</Russian>
-                <French>Récompense : %1 CP, +%2 réputation locale</French>
-                <Chinese>獎勵：%1 CP，+%2 城鎮聲望</Chinese>
-                <Spanish>Recompensa: %1 CP, +%2 reputación del pueblo</Spanish>
+                <Original>Reward: %1 CP, %2 AP, +%3 town reputation</Original>
+                <English>Reward: %1 CP, %2 AP, +%3 town reputation</English>
+                <Chinesesimp>奖励：%1 CP，%2 AP，+%3 城镇声望</Chinesesimp>
+                <German>Belohnung: %1 CP, %2 AP, +%3 Ansehen im Ort</German>
+                <Polish>Nagroda: %1 CP, %2 AP, +%3 reputacji miejscowości</Polish>
+                <Czech>Odměna: %1 CP, %2 AP, +%3 reputace města</Czech>
+                <Russian>Награда: %1 CP, %2 AP, +%3 репутации населённого пункта</Russian>
+                <French>Récompense : %1 CP, %2 AP, +%3 réputation locale</French>
+                <Chinese>獎勵：%1 CP，%2 AP，+%3 城鎮聲望</Chinese>
+                <Spanish>Recompensa: %1 CP, %2 AP, +%3 reputación del pueblo</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_CIVMISSION_FUNDS_TITLE">
                 <Original>Raise Funds</Original>

@@ -24,12 +24,9 @@ private _title = localize _titleKey;
 private _townName = text ((missionNamespace getVariable ["civ_locations", []]) select (_e get "town"));
 if (_townName != "") then { _title = format ["%1: %2", _townName, _title] };
 _e set ["title", _title];
-(_e get "reward") params ["_cp", "_money", "_rep"];
-private _pay = if (_money > 0) then {
-    format [localize "STR_DUWS_T_CIVMISSION_CPMONEY", floor (_cp * cp_reward_multiplier), _money]
-} else {
-    format [localize "STR_DUWS_T_CIVMISSION_CP", floor (_cp * cp_reward_multiplier)]
-};
+(_e get "reward") params ["_cp", "_money", "_rep", "_ap"];
+private _pay = format [localize "STR_DUWS_T_mission_cpap", floor (_cp * cp_reward_multiplier), floor (_ap * cp_reward_multiplier)];
+if (_money > 0) then { _pay = _pay + format [localize "STR_DUWS_T_CIVMISSION_MONEY", _money] };
 private _desc = format [localize _descKey, _e get "target"];
 if (_noteKey != "") then { _desc = _desc + "<br />" + format [localize "STR_DUWS_T_mission_note_line", localize _noteKey] };
 _desc = _desc + "<br />" + (localize "STR_DUWS_T_mission_divider") + _pay + format [localize "STR_DUWS_T_mission_rep", _rep];

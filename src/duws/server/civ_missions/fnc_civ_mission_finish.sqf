@@ -13,9 +13,11 @@ if ((_e get "taskId") != "") then { [_e get "taskId", _status] call fnc_missionT
 
 switch (_status) do {
     case "SUCCEEDED": {
-        (_e get "reward") params ["_cp", "_money", "_rep"];
+        (_e get "reward") params ["_cp", "_money", "_rep", "_ap"];
         private _cpPaid = floor (_cp * cp_reward_multiplier);
         [_cpPaid, format ["civilian mission %1", _id]] call fnc_cp_adjust;
+        private _apPaid = floor (_ap * cp_reward_multiplier);
+        ["BLU", _apPaid, format ["civilian mission %1", _id], _apPaid] call fnc_ap_adjust;
         // Paid into the hands of whoever reported the job, not onto the giver's feet: a player who walks
         // away without looking down is a player who was not paid. A reporter who has since left the
         // session is paid where the giver stands, for whoever is there to take it.
@@ -29,6 +31,7 @@ switch (_status) do {
         private _near = allPlayers select { _x distance _giver < 30 };
         [localize "STR_DUWS_T_civ", localize (_e getOrDefault ["thanks", "STR_DUWS_T_CIVMISSION_THANKS"])] remoteExec ["fnc_duws_dialogue", _near];
         ["cpaddedmission", [_cpPaid]] remoteExec ["BIS_fnc_showNotification", [0, -2] select isDedicated];
+        ["apaddedmission", [_apPaid]] remoteExec ["BIS_fnc_showNotification", [0, -2] select isDedicated];
     };
     case "CANCELED": {
         private _by = _e get "by";

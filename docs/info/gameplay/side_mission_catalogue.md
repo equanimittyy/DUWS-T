@@ -472,7 +472,7 @@ slot. The code is in `src/duws/server/civ_missions/`.
 | Name | a generated operation name | the giver's town, then the type's name (*Kavala: Clear Bandit Camp*); no title card and no music |
 | Deadline | a band per type | none, except the pay clock of Recover Bandit Cache |
 | Ends | on the objective | when a player reports to the giver, or cancels; Raise Funds and Recover Bandit Cache end on the gift that meets the target |
-| Pays | CP and AP | CP, money and town reputation |
+| Pays | CP and AP | CP, AP, money and town reputation |
 
 | Type | Bandits | Won when | Lost when | CP | Money | REP |
 |---|---|---|---|---:|---:|---:|
@@ -487,7 +487,7 @@ The main group walks `closepatrol` round the site at a 100 m radius, as an HQ mi
 does. The pairs are two riflemen each (`fnc_bandit_pairs`) on `widepatrol` at a 250 m radius, inside the
 site's 300 m clearance from every zone. A pair does not count toward the camp's objective.
 
-The CP is scaled by `cp_reward_multiplier`. The money goes into the inventory of the player who reported
+Every type pays 5 AP (`CIV_MISSION_AP`), which credits BLUFOR's tier as an HQ mission's AP does. The CP and the AP are scaled by `cp_reward_multiplier`. The money goes into the inventory of the player who reported
 the job, and at their feet if it does not fit (`fnc_loot_grant`) — for Raise Funds that is whoever's gift
 met the target. A reporter who has left the session is paid at the giver's feet instead. The reputation goes to the giver's town (`fnc_town_rep_adjust`). A cancel ends the mission with no pay
 and no other cost, except that money given to Raise Funds is not refunded, reputation that Rescue Hostages
@@ -537,7 +537,7 @@ home, still captive so that nobody shoots him, until the map sweep takes him. On
 any bandit, a house team or a pair, holds a live sighting of a player for 3 s, a 300 s clock starts that nothing
 stops, and when it runs out, every hostage still held is executed. The sighting test and the execution are those
 of `fnc_rescue_hostage_mission.sqf`. Report goes live when no hostage is still held and at least one was freed,
-and pays only the CP and the money. If every hostage dies before one is freed, the job fails and the town loses
+and pays only the CP, the AP and the money. If every hostage dies before one is freed, the job fails and the town loses
 3. The offer and the task show +5, the most that the job can pay.
 
 **Recover Bandit Cache makes the players choose between money and reputation** (`fnc_civ_mission_cache.sqf`).
@@ -545,7 +545,7 @@ The props are those of Destroy Ammo Cache, without its guns, and the two crates 
 own. The cut is rolled with the offer, so the brief names it. The crates hold the cut plus 3-8 money, split
 between them with no crate over 20, so they always hold the cut. They cannot be damaged, so a stray grenade cannot
 burn it. The giver takes the cut through the Give Money row of Raise Funds, and the gift that meets it is the
-report: it pays 15 CP and 3 reputation, and the players keep the rest of the money. When the crates first hold less
+report: it pays 15 CP, 5 AP and 3 reputation, and the players keep the rest of the money. When the crates first hold less
 than the cut, the task pin moves to the giver and a 20 min clock starts. From then on, any end but the payment costs
 the town 15 reputation: the clock running out, the giver's death or a cancel. A player who keeps all the money makes
 23-33 and pays that price. Before the cut leaves the crates, the job ends like any other.
