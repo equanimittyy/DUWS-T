@@ -18277,16 +18277,16 @@
                 <Spanish>Devuelve esta fuerza operativa a tu Alto Mando.</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_TASKFORCE_RELEASED">
-                <Original>All units, this is Overlord. Task Force %1 is released from my command.</Original>
-                <English>All units, this is Overlord. Task Force %1 is released from my command.</English>
+                <Original>All units, this is Overlord. Task Force %1 has been released from my command.</Original>
+                <English>All units, this is Overlord. Task Force %1 has been released from my command.</English>
                 <Chinesesimp>全体单位注意，这里是 Overlord。特遣队 %1 已解除我的指挥。</Chinesesimp>
-                <German>An alle Einheiten, hier ist Overlord. Task Force %1 ist aus meinem Kommando entlassen.</German>
-                <Polish>Wszystkie jednostki, tu Overlord. Grupa zadaniowa %1 wychodzi spod mojego dowództwa.</Polish>
-                <Czech>Všem jednotkám, tady Overlord. Úkolové uskupení %1 už není pod mým velením.</Czech>
-                <Russian>Всем подразделениям, говорит Overlord. Оперативная группа %1 выходит из-под моего командования.</Russian>
-                <French>À toutes les unités, ici Overlord. Le groupement tactique %1 quitte mon commandement.</French>
+                <German>An alle Einheiten, hier ist Overlord. Task Force %1 wurde aus meinem Kommando entlassen.</German>
+                <Polish>Wszystkie jednostki, tu Overlord. Grupa zadaniowa %1 została wyłączona spod mojego dowództwa.</Polish>
+                <Czech>Všem jednotkám, tady Overlord. Úkolové uskupení %1 bylo uvolněno z mého velení.</Czech>
+                <Russian>Всем подразделениям, говорит Overlord. Оперативная группа %1 выведена из-под моего командования.</Russian>
+                <French>À toutes les unités, ici Overlord. Le groupement tactique %1 a été libéré de mon commandement.</French>
                 <Chinese>全體單位注意，這裡是 Overlord。特遣隊 %1 已解除我的指揮。</Chinese>
-                <Spanish>A todas las unidades, aquí Overlord. La Fuerza Operativa %1 deja de estar bajo mi mando.</Spanish>
+                <Spanish>A todas las unidades, aquí Overlord. La Fuerza Operativa %1 ha sido liberada de mi mando.</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_TASKFORCE_STANCE">
                 <Original>Stance: %1</Original>
@@ -18348,17 +18348,41 @@
                 <Chinese>讓 Overlord 的特遣隊偏向進攻或防守。有兩支或以上時，每一方至少保留一支。</Chinese>
                 <Spanish>Inclina las fuerzas operativas de Overlord hacia el ataque o la defensa. Con dos o más, cada lado conserva al menos una.</Spanish>
             </Key>
-            <Key ID="STR_DUWS_T_TASKFORCE_STANCE_SET">
-                <Original>All units, this is Overlord. Task force stance: %1.</Original>
-                <English>All units, this is Overlord. Task force stance: %1.</English>
-                <Chinesesimp>全体单位注意，这里是 Overlord。特遣队态势：%1。</Chinesesimp>
-                <German>An alle Einheiten, hier ist Overlord. Haltung der Task Forces: %1.</German>
-                <Polish>Wszystkie jednostki, tu Overlord. Postawa grup zadaniowych: %1.</Polish>
-                <Czech>Všem jednotkám, tady Overlord. Postoj úkolových uskupení: %1.</Czech>
-                <Russian>Всем подразделениям, говорит Overlord. Режим оперативных групп: %1.</Russian>
-                <French>À toutes les unités, ici Overlord. Posture des groupements tactiques : %1.</French>
-                <Chinese>全體單位注意，這裡是 Overlord。特遣隊態勢：%1。</Chinese>
-                <Spanish>A todas las unidades, aquí Overlord. Postura de las fuerzas operativas: %1.</Spanish>
+            <Key ID="STR_DUWS_T_TASKFORCE_STANCE_SET_ATTACK">
+                <Original>All task forces, this is Overlord. You are advised to maintain an offensive posture in the AO.</Original>
+                <English>All task forces, this is Overlord. You are advised to maintain an offensive posture in the AO.</English>
+                <Chinesesimp>全体特遣队注意，这里是 Overlord。建议你们在 AO 内保持进攻态势。</Chinesesimp>
+                <German>An alle Task Forces, hier ist Overlord. Euch wird empfohlen, im AO eine offensive Haltung beizubehalten.</German>
+                <Polish>Wszystkie grupy zadaniowe, tu Overlord. Zalecam utrzymanie ofensywnej postawy w AO.</Polish>
+                <Czech>Všem úkolovým uskupením, tady Overlord. Doporučuji udržovat v AO útočný postoj.</Czech>
+                <Russian>Всем оперативным группам, говорит Overlord. Рекомендую сохранять в AO наступательный режим.</Russian>
+                <French>À tous les groupements tactiques, ici Overlord. Il vous est conseillé de maintenir une posture offensive dans l'AO.</French>
+                <Chinese>全體特遣隊注意，這裡是 Overlord。建議你們在 AO 內保持進攻態勢。</Chinese>
+                <Spanish>A todas las fuerzas operativas, aquí Overlord. Se os aconseja mantener una postura ofensiva en el AO.</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_STANCE_SET_BALANCED">
+                <Original>All task forces, this is Overlord. You are advised to maintain a balanced posture in the AO.</Original>
+                <English>All task forces, this is Overlord. You are advised to maintain a balanced posture in the AO.</English>
+                <Chinesesimp>全体特遣队注意，这里是 Overlord。建议你们在 AO 内保持均衡态势。</Chinesesimp>
+                <German>An alle Task Forces, hier ist Overlord. Euch wird empfohlen, im AO eine ausgewogene Haltung beizubehalten.</German>
+                <Polish>Wszystkie grupy zadaniowe, tu Overlord. Zalecam utrzymanie zrównoważonej postawy w AO.</Polish>
+                <Czech>Všem úkolovým uskupením, tady Overlord. Doporučuji udržovat v AO vyvážený postoj.</Czech>
+                <Russian>Всем оперативным группам, говорит Overlord. Рекомендую сохранять в AO сбалансированный режим.</Russian>
+                <French>À tous les groupements tactiques, ici Overlord. Il vous est conseillé de maintenir une posture équilibrée dans l'AO.</French>
+                <Chinese>全體特遣隊注意，這裡是 Overlord。建議你們在 AO 內保持均衡態勢。</Chinese>
+                <Spanish>A todas las fuerzas operativas, aquí Overlord. Se os aconseja mantener una postura equilibrada en el AO.</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_STANCE_SET_DEFEND">
+                <Original>All task forces, this is Overlord. You are advised to maintain a defensive posture in the AO.</Original>
+                <English>All task forces, this is Overlord. You are advised to maintain a defensive posture in the AO.</English>
+                <Chinesesimp>全体特遣队注意，这里是 Overlord。建议你们在 AO 内保持防守态势。</Chinesesimp>
+                <German>An alle Task Forces, hier ist Overlord. Euch wird empfohlen, im AO eine defensive Haltung beizubehalten.</German>
+                <Polish>Wszystkie grupy zadaniowe, tu Overlord. Zalecam utrzymanie defensywnej postawy w AO.</Polish>
+                <Czech>Všem úkolovým uskupením, tady Overlord. Doporučuji udržovat v AO obranný postoj.</Czech>
+                <Russian>Всем оперативным группам, говорит Overlord. Рекомендую сохранять в AO оборонительный режим.</Russian>
+                <French>À tous les groupements tactiques, ici Overlord. Il vous est conseillé de maintenir une posture défensive dans l'AO.</French>
+                <Chinese>全體特遣隊注意，這裡是 Overlord。建議你們在 AO 內保持防守態勢。</Chinese>
+                <Spanish>A todas las fuerzas operativas, aquí Overlord. Se os aconseja mantener una postura defensiva en el AO.</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_TASKFORCE_ASSAULT">
                 <Original>This is %1. We're moving to capture %2.</Original>
