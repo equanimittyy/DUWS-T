@@ -27,17 +27,19 @@ if (_taskforces isEqualTo []) exitWith {
 };
 
 {
-	(_x getVariable ["DUWS_taskforce_status", [0, [], ""]]) params ["_alive", "_classes", "_objective"];
+	(_x getVariable ["DUWS_taskforce_status", [0, [], []]]) params ["_alive", "_classes", "_order"];
 
 	private _status = format [localize "STR_DUWS_T_TASKFORCE_ALIVE", _alive];
 	if (_classes isNotEqualTo []) then {
 		_status = _status + ", " + ((_classes apply {getText (configFile >> "CfgVehicles" >> _x >> "displayName")}) joinString ", ");
 	};
 
-	private _ordersText = if (_objective isEqualTo "") then {
-		localize "STR_DUWS_T_TASKFORCE_AWAITING"
-	} else {
-		format [localize "STR_DUWS_T_TASKFORCE_CAPTURE", _objective]
+	_order params [["_kind", ""], ["_target", ""]];
+	private _ordersText = switch (_kind) do {
+		case "capture": { format [localize "STR_DUWS_T_TASKFORCE_CAPTURE", _target] };
+		case "patrol": { format [localize "STR_DUWS_T_TASKFORCE_PATROL", _target] };
+		case "hq": { localize "STR_DUWS_T_TASKFORCE_DEFEND_HQ" };
+		default { localize "STR_DUWS_T_TASKFORCE_AWAITING" };
 	};
 
 	private _top = _forEachIndex * ROW_H;

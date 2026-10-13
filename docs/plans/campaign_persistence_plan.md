@@ -734,8 +734,9 @@ else brings it back, and the reconciliation pass does not refund it
 would lose the team's investment. The save records the men and the vehicles, not the group, because a
 group does not outlive the session. `DUWS_fnc_restoreTaskforces` rebuilds each task force where it
 stood, with each man's loadout, damage and seat, and then registers the group through
-`fnc_taskforce_create` under its saved name. The objective is not saved: the task-force tick derives
-it from the map again, so the load gives the same order. A man or a vehicle whose class no loaded mod
+`fnc_taskforce_create` under its saved name. The order is not saved: the task-force tick derives
+it from the map again, so the load gives the same order. A patrol leg is a random town, so a load
+picks a new one. A man or a vehicle whose class no loaded mod
 defines is dropped. The load hint counts a dropped vehicle; a dropped man is logged, because the hint's
 unit count is of enemy units.
 
