@@ -261,6 +261,7 @@ live vehicle within 50 m of it that holds more than intel. At the HQ the entry i
 crate, not on the HQ building with the Arsenal, so `fnc_BluHQinit` broadcasts the crate's handle
 (`DUWS_hqCrate`). A FOB and a killhouse terminal have no crate. The entry is in the equip bucket,
 because a mis-scroll loses nothing: everything that the entry deletes, the shelf already offers unlimited.
+Its priority is 79, one below the bucket, so that it lists under the Arsenal and Quick Kits entries.
 
 Gear that the pool counts, and money, goes into the pool (`fnc_captured_pool_collect`,
 `server/warcom/fnc_economy_init.sqf`). The test is the one the close settle uses

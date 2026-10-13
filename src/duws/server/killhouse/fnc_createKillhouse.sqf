@@ -360,7 +360,7 @@ if (count _computerObjects > 0) then {
         // at a terminal, and a player made to walk the course to re-kit will not. Suffixed JIP ids because an object-keyed message *is* that object's netId -- a second entry on the same terminal would evict the first, and these props are never deleted.
         [_x, [ACT_EQUIP("STR_DUWS_T_160jkc3a"), fnc_duws_Arsenal, [], 80, false, false, "",
             "_this distance _target < 8 && support_armory_available"]] remoteExec ["addAction", [0,-2] select isDedicated, format ["killhouse_arsenal_%1", netId _x]];
-        [_x, [ACT_EQUIP("STR_DUWS_T_ARSENAL_COLLECT"), fnc_arsenal_collect, [], 80, false, false, "",
+        [_x, [ACT_EQUIP("STR_DUWS_T_ARSENAL_COLLECT"), fnc_arsenal_collect, [], 79, false, false, "",
             "_this distance _target < 8 && support_armory_available"]] remoteExec ["addAction", [0,-2] select isDedicated, format ["killhouse_collect_%1", netId _x]];
         // No quick kits in Limited: an on-demand role loadout bypasses the tracked pool the mode enforces (same reason as fnc_addQuickChangeActions).
         if (!DUWS_arsenalLimited) then {

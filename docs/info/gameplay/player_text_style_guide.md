@@ -318,6 +318,7 @@ call sites pass a stringtable key and never write markup themselves.
 | `ACT_PRIMARY_MENU` | `#15ff00` | 100 | Command: directs your forces or your base. Uppercased by the macro |
 | `ACT_SECONDARY_MENU` | `#0d9900` | 90 | Services and situational entries — the command hue one tier down |
 | `ACT_EQUIP` | `#ff8000` | 80 | Gives or swaps gear |
+| `ACT_EQUIP` | `#ff8000` | 79 | Dump loot from vehicle, one below the bucket so that it lists under the Arsenal and Quick Kits |
 | `ACT_MOVE` | `#00b7ff` | 70 | Relocates you, or commits a vehicle to a destination |
 | `ACT_AID` | `#00b7ff` | 60 | Heals or rearms |
 | `ACT_CIVILIAN_INTERACTION` | `#00b7ff` | 50 | Acts on a civilian |

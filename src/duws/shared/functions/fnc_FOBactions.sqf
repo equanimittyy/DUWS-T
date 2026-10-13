@@ -14,7 +14,7 @@ _fob addaction [ACT_PRIMARY_MENU("STR_DUWS_T_vw32hahc"), fnc_request_menu, [true
 
 if (support_armory_available) then {
     _fob addaction [ACT_EQUIP("STR_DUWS_T_160jkc3a"),fnc_duws_Arsenal, [], 80, true, true, "", "_this == player", ACT_REACH];
-    _fob addaction [ACT_EQUIP("STR_DUWS_T_ARSENAL_COLLECT"),fnc_arsenal_collect, [], 80, true, true, "", "_this == player", ACT_REACH];
+    _fob addaction [ACT_EQUIP("STR_DUWS_T_ARSENAL_COLLECT"),fnc_arsenal_collect, [], 79, true, true, "", "_this == player", ACT_REACH];
 };
 
 if (support_halo_available) then {
