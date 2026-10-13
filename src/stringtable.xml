@@ -10192,6 +10192,18 @@
                 <Chinese>我們又獲得了本區域更多敵方陣地的情報。它們現也已標注在你的地圖上。</Chinese>
                 <Spanish>Tenemos inteligencia sobre más posiciones enemigas en la zona. También están marcadas en tu mapa.</Spanish>
             </Key>
+            <Key ID="STR_DUWS_T_INTEL_RECON_FLAG">
+                <Original>Overlord, this is Allseer. Unscouted enemy position near %1. Recommend a recon team put eyes on it.</Original>
+                <English>Overlord, this is Allseer. Unscouted enemy position near %1. Recommend a recon team put eyes on it.</English>
+                <Chinesesimp>Overlord，这里是 Allseer。%1 附近有一处未经侦察的敌方阵地。建议派侦察小组前往观察。</Chinesesimp>
+                <German>Overlord, hier ist Allseer. Unaufgeklärte Feindstellung nahe %1. Empfehle, ein Aufklärungsteam zur Beobachtung anzusetzen.</German>
+                <Polish>Overlord, tu Allseer. Nierozpoznana wroga pozycja w rejonie %1. Zalecam wysłanie zespołu rozpoznawczego na obserwację.</Polish>
+                <Czech>Overlord, tady Allseer. Neprozkoumaná nepřátelská pozice poblíž %1. Doporučuji vyslat průzkumný tým k pozorování.</Czech>
+                <Russian>Overlord, это Allseer. Неразведанная позиция противника у %1. Рекомендую направить разведгруппу для наблюдения.</Russian>
+                <French>Overlord, ici Allseer. Position ennemie non repérée près de %1. Je recommande d'y envoyer une équipe de reconnaissance en observation.</French>
+                <Chinese>Overlord，這裡是 Allseer。%1 附近有一處未經偵察的敵方陣地。建議派偵察小組前往觀察。</Chinese>
+                <Spanish>Overlord, aquí Allseer. Posición enemiga sin explorar cerca de %1. Recomiendo enviar un equipo de reconocimiento a observarla.</Spanish>
+            </Key>
             <Key ID="STR_DUWS_T_RECON_OBSERVE_RAISE">
                 <Original>Raise binoculars</Original>
                 <English>Raise binoculars</English>

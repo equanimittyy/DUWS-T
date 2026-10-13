@@ -87,8 +87,14 @@ while {true} do {
         // hourly reveal would end hardcore's hidden-map phase with no player effort.
         "intel" call _enter;
         private _intelLevel = missionNamespace getVariable ["DUWS_intelLevel", 0];
-        if (random 1 < (DUWS_intel_roll_by_level param [_intelLevel, 0])) then {
+        private _intelOdds = DUWS_intel_roll_by_level param [_intelLevel, 0];
+        if (random 1 < _intelOdds) then {
             [[], objNull, true, 0, _intelLevel > 0] call fnc_intel_payout;
+        };
+        // The recon tasking's slot is claimed before the spawn, so a later tick cannot start a second one.
+        if (!DUWS_intelRecon_live && {random 1 < ((2 * _intelOdds) min DUWS_intelRecon_rollCap)}) then {
+            DUWS_intelRecon_live = true;
+            [] spawn fnc_recon_intel_mission;
         };
 
         // friCells/eneCells: cells holding force; belief: live sighting stamps; fresh: groups sensed this

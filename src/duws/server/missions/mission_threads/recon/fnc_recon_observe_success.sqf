@@ -1,7 +1,6 @@
-// Locality: server -- the client observe layer (client/missions/fnc_recon_observe_layer.sqf) remoteExecs
-// here to target 2 when a player finishes the hold. The win itself is decided in the thread's monitor;
-// this only raises the flag it waits on, so a second player finishing a fraction later, or a stale JIP
-// report, cannot pay the reward twice -- the monitor reads the flag once and clears DUWS_recon_active.
+// Locality: server; the client layer remoteExecs it with its job's id. It only raises the flag the job's monitor
+// reads once, so a second report or a stale JIP one cannot pay twice.
 if (!isServer) exitWith {};
-if (!(missionNamespace getVariable ["DUWS_recon_active", false])) exitWith {};
-DUWS_recon_done = true;
+params [["_id", "", [""]]];
+if (!(missionNamespace getVariable [format ["DUWS_recon_active_%1", _id], false])) exitWith {};
+missionNamespace setVariable [format ["DUWS_recon_done_%1", _id], true];

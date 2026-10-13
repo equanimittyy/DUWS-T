@@ -21,16 +21,19 @@ params ["_pos"];
 #define RECON_HP_EXCLUDE ["MORTAR", "ARTY", "MINEFIELD"]
 
 private _enemyZones = missionNamespace getVariable ["WARCOM_zones_controled_by_OPFOR", []];
+// A live recon job's target, so the HQ mission and the Intelligence Center's tasking never share one.
+private _taken = missionNamespace getVariable ["DUWS_recon_targets", []];
 
 // Eligibility filtered once so the ALL list and the nearest pick can never disagree on what counts.
 private _zones = (missionNamespace getVariable ["zone_namePOS_pairs", []]) select {
     _x params ["", "_zp", "_revealed"];
-    !_revealed && {(_enemyZones findIf { _x distance2D _zp < 50 }) >= 0}
+    !_revealed && {(_enemyZones findIf { _x distance2D _zp < 50 }) >= 0} && {(_taken findIf { _x distance2D _zp < 1 }) < 0}
 };
 // Row: [key, pos, type, side, zoneKey, revealed, dir].
 private _hps = (missionNamespace getVariable ["DUWS_hardpoints", []]) select {
-    _x params ["", "", "_type", "_side", "_zoneKey", "_revealed"];
+    _x params ["", "_hp", "_type", "_side", "_zoneKey", "_revealed"];
     !_revealed && {_side isEqualTo "opfor"} && {_zoneKey isEqualTo ""} && {!(_type in RECON_HP_EXCLUDE)}
+        && {(_taken findIf { _x distance2D _hp < 1 }) < 0}
 };
 
 if (_pos isEqualTo "ALL") exitWith { (_zones apply { _x select 1 }) + (_hps apply { _x select 1 }) };

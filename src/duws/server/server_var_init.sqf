@@ -1040,6 +1040,12 @@ WARCOM_opfor_lastIncome = 0;
 // OPCOM_TICK_PERIOD 5 the levels average a report every 60 / 30 / 20 / 15 / 12 minutes. That rate alone
 // pays each level less per CP than the one below it; the share window carries the rest of the climb.
 DUWS_intel_roll_by_level = [0.0014, 0.0028, 0.0042, 0.0056, 0.0069];
+// The recon tasking rolls twice a level's report odds, capped here: a mean wait of 30 min unbought and 17 min from
+// level I, where the cap already binds.
+DUWS_intelRecon_rollCap = 0.005;
+DUWS_intelRecon_live = false;
+// Broadcast: the client-side offer picker skips these too.
+DUWS_recon_targets = []; publicVariable "DUWS_recon_targets";
 DUWS_intel_share_by_level = [[0, 0.25], [0.25, 0.5], [0.5, 0.75], [0.75, 1], [1, 1]];
 DUWS_intel_contact_life = 600;
 

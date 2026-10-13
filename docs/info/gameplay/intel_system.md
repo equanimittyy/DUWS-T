@@ -379,6 +379,28 @@ It rolls silently on a dry pool. A support that rolls every five seconds for hou
 *"Nothing we don't already know"* each time; a player who searched a body asked the question and is owed
 the answer.
 
+
+**The centre also tasks recon** (`fnc_recon_intel_mission.sqf`). In the same stage of the OPCOM tick, and
+only while no tasking is live, a second roll starts one at twice the level's report odds, capped at
+`DUWS_intelRecon_rollCap` (0.005).
+
+| Level | Report odds | Tasking odds | Mean wait for a tasking |
+|---|---:|---:|---:|
+| Unbought | 0.0014 | 0.0028 | 30 min |
+| I to IV | 0.0028-0.0069 | 0.005 | 17 min |
+
+Twice level I's odds already passes the cap, so levels I to IV task at the same rate. The wait counts from
+the end of the last tasking, because a live one blocks the roll.
+
+Allseer's flag to Overlord is the only line. The job has no Overlord brief, no team copy, no title card and
+no music, so a tasking does not interrupt the HQ mission's radio. The target is an unrevealed OPFOR zone
+or standalone hardpoint, drawn at random from the reach of an HQ mission: more than 1.5 km and less than
+1.5 × `zones_max_dist_from_hq` from the HQ. The job is the hold of Recon Enemy Position
+([`side_mission_catalogue.md`](side_mission_catalogue.md#recon-enemy-position)) in a slot of its own,
+`DUWS_intelRecon_live`. So it runs beside any HQ mission, an HQ recon included, and never takes the HQ
+mission lock, the start gate or `DUWS_curReward`. The reward and the deadline are those of the Recon Enemy
+Position row in `mission_types.hpp`, paid through `fnc_mission_reward`. A live tasking is session state, so
+a load starts with none.
 ## Persistence
 
 A hardcore campaign's entire progress is which zones and towns it has revealed, so the campaign snapshot

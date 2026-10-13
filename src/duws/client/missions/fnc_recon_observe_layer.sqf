@@ -1,23 +1,17 @@
-// Locality: runs on each client (the thread remoteExecs it to 0, JIP-keyed). The player-facing half
-// of the recon-observe mission: the "look here" icon over the target, the binocular + line-of-sight
-// hold, and the report back to the server when a hold completes. The dedicated server and any headless
-// client have no player to observe with, so they drop out.
+// Locality: each client (fnc_recon_observe_run remoteExecs it to 0, JIP-keyed per job).
 //
-// State is held in globals rather than the params' locals because a Draw3D block sees no locals from
-// where it was written (the same reason fnc_draw_world_icons names its sources). DUWS_recon_active is
-// the server-owned teardown switch: the thread flips it false and publicVariables it on mission end,
-// and both the draw handler and the hold loop below stop on it.
-params ["_overwatch", "_anchor", "_area", "_range", "_hold"];
+// Per-job state lives in DUWS_recon_layers: the HQ mission and the Intelligence Center's tasking can be live at
+// once, and a Draw3D block sees no locals, so one handler draws every job from there.
+params ["_id", "_overwatch", "_anchor", "_area", "_range", "_hold"];
 if (!hasInterface) exitWith {};
 
-// A late joiner whose JIP copy fires after the mission already ended: nothing to install.
-if (!(missionNamespace getVariable ["DUWS_recon_active", false])) exitWith {};
+// A JIP copy can fire after the job already ended.
+private _activeVar = format ["DUWS_recon_active_%1", _id];
+if (!(missionNamespace getVariable [_activeVar, false])) exitWith {};
 
-DUWS_recon_overwatch = _overwatch;
-DUWS_recon_anchorPos = _anchor;
-DUWS_recon_area      = _area;
-DUWS_recon_range     = _range;
-DUWS_recon_progress  = 0;   // 0..1, written by the hold loop, read by the draw handler
+// [overwatch, anchor, area, progress 0..1]
+if (isNil "DUWS_recon_layers") then { DUWS_recon_layers = createHashMap };
+DUWS_recon_layers set [_id, [_overwatch, _anchor, _area, 0]];
 
 // Glassing = binoculars raised and actually looked through, not merely carried: currentWeapon reports
 // the binocular only while it is selected, and cameraView is "GUNNER" only while the optic is up.
@@ -44,44 +38,45 @@ if (isNil "DUWS_fnc_recon_los") then {
     };
 };
 
-// The icon draws once the player is inside the designated overwatch area. It rides the fixed anchor
-// position (z is metres above it, the array-source convention fnc_draw_world_icons uses). Its text is
-// the one action still owed: "Raise binoculars" until the player is glassing, then the live hold percent.
-DUWS_recon_ehDraw = addMissionEventHandler ["Draw3D", {
-    if (!(missionNamespace getVariable ["DUWS_recon_active", false])) exitWith {};
-    if ((player distance2D DUWS_recon_overwatch) > DUWS_recon_area) exitWith {};
-    private _a = DUWS_recon_anchorPos;
-    private _label = if (!([player] call DUWS_fnc_recon_glassing)) then { localize "STR_DUWS_T_RECON_OBSERVE_RAISE" } else {
-        private _pct = round (DUWS_recon_progress * 100);
-        if (_pct > 0) then { format [localize "STR_DUWS_T_RECON_OBSERVE_HOLDING", _pct, "%"] } else { localize "STR_DUWS_T_RECON_OBSERVE_OBSERVE" }
-    };
-    drawIcon3D ["\a3\ui_f\data\gui\cfg\hints\Direction_ca.paa", [0.2, 1, 0.2, 0.8],
-        [_a select 0, _a select 1, 8], 1, 1, 0, _label, 1, 0.03, "TahomaB"];
-}];
+// Never removed: taking it out as the last job ends would race a new job installing at the same moment.
+if (isNil "DUWS_recon_ehDraw") then {
+    DUWS_recon_ehDraw = addMissionEventHandler ["Draw3D", {
+        {
+            _y params ["_ow", "_a", "_area", "_progress"];
+            if ((player distance2D _ow) <= _area) then {
+                private _label = if (!([player] call DUWS_fnc_recon_glassing)) then { localize "STR_DUWS_T_RECON_OBSERVE_RAISE" } else {
+                    private _pct = round (_progress * 100);
+                    if (_pct > 0) then { format [localize "STR_DUWS_T_RECON_OBSERVE_HOLDING", _pct, "%"] } else { localize "STR_DUWS_T_RECON_OBSERVE_OBSERVE" }
+                };
+                drawIcon3D ["\a3\ui_f\data\gui\cfg\hints\Direction_ca.paa", [0.2, 1, 0.2, 0.8],
+                    [_a select 0, _a select 1, 8], 1, 1, 0, _label, 1, 0.03, "TahomaB"];
+            };
+        } forEach DUWS_recon_layers;
+    }];
+};
 
 // The hold. Accrues real elapsed time while the player stays in the area, glassing, with LOS; any break
 // resets it -- the observation has to be continuous. On completion it reports once to the server and
 // stops; the server owns the win, so this only sends the signal. A short poll keeps it off every frame.
-[_hold] spawn {
-    params ["_hold"];
+[_id, _activeVar, _overwatch, _anchor, _area, _range, _hold] spawn {
+    params ["_id", "_activeVar", "_overwatch", "_anchor", "_area", "_range", "_hold"];
     private _acc = 0;
     private _last = diag_tickTime;
     private _sent = false;
-    while { (missionNamespace getVariable ["DUWS_recon_active", false]) && !_sent } do {
+    while { (missionNamespace getVariable [_activeVar, false]) && !_sent } do {
         private _dt = diag_tickTime - _last;
         _last = diag_tickTime;
         private _ok = alive player
-            && {(player distance2D DUWS_recon_overwatch) <= DUWS_recon_area}
+            && {(player distance2D _overwatch) <= _area}
             && {[player] call DUWS_fnc_recon_glassing}
-            && {[player, DUWS_recon_anchorPos, DUWS_recon_range] call DUWS_fnc_recon_los};
+            && {[player, _anchor, _range] call DUWS_fnc_recon_los};
         if (_ok) then { _acc = _acc + _dt } else { _acc = 0 };
-        DUWS_recon_progress = 0 max ((_acc / _hold) min 1);
+        (DUWS_recon_layers get _id) set [3, 0 max ((_acc / _hold) min 1)];
         if (_acc >= _hold) then {
             _sent = true;
-            remoteExec ["fnc_recon_observe_success", 2];
+            [_id] remoteExec ["fnc_recon_observe_success", 2];
         };
         sleep 0.5;
     };
-    removeMissionEventHandler ["Draw3D", DUWS_recon_ehDraw];
-    DUWS_recon_progress = 0;
+    DUWS_recon_layers deleteAt _id;
 };

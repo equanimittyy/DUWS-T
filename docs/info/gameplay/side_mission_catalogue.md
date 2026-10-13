@@ -182,47 +182,47 @@ Tunables (defaults, all in the thread): leave 4 steps friendly / 2 steps enemy (
 ### Recon Enemy Position
 
 A standoff scout, not a fight. The player infils to a mission-chosen overwatch position, raises
-binoculars, and holds eyes-on an unrevealed OPFOR zone long enough to scout it; success lifts that
-zone's fog of war on the strategic map. Thread:
+binoculars, and holds eyes-on an unrevealed OPFOR zone or standalone hardpoint long enough to scout it;
+success lifts its fog of war on the strategic map. Thread:
 `mission_threads/recon/fnc_recon_observe_mission.sqf`.
 
-**Siting.** `fnc_recon_observe_site` snaps a picker candidate to the nearest unrevealed OPFOR-held
-zone within 2.5 km, confirms at least one 600-800 m bearing has clear terrain LOS onto it *and* stands
-clear of every other enemy zone and hardpoint, then returns the **target zone** -- not the overwatch.
+**Siting.** `fnc_recon_observe_site` snaps a picker candidate to the nearest unrevealed OPFOR target,
+confirms at least one 600-800 m bearing has clear terrain LOS onto it *and* stands
+clear of every other enemy zone and hardpoint, then returns the **target** -- not the overwatch.
 `fnc_mission_findSite` keeps only `select 0`, so the thread cannot be handed both; re-deriving the
 target from an overwatch position is ambiguous where zones sit close, so handing back the target makes
-the thread's re-derivation exact. The thread then computes the overwatch (fuller terrain+object LOS,
-friendly-facing arc, height-favoured, clear of other enemy zones and hardpoints) for the launched
-mission. A revealed zone is no target -- the reveal is the payoff -- so with none unrevealed in reach
-the offer is dropped.
+the thread's re-derivation exact. `fnc_recon_observe_overwatch` then computes the overwatch (fuller
+terrain+object LOS, friendly-facing arc, height-favoured, clear of other enemy zones and hardpoints) for
+the launched mission. A revealed target is no target -- the reveal is the payoff -- so with none
+unrevealed in reach the offer is dropped.
 
-**Custom streaming, this mission only.** At an 800 m standoff the real garrison is streamed out by the
-global site poller, and waking it there would hand the player a live garrison that wanders off the
-scouted spot. Instead the thread runs its own streamer: on approach it builds the target zone's OWN
-prefab (real structures and crewed statics, via the zone's builder fn resolved from
-`DUWS_zoneKind_<key>`), plus two representative infantry teams (`YELLOW`, so they hold rather than
-chase an 800 m spotter) and a car, all on `closepatrol`. The prefab is built a step off the zone
-centre so its `zone_<x>_<y>` key stays distinct from the real zone's -- releasing the recon copy must
-not retire the live zone. Teardown rides `fnc_mission_finish`: prefab by compKey, gunners/teams/car by
-the claimed-token sweep plus a proximity pass for the builder-orphaned gunners.
+**Two recon jobs can run at once.** The thread shares the overwatch and the hold
+(`fnc_recon_observe_run`) with the Intelligence Center's recon tasking
+([`intel_system.md`](intel_system.md#the-intelligence-center)). Each job runs under its own id, `hq` or
+`intel`, so the client layer, the win flag and the JIP key of one never touch the other. A live job's
+target is in `DUWS_recon_targets`, and `fnc_recon_observe_pick` skips it. Two jobs on one target would pay
+twice for one hold and hand the zone's radius back out of order.
+
+**The real zone wakes for the scout.** At an 800 m standoff the global site poller leaves a zone target
+streamed out. The hold widens the zone's site-record radius to reach the overwatch plus 200 m, so the real
+garrison streams in as the player nears the outlook. The capture triggers keep their geometry, and the
+radius is handed back when the job ends. A hardpoint target streams on its own ring and is not touched.
 
 **Observing.** The player-facing half (`client/missions/fnc_recon_observe_layer.sqf`, JIP-keyed to all
-clients) draws a 3D "look here" icon over the target and runs the hold: continuous binocular LOS
+clients per job) draws a 3D "look here" icon over the target and runs the hold: continuous binocular LOS
 (`cameraView == "GUNNER"` and the binocular is `currentWeapon`) from within the overwatch area, any
-break resetting it, re-checked client-side per tick. On a completed hold the client reports once to
-`fnc_recon_observe_success`, which raises the flag the thread's monitor wins on -- a second player or a
-stale JIP report cannot double-pay. Soft stealth: the element can see and fire, but the mission never
-auto-fails on detection.
+break resetting it, re-checked client-side per tick. On a completed hold the client reports once, with
+its job's id, to `fnc_recon_observe_success`, which raises the flag the job's monitor wins on -- a second
+player or a stale JIP report cannot double-pay. Soft stealth: the element can see and fire, but the
+mission never auto-fails on detection.
 
-**Payoff.** `fnc_zone_reveal` lifts the scouted zone onto the strategic map. The scout also reveals
+**Payoff.** The scouted target is revealed on the strategic map. The scout also reveals
 `rand(0-2)` of the nearest unrevealed positions (the target's own hardpoints, standalone hardpoints,
 unrevealed enemy zones, ranked by distance), then the standard CP/AP. The hardpoint parent gate is
 respected: a hardpoint under a still-hidden zone is not offered as bonus intel.
 
-Tunables (defaults, all in the thread): overwatch band 600-800 m, LOS range 900 m, observe area 75 m,
-hold 12 s, approach ring 200 m, 2 teams + a car, prefab offset 25 m, gunner-claim radius 60 m, up to 2
-bonus reveals. Targets zones only for now -- hardpoint targeting as the primary objective is a later
-add.
+Tunables (defaults): overwatch band 600-800 m (`fnc_recon_observe_overwatch`); LOS range 900 m, observe
+area 75 m, hold 12 s, approach ring 200 m and up to 2 bonus reveals (`fnc_recon_observe_run`).
 
 ### Destroy Signal Tower
 
