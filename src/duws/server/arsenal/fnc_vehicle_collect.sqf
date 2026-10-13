@@ -115,6 +115,7 @@ private _sources = nearestObjects [_veh, ["CAManBase", "WeaponHolder", "GroundWe
 	};
 } forEach (_sources arrayIntersect _sources);
 
+if (duws_log_level >= 4) then { ["DEBUG", "GEAR", format ["vehicle collect %1 into %2: moved=%3 left=%4 room=%5", name _caller, typeOf _veh, _moved, _left, _room]] call fnc_log; };
 if (_moved == 0 && {!_left}) exitWith { [localize "STR_DUWS_T_VEHICLE_COLLECT_NONE"] remoteExec ["hint", _caller]; };
 private _msg = format [localize "STR_DUWS_T_VEHICLE_COLLECT_DONE", _moved];
 if (_left) then { _msg = _msg + "\n" + localize "STR_DUWS_T_VEHICLE_COLLECT_FULL" };
