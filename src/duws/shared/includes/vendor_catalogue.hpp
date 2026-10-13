@@ -22,6 +22,14 @@ class vendor_catalogue
             h = 23.4 * GUI_GRID_H;
             colorBackground[] = {0,0,0,0.3};
         };
+        class vendor_pane: RscText
+        {
+            x = 0 * GUI_GRID_W + GUI_GRID_X;
+            y = 1.2 * GUI_GRID_H + GUI_GRID_Y;
+            w = 21.5 * GUI_GRID_W;
+            h = 20.9 * GUI_GRID_H;
+            colorBackground[] = {0.16, 0.3, 0.55, 0.7};
+        };
         class vendor_frame: RscFrame
         {
             idc = 8901;
@@ -31,7 +39,6 @@ class vendor_catalogue
             y = 1.2 * GUI_GRID_H + GUI_GRID_Y;
             w = 21.5 * GUI_GRID_W;
             h = 20.9 * GUI_GRID_H;
-            colorBackground[] = {0,0,0,0.5};
         };
 
         class vendor_money_box: RscFrame
