@@ -287,7 +287,7 @@ the opening runs client-side (the drops, arty), `name _caller` where it runs on 
 | Mechanism | Produces | Used for |
 | --- | --- | --- |
 | `addAction` | An instant scroll entry | Almost everything |
-| `BIS_fnc_holdActionAdd` | A hold-to-complete entry with an icon and progress ring | Searching bodies and containers, the disguise panel |
+| `BIS_fnc_holdActionAdd` | A hold-to-complete entry with an icon and progress ring | Searching bodies and containers, loading a vehicle, the disguise panel |
 | `fnc_open_action_menu` | A dialog listbox opened *by* one scroll entry | Collapsing a cluster of related entries into a single scroll row |
 
 `src/duws/client/dialog/fnc_open_action_menu.sqf` is the escape hatch from scroll-menu sprawl:
@@ -325,6 +325,7 @@ call sites pass a stringtable key and never write markup themselves.
 | `ACT_COMMIT` | `#ff1111` | 10 | Spends CP or commits a shared asset; not freely undone |
 | *(none)* | plain | 40 | The rescue-pilot set |
 | *(none)* | plain | 30 | Hold-to-search entries, identified by icon instead |
+| *(none)* | plain | -100 | Collect into vehicle, a hold entry kept last, below the engine's own entries for the vehicle |
 
 **Colour lives in the header, not in `stringtable.xml`.** A value carrying its own `<t>` markup
 freezes that markup into every translation — the variants drift apart, one entry once shipping
@@ -421,7 +422,7 @@ lists, because it pairs an edit box with the buttons that spend it.
 ## Vendored module entries
 
 Not DUWS-authored, but they share the same scroll menu, the same priority space, and the same `<t>`
-markup. DUWS bands from 10 to 100, and no vendored entry rises above that floor — R3F's release entry
+markup. Apart from Collect into vehicle, which sits last on purpose, DUWS bands from 10 to 100, and no vendored entry rises above that floor — R3F's release entry
 ties `ACT_COMMIT` at 10 and everything else sits under it.
 
 | Module | Entries | Source and formatting |

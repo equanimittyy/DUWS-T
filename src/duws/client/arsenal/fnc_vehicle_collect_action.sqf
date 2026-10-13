@@ -19,7 +19,8 @@ private _cond = "!isNull ([_target] call fnc_vehicle_collect_pick)";
     {},
     [],
     10,
-    30,
+    // Last in the menu, below the engine's own entries for the vehicle.
+    -100,
     false,
     false
 ] call BIS_fnc_holdActionAdd;

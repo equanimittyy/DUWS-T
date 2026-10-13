@@ -6341,16 +6341,16 @@
                 <Spanish>Objetos cargados en el vehículo: %1</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_VEHICLE_COLLECT_FULL">
-                <Original>The vehicle is full. The rest stays where it lies.</Original>
-                <English>The vehicle is full. The rest stays where it lies.</English>
-                <Chinesesimp>载具已满。其余物品留在原处。</Chinesesimp>
-                <German>Das Fahrzeug ist voll. Der Rest bleibt liegen.</German>
-                <Polish>Pojazd jest pełny. Reszta zostaje na miejscu.</Polish>
-                <Czech>Vozidlo je plné. Zbytek zůstává na místě.</Czech>
-                <Russian>Техника заполнена. Остальное остаётся на месте.</Russian>
-                <French>Le véhicule est plein. Le reste demeure sur place.</French>
-                <Chinese>載具已滿。其餘物品留在原處。</Chinese>
-                <Spanish>El vehículo está lleno. El resto se queda donde está.</Spanish>
+                <Original>The vehicle is full.</Original>
+                <English>The vehicle is full.</English>
+                <Chinesesimp>载具已满。</Chinesesimp>
+                <German>Das Fahrzeug ist voll.</German>
+                <Polish>Pojazd jest pełny.</Polish>
+                <Czech>Vozidlo je plné.</Czech>
+                <Russian>Техника заполнена.</Russian>
+                <French>Le véhicule est plein.</French>
+                <Chinese>載具已滿。</Chinese>
+                <Spanish>El vehículo está lleno.</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_VEHICLE_COLLECT_NONE">
                 <Original>Nothing to collect within 50 m.</Original>
