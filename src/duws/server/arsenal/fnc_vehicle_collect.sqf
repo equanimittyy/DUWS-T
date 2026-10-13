@@ -43,7 +43,7 @@ private _addCargo = {
 	{ _veh addWeaponWithAttachmentsCargoGlobal [_x, 1] } forEach _weapons;
 	{ _veh addMagazineAmmoCargo [_x select 0, 1, _x select 1] } forEach _mags;
 	{ _veh addItemCargoGlobal [_x, 1] } forEach _items;
-	{ _veh addBackpackCargoGlobal [[_x] call BIS_fnc_basicBackpack, 1] } forEach _packs;
+	{ _veh addBackpackCargoGlobal [_x call BIS_fnc_basicBackpack, 1] } forEach _packs;
 	_moved = _moved + count _weapons + count _mags + count _items + count _packs;
 	{ [_x select 1] call _addCargo } forEach _nested;
 };

@@ -352,6 +352,10 @@ A unary command binds tighter than binary `remoteExec`, so `titleText [...] remo
 
 `BIS_fnc_typeText`'s signature is `[lines, x, y, format]` — a hold or typing speed passed in those slots is read as a position, so the card types itself off-screen (`[..., 1, 2]` puts it two full screens below the bottom). The timing lever is per line: each entry is `[text, format, delay]`. Callers: `client/misc/fnc_bottom_right_message.sqf:221` passes `-safezoneX`, `0.85` to pin bottom-right; `server/warcom/fnc_init_OPFOR_WARCOM.sqf:75` passes the line array alone and lands centred. Fix: pass the line array alone unless moving the card, and put a hold in the line's own third element — a one-line card with no delay drops the instant the last character lands, reading as a flicker.
 
+## `BIS_fnc_basicBackpack` takes the class bare, not in an array
+
+`BIS_fnc_basicBackpack` reads `_this` as the class string, so `[_cls] call BIS_fnc_basicBackpack` fails inside the function with `Error ==: Type Array, expected Number,Bool,String,...` at `fn_basicBackpack.sqf, line 205`. The error halts the caller ([below](#a-runtime-error-inside-a-called-function-halts-the-whole-calling-script-not-just-the-callee)): Loot into vehicle stopped at the first backpack, after it had added a body's earlier slots to the vehicle and before it stripped the body, so the gear was duplicated and no hint fired. Fix: `_cls call BIS_fnc_basicBackpack` (`server/arsenal/fnc_vehicle_collect.sqf:46`).
+
 ## `localize` resolves on the machine that runs it, so a broadcast string carries the sender's language
 
 `localize` reads the executing machine's stringtable — resolving a key server-side and broadcasting the result sends the *server's* language to everyone; broadcasting a code block that localizes on arrival lets each client resolve its own:
