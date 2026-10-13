@@ -228,7 +228,8 @@ a cheaper way to liquidate a slate, which inverts what the death penalty is for.
 
 Money is the `Money_roll` item. A player carries it, and the team can bank it. The bank is the
 `Money_roll` row of the captured-materiel pool (`DUWS_capturedPool`), so the campaign save keeps it
-with the pool and it needs no key of its own. The top status bar shows it as **Money**.
+with the pool and it needs no key of its own. The top status bar shows it as **Money**. A new campaign
+opens with 20 in the bank (`server/init_hq/fnc_BluHQinit.sqf`).
 
 The arsenal is the only way out of the bank. Money goes in through the arsenal, and through Collect
 ([below](#collect-from-vehicle)), which banks the money in a crate or a vehicle. Carried money stays

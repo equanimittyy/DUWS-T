@@ -196,7 +196,7 @@ DUWS_fnc_campaignSnapshot = {
     _s set ["garage", DUWS_garage_stored];
     _s set ["parked", call DUWS_fnc_campaignParked];
     _s set ["taskforces", call DUWS_fnc_campaignTaskforces];
-    // Null once a game master deletes it; a load then keeps the opening stock.
+    // Null once a game master deletes it; a load then leaves the rebuilt crate empty.
     if (!isNull DUWS_hqCrate) then { _s set ["hqCrate", [DUWS_hqCrate] call DUWS_fnc_campaignCargo] };
     private _lockout = ((missionNamespace getVariable ["MHQ_lockout_until", 0]) - time) max 0;
     _s set ["mhq", if (!isNil "MHQ1" && {alive MHQ1}) then {

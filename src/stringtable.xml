@@ -11655,16 +11655,16 @@
                 <Chinese>明白，執行任務。</Chinese>
             </Key>
             <Key ID="STR_DUWS_T_heli_money">
-                <Original>Be advised: resources in this AO are limited. Your starting operational funds are available at the arsenal crate at base — spend them wisely.</Original>
-                <English>Be advised: resources in this AO are limited. Your starting operational funds are available at the arsenal crate at base — spend them wisely.</English>
-                <German>Achtung: Ressourcen in diesem AO sind begrenzt. Deine anfänglichen Einsatzmittel sind an der Arsenalkiste in der Basis verfügbar – setze sie klug ein.</German>
-                <Spanish>Atención: los recursos en este AO son limitados. Vuestros fondos operativos iniciales están disponibles en el cajón de arsenal de la base. Gastadlos con prudencia.</Spanish>
-                <Chinesesimp>注意：本 AO 内资源有限。你的初始行动资金可在基地的军械库箱内取用——谨慎使用。</Chinesesimp>
-                <Polish>Uwaga: zasoby w tym AO są ograniczone. Wasze początkowe środki operacyjne są dostępne przy skrzyni arsenału w bazie, wydawajcie je rozważnie.</Polish>
-                <Czech>Upozorňuji: zdroje v tomto AO jsou omezené. Tvé počáteční operační finance jsou dostupné u bedny arzenálu na základně, hospodař s nimi rozumně.</Czech>
-                <Russian>Внимание: ресурсы в этом AO ограничены. Стартовые средства доступны в ящике арсенала на базе, тратьте их разумно.</Russian>
-                <French>Attention : les ressources dans cet AO sont limitées. Vos fonds opérationnels de départ sont disponibles à la caisse d'arsenal à la base – dépensez-les judicieusement.</French>
-                <Chinese>注意：本 AO 內資源有限。你的初始行動資金可在基地的軍械庫箱內取用——謹慎使用。</Chinese>
+                <Original>Be advised: resources in this AO are limited. Your starting operational funds are available in the bank at HQ. Spend it wisely.</Original>
+                <English>Be advised: resources in this AO are limited. Your starting operational funds are available in the bank at HQ. Spend it wisely.</English>
+                <German>Achtung: Ressourcen in diesem AO sind begrenzt. Deine anfänglichen Einsatzmittel liegen im HQ auf der Bank bereit. Setze sie klug ein.</German>
+                <Spanish>Atención: los recursos en este AO son limitados. Vuestros fondos operativos iniciales están disponibles en el banco del CG. Gastadlos con prudencia.</Spanish>
+                <Chinesesimp>注意：本 AO 内资源有限。你的初始行动资金可在总部的银行中取用。谨慎使用。</Chinesesimp>
+                <Polish>Uwaga: zasoby w tym AO są ograniczone. Wasze początkowe środki operacyjne są dostępne w banku w HQ. Wydawajcie je rozważnie.</Polish>
+                <Czech>Upozorňuji: zdroje v tomto AO jsou omezené. Tvé počáteční operační finance jsou dostupné v bance na HQ. Hospodař s nimi rozumně.</Czech>
+                <Russian>Внимание: ресурсы в этом AO ограничены. Стартовые средства доступны в банке штаба. Тратьте их разумно.</Russian>
+                <French>Attention : les ressources dans cet AO sont limitées. Vos fonds opérationnels de départ sont disponibles à la banque du QG. Dépensez-les judicieusement.</French>
+                <Chinese>注意：本 AO 內資源有限。你的初始行動資金可在總部的銀行中取用。謹慎使用。</Chinese>
             </Key>
             <Key ID="STR_DUWS_T_ground_reached">
                 <Original>To Overlord, in position.</Original>
