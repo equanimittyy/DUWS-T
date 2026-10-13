@@ -68,7 +68,7 @@ duws_vendor_paint = {
     _discountCtrl ctrlSetTextColor ([[1, 1, 1, 1], [0.2, 0.5, 1, 1]] select (duws_vendor_discount > 0));
 
     if (_class isEqualTo "") exitWith {
-        ([8908] call duws_vendor_ctrl) ctrlSetText "#(argb,8,8,3)color(0,0,0,0.5)";
+        ([8908] call duws_vendor_ctrl) ctrlSetText "#(argb,8,8,3)color(0,0,0,0)";
         ([8909] call duws_vendor_ctrl) ctrlSetStructuredText parseText "";
         ([8910] call duws_vendor_ctrl) ctrlSetStructuredText parseText "";
         ([8915] call duws_vendor_ctrl) ctrlSetText "--";
@@ -86,7 +86,7 @@ duws_vendor_paint = {
     if (_pic isEqualTo "") then { _pic = getText (_cfg >> "picture") };
     if (_pic isEqualTo "") then { _pic = getText (_cfg >> "ItemInfo" >> "picture") };
     ([8908] call duws_vendor_ctrl) ctrlSetText
-        (if (_pic isEqualTo "") then {"#(argb,8,8,3)color(0,0,0,0.5)"} else {_pic});
+        (if (_pic isEqualTo "") then {"#(argb,8,8,3)color(0,0,0,0)"} else {_pic});
     ([8909] call duws_vendor_ctrl) ctrlSetStructuredText parseText (if (_pic isEqualTo "") then {
         format ["<t align='center' size='1.4' font='PuristaMedium' color='#ff5555'>%1</t>",
             localize "STR_DUWS_T_faction_edit_nopreview"]
