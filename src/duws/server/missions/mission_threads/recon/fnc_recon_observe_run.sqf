@@ -55,8 +55,15 @@ if (_kind isEqualTo "zone") then {
     };
 };
 
-waitUntil { sleep 2; (missionNamespace getVariable [_done, false]) || {[_deadline] call fnc_time_expired} };
-private _won = missionNamespace getVariable [_done, false];
+// Found on foot (walking into the zone, nearing the hardpoint) wins too: intel payouts skip a live target, so
+// only the player can have revealed it.
+private _fnc_found = if (_kind isEqualTo "hp") then {
+    { (DUWS_hardpoints findIf { ((_x select 0) isEqualTo _hpKey) && {_x select 5} }) >= 0 }
+} else {
+    { (zone_namePOS_pairs findIf { (_x select 2) && {(_x select 1) distance2D _target < 1} }) >= 0 }
+};
+waitUntil { sleep 2; (missionNamespace getVariable [_done, false]) || _fnc_found || {[_deadline] call fnc_time_expired} };
+private _won = (missionNamespace getVariable [_done, false]) || _fnc_found;
 
 missionNamespace setVariable [_active, false, true];
 remoteExec ["", _jip];

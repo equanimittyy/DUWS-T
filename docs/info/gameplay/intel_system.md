@@ -113,6 +113,10 @@ player goes to *do* something, so one on the far side of the map is worth no mor
 happening, and nearest wins. One merged pool would force a single rule on both. The consequence to know
 when tuning: in hardcore both buckets usually hold stock, so roughly half of the pool half goes to towns.
 
+**A live recon job's target sits out the pool.** A zone or hardpoint in `DUWS_recon_targets` is left for the
+job to reveal ([`side_mission_catalogue.md`](side_mission_catalogue.md#recon-enemy-position)). If a search
+revealed it during the job, the hold that the player was sent to would reveal nothing.
+
 Every bucket draws from the unrevealed set rather than from everything and filtering after the draw.
 Drawing from every zone and then testing whether it happened to be hidden — the shape this replaced —
 makes the real odds decay as a campaign progresses, because late on most winning rolls land on ground

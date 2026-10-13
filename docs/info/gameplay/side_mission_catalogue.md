@@ -214,7 +214,9 @@ clients per job) draws a 3D "look here" icon over the target and runs the hold: 
 break resetting it, re-checked client-side per tick. On a completed hold the client reports once, with
 its job's id, to `fnc_recon_observe_success`, which raises the flag the job's monitor wins on -- a second
 player or a stale JIP report cannot double-pay. Soft stealth: the element can see and fire, but the
-mission never auto-fails on detection.
+mission never auto-fails on detection. A target the player reveals on foot during the job, by walking into the zone or nearing the
+hardpoint, also completes the job as a success. No other reveal can reach it: intel payouts skip a live
+job's target ([`intel_system.md`](intel_system.md#one-writer-per-reveal-flag-one-function-for-payout)).
 
 **Payoff.** The scouted target is revealed on the strategic map. The scout also reveals
 `rand(0-2)` of the nearest unrevealed positions (the target's own hardpoints, standalone hardpoints,

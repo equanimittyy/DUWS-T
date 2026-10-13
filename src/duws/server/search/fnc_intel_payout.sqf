@@ -38,7 +38,11 @@ private _awarded = false;
 // different arrays.
 private _kinds = [];
 
-private _hiddenZones = zone_namePOS_pairs select {!(_x select 2) && {[_x select 1] call _fnc_inReach}};
+// A live recon job's target is left for the job to reveal, or the hold the player is sent to pays for nothing.
+private _reconTargets = missionNamespace getVariable ["DUWS_recon_targets", []];
+private _fnc_unclaimed = { params ["_pos"]; (_reconTargets findIf { _x distance2D _pos < 1 }) < 0 };
+
+private _hiddenZones = zone_namePOS_pairs select {!(_x select 2) && {[_x select 1] call _fnc_inReach} && {[_x select 1] call _fnc_unclaimed}};
 if !(_hiddenZones isEqualTo []) then { _kinds pushBack "ZONE" };
 
 // The town bucket ranks by distance, so it needs somewhere to measure from: where the intel was
@@ -72,7 +76,7 @@ private _revealedZoneKeys = [];
 } forEach zone_namePOS_pairs;
 private _hiddenHPs = DUWS_hardpoints select {
     !(_x select 5) && { (_x select 4) isEqualTo "" || {(_x select 4) in _revealedZoneKeys} }
-    && {[_x select 1] call _fnc_inReach}
+    && {[_x select 1] call _fnc_inReach} && {[_x select 1] call _fnc_unclaimed}
 };
 if !(_hiddenHPs isEqualTo []) then { _kinds pushBack "HP" };
 
