@@ -3,10 +3,10 @@
 #define GUI_GRID_H  0.04
 
 #define ROW_H       1.0
-#define STATUS_X    6.5
-#define ORDERS_X    15.5
-#define TAKE_X      21.5
-#define ROW_W       25.9
+#define STATUS_X    7
+#define ORDERS_X    20
+#define TAKE_X      27.9
+#define ROW_W       32.9
 
 params ["_display"];
 private _list = _display displayCtrl 1700;
@@ -66,7 +66,7 @@ if (_taskforces isEqualTo []) exitWith {
 	if (!_spawned) then {
 		private _take = _display ctrlCreate ["RscButton", -1, _list];
 		_take ctrlSetPosition [TAKE_X * GUI_GRID_W, _top * GUI_GRID_H, (ROW_W - TAKE_X) * GUI_GRID_W, ROW_H * GUI_GRID_H];
-		_take ctrlSetFontHeight 0.024;
+		_take ctrlSetFontHeight 0.026;
 		_take ctrlSetText localize "STR_DUWS_T_TASKFORCE_TAKEBACK";
 		_take ctrlSetTooltip localize "STR_DUWS_T_TASKFORCE_TAKEBACK_TIP";
 		_take setVariable ["DUWS_taskforce", _group];
