@@ -552,15 +552,19 @@ fnc_captured_pool_settle = {
 		_x params ["_cls"];
 		private _idx = [3, 4, 5] findIf { ((_closeLoadout param [_x, []]) param [0, ""]) isEqualTo _cls };
 		if (_idx < 0) then { continue };   // not a worn container (headgear/goggles/loose item)
+		private _slot = [3, 4, 5] select _idx;
+		private _worn = [[], [], [], [], [], [], "", "", [], []];
+		_worn set [_slot, _closeLoadout select _slot];
+		private _inside = [_worn] call fnc_captured_loadout_counts;
+		_inside set [_cls, (_inside get _cls) - 1];
 		{
-			_x params ["_cc", ["_cn", 1]];
-			if ([_cc] call fnc_captured_pool_unpooled) then { continue };
-			private _keep = _cn - (_exMap getOrDefault [_cc, 0]);
+			if ([_x] call fnc_captured_pool_unpooled) then { continue };
+			private _keep = _y - (_exMap getOrDefault [_x, 0]);
 			if (_keep > 0) then {
-				[_cc, ([_cc] call fnc_captured_pool_getCount) + _keep] call fnc_captured_pool_setCount;
-				_salvaged pushBack [_cc, _keep];
+				[_x, ([_x] call fnc_captured_pool_getCount) + _keep] call fnc_captured_pool_setCount;
+				_salvaged pushBack [_x, _keep];
 			};
-		} forEach ((_closeLoadout param [([3, 4, 5] select _idx), []]) param [1, []]);
+		} forEach _inside;
 	} forEach _excess;
 
 	if (duws_log_level >= 4) then { ["DEBUG", "GEAR", format ["pool settle %1: [cls, net, before, after]=%2 excess=%3 salvaged=%4", name _requester, _ledger, _excess, _salvaged]] call fnc_log; };

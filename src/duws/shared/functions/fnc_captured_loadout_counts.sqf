@@ -1,7 +1,8 @@
 // Tally class -> count from a getUnitLoadout array. The loadout nests counts in three shapes -- a
-// weapon's loaded magazine is [mag, ammo] (one magazine), a container holds [class, count] pairs,
-// and worn/assigned slots are bare strings -- so a flat pushBackUnique scan would both lose counts
-// and miss magazines. Weapons tally under their arsenal row (fnc_arsenal_weapon_row), the pool's key.
+// weapon's loaded magazine is [mag, ammo] (one magazine), a container holds [class, count] pairs
+// (a packed weapon's "class" is its whole weapon array), and worn/assigned slots are bare strings --
+// so a flat pushBackUnique scan would both lose counts and miss magazines. Weapons tally under their
+// arsenal row (fnc_arsenal_weapon_row), the pool's key.
 // Returns a HashMap.
 	params [["_loadout", []]];
 	private _counts = createHashMap;
@@ -32,7 +33,13 @@
 		private _contents = _c param [1, []];
 		if (_contents isEqualType []) then {
 			{
-				if (_x isEqualType [] && {(count _x) >= 1}) then { [_x select 0, _x param [1, 1]] call _bump; };
+				if (_x isEqualType [] && {(count _x) >= 1}) then {
+					if ((_x select 0) isEqualType []) then {
+						for "_i" from 1 to (_x param [1, 1]) do { [_x select 0] call _weapon; };
+					} else {
+						[_x select 0, _x param [1, 1]] call _bump;
+					};
+				};
 			} forEach _contents;
 		};
 	};
