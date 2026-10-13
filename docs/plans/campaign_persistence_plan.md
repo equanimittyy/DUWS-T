@@ -692,9 +692,9 @@ the garage is to vehicles: a player who wants gear to survive a restart stores i
 The save records each piece, not the garage's per-class counts, so a weapon keeps its attachments and
 its loaded magazine, a magazine keeps its rounds, and a stored uniform, vest or backpack keeps its
 contents. `Money_roll` is a magazine, so money in the crate is saved with the rest. `fnc_bluHQinit`
-builds the crate with its opening stock, and `DUWS_fnc_restoreBases` replaces that stock with the saved
-contents. A piece that names a class no loaded mod defines is dropped, and the load hint counts it. A
-save taken after a game master deleted the crate has no crate key, so a load keeps the opening stock.
+builds the crate empty, and `DUWS_fnc_restoreBases` fills it with the saved contents. A piece that
+names a class no loaded mod defines is dropped, and the load hint counts it. A save taken after a game
+master deleted the crate has no crate key, so a load leaves the crate empty.
 
 **Permanent unlocks are team state, so one array carries them.** `DUWS_support_permanent` holds them
 in purchase order and each client keeps the individual flags as its fast path, so restore replays the
@@ -1068,7 +1068,7 @@ function runs unchanged.
 | Setup gates, `chosen_hq_placement` / `createzone_server` (`:161,166`) | Pre-satisfied by the gate |
 | Faction init (`:60-156`) | Runs — classnames must be re-resolved against whatever mods are loaded now. Then `fnc_faction_edits_apply` applies the saved faction list edits over the new pools. The restore has to publish the result itself: the loop that broadcasts every schema key and the request-menu catalogue is the setup loop this gate skips, and no faction file runs on a client to fill the gap |
 | `fnc_create_ammo_lists` (`:189`) | Runs — the friendly class list re-resolves against the loaded mods. In Limited its pool seed covers only the classes the campaign never seeded ([§The arsenal](#the-arsenal-the-shelf-is-rebuilt-the-pool-is-stored)) |
-| `fnc_bluHQinit` (`:192`) | Runs, from the saved `PosOfBLUHQ`. It rebuilds the whole HQ deterministically, which is why persisting one position is enough. The officer spawns alive, so a saved officer death applies after this step. The arsenal crate gets its opening stock, which `DUWS_fnc_restoreBases` replaces with the saved contents |
+| `fnc_bluHQinit` (`:192`) | Runs, from the saved `PosOfBLUHQ`. It rebuilds the whole HQ deterministically, which is why persisting one position is enough. The officer spawns alive, so a saved officer death applies after this step. The arsenal crate starts empty, and `DUWS_fnc_restoreBases` fills it with the saved contents. The opening money goes to the bank only on a new campaign, because a load restores the bank before this step |
 | `fnc_init_OPFOR_WARCOM` (`:205`) | Runs, with the locator bypassed as above |
 | `fnc_escalation` (`fnc_init_OPFOR_WARCOM.sqf:63`) | Runs the census, then the snapshot restores `escalation_destroyed` |
 | `fnc_intro_heli` (`:433`) | **Skipped**: the players land at the HQ the way a player joining a running campaign does |
