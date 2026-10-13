@@ -356,8 +356,9 @@ fnc_support_apply = {
 	switch (_key) do {
 		case "armory": {
 			private _arsenal = [ACT_EQUIP("STR_DUWS_T_160jkc3a"), fnc_duws_Arsenal, [], 80, true, true, "", "_this == player", ACT_REACH];
-			private _collect = [ACT_COMMIT("STR_DUWS_T_ARSENAL_COLLECT"), fnc_arsenal_collect, [], 10, true, true, "", "_this == player", ACT_REACH];
-			{ _x addAction _arsenal; _x addAction _collect } forEach ([bluHQ_object] + Array_of_FOBS);
+			private _collect = [ACT_EQUIP("STR_DUWS_T_ARSENAL_COLLECT"), fnc_arsenal_collect, [], 80, true, true, "", "_this == player", ACT_REACH];
+			{ _x addAction _arsenal } forEach ([bluHQ_object] + Array_of_FOBS);
+			{ _x addAction _collect } forEach ([DUWS_hqCrate] + Array_of_FOBS);
 		};
 		case "halo": {
 			private _sites = [bluHQ_object] + Array_of_FOBS;

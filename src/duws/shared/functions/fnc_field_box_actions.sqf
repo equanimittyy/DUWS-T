@@ -15,6 +15,6 @@ params ["_box"];
 
 _box addAction [ACT_EQUIP("STR_DUWS_T_160jkc3a"), fnc_duws_Arsenal, [], 80, false, false, "",
     "_this distance _target < 8 && {missionNamespace getVariable ['support_armory_available', false]}"];
-_box addAction [ACT_COMMIT("STR_DUWS_T_ARSENAL_COLLECT"), fnc_arsenal_collect, [], 10, false, false, "",
+_box addAction [ACT_EQUIP("STR_DUWS_T_ARSENAL_COLLECT"), fnc_arsenal_collect, [], 80, false, false, "",
     "_this distance _target < 8 && {missionNamespace getVariable ['support_armory_available', false]}"];
 _box addAction [ACT_AID("STR_DUWS_T_xfgokhbc"), fnc_AI_rearm, [], 60, false, false, "", "_this distance _target < 8"];

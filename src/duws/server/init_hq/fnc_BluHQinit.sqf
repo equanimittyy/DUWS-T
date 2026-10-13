@@ -307,8 +307,8 @@ if (!isNull _barrier) then {
     }];
 };
 
-// By handle for the save: a supply drop landing at HQ is the same class.
-DUWS_hqCrate = _supplyCrate;
+// By handle because a supply drop landing at HQ is the same class; broadcast for the client's Collect entry.
+missionNamespace setVariable ["DUWS_hqCrate", _supplyCrate, true];
 if (!isNull _supplyCrate) then {
     clearMagazineCargoGlobal _supplyCrate;
     clearWeaponCargoGlobal _supplyCrate;

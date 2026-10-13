@@ -255,12 +255,12 @@ respawn never copies money from the death loadout.
 
 ## Collect from vehicle
 
-Every Arsenal entry has a Collect entry beside it: at the HQ, a FOB, the Mobile HQ box, a supply drop
-and the killhouse terminals. Collect empties two cargoes: the crate that carries the entry, and the
-nearest live vehicle within 50 m of it that holds more than intel. At the HQ the entry hangs off the
-HQ building, so the crate is the HQ supply crate. A FOB and a killhouse terminal have no crate. The
-entry is in the commit bucket, last on the scroll wheel, because it deletes cargo and a mis-scroll
-cannot be undone.
+Every Arsenal site has a Collect entry: the HQ, a FOB, the Mobile HQ box, a supply drop and the
+killhouse terminals. Collect empties two cargoes: the object that carries the entry, and the nearest
+live vehicle within 50 m of it that holds more than intel. At the HQ the entry is on the HQ supply
+crate, not on the HQ building with the Arsenal, so `fnc_BluHQinit` broadcasts the crate's handle
+(`DUWS_hqCrate`). A FOB and a killhouse terminal have no crate. The entry is in the equip bucket,
+because a mis-scroll loses nothing: everything that Collect deletes, the shelf already offers unlimited.
 
 Gear that the pool counts, and money, goes into the pool (`fnc_captured_pool_collect`,
 `server/warcom/fnc_economy_init.sqf`). The test is the one the close settle uses

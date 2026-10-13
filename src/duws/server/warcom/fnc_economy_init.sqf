@@ -596,8 +596,6 @@ fnc_captured_pool_collect = {
 	params ["_box", "_caller", ["_intel", []]];
 	if (isNull _box || {isNull _caller}) exitWith {};
 	call fnc_captured_pool_friendly;
-	// The HQ's Arsenal hangs off the HQ building, so its crate is the HQ supply crate.
-	private _crate = if (_box isEqualTo bluHQ_object) then { missionNamespace getVariable ["DUWS_hqCrate", objNull] } else { _box };
 	private _veh = objNull;
 	{
 		if (alive _x && {((weaponCargo _x) + (magazineCargo _x) + (itemCargo _x) + (backpackCargo _x) - _intel) isNotEqualTo []}) exitWith { _veh = _x };
@@ -617,7 +615,7 @@ fnc_captured_pool_collect = {
 		{ [_x select 1] call _walk } forEach _nested;
 	};
 	private _full = DUWS_paramArsenal == 1;
-	private _sources = [_crate, _veh] select { !isNull _x };
+	private _sources = [_box, _veh] select { !isNull _x };
 	private _total = 0;
 	private _credited = [];
 	{
