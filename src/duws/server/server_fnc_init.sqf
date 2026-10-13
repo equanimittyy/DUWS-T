@@ -39,7 +39,8 @@ publicVariable "fnc_civ_moveToPlayerServer";
 // registered as a second occupant of each town's site.
 [] call compile preprocessFileLineNumbers "duws\server\vendors\fnc_vendor_state_init.sqf";
 // The catalogue runs on the buyer's machine: it names the shop, resolves each class's config for the
-// preview, prices the row, labels its category and greys the arsenal button. The reply lands there too.
+// preview, prices the row, states the pack size, labels its category and greys the arsenal button. The
+// reply lands there too.
 publicVariable "DUWS_vendorTypes";
 publicVariable "DUWS_vendorCategories";
 publicVariable "fnc_vendor_type";
@@ -48,6 +49,7 @@ publicVariable "fnc_vendor_lists";
 publicVariable "fnc_vendor_classCfg";
 publicVariable "fnc_vendor_hullFits";
 publicVariable "fnc_vendor_poolCounts";
+publicVariable "fnc_vendor_packSize";
 publicVariable "fnc_vendor_ask";
 publicVariable "fnc_vendor_reply";
 [] call compile preprocessFileLineNumbers "duws\server\supports\fnc_support_claim_init.sqf";

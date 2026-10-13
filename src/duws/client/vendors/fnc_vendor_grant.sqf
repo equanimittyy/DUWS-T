@@ -57,5 +57,6 @@ for "_i" from 1 to _count do { if !(call _fnc_take) then { _dropped = _dropped +
 if (_dropped > 0) then { [[[_class, _dropped]], getPosATL player] remoteExec ["fnc_money_drop", 2] };
 
 private _name = getText (([_class] call fnc_vendor_classCfg) >> "displayName");
-private _line = format [localize "STR_DUWS_T_VENDOR_BOUGHT", [_name, _class] select (_name isEqualTo "")];
+private _line = format [localize "STR_DUWS_T_VENDOR_BOUGHT",
+    format ["%1 x %2", _count, [_name, _class] select (_name isEqualTo "")]];
 hint (if (_dropped == 0) then { _line } else { format ["%1\n\n%2", _line, [[[_class, _dropped]]] call DUWS_fnc_dropped_line] });

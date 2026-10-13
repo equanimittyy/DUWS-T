@@ -8859,16 +8859,16 @@
                 <Spanish>Comprar</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_VENDOR_TAKE_TT">
-                <Original>Buy one into inventory.</Original>
-                <English>Buy one into inventory.</English>
-                <Chinesesimp>购买一件至物品栏。</Chinesesimp>
-                <German>Eines ins Inventar kaufen.</German>
-                <Polish>Kup jedno do ekwipunku.</Polish>
-                <Czech>Koupit jeden kus do inventáře.</Czech>
-                <Russian>Купить один экземпляр в инвентарь.</Russian>
-                <French>Acheter un exemplaire dans l'inventaire.</French>
-                <Chinese>購買一件至物品欄。</Chinese>
-                <Spanish>Comprar una unidad al inventario.</Spanish>
+                <Original>Buy %1 into inventory.</Original>
+                <English>Buy %1 into inventory.</English>
+                <Chinesesimp>购买 %1 件至物品栏。</Chinesesimp>
+                <German>Ins Inventar kaufen, Menge: %1.</German>
+                <Polish>Kup do ekwipunku, ilość: %1.</Polish>
+                <Czech>Koupit do inventáře, počet: %1.</Czech>
+                <Russian>Купить в инвентарь, количество: %1.</Russian>
+                <French>Acheter dans l'inventaire, quantité : %1.</French>
+                <Chinese>購買 %1 件至物品欄。</Chinese>
+                <Spanish>Comprar al inventario, cantidad: %1.</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_VENDOR_STORE">
                 <Original>Buy to Arsenal</Original>
@@ -8883,16 +8883,16 @@
                 <Spanish>Comprar para el Arsenal</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_VENDOR_STORE_TT">
-                <Original>Buy one into Arsenal.</Original>
-                <English>Buy one into Arsenal.</English>
-                <Chinesesimp>购买一件至军械库。</Chinesesimp>
-                <German>Eines ins Arsenal kaufen.</German>
-                <Polish>Kup jedno do arsenału.</Polish>
-                <Czech>Koupit jeden kus do arzenálu.</Czech>
-                <Russian>Купить один экземпляр в арсенал.</Russian>
-                <French>Acheter un exemplaire dans l'arsenal.</French>
-                <Chinese>購買一件至軍械庫。</Chinese>
-                <Spanish>Comprar una unidad al Arsenal.</Spanish>
+                <Original>Buy %1 into Arsenal.</Original>
+                <English>Buy %1 into Arsenal.</English>
+                <Chinesesimp>购买 %1 件至军械库。</Chinesesimp>
+                <German>Ins Arsenal kaufen, Menge: %1.</German>
+                <Polish>Kup do arsenału, ilość: %1.</Polish>
+                <Czech>Koupit do arzenálu, počet: %1.</Czech>
+                <Russian>Купить в арсенал, количество: %1.</Russian>
+                <French>Acheter dans l'arsenal, quantité : %1.</French>
+                <Chinese>購買 %1 件至軍械庫。</Chinese>
+                <Spanish>Comprar al Arsenal, cantidad: %1.</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_VENDOR_HOSTILE">
                 <Original>The trader refuses to deal with you while %1 is hostile towards you.</Original>

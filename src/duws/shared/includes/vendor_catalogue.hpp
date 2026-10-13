@@ -173,7 +173,6 @@ class vendor_catalogue
         {
             idc = 8913;
             text = "$STR_DUWS_T_VENDOR_TAKE";
-            tooltip = "$STR_DUWS_T_VENDOR_TAKE_TT";
             sizeEx = 0.025;
             x = 22.2 * GUI_GRID_W + GUI_GRID_X;
             y = 20.4 * GUI_GRID_H + GUI_GRID_Y;
@@ -184,7 +183,6 @@ class vendor_catalogue
         {
             idc = 8914;
             text = "$STR_DUWS_T_VENDOR_STORE";
-            tooltip = "$STR_DUWS_T_VENDOR_STORE_TT";
             x = 31 * GUI_GRID_W + GUI_GRID_X;
         };
 

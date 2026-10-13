@@ -133,6 +133,22 @@ fnc_vendor_poolCounts = {
 	DUWS_arsenalLimited || {!(_class in (missionNamespace getVariable ["DUWS_friendlyArsenal", []]))}
 };
 
+fnc_vendor_packSize = {
+	params ["_class"];
+	private _mag = configFile >> "CfgMagazines" >> _class;
+	if (!isClass _mag) exitWith { 1 };
+	private _sim = getText (configFile >> "CfgAmmo" >> getText (_mag >> "ammo") >> "simulation");
+	if (_sim in ["shotMissile", "shotRocket"]) exitWith { 2 };
+	// shotShell is the 40 mm grenade round.
+	if (_sim in [
+		"shotGrenade", "shotShell", "shotSmoke", "shotSmokeX", "shotIlluminating",
+		"shotMine", "shotBoundingMine", "shotDirectionalBomb", "shotPipeBomb", "shotTimeBomb"
+	]) exitWith { 3 };
+	// The belt-fed line fnc_IsMG draws.
+	if (getNumber (_mag >> "count") >= 100) exitWith { 3 };
+	5
+};
+
 // Stock is fetched rather than broadcast: the Everything list is a whole-config sweep, far too large
 // to push to every client at boot for a shop most of them never open. Shaped on fnc_faction_ask,
 // which answers the faction browser the same way.

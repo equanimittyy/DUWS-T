@@ -126,7 +126,7 @@ opens a town's shops. The check runs twice:
 | Where | Reads | Role |
 |---|---|---|
 | Catalogue open (`fnc_vendor_catalogue.sqf:26`) | The town centre in the broadcast `DUWS_enemy_town_pos` | Advisory. `civ_town_rep` is server-only, so `fnc_civ_repAt` returns 0 on a client |
-| Purchase (`fnc_vendor_buy.sqf:37`) | `fnc_civ_repAt` | Authoritative |
+| Purchase (`fnc_vendor_buy.sqf:38`) | `fnc_civ_repAt` | Authoritative |
 
 The refusal is a hint that names the town (`STR_DUWS_T_VENDOR_HOSTILE`). No catalogue shows behind
 it.
@@ -253,8 +253,9 @@ Each purchase offers two destinations:
 | Gear | The arsenal: the pack size is added to the captured-materiel pool, then `publicVariable "DUWS_capturedPool"`, because the setter does not broadcast | `fnc_vendor_grant` on the buyer's machine, one piece at a time: the item's own empty equipment slot, then the first worn container with room, then a ground holder at the buyer |
 | Vehicle | The garage: a spec pushed onto `DUWS_garage_stored` | `fnc_depot_carry_spawn` at the buyer, then the R3F carry of a garage retrieval (`fnc_depot_place_r3f`) |
 
-A magazine sells as a pack (`fnc_vendor_buy.sqf:67`). Every other gear class sells as one piece.
-The price is for the whole pack.
+A magazine sells as a pack (`fnc_vendor_packSize`, `fnc_vendor_state_init.sqf:136`). Every other
+gear class sells as one piece. The price is for the whole pack. The catalogue details, the tooltips
+of both buy buttons and the purchase hint show the pack size, for example `5 x` before the name.
 
 | Magazine | Pack |
 |---|---|
@@ -272,7 +273,7 @@ The ground holder comes from `fnc_money_drop`, which puts a weapon or a backpack
 backpack cargo. Item cargo accepts both but never renders them, so a dropped rifle disappeared.
 
 A bought vehicle has no live original, so its garage spec is built in factory state
-(`fnc_vendor_buy.sqf:94`). The hitpoints field is `[[],[],[]]` and never `[]`, because
+(`fnc_vendor_buy.sqf:83`). The hitpoints field is `[[],[],[]]` and never `[]`, because
 `DUWS_fnc_vehSpecApply` destructures it into three arrays.
 
 The carry for a vehicle taken now passes `_baseBound` as false: the buyer stands in a town, not

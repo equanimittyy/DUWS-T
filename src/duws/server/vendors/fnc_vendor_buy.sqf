@@ -19,9 +19,11 @@ private _fnc_say = {
     [localize "STR_DUWS_T_civ", localize _line] remoteExec ["fnc_duws_dialogue", _buyer];
 };
 private _fnc_bought = {
-    params ["_key"];
+    params ["_key", ["_count", 0]];
     private _name = getText (([_class] call fnc_vendor_classCfg) >> "displayName");
-    [format [localize _key, [_name, _class] select (_name isEqualTo "")]] remoteExec ["hint", _buyer];
+    _name = [_name, _class] select (_name isEqualTo "");
+    if (_count > 0) then { _name = format ["%1 x %2", _count, _name] };
+    [format [localize _key, _name]] remoteExec ["hint", _buyer];
 };
 
 // The reach the action opens at, with a metre of slack for the walk to the dialog button.
@@ -64,26 +66,13 @@ if (_store && {_domainIndex >= 0}
 if !([_buyer, _price] call fnc_money_spend) exitWith { [localize "STR_DUWS_T_VENDOR_BROKE"] remoteExec ["hint", _buyer] };
 
 if (_gear) exitWith {
-    private _pack = call {
-        private _mag = configFile >> "CfgMagazines" >> _class;
-        if (!isClass _mag) exitWith { 1 };
-        private _sim = getText (configFile >> "CfgAmmo" >> getText (_mag >> "ammo") >> "simulation");
-        if (_sim in ["shotMissile", "shotRocket"]) exitWith { 2 };
-        // shotShell is the 40 mm grenade round.
-        if (_sim in [
-            "shotGrenade", "shotShell", "shotSmoke", "shotSmokeX", "shotIlluminating",
-            "shotMine", "shotBoundingMine", "shotDirectionalBomb", "shotPipeBomb", "shotTimeBomb"
-        ]) exitWith { 3 };
-        // The belt-fed line fnc_IsMG draws.
-        if (getNumber (_mag >> "count") >= 100) exitWith { 3 };
-        5
-    };
+    private _pack = [_class] call fnc_vendor_packSize;
     if (_store) exitWith {
         [_class, ([_class] call fnc_captured_pool_getCount) + _pack] call fnc_captured_pool_setCount;
         // The setter deliberately does not broadcast -- its other callers batch several writes behind
         // one publish -- so a single sale has to publish for itself or no client sees the shelf move.
         publicVariable "DUWS_capturedPool";
-        ["STR_DUWS_T_VENDOR_BOUGHT_ARSENAL"] call _fnc_bought;
+        ["STR_DUWS_T_VENDOR_BOUGHT_ARSENAL", _pack] call _fnc_bought;
     };
     [_class, _pack] remoteExec ["fnc_vendor_grant", _buyer];
 };

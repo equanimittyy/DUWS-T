@@ -72,7 +72,11 @@ duws_vendor_paint = {
         ([8909] call duws_vendor_ctrl) ctrlSetStructuredText parseText "";
         ([8910] call duws_vendor_ctrl) ctrlSetStructuredText parseText "";
         ([8915] call duws_vendor_ctrl) ctrlSetText "--";
-        { ([_x] call duws_vendor_ctrl) ctrlEnable false } forEach [8913, 8914];
+        {
+            private _button = [_x] call duws_vendor_ctrl;
+            _button ctrlEnable false;
+            if (duws_vendor_kind isEqualTo "gear") then { _button ctrlSetTooltip "" };
+        } forEach [8913, 8914];
     };
 
     private _cfg = [_class] call fnc_vendor_classCfg;
@@ -88,9 +92,16 @@ duws_vendor_paint = {
             localize "STR_DUWS_T_faction_edit_nopreview"]
     } else {""});
 
+    private _name = _listCtrl lbText _sel;
+    if (duws_vendor_kind isEqualTo "gear") then {
+        private _pack = [_class] call fnc_vendor_packSize;
+        _name = format ["%1 x %2", _pack, _name];
+        ([8913] call duws_vendor_ctrl) ctrlSetTooltip format [localize "STR_DUWS_T_VENDOR_TAKE_TT", _pack];
+        ([8914] call duws_vendor_ctrl) ctrlSetTooltip format [localize "STR_DUWS_T_VENDOR_STORE_TT", _pack];
+    };
     ([8910] call duws_vendor_ctrl) ctrlSetStructuredText parseText format [
         "<t align='left' size='1.3'>%1</t><br/><t align='left' color='#a0a0a0'>%2</t><br/><br/><t align='left'>%3</t>",
-        _listCtrl lbText _sel, _class, getText (_cfg >> "descriptionShort")];
+        _name, _class, getText (_cfg >> "descriptionShort")];
 
     private _price = _listCtrl lbValue _sel;
     ([8915] call duws_vendor_ctrl) ctrlSetText str _price;
@@ -218,13 +229,14 @@ if (isNull _display) exitWith {
 
 // The two destinations are the same choice at every shop, but not the same words: gear goes to the
 // arsenal or into a holder at the buyer's feet, a vehicle to the base garage or the street outside.
+// Gear tooltips name the pack size, so duws_vendor_paint sets them per row.
 private _gear = duws_vendor_kind isEqualTo "gear";
-(_display displayCtrl 8913) ctrlSetTooltip
-    (localize (["STR_DUWS_T_VENDOR_TAKE_TT_VEH", "STR_DUWS_T_VENDOR_TAKE_TT"] select _gear));
 (_display displayCtrl 8914) ctrlSetText
     (localize (["STR_DUWS_T_VENDOR_STORE_VEH", "STR_DUWS_T_VENDOR_STORE"] select _gear));
-(_display displayCtrl 8914) ctrlSetTooltip
-    (localize (["STR_DUWS_T_VENDOR_STORE_TT_VEH", "STR_DUWS_T_VENDOR_STORE_TT"] select _gear));
+if (!_gear) then {
+    (_display displayCtrl 8913) ctrlSetTooltip localize "STR_DUWS_T_VENDOR_TAKE_TT_VEH";
+    (_display displayCtrl 8914) ctrlSetTooltip localize "STR_DUWS_T_VENDOR_STORE_TT_VEH";
+};
 
 private _listLabels = createHashMapFromArray [
     ["civilian", "STR_DUWS_T_VENDOR_STOCK_CIV"],
