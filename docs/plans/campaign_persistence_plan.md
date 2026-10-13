@@ -719,7 +719,7 @@ reason as Ownership.
 Storing the state rather than how it was reached is what keeps this to a flat list of positions: a
 zone the player walked into, bought from a local, or found on a dead officer all restore
 identically, because by then they are one flag. A hardpoint's reveal is the same kind of state —
-intel can uncover one without its parent zone — but it is not stored here: it is a field on the
+intel uncovers a standalone one on its own — but it is not stored here: it is a field on the
 hardpoint's own registry row and comes back with it ([§The enemy](#the-enemy)). Details in
 [`info/intel_system.md`](../info/gameplay/intel_system.md#persistence).
 

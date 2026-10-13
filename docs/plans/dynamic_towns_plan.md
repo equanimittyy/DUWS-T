@@ -123,7 +123,7 @@ the vendor draft do not change.
 |---|---|
 | Parameter | A row in `DUWS_campaignParams`, as in [The parameter](#the-parameter) |
 | Town row | `[pos, radius, pop]` becomes `[pos, radius, pop, sector]` in `fnc_campaign_save.sqf:140-148`; `sector` is `""` for a map town |
-| Town restore | `DUWS_fnc_restoreTownQueue` (`fnc_campaign_restore.sqf:322`): a row with a sector word creates its Location directly, with `DUWS_cluster` and `DUWS_sector`, and logs no "no town at" warning; registration sets its text. A row without one resolves as now |
+| Town restore | `DUWS_fnc_restoreTownQueue` (`fnc_campaign_restore.sqf:324`): a row with a sector word creates its Location directly, with `DUWS_cluster` and `DUWS_sector`, and logs no "no town at" warning; registration sets its text. A row without one resolves as now |
 | Older saves | A row with no fourth element reads `""` through a `params` default, so every row in an older save is a map town. The format version stays `1` |
 | Sector words | `DUWS_zoneNames` already saves and restores (`fnc_campaign_save.sqf:135`, `fnc_campaign_restore.sqf:272`), and now holds the sector words too |
 
