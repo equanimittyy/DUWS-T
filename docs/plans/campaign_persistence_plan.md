@@ -561,7 +561,7 @@ so they stay out of the save.
 
 **The registry is the whole hardpoint state, because presence is liveness.** A cleared hardpoint is
 deleted from `DUWS_hardpoints` rather than flagged
-(`server/init_zones/fnc_hardpoint_stream.sqf:185-189`), so what was cleared needs no key of its own —
+(`server/init_zones/fnc_hardpoint_stream.sqf:197-201`), so what was cleared needs no key of its own —
 it is what the saved array does not hold. Reveal rides the row's `shown` field, whose sole writer is
 `fnc_hardpoint_reveal`, keyed by the row's own key, which is why the hardpoint half of reveal is not
 in [§The team](#the-team): restoring the rows restores it, provided the siting pass takes them

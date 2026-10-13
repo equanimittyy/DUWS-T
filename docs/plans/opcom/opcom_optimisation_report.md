@@ -192,7 +192,7 @@ Each of these is small and none is the bottleneck; together they are a steady sh
   zone key per call (`init_zones/fnc_zone_state_init.sqf:114-117`), and `DUWS_fnc_opcom_zonesOpenSweep`,
   `DUWS_fnc_opcom_zoneLabel` and `DUWS_fnc_opcom_fireClear` call it per zone per candidate. A key-to-index map built
   once a tick removes the formatting.
-- `DUWS_fnc_hardpointOPBurst` (`init_zones/fnc_hardpoint_stream.sqf:253-258`) filters `allUnits` per OP post that
+- `DUWS_fnc_hardpointOPBurst` (`init_zones/fnc_hardpoint_stream.sqf:265-270`) filters `allUnits` per OP post that
   fires, the scan shape [`performance.md`](../../info/architecture/performance.md#the-pattern-that-costs-the-most-timed-scans-anchored-on-allunits)
   rules against; `nearEntities` on the post's position answers the same question off the spatial index.
 
