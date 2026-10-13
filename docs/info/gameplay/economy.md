@@ -231,8 +231,8 @@ Money is the `Money_roll` item. A player carries it, and the team can bank it. T
 with the pool and it needs no key of its own. The top status bar shows it as **Money**. A new campaign
 opens with 20 in the bank (`server/init_hq/fnc_BluHQinit.sqf`).
 
-The arsenal is the only way out of the bank. Money goes in through the arsenal, and through Collect
-([below](#collect-from-vehicle)), which banks the money in a crate or a vehicle. Carried money stays
+The arsenal is the only way out of the bank. Money goes in through the arsenal, and through Dump loot from
+vehicle ([below](#dump-loot-from-vehicle)), which banks the money in a crate or a vehicle. Carried money stays
 in the loadout when the arsenal opens, and `DUWS_fnc_arsenal_stock` (`initPlayerLocal.sqf`) always
 puts `Money_roll` on the shelf, so the row shows the bank count even when the bank is empty. Money
 that leaves the loadout is a deposit, and money that the player takes is a withdrawal. The close settle
@@ -253,14 +253,14 @@ bank.
 A quick-kit swap stashes the carried money and gives it back, so a swap never deposits money. A
 respawn never copies money from the death loadout.
 
-## Collect from vehicle
+## Dump loot from vehicle
 
-Every Arsenal site has a Collect entry: the HQ, a FOB, the Mobile HQ box, a supply drop and the
-killhouse terminals. Collect empties two cargoes: the object that carries the entry, and the nearest
+Every Arsenal site has a Dump loot from vehicle entry: the HQ, a FOB, the Mobile HQ box, a supply drop and the
+killhouse terminals. The entry empties two cargoes: the object that carries the entry, and the nearest
 live vehicle within 50 m of it that holds more than intel. At the HQ the entry is on the HQ supply
 crate, not on the HQ building with the Arsenal, so `fnc_BluHQinit` broadcasts the crate's handle
 (`DUWS_hqCrate`). A FOB and a killhouse terminal have no crate. The entry is in the equip bucket,
-because a mis-scroll loses nothing: everything that Collect deletes, the shelf already offers unlimited.
+because a mis-scroll loses nothing: everything that the entry deletes, the shelf already offers unlimited.
 
 Gear that the pool counts, and money, goes into the pool (`fnc_captured_pool_collect`,
 `server/warcom/fnc_economy_init.sqf`). The test is the one the close settle uses
@@ -271,11 +271,11 @@ the cargo that held it, loose at the top level, because a player turns it in fro
 
 The client sends `DUWS_intelItems` with the request, because only clients define it. The read, the clear
 and the credit run in one `remoteExecCall`, so two players cannot bank one load twice. The pool is
-already in the campaign save, so Collect needs no key of its own.
+already in the campaign save, so the entry needs no key of its own.
 
-## Collect into vehicle
+## Loot into vehicle
 
-Collect into vehicle is the other half of Collect: it fills a vehicle that a player then drives to an
+Loot into vehicle is the other half of Dump loot from vehicle: it fills a vehicle that a player then drives to an
 Arsenal. It is a 10 s hold action on every player (`client/arsenal/fnc_vehicle_collect_action.sqf`),
 shown while the cursor is on a vehicle with cargo space within 8 m. Walking, or taking a hit, stops
 the hold. The server (`server/arsenal/fnc_vehicle_collect.sqf`) then loads that vehicle from every
@@ -291,7 +291,7 @@ twice.
 
 The remove commands take a local unit, so `fnc_body_strip` runs where the corpse is local. A corpse that
 is remote to the server, such as one from a player's own group, is stripped a moment after its gear goes
-into the vehicle. Bodies and ground holders are session state, so Collect into vehicle saves nothing.
+into the vehicle. Bodies and ground holders are session state, so Loot into vehicle saves nothing.
 
 ## Faucets
 

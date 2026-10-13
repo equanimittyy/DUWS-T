@@ -307,7 +307,7 @@ if (!isNull _barrier) then {
     }];
 };
 
-// By handle because a supply drop landing at HQ is the same class; broadcast for the client's Collect entry.
+// By handle because a supply drop landing at HQ is the same class; broadcast for the client's Dump loot from vehicle entry.
 missionNamespace setVariable ["DUWS_hqCrate", _supplyCrate, true];
 if (!isNull _supplyCrate) then {
     clearMagazineCargoGlobal _supplyCrate;

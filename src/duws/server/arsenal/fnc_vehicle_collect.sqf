@@ -1,4 +1,4 @@
-// Locality: server, by remoteExecCall from the Collect into vehicle hold action, so the vehicle's room is
+// Locality: server, by remoteExecCall from the Loot into vehicle hold action, so the vehicle's room is
 // read and spent in one unscheduled step and two players cannot load one vehicle past full. Room is config
 // mass against maximumLoad, because the cargo add commands ignore capacity.
 //

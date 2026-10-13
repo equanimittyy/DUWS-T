@@ -325,7 +325,7 @@ call sites pass a stringtable key and never write markup themselves.
 | `ACT_COMMIT` | `#ff1111` | 10 | Spends CP or commits a shared asset; not freely undone |
 | *(none)* | plain | 40 | The rescue-pilot set |
 | *(none)* | plain | 30 | Hold-to-search entries, identified by icon instead |
-| *(none)* | plain | -100 | Collect into vehicle, a hold entry kept last, below the engine's own entries for the vehicle |
+| *(none)* | plain | -100 | Loot into vehicle, a hold entry kept last, below the engine's own entries for the vehicle |
 
 **Colour lives in the header, not in `stringtable.xml`.** A value carrying its own `<t>` markup
 freezes that markup into every translation — the variants drift apart, one entry once shipping
@@ -422,7 +422,7 @@ lists, because it pairs an edit box with the buttons that spend it.
 ## Vendored module entries
 
 Not DUWS-authored, but they share the same scroll menu, the same priority space, and the same `<t>`
-markup. Apart from Collect into vehicle, which sits last on purpose, DUWS bands from 10 to 100, and no vendored entry rises above that floor — R3F's release entry
+markup. Apart from Loot into vehicle, which sits last on purpose, DUWS bands from 10 to 100, and no vendored entry rises above that floor — R3F's release entry
 ties `ACT_COMMIT` at 10 and everything else sits under it.
 
 | Module | Entries | Source and formatting |

@@ -1,4 +1,4 @@
-// Locality: client. The vehicle this player's Collect into vehicle targets, or objNull. The hold action's
+// Locality: client. The vehicle this player's Loot into vehicle targets, or objNull. The hold action's
 // show and progress conditions and its completion all call it, so the three resolve the same vehicle.
 params ["_who"];
 private _v = cursorObject;
