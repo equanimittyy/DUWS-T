@@ -308,6 +308,7 @@ fnc_arsenal_base_weapons = compile preprocessFileLineNumbers "duws\server\arsena
 fnc_arsenal_reward = compile preprocessFileLineNumbers "duws\server\arsenal\fnc_arsenal_reward.sqf";
 fnc_fill_ammobox = compile preprocessFileLineNumbers "duws\server\arsenal\fnc_fill_ammobox.sqf";publicVariable "fnc_fill_ammobox";
 fnc_buildQuickKits = compile preprocessFileLineNumbers "duws\server\arsenal\fnc_buildQuickKits.sqf";
+fnc_vehicle_collect = compile preprocessFileLineNumbers "duws\server\arsenal\fnc_vehicle_collect.sqf";
 publicVariable "fnc_buildQuickKits";
 fnc_rearmUnit = compile preprocessFileLineNumbers "duws\server\arsenal\fnc_rearmUnit.sqf";
 publicVariable "fnc_rearmUnit";
@@ -859,6 +860,8 @@ fnc_arsenal_collect = compile preprocessFileLineNumbers "duws\client\arsenal\fnc
 fnc_duws_Arsenal = compile preprocessFileLineNumbers "duws\client\arsenal\fnc_duws_Arsenal.sqf";publicVariable "fnc_duws_Arsenal";
 fnc_quick_kits_menu = compile preprocessFileLineNumbers "duws\client\arsenal\fnc_quick_kits_menu.sqf";
 publicVariable "fnc_quick_kits_menu";
+fnc_vehicle_collect_action = compile preprocessFileLineNumbers "duws\client\arsenal\fnc_vehicle_collect_action.sqf";publicVariable "fnc_vehicle_collect_action";
+fnc_vehicle_collect_pick = compile preprocessFileLineNumbers "duws\client\arsenal\fnc_vehicle_collect_pick.sqf";publicVariable "fnc_vehicle_collect_pick";
 
 // =========================================================================================================
 // client/chatter
@@ -1147,6 +1150,7 @@ fnc_sniper_stand_in = compile preprocessFileLineNumbers "duws\shared\faction_lib
 fnc_captured_loadout_counts = compile preprocessFileLineNumbers "duws\shared\functions\fnc_captured_loadout_counts.sqf";
 fnc_arsenal_weapon_row = compile preprocessFileLineNumbers "duws\shared\functions\fnc_arsenal_weapon_row.sqf";
 fnc_loadout_attachments = compile preprocessFileLineNumbers "duws\shared\functions\fnc_loadout_attachments.sqf";
+fnc_body_strip = compile preprocessFileLineNumbers "duws\shared\functions\fnc_body_strip.sqf";publicVariable "fnc_body_strip";
 // Broadcast: the faction key editor that calls it runs on the player's machine.
 fnc_class_rows_fill = compile preprocessFileLineNumbers "duws\shared\functions\fnc_class_rows_fill.sqf";
 publicVariable "fnc_class_rows_fill";

@@ -272,6 +272,26 @@ The client sends `DUWS_intelItems` with the request, because only clients define
 and the credit run in one `remoteExecCall`, so two players cannot bank one load twice. The pool is
 already in the campaign save, so Collect needs no key of its own.
 
+## Collect into vehicle
+
+Collect into vehicle is the other half of Collect: it fills a vehicle that a player then drives to an
+Arsenal. It is a 10 s hold action on every player (`client/arsenal/fnc_vehicle_collect_action.sqf`),
+shown while the cursor is on a vehicle with cargo space within 8 m. Walking, or taking a hit, stops
+the hold. The server (`server/arsenal/fnc_vehicle_collect.sqf`) then loads that vehicle from every
+body and every ground holder within 50 m of it, nearest first. A body gives up everything it wears and
+carries.
+
+Room is the config mass of the cargo against the vehicle's `maximumLoad`, because the cargo add commands
+ignore capacity. What does not fit stays where it lies. A ground holder moves whole or not at all. A
+body moves slot by slot: each weapon, each worn container with its contents, the headgear, the goggles
+and each linked item. A container arrives empty, with its contents loose in the vehicle. A preset
+backpack arrives as its basic class (`BIS_fnc_basicBackpack`), so its config contents are not added
+twice.
+
+The remove commands take a local unit, so `fnc_body_strip` runs where the corpse is local. A corpse that
+is remote to the server, such as one from a player's own group, is stripped a moment after its gear goes
+into the vehicle. Bodies and ground holders are session state, so Collect into vehicle saves nothing.
+
 ## Faucets
 
 | Source | File | Amount |

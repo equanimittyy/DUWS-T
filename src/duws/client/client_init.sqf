@@ -245,6 +245,7 @@ player addaction [ACT_UTIL("STR_DUWS_T_2rc0nvug"),fnc_earplugs, [], 20, true, tr
 
 // Same re-add reason as the earplugs above: it dies with the body.
 [] call fnc_intel_search_action;
+[] call fnc_vehicle_collect_action;
 
 // Developer tools. Two gates, because the parameter is mission config and so reads the same on
 // every machine: on its own it would give the whole server a button that makes the server work.

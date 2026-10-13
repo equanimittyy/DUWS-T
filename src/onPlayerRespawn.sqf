@@ -38,6 +38,7 @@ player addaction [ACT_UTIL("STR_DUWS_T_2rc0nvug"),fnc_earplugs, [], 20, true, tr
 
 // Same re-add reason as the earplug action above.
 [] call fnc_intel_search_action;
+[] call fnc_vehicle_collect_action;
 
 // Same re-add reason as the earplug action: the debug menu was attached to the old body.
 // Both gates repeated from client_init.sqf -- the parameter alone is mission-wide.

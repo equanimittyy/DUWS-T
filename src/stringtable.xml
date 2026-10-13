@@ -6316,6 +6316,54 @@
                 <Chinese>此處及 50 公尺內的載具中沒有可收集的物品。</Chinese>
                 <Spanish>No hay nada que recoger aquí ni en vehículos a menos de 50 m.</Spanish>
             </Key>
+            <Key ID="STR_DUWS_T_VEHICLE_COLLECT">
+                <Original>Collect into vehicle</Original>
+                <English>Collect into vehicle</English>
+                <Chinesesimp>收集到载具</Chinesesimp>
+                <German>In Fahrzeug einsammeln</German>
+                <Polish>Zbierz do pojazdu</Polish>
+                <Czech>Sebrat do vozidla</Czech>
+                <Russian>Собрать в технику</Russian>
+                <French>Collecter dans le véhicule</French>
+                <Chinese>收集到載具</Chinese>
+                <Spanish>Recoger en el vehículo</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_VEHICLE_COLLECT_DONE">
+                <Original>Items loaded into the vehicle: %1</Original>
+                <English>Items loaded into the vehicle: %1</English>
+                <Chinesesimp>已装入载具的物品：%1</Chinesesimp>
+                <German>Ins Fahrzeug geladene Gegenstände: %1</German>
+                <Polish>Przedmioty załadowane do pojazdu: %1</Polish>
+                <Czech>Předměty naložené do vozidla: %1</Czech>
+                <Russian>Предметов загружено в технику: %1</Russian>
+                <French>Objets chargés dans le véhicule : %1</French>
+                <Chinese>已裝入載具的物品：%1</Chinese>
+                <Spanish>Objetos cargados en el vehículo: %1</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_VEHICLE_COLLECT_FULL">
+                <Original>The vehicle is full. The rest stays where it lies.</Original>
+                <English>The vehicle is full. The rest stays where it lies.</English>
+                <Chinesesimp>载具已满。其余物品留在原处。</Chinesesimp>
+                <German>Das Fahrzeug ist voll. Der Rest bleibt liegen.</German>
+                <Polish>Pojazd jest pełny. Reszta zostaje na miejscu.</Polish>
+                <Czech>Vozidlo je plné. Zbytek zůstává na místě.</Czech>
+                <Russian>Техника заполнена. Остальное остаётся на месте.</Russian>
+                <French>Le véhicule est plein. Le reste demeure sur place.</French>
+                <Chinese>載具已滿。其餘物品留在原處。</Chinese>
+                <Spanish>El vehículo está lleno. El resto se queda donde está.</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_VEHICLE_COLLECT_NONE">
+                <Original>Nothing to collect within 50 m.</Original>
+                <English>Nothing to collect within 50 m.</English>
+                <Chinesesimp>50 米内没有可收集的物品。</Chinesesimp>
+                <German>Im Umkreis von 50 m gibt es nichts einzusammeln.</German>
+                <Polish>W promieniu 50 m nie ma nic do zebrania.</Polish>
+                <Czech>Do 50 m není co sebrat.</Czech>
+                <Russian>В радиусе 50 м нечего собирать.</Russian>
+                <French>Rien à collecter à moins de 50 m.</French>
+                <Chinese>50 公尺內沒有可收集的物品。</Chinese>
+                <Spanish>No hay nada que recoger a menos de 50 m.</Spanish>
+            </Key>
             <Key ID="STR_DUWS_T_arsenal">
                 <German>Arsenal-System</German>
                 <Spanish>Sistema de Arsenal</Spanish>
