@@ -222,6 +222,10 @@ drops every such class, so it is the one sellability gate. `Money_roll` itself i
 | Launcher | 3 |
 | Backpack with no load (`maximumLoad` 0): a static weapon part or a UAV | 6 |
 | Vehicle | 1.2 × its request-menu CP price (`DUWS_fnc_vehPrice`) |
+| Civilian ground vehicle (config `side` 3) | 1.2 × the CP price of the `lightUnarmed` band, which reads only the seats |
+
+Without the civilian rule, a civilian fuel truck, repair van or ambulance would take the logistics
+band and cost more than BLUFOR's own troop trucks.
 
 Town reputation gives a discount at every shop in the town (`fnc_vendor_discount`): 10% at 10 and
 20% at 20, the reputation cap. The server sends the discount with each stock list, and the

@@ -32,7 +32,10 @@ private _base = call {
     // Hulls take the request menu's CP price, so a dealer ranks them exactly as HQ does and a retune
     // of the CP bands carries through to the forecourt.
     if (["car", _class] call fnc_vendor_hullFits || {["boat", _class] call fnc_vendor_hullFits}) exitWith {
-        VEHICLE_RATE * ([_class] call DUWS_fnc_vehPrice)
+        // A civilian ground hull prices by its seats alone, so a fuel truck or an ambulance off the
+        // street sells as the car it is, not as military logistics above BLUFOR's own transports.
+        private _civ = getNumber (configFile >> "CfgVehicles" >> _class >> "side") == 3 && {_class isKindOf "LandVehicle"};
+        VEHICLE_RATE * ([_class, ["", "lightUnarmed"] select _civ] call DUWS_fnc_vehPrice)
     };
 
     // Anything left that is not gear has no band, so it has no price and cannot be sold -- which is

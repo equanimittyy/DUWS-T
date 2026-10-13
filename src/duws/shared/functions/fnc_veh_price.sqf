@@ -33,7 +33,8 @@ DUWS_vehPriceBands = createHashMapFromArray [
     ["logi",           [14, 18, 0.10, 0.00, 0.90]],
     ["lightUnarmed",   [ 1,  8, 0.00, 0.00, 1.00]],
     ["arty",           [66, 75, 0.20, 0.80, 0.00]],
-    ["boat",           [16, 24, 0.10, 0.70, 0.20]],
+    ["boatArmed",      [16, 24, 0.10, 0.70, 0.20]],
+    ["boatTransport",  [ 1,  8, 0.00, 0.00, 1.00]],
     ["uav",            [ 5, 22, 0.00, 1.00, 0.00]],
     ["default",        [10, 10, 0.00, 0.00, 0.00]]
 ];
@@ -115,7 +116,7 @@ DUWS_fnc_vehKind = {
         if (_armed) exitWith { "armedCar" };
         "lightUnarmed"
     };
-    if (_class isKindOf "Ship") exitWith { "boat" };
+    if (_class isKindOf "Ship") exitWith { ["boatTransport", "boatArmed"] select _armed };
     "default"
 };
 
@@ -160,17 +161,18 @@ DUWS_fnc_vehWeaponScore = {
 };
 
 // CP price: kind picks the band, the heaviness score (armour + armament + seats, blended by the
-// kind's weights) picks the point inside it. Memoised per class -- the config walk runs once per
-// class per machine, not per menu open.
+// kind's weights) picks the point inside it. Memoised per class and forced band -- the config walk
+// runs once per class per machine, not per menu open.
 DUWS_fnc_vehPrice = {
-    params ["_class"];
+    params ["_class", ["_kind", ""]];
     if (_class == "") exitWith { 10 };
+    private _key = [_class + "|" + _kind, _class] select (_kind == "");
     private _cache = missionNamespace getVariable ["DUWS_vehPriceCache", createHashMap];
-    private _hit = _cache getOrDefault [_class, -1];
+    private _hit = _cache getOrDefault [_key, -1];
     if (_hit >= 0) exitWith { _hit };
 
     private _cfg = configFile >> "CfgVehicles" >> _class;
-    private _kind = [_class] call DUWS_fnc_vehKind;
+    if (_kind == "") then { _kind = [_class] call DUWS_fnc_vehKind };
     (DUWS_vehPriceBands getOrDefault [_kind, [10, 10, 0, 0, 0]]) params ["_lo", "_hi", "_wA", "_wW", "_wS"];
 
     private _score = if (_kind == "default") then { 0.5 } else {
@@ -181,7 +183,7 @@ DUWS_fnc_vehPrice = {
     };
     private _cp = round (_lo + _score * (_hi - _lo));
 
-    _cache set [_class, _cp];
+    _cache set [_key, _cp];
     missionNamespace setVariable ["DUWS_vehPriceCache", _cache];
     _cp
 };

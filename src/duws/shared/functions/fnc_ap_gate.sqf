@@ -56,7 +56,8 @@ DUWS_fnc_vehTier = {
             [2, 1] select (_seats <= 6 || {_class isKindOf "Truck_F"})
         };
         case "logi": { 1 };
-        case "boat": { 1 };
+        case "boatArmed";
+        case "boatTransport": { 1 };
         default { 3 };
     }
 };

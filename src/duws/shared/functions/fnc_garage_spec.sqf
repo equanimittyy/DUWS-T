@@ -28,7 +28,7 @@ DUWS_fnc_vehDomain = {
     params ["_class"];
     private _kind = [_class] call DUWS_fnc_vehKind;
     if (_kind in ["planeArmed", "planeTransport", "heliArmed", "heliTransport", "uav"]) exitWith { "air" };
-    if (_kind == "boat") exitWith { "boat" };
+    if (_kind in ["boatArmed", "boatTransport"]) exitWith { "boat" };
     "land"
 };
 
