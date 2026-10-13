@@ -855,6 +855,7 @@ fnc_debug_aoi_circles = compile preprocessFileLineNumbers "duws\server\warcom\fn
 // client/arsenal
 // =========================================================================================================
 fnc_ai_rearm = compile preprocessFileLineNumbers "duws\client\arsenal\fnc_ai_rearm.sqf";publicVariable "fnc_ai_rearm";
+fnc_arsenal_collect = compile preprocessFileLineNumbers "duws\client\arsenal\fnc_arsenal_collect.sqf";publicVariable "fnc_arsenal_collect";
 fnc_duws_Arsenal = compile preprocessFileLineNumbers "duws\client\arsenal\fnc_duws_Arsenal.sqf";publicVariable "fnc_duws_Arsenal";
 fnc_quick_kits_menu = compile preprocessFileLineNumbers "duws\client\arsenal\fnc_quick_kits_menu.sqf";
 publicVariable "fnc_quick_kits_menu";

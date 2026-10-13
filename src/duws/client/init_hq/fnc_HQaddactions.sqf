@@ -15,6 +15,7 @@ if (isMultiplayer) then {
     _hq setVariable ["HQ_actions_done", true];
     if (support_armory_available) then {
         bluHQ_object addaction [ACT_EQUIP("STR_DUWS_T_160jkc3a"),fnc_duws_Arsenal, [_this], 80, true, true, "", "_this == player", ACT_REACH];
+        bluHQ_object addaction [ACT_COMMIT("STR_DUWS_T_ARSENAL_COLLECT"),fnc_arsenal_collect, [], 10, true, true, "", "_this == player", ACT_REACH];
     };
 
 if (support_halo_available) then {
@@ -27,8 +28,10 @@ if (support_halo_available) then {
 
     "support_armory_available" addPublicVariableEventHandler {
         bluHQ_object addaction [ACT_EQUIP("STR_DUWS_T_160jkc3a"),fnc_duws_Arsenal, [_this], 80, true, true, "", "_this == player", ACT_REACH];
+        bluHQ_object addaction [ACT_COMMIT("STR_DUWS_T_ARSENAL_COLLECT"),fnc_arsenal_collect, [], 10, true, true, "", "_this == player", ACT_REACH];
         {
             _x addaction [ACT_EQUIP("STR_DUWS_T_160jkc3a"),fnc_duws_Arsenal, [_this], 80, true, true, "", "_this == player", ACT_REACH];
+            _x addaction [ACT_COMMIT("STR_DUWS_T_ARSENAL_COLLECT"),fnc_arsenal_collect, [], 10, true, true, "", "_this == player", ACT_REACH];
         } forEach (Array_of_FOBS);
     };
 

@@ -478,19 +478,10 @@ fnc_captured_pool_seedCount = {
 };
 
 
-// Arsenal close (server). Diffs the loadout the player opened with against the one they closed with,
-// per foreign class: a class present at close but not open (or in a greater count) was withdrawn from
-// the shelf; a lesser count was deposited. net = close - open. A friendly class is skipped -- it is
-// unlimited and never touches the pool. Overdraw (net beyond what the pool held) is answered by
-// replying the excess back to the client to strip, which is what makes a count-1 rifle yield one.
-// _moneyOnly settles the bank alone, for the Full arsenal, where all other gear is unlimited.
-fnc_captured_pool_settle = {
-	if (!isServer) exitWith {};
-	params [["_openLoadout", []], ["_closeLoadout", []], ["_requester", objNull], ["_replyVar", ""], ["_moneyOnly", false]];
-	// Close is read on the client, like open, not re-read here: getUnitLoadout on the remote requester
-	// lagged its replication, so a grab just before close settled against a stale loadout and stripped
-	// gear off an honest co-op player. Trusting the client is the price; the accepted cheat is in the doc.
-	call fnc_captured_pool_friendly;
+// The Full arsenal counts money alone, and that test is the caller's. Callers run
+// fnc_captured_pool_friendly first.
+fnc_captured_pool_unpooled = {
+	params ["_c"];
 	// A disposable launcher (CUP NLAW/M136/RPG18) is stocked and shown by its base row but leaves the
 	// arsenal as a distinct loaded fire-class (CUP_launch_NLAW -> CUP_launch_NLAW_Loaded) the raw
 	// friendly set never holds. Resolve back to the arsenal base -- the same mapping that built the set
@@ -504,13 +495,25 @@ fnc_captured_pool_settle = {
 	// Ammo untracked: magazines never touch the pool. Hybrid keeps friendly as the unlimited floor and
 	// skips it; Limited tracks friendly too, so that skip is dropped. Money is the bank, so it is never
 	// unlimited, though Money_roll is a magazine.
-	private _unpooled = {
-		params ["_c"];
-		_c != "Money_roll" && {
-			(!DUWS_trackAmmo && {isClass (configFile >> "CfgMagazines" >> _c)})
-			|| {!DUWS_arsenalLimited && {[_c] call _friendlyHit}}
-		}
-	};
+	_c != "Money_roll" && {
+		(!DUWS_trackAmmo && {isClass (configFile >> "CfgMagazines" >> _c)})
+		|| {!DUWS_arsenalLimited && {[_c] call _friendlyHit}}
+	}
+};
+
+// Arsenal close (server). Diffs the loadout the player opened with against the one they closed with,
+// per foreign class: a class present at close but not open (or in a greater count) was withdrawn from
+// the shelf; a lesser count was deposited. net = close - open. A friendly class is skipped -- it is
+// unlimited and never touches the pool. Overdraw (net beyond what the pool held) is answered by
+// replying the excess back to the client to strip, which is what makes a count-1 rifle yield one.
+// _moneyOnly settles the bank alone, for the Full arsenal, where all other gear is unlimited.
+fnc_captured_pool_settle = {
+	if (!isServer) exitWith {};
+	params [["_openLoadout", []], ["_closeLoadout", []], ["_requester", objNull], ["_replyVar", ""], ["_moneyOnly", false]];
+	// Close is read on the client, like open, not re-read here: getUnitLoadout on the remote requester
+	// lagged its replication, so a grab just before close settled against a stale loadout and stripped
+	// gear off an honest co-op player. Trusting the client is the price; the accepted cheat is in the doc.
+	call fnc_captured_pool_friendly;
 	private _openC = [_openLoadout] call fnc_captured_loadout_counts;
 	private _closeC = [_closeLoadout] call fnc_captured_loadout_counts;
 	private _classes = (keys _openC) + (keys _closeC);
@@ -520,7 +523,7 @@ fnc_captured_pool_settle = {
 	private _ledger = [];
 	{
 		private _cls = _x;
-		if ([_cls] call _unpooled) then { continue };
+		if ([_cls] call fnc_captured_pool_unpooled) then { continue };
 		private _net = (_closeC getOrDefault [_cls, 0]) - (_openC getOrDefault [_cls, 0]);
 		if (_net == 0) then { continue };
 		private _cur = [_cls] call fnc_captured_pool_getCount;
@@ -551,7 +554,7 @@ fnc_captured_pool_settle = {
 		if (_idx < 0) then { continue };   // not a worn container (headgear/goggles/loose item)
 		{
 			_x params ["_cc", ["_cn", 1]];
-			if ([_cc] call _unpooled) then { continue };
+			if ([_cc] call fnc_captured_pool_unpooled) then { continue };
 			private _keep = _cn - (_exMap getOrDefault [_cc, 0]);
 			if (_keep > 0) then {
 				[_cc, ([_cc] call fnc_captured_pool_getCount) + _keep] call fnc_captured_pool_setCount;
@@ -579,4 +582,63 @@ fnc_captured_pool_deposit_counts = {
 	} forEach _pairs;
 	if (duws_log_level >= 4) then { ["DEBUG", "GEAR", format ["pool deposit_counts: %1", _pairs]] call fnc_log; };
 	publicVariable "DUWS_capturedPool";
+};
+
+// Collect (server). Reached by remoteExecCall, so the read, the clear and the credit run in one unscheduled
+// step and two players cannot bank one load twice. Cargo the pool does not count is dropped, because the
+// shelf already offers it unlimited. Intel goes back loose: a player turns it in from the inventory.
+fnc_captured_pool_collect = {
+	if (!isServer) exitWith {};
+	params ["_box", "_caller", ["_intel", []]];
+	if (isNull _box || {isNull _caller}) exitWith {};
+	call fnc_captured_pool_friendly;
+	// The HQ's Arsenal hangs off the HQ building, so its crate is the HQ supply crate.
+	private _crate = if (_box isEqualTo bluHQ_object) then { missionNamespace getVariable ["DUWS_hqCrate", objNull] } else { _box };
+	private _veh = objNull;
+	{
+		if (alive _x && {((weaponCargo _x) + (magazineCargo _x) + (itemCargo _x) + (backpackCargo _x) - _intel) isNotEqualTo []}) exitWith { _veh = _x };
+	} forEach (nearestObjects [_box, ["LandVehicle", "Air", "Ship"], 50]);
+
+	private _bump = {
+		params ["_cls", "_n"];
+		_got set [_cls, (_got getOrDefault [_cls, 0]) + _n];
+	};
+	// A cargo weapon has a loadout weapon slot's shape, so the loadout tally keys it by arsenal row as the settle does.
+	private _walk = {
+		params ["_cargo"];
+		_cargo params ["_weapons", "_mags", "_items", "_packs", "_nested"];
+		{ { [_x, _y] call _bump } forEach ([[_x]] call fnc_captured_loadout_counts) } forEach _weapons;
+		{ [_x select 0, 1] call _bump } forEach _mags;
+		{ [_x, 1] call _bump } forEach (_items + _packs);
+		{ [_x select 1] call _walk } forEach _nested;
+	};
+	private _full = DUWS_paramArsenal == 1;
+	private _total = 0;
+	{
+		private _src = _x;
+		private _got = createHashMap;
+		[[_src] call DUWS_fnc_campaignCargo] call _walk;
+		clearWeaponCargoGlobal _src;
+		clearMagazineCargoGlobal _src;
+		clearItemCargoGlobal _src;
+		clearBackpackCargoGlobal _src;
+		{
+			if (_x in _intel) then {
+				if (isClass (configFile >> "CfgMagazines" >> _x)) then { _src addMagazineCargoGlobal [_x, _y] } else { _src addItemCargoGlobal [_x, _y] };
+			} else {
+				_total = _total + _y;
+				if (_x == "Money_roll" || {!_full && {!([_x] call fnc_captured_pool_unpooled)}}) then {
+					[_x, ([_x] call fnc_captured_pool_getCount) + _y] call fnc_captured_pool_setCount;
+				};
+			};
+		} forEach _got;
+	} forEach ([_crate, _veh] select { !isNull _x });
+
+	if (_total == 0) exitWith { [localize "STR_DUWS_T_ARSENAL_COLLECT_NONE"] remoteExec ["hint", _caller]; };
+	publicVariable "DUWS_capturedPool";
+	private _msg = format [localize "STR_DUWS_T_ARSENAL_COLLECT_DONE", _total];
+	if (!isNull _veh) then {
+		_msg = _msg + "\n" + format [localize "STR_DUWS_T_ARSENAL_COLLECT_VEHICLE", getText (configFile >> "CfgVehicles" >> typeOf _veh >> "displayName")];
+	};
+	[_msg] remoteExec ["hint", _caller];
 };

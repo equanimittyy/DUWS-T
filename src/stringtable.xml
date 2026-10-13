@@ -6268,6 +6268,54 @@
                 <Chinese>[軍械庫] 已移除 %1 件受限物品。</Chinese>
                 <Spanish>[Arsenal] Objetos restringidos eliminados: %1.</Spanish>
             </Key>
+            <Key ID="STR_DUWS_T_ARSENAL_COLLECT">
+                <Original>Collect from vehicle</Original>
+                <English>Collect from vehicle</English>
+                <Chinesesimp>从载具收集</Chinesesimp>
+                <German>Aus Fahrzeug einsammeln</German>
+                <Polish>Zbierz z pojazdu</Polish>
+                <Czech>Sebrat z vozidla</Czech>
+                <Russian>Собрать из техники</Russian>
+                <French>Collecter depuis le véhicule</French>
+                <Chinese>從載具收集</Chinese>
+                <Spanish>Recoger del vehículo</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_ARSENAL_COLLECT_DONE">
+                <Original>Items collected into the arsenal: %1</Original>
+                <English>Items collected into the arsenal: %1</English>
+                <Chinesesimp>已收入军械库的物品：%1</Chinesesimp>
+                <German>Ins Arsenal gebrachte Gegenstände: %1</German>
+                <Polish>Przedmioty zebrane do arsenału: %1</Polish>
+                <Czech>Předměty sebrané do arzenálu: %1</Czech>
+                <Russian>Предметов собрано в арсенал: %1</Russian>
+                <French>Objets collectés dans l'arsenal : %1</French>
+                <Chinese>已收入軍械庫的物品：%1</Chinese>
+                <Spanish>Objetos recogidos en el arsenal: %1</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_ARSENAL_COLLECT_VEHICLE">
+                <Original>Vehicle emptied: %1</Original>
+                <English>Vehicle emptied: %1</English>
+                <Chinesesimp>已清空载具：%1</Chinesesimp>
+                <German>Fahrzeug geleert: %1</German>
+                <Polish>Opróżniono pojazd: %1</Polish>
+                <Czech>Vyprázdněné vozidlo: %1</Czech>
+                <Russian>Разгружена техника: %1</Russian>
+                <French>Véhicule vidé : %1</French>
+                <Chinese>已清空載具：%1</Chinese>
+                <Spanish>Vehículo vaciado: %1</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_ARSENAL_COLLECT_NONE">
+                <Original>Nothing to collect here or in a vehicle within 50 m.</Original>
+                <English>Nothing to collect here or in a vehicle within 50 m.</English>
+                <Chinesesimp>此处及 50 米内的载具中没有可收集的物品。</Chinesesimp>
+                <German>Hier und in Fahrzeugen im Umkreis von 50 m gibt es nichts einzusammeln.</German>
+                <Polish>Tutaj ani w pojazdach w promieniu 50 m nie ma nic do zebrania.</Polish>
+                <Czech>Tady ani ve vozidlech do 50 m není co sebrat.</Czech>
+                <Russian>Здесь и в технике в радиусе 50 м нечего собирать.</Russian>
+                <French>Rien à collecter ici ni dans un véhicule à moins de 50 m.</French>
+                <Chinese>此處及 50 公尺內的載具中沒有可收集的物品。</Chinese>
+                <Spanish>No hay nada que recoger aquí ni en vehículos a menos de 50 m.</Spanish>
+            </Key>
             <Key ID="STR_DUWS_T_arsenal">
                 <German>Arsenal-System</German>
                 <Spanish>Sistema de Arsenal</Spanish>

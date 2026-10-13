@@ -230,11 +230,12 @@ Money is the `Money_roll` item. A player carries it, and the team can bank it. T
 `Money_roll` row of the captured-materiel pool (`DUWS_capturedPool`), so the campaign save keeps it
 with the pool and it needs no key of its own. The top status bar shows it as **Money**.
 
-The arsenal is the only way into and out of the bank. Carried money stays in the loadout when the
-arsenal opens, and `DUWS_fnc_arsenal_stock` (`initPlayerLocal.sqf`) always puts `Money_roll` on the
-shelf, so the row shows the bank count even when the bank is empty. Money that leaves the loadout is a
-deposit, and money that the player takes is a withdrawal. The close settle
-(`server/warcom/fnc_economy_init.sqf:487`, `fnc_captured_pool_settle`) nets the two and strips a
+The arsenal is the only way out of the bank. Money goes in through the arsenal, and through Collect
+([below](#collect-from-vehicle)), which banks the money in a crate or a vehicle. Carried money stays
+in the loadout when the arsenal opens, and `DUWS_fnc_arsenal_stock` (`initPlayerLocal.sqf`) always
+puts `Money_roll` on the shelf, so the row shows the bank count even when the bank is empty. Money
+that leaves the loadout is a deposit, and money that the player takes is a withdrawal. The close settle
+(`server/warcom/fnc_economy_init.sqf:510`, `fnc_captured_pool_settle`) nets the two and strips a
 withdrawal that is larger than the bank. An arsenal edit that deletes carried money therefore
 deposits it and does not burn it.
 
@@ -250,6 +251,26 @@ bank.
 
 A quick-kit swap stashes the carried money and gives it back, so a swap never deposits money. A
 respawn never copies money from the death loadout.
+
+## Collect from vehicle
+
+Every Arsenal entry has a Collect entry beside it: at the HQ, a FOB, the Mobile HQ box, a supply drop
+and the killhouse terminals. Collect empties two cargoes: the crate that carries the entry, and the
+nearest live vehicle within 50 m of it that holds more than intel. At the HQ the entry hangs off the
+HQ building, so the crate is the HQ supply crate. A FOB and a killhouse terminal have no crate. The
+entry is in the commit bucket, last on the scroll wheel, because it deletes cargo and a mis-scroll
+cannot be undone.
+
+Gear that the pool counts, and money, goes into the pool (`fnc_captured_pool_collect`,
+`server/warcom/fnc_economy_init.sqf`). The test is the one the close settle uses
+(`fnc_captured_pool_unpooled`), so a class counts by the arsenal mode: foreign gear in Hybrid, all gear
+in Limited, magazines only when ammo is tracked, and money in every mode. The Full arsenal counts money
+alone. The rest of the cargo is deleted, because the shelf already offers it unlimited. Intel stays in
+the cargo that held it, loose at the top level, because a player turns it in from the inventory.
+
+The client sends `DUWS_intelItems` with the request, because only clients define it. The read, the clear
+and the credit run in one `remoteExecCall`, so two players cannot bank one load twice. The pool is
+already in the campaign save, so Collect needs no key of its own.
 
 ## Faucets
 
