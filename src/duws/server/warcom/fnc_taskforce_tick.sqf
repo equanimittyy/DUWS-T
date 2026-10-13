@@ -75,12 +75,19 @@ private _live = [];
 					};
 				};
 				case (_towns isEqualTo []): {
-					if (_order isNotEqualTo ["hq"]) then {
-						[_group, "", WARCOM_blu_hq_pos] call DUWS_fnc_opcom_applyOrder;
-						private _hold = _group addWaypoint [WARCOM_blu_hq_pos, 0];
+					private _kind = ["defend", "hq"] select (WARCOM_zones_controled_by_BLUFOR isEqualTo []);
+					if ((_order param [0, ""]) != _kind) then {
+						private _post = WARCOM_blu_hq_pos;
+						private _target = "";
+						if (_kind == "defend") then {
+							_post = [WARCOM_zones_controled_by_BLUFOR, leader _group] call BIS_fnc_nearestPosition;
+							_target = (zone_namePOS_pairs select (zone_namePOS_pairs findIf {((_x select 1) distance2D _post) < 1})) select 0;
+						};
+						[_group, "", _post] call DUWS_fnc_opcom_applyOrder;
+						private _hold = _group addWaypoint [_post, 0];
 						_hold setWaypointType "HOLD";
 						_group setCurrentWaypoint _hold;
-						_group setVariable ["DUWS_taskforce_order", ["hq"]];
+						_group setVariable ["DUWS_taskforce_order", [_kind, _target]];
 					};
 				};
 				default {

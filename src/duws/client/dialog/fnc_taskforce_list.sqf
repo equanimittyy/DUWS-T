@@ -38,6 +38,7 @@ if (_taskforces isEqualTo []) exitWith {
 	private _ordersText = switch (_kind) do {
 		case "capture": { format [localize "STR_DUWS_T_TASKFORCE_CAPTURE", _target] };
 		case "patrol": { format [localize "STR_DUWS_T_TASKFORCE_PATROL", _target] };
+		case "defend": { format [localize "STR_DUWS_T_TASKFORCE_DEFEND", _target] };
 		case "hq": { localize "STR_DUWS_T_TASKFORCE_DEFEND_HQ" };
 		default { localize "STR_DUWS_T_TASKFORCE_AWAITING" };
 	};
