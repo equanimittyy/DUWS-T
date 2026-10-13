@@ -30,7 +30,6 @@ private _fnc_inReach = {
 
 private _awarded = false;
 
-// ---- the pool half ----
 // Rolled over the kinds that have something to give right now, not a fixed list: a kind whose
 // pool is empty never enters the draw, and a campaign that has found everything pays this half
 // nothing rather than silently awarding it. They stay separate buckets rather than one
@@ -52,8 +51,7 @@ if !(_hiddenZones isEqualTo []) then { _kinds pushBack "ZONE" };
 private _from = _origin;
 if (count _from < 2) then { _from = missionNamespace getVariable ["PosOfBLUHQ", []] };
 
-// Towns are only ever hidden in hardcore, so outside it this stays empty and the payout is
-// zones-only exactly as before.
+// Towns are only ever hidden in hardcore, so outside it this stays empty.
 private _towns = missionNamespace getVariable ["civ_locations", []];
 private _hiddenTowns = [];
 if (count _from >= 2) then {
@@ -65,17 +63,9 @@ if (count _from >= 2) then {
 };
 if !(_hiddenTowns isEqualTo []) then { _kinds pushBack "CIV" };
 
-// Hardpoints are hidden only under hardcore, like towns, so outside it this stays empty and the
-// payout is unchanged. A zone-child hardpoint is gated behind its parent: it enters the pool only
-// once that zone is revealed, so the player finds the zone before its guns. A standalone hardpoint
-// has no parent and is always eligible. Matched by key -- fnc_zone_key of a revealed zone's centre
-// is the same key the hardpoint row carries (both derive from the one zone-centre position).
-private _revealedZoneKeys = [];
-{
-    if (_x select 2) then { _revealedZoneKeys pushBack ([_x select 1] call fnc_zone_key) };
-} forEach zone_namePOS_pairs;
+// Standalone only: a zone hardpoint reveals with its zone (fnc_zone_reveal).
 private _hiddenHPs = DUWS_hardpoints select {
-    !(_x select 5) && { (_x select 4) isEqualTo "" || {(_x select 4) in _revealedZoneKeys} }
+    !(_x select 5) && {(_x select 4) isEqualTo ""}
     && {[_x select 1] call _fnc_inReach} && {[_x select 1] call _fnc_unclaimed}
 };
 if !(_hiddenHPs isEqualTo []) then { _kinds pushBack "HP" };
@@ -86,9 +76,8 @@ if (_pool && {_kinds isNotEqualTo []}) then {
         // Random, and from the unrevealed set only. A zone is a target the campaign points the player
         // at, so which one comes next is a strategic question rather than a geographic one, and
         // nearest-first would march them outward in a spiral. Drawing from the unrevealed set rather
-        // than from every zone and testing afterwards -- the shape this replaced -- stops the real
-        // odds decaying as a campaign progresses, when late on most winning rolls land on ground
-        // already found.
+        // than from every zone and testing afterwards stops the real odds decaying as a campaign
+        // progresses, when late on most winning rolls land on ground already found.
         case "ZONE": {
             _awarded = ["ONE", (selectRandom _hiddenZones) select 1] call fnc_zone_reveal;
         };
@@ -107,8 +96,8 @@ if (_pool && {_kinds isNotEqualTo []}) then {
             _awarded = [_closest] call fnc_civ_town_reveal;
         };
 
-        // Random from the eligible unrevealed set, like the zone bucket: a hardpoint is a target the
-        // campaign points the player at, not a place they are measured a distance from.
+        // Random, like the zone bucket: a hardpoint is a target the campaign points the player at, not a
+        // place they are measured a distance from.
         case "HP": {
             _awarded = ["ONE", (selectRandom _hiddenHPs) select 0] call fnc_hardpoint_reveal;
         };
@@ -116,7 +105,6 @@ if (_pool && {_kinds isNotEqualTo []}) then {
     };
 };
 
-// ---- the contact half ----
 // Gated on the player knowing where at least one enemy zone is. A march plotted across ground whose
 // owner they have never found names nothing, and in hardcore that blank map is the opening the first
 // zone is there to end -- intel that jumped straight to enemy movements would answer a question the
@@ -132,6 +120,10 @@ private _knownOpfor = false;
 
 if (_knownOpfor) then {
     // A garrison rests on its home zone, so plotting one whose zone is still hidden would mark that zone.
+    private _revealedZoneKeys = [];
+    {
+        if (_x select 2) then { _revealedZoneKeys pushBack ([_x select 1] call fnc_zone_key) };
+    } forEach zone_namePOS_pairs;
     private _contacts = DUWS_opcom_taskings select {
         ((_x get "order") isNotEqualTo "garrison" || {(_x get "homeZone") in _revealedZoneKeys})
         && {[_x get "pos"] call _fnc_inReach}

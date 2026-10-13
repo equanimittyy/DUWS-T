@@ -248,7 +248,7 @@ composition's own deploy rebuilds members with `createVehicle`, which would hand
 A minefield instead streams on its own path, square by square ([Siting](#siting)).
 On registration, every member of their
 composition is re-filed through `fnc_duws_keep` with `_pinned = true`
-(`fnc_hardpoint_stream.sqf:483`), which sets `DUWS_noStow` and excludes the object from
+(`fnc_hardpoint_stream.sqf:484`), which sets `DUWS_noStow` and excludes the object from
 `fnc_duws_stow`'s crewed-member refusal and its delete pass
 (`server/misc/fnc_composition_stream_init.sqf:38-46,93-100`). Every other type stows and redeploys
 like an ordinary composition: garrisons are raised fresh from `DUWS_fnc_teamRoster` on each raise
@@ -318,21 +318,21 @@ with the type token as its text (`fnc_hardpoint_stream.sqf:441-448`) — one ico
 distinguished by label rather than by symbol. The marker's alpha and the revealed flag start at the rule
 in [`intel_system.md`](intel_system.md#what-is-hidden-depends-on-when-it-came-into-existence): a hardpoint
 laid by campaign generation is shown outside hardcore and hidden under it, and one built in play
-(registered after `mission_init_complete`) starts hidden in both modes. `fnc_hardpoint_reveal` (`fnc_hardpoint_reveal.sqf`)
+(registered after `mission_init_complete`) starts hidden in both modes. A zone hardpoint follows its zone instead:
+`fnc_zone_reveal` reveals the zone's hardpoints with it, under the zone's own announcement (the `"ZONE"` mode of
+`fnc_hardpoint_reveal`), and a zone hardpoint that is registered or restored under a found zone starts shown
+(`DUWS_fnc_hardpointZoneFound`). `fnc_hardpoint_reveal` (`fnc_hardpoint_reveal.sqf`)
 is the sole writer of the revealed flag — index 5 of a `DUWS_hardpoints` row — keyed on the
 hardpoint's own key rather than position, the way `fnc_zone_reveal` owns its flag and
 `fnc_civ_town_reveal` owns `civ_visible`. It announces each reveal as an Allseer line on SUB-NET, naming
 the type (`DUWS_hardpointName`) and the nearest zone or town (`DUWS_fnc_hardpointNearestPlace`).
 
-Two ways a hidden hardpoint is found. **Proximity**: each hardpoint registers a server trigger that
-fires when a player comes within 100 m (`HP_REVEAL_RADIUS`, `fnc_hardpoint_stream.sqf:13`) and its parent
-zone (if any) is already revealed (`DUWS_fnc_hardpointZoneFound`), as a zone reveals on entry — a
-zone-child hardpoint cannot be found before its zone is. A trigger checks every 0.5 s, where the site
+Two ways a hidden standalone hardpoint is found. **Proximity**: each standalone hardpoint registers a
+server trigger that fires when a player comes within 100 m (`HP_REVEAL_RADIUS`,
+`fnc_hardpoint_stream.sqf:13`), as a zone reveals on entry. A trigger checks every 0.5 s, where the site
 pass would let a driver cross the 100 m disc between two polls. It retires on firing, or with the
-hardpoint's clear. **Intel**: `fnc_intel_payout` draws `"HP"` as one of its kinds whenever the
-eligible set is non-empty — unrevealed, and either standalone or whose parent zone is already
-revealed (`server/search/fnc_intel_payout.sqf:48-60`) — matched by `fnc_zone_key`, the same key both a
-revealed zone and a hardpoint row carry.
+hardpoint's clear. **Intel**: `fnc_intel_payout` draws `"HP"` as one of its kinds whenever an unrevealed
+standalone hardpoint is in reach (`server/search/fnc_intel_payout.sqf:68-73`).
 
 A minefield is also found when its first mine is gone: set off, disarmed or destroyed. The clear check
 reads its mine list every tick, and reveals the field once fewer mines are armed than were laid. Revealing

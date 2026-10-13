@@ -11881,18 +11881,6 @@
                 <French>Tombé aux mains de l'ennemi : %1.</French>
                 <Chinese>%1 已落入敵手。</Chinese>
             </Key>
-            <Key ID="STR_DUWS_T_daqqfq5j">
-                <German>==INFORMATIONEN GEBORGEN==\n\nAlle Zonen wurden auf der Karte aufgedeckt.</German>
-                <Spanish>==INTELIGENCIA RECUPERADA==\n\nTodas las zonas han sido reveladas en el mapa.</Spanish>
-                <Chinesesimp>==已获取情报==\n\n所有区域已在地图上标示。</Chinesesimp>
-                <Original>==INTEL RECOVERED==\n\nAll Zones have been revealed on the map.</Original>
-                <English>==INTEL RECOVERED==\n\nAll Zones have been revealed on the map.</English>
-                <Polish>==WYWIAD ODZYSKANY==\n\nWszystkie strefy zostały odsłonięte na mapie.</Polish>
-                <Czech>==ZPRAVODAJSTVÍ ZÍSKÁNO==\n\nVšechny zóny byly odhaleny na mapě.</Czech>
-                <Russian>==РАЗВЕДДАННЫЕ ПОЛУЧЕНЫ==\n\nВсе зоны показаны на карте.</Russian>
-                <French>==RENSEIGNEMENT RÉCUPÉRÉ==\n\nToutes les zones ont été révélées sur la carte.</French>
-                <Chinese>==已取得情報==\n\n所有區域已在地圖上標示。</Chinese>
-            </Key>
             <Key ID="STR_DUWS_T_92465yls">
                 <German>
 					Der Feind kontrolliert einige wichtige Zonen in diesem Gebiet, die wir zurückerobern müssen. Nimm jede Zone unter feindlicher Kontrolle ein, dann ist die Mission erfolgreich. &lt;br /&gt;

@@ -7,9 +7,8 @@
 // Returns true only when this call changed something, so a caller can tell "found it" from "already
 // on the map". _quiet follows fnc_zone_reveal's rule.
 //
-// The parent gate (a zone-child hardpoint is only discoverable once its zone is revealed) lives in
-// the intel-draw eligibility filter, not here: this function reveals whatever key it is handed.
-params ["_one_or_all", ["_key", ""], ["_quiet", false]];
+// "ZONE" takes a zone key and speaks no line: it runs under fnc_zone_reveal's own announcement.
+params ["_mode", ["_key", ""], ["_quiet", false]];
 
 if (!isServer) exitWith {false};
 
@@ -32,7 +31,7 @@ private _fnc_paint = {
 
 private _revealed = false;
 
-switch (_one_or_all) do {
+switch (_mode) do {
 
     case "ONE": {
         private _i = DUWS_hardpoints findIf { (_x select 0) isEqualTo _key };
@@ -49,9 +48,9 @@ switch (_one_or_all) do {
         };
     };
 
-    case "ALL": {
+    case "ZONE": {
         {
-            if (!(_x select 5)) then {
+            if ((_x select 4) isEqualTo _key && {!(_x select 5)}) then {
                 _x set [5, true];
                 [_x select 0] call _fnc_paint;
                 _revealed = true;

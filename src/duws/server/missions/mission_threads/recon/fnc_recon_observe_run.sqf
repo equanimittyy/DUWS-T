@@ -77,12 +77,9 @@ if (_won) then {
     if (_kind isEqualTo "hp") then { ["ONE", _hpKey, true] call fnc_hardpoint_reveal }
     else { ["ONE", _target, true] call fnc_zone_reveal };
 
-    // A hardpoint under a still-hidden zone is no bonus: it reveals with its zone.
+    // A zone hardpoint is no bonus: it reveals with its zone.
     private _pairs = missionNamespace getVariable ["zone_namePOS_pairs", []];
     private _enemyZones = missionNamespace getVariable ["WARCOM_zones_controled_by_OPFOR", []];
-    private _targetKey = [_target] call fnc_zone_key;
-    private _revealedKeys = [_targetKey];
-    { _x params ["", "_zp2", "_rev2"]; if (_rev2) then { _revealedKeys pushBack ([_zp2] call fnc_zone_key) } } forEach _pairs;
     private _extra = [];
     {
         _x params ["", "_zp", "_rev"];
@@ -91,7 +88,7 @@ if (_won) then {
         };
     } forEach _pairs;
     {
-        if (!(_x select 5) && {((_x select 4) isEqualTo "") || {(_x select 4) in _revealedKeys}}) then {
+        if (!(_x select 5) && {(_x select 4) isEqualTo ""}) then {
             _extra pushBack ["hp", _x select 0, (_x select 1) distance2D _target];
         };
     } forEach (missionNamespace getVariable ["DUWS_hardpoints", []]);

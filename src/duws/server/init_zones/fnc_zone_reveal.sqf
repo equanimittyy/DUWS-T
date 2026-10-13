@@ -5,7 +5,7 @@
 //
 // A single reveal is announced to every player whatever its source, since the zone lands on every
 // map. _quiet hands the reporting to a caller that speaks its own line over the reveal.
-params ["_one_or_all", ["_zonePos", []], ["_quiet", false]];
+params ["_mode", ["_zonePos", []], ["_quiet", false]];
 
 if (!isServer) exitWith {false};
 
@@ -25,13 +25,14 @@ private _fnc_paint = {
 
 private _revealed = false;
 
-switch (_one_or_all) do {
+switch (_mode) do {
 
     case "ONE": {
         private _i = zone_namePOS_pairs findIf {str (_x select 1) == str _zonePos};
         if (_i > -1 && {!((zone_namePOS_pairs select _i) select 2)}) then {
             (zone_namePOS_pairs select _i) set [2, true];
             [_zonePos] call _fnc_paint;
+            ["ZONE", [_zonePos] call fnc_zone_key] call fnc_hardpoint_reveal;
             _revealed = true;
             if (!_quiet) then {
                 private _name = (zone_namePOS_pairs select _i) select 0;
@@ -39,20 +40,6 @@ switch (_one_or_all) do {
                 [localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_INTEL_REVEAL_ZONE_LINE",
                     _name, [_zonePos] call fnc_place_name]] remoteExec ["fnc_duws_dialogue", 0];
             };
-        };
-    };
-
-    case "ALL": {
-        {
-            if (!(_x select 2)) then {
-                _x set [2, true];
-                [_x select 1] call _fnc_paint;
-                _revealed = true;
-            };
-        } forEach zone_namePOS_pairs;
-
-        if (_revealed) then {
-            [{hint localize "STR_DUWS_T_daqqfq5j"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated, false];
         };
     };
 

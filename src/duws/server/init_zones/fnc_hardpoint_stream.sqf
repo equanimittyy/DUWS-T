@@ -25,10 +25,10 @@ DUWS_fnc_hardpointZoneAwake = {
     (_o getOrDefault ["awake", false]) || {_o getOrDefault ["raising", false]}
 };
 
-// A zone-child hardpoint is never found before its zone, so closing on a gun cannot mark ground the map still hides.
+// A zone's reveal fires once, so a zone hardpoint built or restored after it reads its zone here to start on the map.
 DUWS_fnc_hardpointZoneFound = {
     params ["_zk"];
-    _zk isEqualTo "" || {(zone_namePOS_pairs findIf { (_x select 2) && {([_x select 1] call fnc_zone_key) isEqualTo _zk} }) > -1}
+    _zk isNotEqualTo "" && {(zone_namePOS_pairs findIf { (_x select 2) && {([_x select 1] call fnc_zone_key) isEqualTo _zk} }) > -1}
 };
 
 // Dispatched, not inline: the raise re-crews statics through DUWS_fnc_manStatics, which sleeps in the
@@ -302,7 +302,7 @@ DUWS_hardpointHooks = createHashMapFromArray [["tick", {
     // Resident types keep pieces/crew pinned (OPCOM tasks with no player near) but still stream the loose
     // garrison; awake stays true since the pieces are always up. A minefield has no loose garrison to cycle.
     if (_o get "neverStream") exitWith {
-        if ((_o get "hpGarrison") isEqualTo "") exitWith {};   // no loose garrison (minefield): nothing to cycle
+        if ((_o get "hpGarrison") isEqualTo "") exitWith {};
         if (_o getOrDefault ["looseRaising", false]) exitWith {
             private _res = missionNamespace getVariable [HP_LOOSE_SLOT(_key), nil];
             if (isNil "_res") exitWith {};
@@ -318,7 +318,7 @@ DUWS_hardpointHooks = createHashMapFromArray [["tick", {
         if (_o getOrDefault ["looseUp", false]) then {
             if (!_up) then {
                 _o set ["looseUp", false];
-                [_key] call fnc_site_collect;   // loose roster only; the crew occupant is untouched
+                [_key] call fnc_site_collect;
             };
         } else {
             if (_up) then {
@@ -429,9 +429,9 @@ fnc_hardpoint_register = {
 
     // Registry row for OPCOM and the map readout: [key, pos, type, side, zone, revealed, dir]. Presence is
     // liveness -- the clearance check deletes the row on fall. Hardcore gates only the initial intel: what
-    // generation lays starts shown outside hardcore, and anything built in play (after mission_init_complete)
+    // generation lays starts shown outside hardcore, and a standalone built in play (after mission_init_complete)
     // starts hidden in both modes. Dir is read by the survey to score interlocking fire.
-    private _shown = !hardcore_mode_enable && {!mission_init_complete};
+    private _shown = (!hardcore_mode_enable && {!mission_init_complete}) || {[_zoneKey] call DUWS_fnc_hardpointZoneFound};
     DUWS_hardpoints pushBack [_key, _pos, _type, _side, _zoneKey, _shown, _dir];
     publicVariable "DUWS_hardpoints";
     [_key] call DUWS_fnc_opcom_gridDirty;
@@ -453,18 +453,19 @@ fnc_hardpoint_register = {
     if (_type isEqualTo "ROADBLOCK") then { [_key, _pos, _side] call fnc_roadblock_gate_arm; };
 
     // A trigger, as a zone's reveal is: a driver can cross the disc between two site passes. Armed whatever
-    // the flag, since a restore rewrites the flag after this returns.
-    private _revealTrg = createTrigger ["EmptyDetector", _pos, false];
-    _revealTrg setTriggerArea [HP_REVEAL_RADIUS, HP_REVEAL_RADIUS, 0, false];
-    _revealTrg setTriggerActivation ["ANYPLAYER", "PRESENT", false];
-    _revealTrg setVariable ["DUWS_hpKey", _key];
-    _revealTrg setVariable ["DUWS_hpZoneKey", _zoneKey];
-    _revealTrg setTriggerStatements [
-        "this && {[thisTrigger getVariable 'DUWS_hpZoneKey'] call DUWS_fnc_hardpointZoneFound}",
-        "['ONE', thisTrigger getVariable 'DUWS_hpKey'] call fnc_hardpoint_reveal; deleteVehicle thisTrigger",
-        ""
-    ];
-    missionNamespace setVariable [format ["DUWS_hpRevealTrg_%1", _key], _revealTrg];
+    // the flag, since a restore rewrites the flag after this returns. A zone hardpoint reveals with its zone.
+    if (_zoneKey isEqualTo "") then {
+        private _revealTrg = createTrigger ["EmptyDetector", _pos, false];
+        _revealTrg setTriggerArea [HP_REVEAL_RADIUS, HP_REVEAL_RADIUS, 0, false];
+        _revealTrg setTriggerActivation ["ANYPLAYER", "PRESENT", false];
+        _revealTrg setVariable ["DUWS_hpKey", _key];
+        _revealTrg setTriggerStatements [
+            "this",
+            "['ONE', thisTrigger getVariable 'DUWS_hpKey'] call fnc_hardpoint_reveal; deleteVehicle thisTrigger",
+            ""
+        ];
+        missionNamespace setVariable [format ["DUWS_hpRevealTrg_%1", _key], _revealTrg];
+    };
 
     // The dev tool spawns onto the player, so its hardpoints read up and crew immediately.
     private _objs = (DUWS_compositions getOrDefault [_key, []]) select { !isNull _x };
@@ -512,6 +513,6 @@ fnc_hardpoint_register = {
         call _crewNow;
     } else {
         _occ set ["awake", false];
-        [_key] call DUWS_fnc_hardpointStow;   // stows the uncrewed composition; the raise re-crews on approach
+        [_key] call DUWS_fnc_hardpointStow;
     };
 };

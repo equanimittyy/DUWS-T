@@ -27,15 +27,19 @@ OPFOR build during play stays hidden in both.
 |---|---|---|
 | Zones | visible from the start | hidden |
 | Civilian towns | visible from the start | hidden, bar the HQ anchor's opening three |
-| Zone hardpoints | visible from the start | hidden with their parent |
-| Normal hardpoints, generated at start | visible from the start | hidden |
-| Normal hardpoints, built in play | **hidden** | **hidden** |
+| Zone hardpoints | shown with their parent | shown with their parent |
+| Standalone hardpoints, generated at start | visible from the start | hidden |
+| Standalone hardpoints, built in play | **hidden** | **hidden** |
 | Enemy elements on missions | **hidden** | **hidden** |
 | OPCOM units under orders | **hidden** | **hidden** |
 
+A zone hardpoint is never hidden apart from its zone. The zone's reveal reveals its hardpoints, and one
+that OPFOR builds in a found zone starts shown. Only standalone hardpoints are left for intel and
+proximity to find.
+
 So normal mode has a live intel channel answering "what has changed", and hardcore has that plus
 everything generation produced, answering "where is the war". Normal mode's channel is the two kinds
-OPFOR produce during play — a hardpoint it builds, and a unit it puts under orders — so outside
+OPFOR produce during play — a standalone hardpoint it builds, and a unit it puts under orders — so outside
 hardcore the pool holds only what the enemy is doing right now.
 
 **The mode changes what is hidden and nothing else.** Every mechanic runs the same in both — same flag
@@ -104,7 +108,7 @@ own member.
 |---|---|---|
 | An unrevealed enemy zone | at random | built |
 | An unrevealed civilian town | nearest to where the intel was earned | built; contributes nothing outside hardcore, where no town is hidden |
-| An unrevealed hardpoint | at random from the eligible set | built ([`hardpoints.md`](hardpoints.md#reveal)) |
+| An unrevealed standalone hardpoint | at random | built ([`hardpoints.md`](hardpoints.md#reveal)) |
 
 **Kinds are separate buckets rather than one merged pool, because they are picked on different rules.** A
 zone is a target the campaign points the player at, so which one comes next is a strategic question and
@@ -129,7 +133,7 @@ returning quietly: four of the six side-mission sites hand their result to a `re
 return value, so a line spoken at each faucet is a line four of them cannot say. It is a searcher's report of
 their own search, so it goes to the earner alone, and a faucet with no earner behind it stays quiet.
 
-Hardpoints and contacts are what OPFOR keep producing during play
+Standalone hardpoints and contacts are what OPFOR keep producing during play
 ([§What is hidden](#what-is-hidden-depends-on-when-it-came-into-existence)). Zones and towns are generated
 once, so once found they are found for the campaign, and a fully mapped campaign pays the pool half nothing
 for the rest of its run — the contact half still has the enemy's movements to report.
@@ -152,7 +156,7 @@ player out of one currency still has a route.
 |---|---|
 | Body search | not capped; each team search in the last 15 minutes lowers the chance of the next ([§A corpse search walks a ladder](#a-corpse-search-walks-a-ladder)) |
 | Side-mission objective | flagged with certainty; reaching the object is the gate |
-| Walking into a zone or town, or within 100 m of a hardpoint | not applicable; it reveals the ground the player is standing on and rolls nothing |
+| Walking into a zone or town, or within 100 m of a standalone hardpoint | not applicable; it reveals the ground the player is standing on and rolls nothing |
 | Civilian frisk | flagged with certainty; the arrest is the price, and its success chance carries the odds |
 | Intelligence Center | by the odds its level sets, the unbought level included — one roll per OPCOM tick ([§The Intelligence Center](#the-intelligence-center)) |
 

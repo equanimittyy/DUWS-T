@@ -218,10 +218,10 @@ mission never auto-fails on detection. A target the player reveals on foot durin
 hardpoint, also completes the job as a success. No other reveal can reach it: intel payouts skip a live
 job's target ([`intel_system.md`](intel_system.md#one-writer-per-reveal-flag-one-function-for-payout)).
 
-**Payoff.** The scouted target is revealed on the strategic map. The scout also reveals
-`rand(0-2)` of the nearest unrevealed positions (the target's own hardpoints, standalone hardpoints,
-unrevealed enemy zones, ranked by distance), then the standard CP/AP. The hardpoint parent gate is
-respected: a hardpoint under a still-hidden zone is not offered as bonus intel.
+**Payoff.** The scouted target is revealed on the strategic map, and a zone target reveals its
+hardpoints with it. The scout also reveals `rand(0-2)` of the nearest unrevealed positions (standalone
+hardpoints and unrevealed enemy zones, ranked by distance), then the standard CP/AP. A zone hardpoint
+is never a bonus, because it reveals with its zone.
 
 Tunables (defaults): overwatch band 600-800 m (`fnc_recon_observe_overwatch`); LOS range 900 m, observe
 area 75 m, hold 12 s, approach ring 200 m and up to 2 bonus reveals (`fnc_recon_observe_run`).

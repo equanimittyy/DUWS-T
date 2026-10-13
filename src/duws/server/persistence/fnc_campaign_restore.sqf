@@ -304,9 +304,11 @@ DUWS_fnc_restoreHardpoints = {
                 _built = true;
             };
         };
-        // Registration stamps generation's reveal rule; the snapshot's flag is what the players had found.
+        // Registration stamps generation's reveal rule; the snapshot's flag is what the players had found. A zone
+        // hardpoint saved hidden under a found zone is shown, since no later reveal reaches it.
         private _i = DUWS_hardpoints findIf { (_x select 0) isEqualTo _key };
         if (_built && {_i >= 0}) then {
+            _shown = _shown || {[_zoneKey] call DUWS_fnc_hardpointZoneFound};
             (DUWS_hardpoints select _i) set [5, _shown];
             (format ["hpm_%1", _key]) setMarkerAlpha ([0, 1] select _shown);
         };
