@@ -543,6 +543,8 @@ DUWS_fnc_restoreTaskforces = {
         if (units _group isEqualTo []) then { deleteGroup _group } else { [_group, _tfName, _spawned] call fnc_taskforce_create };
     } forEach (DUWS_restore getOrDefault ["taskforces", []]);
     if ("taskforceSpawnIn" in DUWS_restore) then { DUWS_taskforce_spawnAt = time + (DUWS_restore get "taskforceSpawnIn") };
+    DUWS_taskforce_stance = DUWS_restore getOrDefault ["taskforceStance", DUWS_taskforce_stance];
+    publicVariable "DUWS_taskforce_stance";
 };
 
 // After fnc_WARCOM_init's seed, which would derive the tiers from a wallet since spent down.

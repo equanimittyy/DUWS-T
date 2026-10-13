@@ -675,6 +675,7 @@ restore with the settings group, not here.
 | Reveal | outcome | positions of revealed zones and revealed towns |
 | Arsenal crate | outcome | the contents of the arsenal crate at the HQ, piece by piece, with the contents of each stored uniform, vest and backpack |
 | Task forces | outcome | each task force's name, its men (class, loadout, damage, skill, position and seat), its vehicles (the garage's vehicle spec, position and direction) and whether Overlord spawned it; the seconds left until the next free task force is due |
+| Task force stance | input | `DUWS_taskforce_stance`, the attack or defense weighting a player set for Overlord's task forces |
 | Operatives | input | each operative's six skills, unspent points and whether the team has paid for it, keyed by its identity |
 
 **Nothing per-player is saved.** No loadouts, no per-player cooldowns, and no per-player record of
@@ -733,7 +734,8 @@ task force that Overlord spawns. A free one is saved with a flag, so a load keep
 still counts toward the cap, and the time left until the next one is saved with it. Nothing
 else brings it back, and the reconciliation pass does not refund it
 ([§What live state costs](#what-live-state-costs-and-who-pays-it-back)), so a restart without it
-would lose the team's investment. The save records the men and the vehicles, not the group, because a
+would lose the team's investment. A task force taken back into High Command leaves the registry, so
+the save refunds it with the other High Command squads instead of restoring it. The save records the men and the vehicles, not the group, because a
 group does not outlive the session. `DUWS_fnc_restoreTaskforces` rebuilds each task force where it
 stood, with each man's loadout, damage and seat, and then registers the group through
 `fnc_taskforce_create` under its saved name. The order is not saved: the task-force tick derives

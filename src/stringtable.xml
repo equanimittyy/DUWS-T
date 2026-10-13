@@ -18252,6 +18252,114 @@
                 <Chinese>防守 %1</Chinese>
                 <Spanish>Defender %1</Spanish>
             </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_TAKEBACK">
+                <Original>Take back</Original>
+                <English>Take back</English>
+                <Chinesesimp>收回</Chinesesimp>
+                <German>Zurücknehmen</German>
+                <Polish>Odbierz</Polish>
+                <Czech>Převzít zpět</Czech>
+                <Russian>Забрать</Russian>
+                <French>Reprendre</French>
+                <Chinese>收回</Chinese>
+                <Spanish>Recuperar</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_TAKEBACK_TIP">
+                <Original>Return this task force to your High Command.</Original>
+                <English>Return this task force to your High Command.</English>
+                <Chinesesimp>将这支特遣队交还到你的高级指挥。</Chinesesimp>
+                <German>Gib diese Task Force an dein Oberkommando zurück.</German>
+                <Polish>Przywróć tę grupę zadaniową do swojego Wysokiego Dowództwa.</Polish>
+                <Czech>Vrať toto úkolové uskupení do svého vrchního velení.</Czech>
+                <Russian>Верни эту оперативную группу в своё высшее командование.</Russian>
+                <French>Rendez ce groupement tactique à votre haut commandement.</French>
+                <Chinese>將這支特遣隊交還到你的高階指揮。</Chinese>
+                <Spanish>Devuelve esta fuerza operativa a tu Alto Mando.</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_RELEASED">
+                <Original>All units, this is Overlord. Task Force %1 is released from my command.</Original>
+                <English>All units, this is Overlord. Task Force %1 is released from my command.</English>
+                <Chinesesimp>全体单位注意，这里是 Overlord。特遣队 %1 已解除我的指挥。</Chinesesimp>
+                <German>An alle Einheiten, hier ist Overlord. Task Force %1 ist aus meinem Kommando entlassen.</German>
+                <Polish>Wszystkie jednostki, tu Overlord. Grupa zadaniowa %1 wychodzi spod mojego dowództwa.</Polish>
+                <Czech>Všem jednotkám, tady Overlord. Úkolové uskupení %1 už není pod mým velením.</Czech>
+                <Russian>Всем подразделениям, говорит Overlord. Оперативная группа %1 выходит из-под моего командования.</Russian>
+                <French>À toutes les unités, ici Overlord. Le groupement tactique %1 quitte mon commandement.</French>
+                <Chinese>全體單位注意，這裡是 Overlord。特遣隊 %1 已解除我的指揮。</Chinese>
+                <Spanish>A todas las unidades, aquí Overlord. La Fuerza Operativa %1 deja de estar bajo mi mando.</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_STANCE">
+                <Original>Stance: %1</Original>
+                <English>Stance: %1</English>
+                <Chinesesimp>态势：%1</Chinesesimp>
+                <German>Haltung: %1</German>
+                <Polish>Postawa: %1</Polish>
+                <Czech>Postoj: %1</Czech>
+                <Russian>Режим: %1</Russian>
+                <French>Posture : %1</French>
+                <Chinese>態勢：%1</Chinese>
+                <Spanish>Postura: %1</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_STANCE_ATTACK">
+                <Original>Attack</Original>
+                <English>Attack</English>
+                <Chinesesimp>进攻</Chinesesimp>
+                <German>Angriff</German>
+                <Polish>Atak</Polish>
+                <Czech>Útok</Czech>
+                <Russian>Атака</Russian>
+                <French>Attaque</French>
+                <Chinese>進攻</Chinese>
+                <Spanish>Ataque</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_STANCE_BALANCED">
+                <Original>Balanced</Original>
+                <English>Balanced</English>
+                <Chinesesimp>均衡</Chinesesimp>
+                <German>Ausgewogen</German>
+                <Polish>Zrównoważona</Polish>
+                <Czech>Vyvážený</Czech>
+                <Russian>Баланс</Russian>
+                <French>Équilibrée</French>
+                <Chinese>均衡</Chinese>
+                <Spanish>Equilibrada</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_STANCE_DEFEND">
+                <Original>Defend</Original>
+                <English>Defend</English>
+                <Chinesesimp>防守</Chinesesimp>
+                <German>Verteidigung</German>
+                <Polish>Obrona</Polish>
+                <Czech>Obrana</Czech>
+                <Russian>Оборона</Russian>
+                <French>Défense</French>
+                <Chinese>防守</Chinese>
+                <Spanish>Defensa</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_STANCE_TIP">
+                <Original>Weights Overlord's task forces toward attack or defense. With two or more, each side keeps at least one.</Original>
+                <English>Weights Overlord's task forces toward attack or defense. With two or more, each side keeps at least one.</English>
+                <Chinesesimp>让 Overlord 的特遣队偏向进攻或防守。有两支或以上时，每一方至少保留一支。</Chinesesimp>
+                <German>Gewichtet Overlords Task Forces in Richtung Angriff oder Verteidigung. Ab zwei behält jede Seite mindestens eine.</German>
+                <Polish>Przesuwa grupy zadaniowe Overlorda w stronę ataku lub obrony. Przy dwóch lub więcej każda strona zachowuje co najmniej jedną.</Polish>
+                <Czech>Vychyluje úkolová uskupení Overlorda k útoku nebo obraně. Při dvou a více si každá strana ponechá aspoň jedno.</Czech>
+                <Russian>Смещает оперативные группы Overlord к атаке или обороне. Если групп две или больше, каждая сторона сохраняет хотя бы одну.</Russian>
+                <French>Oriente les groupements tactiques d'Overlord vers l'attaque ou la défense. À partir de deux, chaque côté en garde au moins un.</French>
+                <Chinese>讓 Overlord 的特遣隊偏向進攻或防守。有兩支或以上時，每一方至少保留一支。</Chinese>
+                <Spanish>Inclina las fuerzas operativas de Overlord hacia el ataque o la defensa. Con dos o más, cada lado conserva al menos una.</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_STANCE_SET">
+                <Original>All units, this is Overlord. Task force stance: %1.</Original>
+                <English>All units, this is Overlord. Task force stance: %1.</English>
+                <Chinesesimp>全体单位注意，这里是 Overlord。特遣队态势：%1。</Chinesesimp>
+                <German>An alle Einheiten, hier ist Overlord. Haltung der Task Forces: %1.</German>
+                <Polish>Wszystkie jednostki, tu Overlord. Postawa grup zadaniowych: %1.</Polish>
+                <Czech>Všem jednotkám, tady Overlord. Postoj úkolových uskupení: %1.</Czech>
+                <Russian>Всем подразделениям, говорит Overlord. Режим оперативных групп: %1.</Russian>
+                <French>À toutes les unités, ici Overlord. Posture des groupements tactiques : %1.</French>
+                <Chinese>全體單位注意，這裡是 Overlord。特遣隊態勢：%1。</Chinese>
+                <Spanish>A todas las unidades, aquí Overlord. Postura de las fuerzas operativas: %1.</Spanish>
+            </Key>
             <Key ID="STR_DUWS_T_TASKFORCE_ASSAULT">
                 <Original>This is %1. We're moving to capture %2.</Original>
                 <English>This is %1. We're moving to capture %2.</English>
@@ -20212,16 +20320,16 @@
                 <Chinese>特遣隊</Chinese>
             </Key>
             <Key ID="STR_DUWS_T_16wnqdrz">
-                <German>Möchtest du eine HC-Gruppe lieber nicht selbst führen, übergib sie Overlord in der Gruppenverwaltung. Sie wird zur Task Force, auf der Karte angezeigt, und Overlord schickt sie zum Angriff auf die nächstgelegene bekannte Feindzone zum HQ. Gibt es keine bekannte Feindzone, verteidigt je eine Task Force jede gehaltene Zone, und die übrigen patrouillieren zwischen bekannten Orten. Ist kein Ort bekannt, verteidigen sie das HQ. Overlord stellt außerdem eigene Task Forces: zunächst eine, mit wachsender Armeestärke von BLUFOR bis zu drei. Eine neue rückt 30 Minuten nach dem letzten Einsatz oder Verlust aus.</German>
-                <Spanish>Si prefieres no gestionar tú mismo una escuadra HC, entrégasela a Overlord en el gestor de escuadra. Se convierte en una fuerza operativa, que se muestra en el mapa, y Overlord la envía a atacar la zona enemiga conocida más cercana al CG. Sin una zona enemiga conocida, una fuerza operativa defiende cada zona controlada y las demás patrullan entre pueblos conocidos. Si no se conoce ningún pueblo, defienden el CG. Overlord también despliega fuerzas operativas propias: una al principio y hasta tres a medida que crece el Poder Militar de BLUFOR. Una nueva sale 30 minutos después del último despliegue o pérdida.</Spanish>
-                <Chinesesimp>如果你不想亲自指挥一支 HC 小队，可以在“小队管理”中将其交给 Overlord。它会成为一支特遣队，显示在地图上，Overlord 会派遣它进攻距总部最近的已知敌方区域。如果没有已知敌方区域，每个己方区域由一支特遣队防守，其余特遣队在已知城镇之间巡逻。若没有已知城镇，它们会防守总部。Overlord 还会派出自己的特遣队：起初一支，随着 BLUFOR 军力增长最多三支。每次部署或损失后 30 分钟，会有一支新的特遣队出发。</Chinesesimp>
-                <Original>If you would rather not manage a HC squad yourself, hand it to Overlord in Squad Manager. It becomes a task force, shown on the map, and Overlord sends it to attack the known enemy zone nearest to HQ. With no known enemy zone, one task force defends each held zone and the rest patrol between known towns. With no known town, they defend HQ. Overlord also fields task forces of its own: one at first, up to three as BLUFOR's Army Power grows. A new one deploys 30 minutes after the last deployment or loss.</Original>
-                <English>If you would rather not manage a HC squad yourself, hand it to Overlord in Squad Manager. It becomes a task force, shown on the map, and Overlord sends it to attack the known enemy zone nearest to HQ. With no known enemy zone, one task force defends each held zone and the rest patrol between known towns. With no known town, they defend HQ. Overlord also fields task forces of its own: one at first, up to three as BLUFOR's Army Power grows. A new one deploys 30 minutes after the last deployment or loss.</English>
-                <Polish>Jeśli nie chcesz sam zarządzać drużyną HC, przekaż ją Overlordowi w „Zarządzaniu drużyną”. Staje się wtedy grupą zadaniową, widoczną na mapie, a Overlord wysyła ją do ataku na najbliższą znaną strefę wroga względem HQ. Gdy nie ma znanej strefy wroga, każdej utrzymywanej strefy broni jedna grupa zadaniowa, a pozostałe patrolują między znanymi miejscowościami. Gdy żadna miejscowość nie jest znana, bronią HQ. Overlord wystawia też własne grupy zadaniowe: na początku jedną, a wraz ze wzrostem Potęgi Wojskowej BLUFOR do trzech. Nowa wyrusza 30 minut po ostatnim rozmieszczeniu lub stracie.</Polish>
-                <Czech>Pokud nechceš družstvo HC řídit sám, předej ho Overlordovi ve „Správě družstev“. Stane se úkolovým uskupením zobrazeným na mapě a Overlord ho vyšle zaútočit na nejbližší známou nepřátelskou zónu od HQ. Když není známa žádná nepřátelská zóna, každou drženou zónu brání jedno úkolové uskupení a ostatní hlídkují mezi známými obcemi. Když není známa žádná obec, brání HQ. Overlord také nasazuje vlastní úkolová uskupení: zpočátku jedno, s rostoucí vojenskou silou BLUFOR až tři. Nové vyráží 30 minut po posledním nasazení nebo ztrátě.</Czech>
-                <Russian>Если управлять отрядом HC самостоятельно не хочется, передай его Overlord в «Управление отрядом». Он становится оперативной группой, отображаемой на карте, и Overlord отправляет её атаковать ближайшую к штабу известную вражескую зону. Если известных вражеских зон нет, каждую удерживаемую зону обороняет одна оперативная группа, а остальные патрулируют между известными населёнными пунктами. Если ни один населённый пункт не известен, они обороняют штаб. Overlord также выставляет собственные оперативные группы: сначала одну, а по мере роста военной мощи BLUFOR — до трёх. Новая выдвигается через 30 минут после последнего развёртывания или потери.</Russian>
-                <French>Si vous préférez ne pas gérer vous-même une escouade HC, confiez-la à Overlord dans « Gestion d'escouade ». Elle devient un groupement tactique, affiché sur la carte, et Overlord l'envoie attaquer la zone ennemie connue la plus proche du QG. Sans zone ennemie connue, un groupement tactique défend chaque zone tenue et les autres patrouillent entre les localités connues. Si aucune localité n'est connue, ils défendent le QG. Overlord déploie aussi ses propres groupements tactiques : un au départ, jusqu'à trois à mesure que la puissance militaire de BLUFOR augmente. Un nouveau part 30 minutes après le dernier déploiement ou la dernière perte.</French>
-                <Chinese>如果你不想親自指揮一支 HC 小隊，可以在「小隊管理」中將其交給 Overlord。它會成為一支特遣隊，顯示在地圖上，Overlord 會派遣它進攻距總部最近的已知敵方區域。如果沒有已知敵方區域，每個己方區域由一支特遣隊防守，其餘特遣隊在已知城鎮之間巡邏。若沒有已知城鎮，它們會防守總部。Overlord 還會派出自己的特遣隊：起初一支，隨著 BLUFOR 軍力增長最多三支。每次部署或損失後 30 分鐘，會有一支新的特遣隊出發。</Chinese>
+                <German>Möchtest du eine HC-Gruppe lieber nicht selbst führen, übergib sie Overlord in der Gruppenverwaltung. Sie wird zur Task Force und auf der Karte angezeigt. Overlord teilt seine Task Forces auf zwischen dem Angriff auf die nächstgelegene bekannte Feindzone zum HQ und der Verteidigung: je eine auf jeder gehaltenen Zone, die übrigen patrouillieren zwischen bekannten Orten oder verteidigen das HQ, wenn kein Ort bekannt ist. Die Haltung in der Gruppenverwaltung gewichtet diese Aufteilung in Richtung Angriff oder Verteidigung, und „Zurücknehmen“ gibt eine übergebene Task Force an dein Oberkommando zurück. Overlord stellt außerdem eigene Task Forces: zunächst eine, mit wachsender Armeestärke von BLUFOR bis zu drei. Eine neue rückt 30 Minuten nach dem letzten Einsatz oder Verlust aus.</German>
+                <Spanish>Si prefieres no gestionar tú mismo una escuadra HC, entrégasela a Overlord en el gestor de escuadra. Se convierte en una fuerza operativa, que se muestra en el mapa. Overlord reparte sus fuerzas operativas entre atacar la zona enemiga conocida más cercana al CG y defender: una en cada zona controlada, y las demás patrullan entre pueblos conocidos, o defienden el CG si no se conoce ningún pueblo. La postura del gestor de escuadra inclina ese reparto hacia el ataque o la defensa, y «Recuperar» devuelve a tu Alto Mando una fuerza operativa entregada. Overlord también despliega fuerzas operativas propias: una al principio y hasta tres a medida que crece el Poder Militar de BLUFOR. Una nueva sale 30 minutos después del último despliegue o pérdida.</Spanish>
+                <Chinesesimp>如果你不想亲自指挥一支 HC 小队，可以在“小队管理”中将其交给 Overlord。它会成为一支特遣队，显示在地图上。Overlord 会把特遣队分配到进攻距总部最近的已知敌方区域和防守两方面：每个己方区域一支，其余在已知城镇之间巡逻；若没有已知城镇，则防守总部。“小队管理”中的态势会让这一分配偏向进攻或防守，“收回”可将已移交的特遣队交还到你的高级指挥。Overlord 还会派出自己的特遣队：起初一支，随着 BLUFOR 军力增长最多三支。每次部署或损失后 30 分钟，会有一支新的特遣队出发。</Chinesesimp>
+                <Original>If you would rather not manage a HC squad yourself, hand it to Overlord in Squad Manager. It becomes a task force, shown on the map. Overlord splits its task forces between attacking the known enemy zone nearest to HQ and defending: one on each held zone, the rest patrolling between known towns, or defending HQ if no town is known. The stance in Squad Manager weights the split toward attack or defense, and Take back returns a handed-over task force to your High Command. Overlord also fields task forces of its own: one at first, up to three as BLUFOR's Army Power grows. A new one deploys 30 minutes after the last deployment or loss.</Original>
+                <English>If you would rather not manage a HC squad yourself, hand it to Overlord in Squad Manager. It becomes a task force, shown on the map. Overlord splits its task forces between attacking the known enemy zone nearest to HQ and defending: one on each held zone, the rest patrolling between known towns, or defending HQ if no town is known. The stance in Squad Manager weights the split toward attack or defense, and Take back returns a handed-over task force to your High Command. Overlord also fields task forces of its own: one at first, up to three as BLUFOR's Army Power grows. A new one deploys 30 minutes after the last deployment or loss.</English>
+                <Polish>Jeśli nie chcesz sam zarządzać drużyną HC, przekaż ją Overlordowi w „Zarządzaniu drużyną”. Staje się wtedy grupą zadaniową, widoczną na mapie. Overlord dzieli swoje grupy zadaniowe między atak na najbliższą znaną strefę wroga względem HQ a obronę: po jednej w każdej utrzymywanej strefie, a pozostałe patrolują między znanymi miejscowościami lub bronią HQ, gdy żadna miejscowość nie jest znana. Postawa w „Zarządzaniu drużyną” przesuwa ten podział w stronę ataku lub obrony, a „Odbierz” zwraca przekazaną grupę zadaniową do twojego Wysokiego Dowództwa. Overlord wystawia też własne grupy zadaniowe: na początku jedną, a wraz ze wzrostem Potęgi Wojskowej BLUFOR do trzech. Nowa wyrusza 30 minut po ostatnim rozmieszczeniu lub stracie.</Polish>
+                <Czech>Pokud nechceš družstvo HC řídit sám, předej ho Overlordovi ve „Správě družstev“. Stane se úkolovým uskupením zobrazeným na mapě. Overlord rozděluje svá úkolová uskupení mezi útok na nejbližší známou nepřátelskou zónu od HQ a obranu: po jednom na každé držené zóně, ostatní hlídkují mezi známými obcemi, nebo brání HQ, když není známa žádná obec. Postoj ve „Správě družstev“ vychyluje toto rozdělení k útoku nebo obraně a „Převzít zpět“ vrátí předané úkolové uskupení do tvého vrchního velení. Overlord také nasazuje vlastní úkolová uskupení: zpočátku jedno, s rostoucí vojenskou silou BLUFOR až tři. Nové vyráží 30 minut po posledním nasazení nebo ztrátě.</Czech>
+                <Russian>Если управлять отрядом HC самостоятельно не хочется, передай его Overlord в «Управление отрядом». Он становится оперативной группой, отображаемой на карте. Overlord распределяет свои оперативные группы между атакой на ближайшую к штабу известную вражескую зону и обороной: по одной на каждую удерживаемую зону, остальные патрулируют между известными населёнными пунктами или, если ни один не известен, обороняют штаб. Режим в «Управление отрядом» смещает это распределение к атаке или обороне, а «Забрать» возвращает переданную оперативную группу в твоё высшее командование. Overlord также выставляет собственные оперативные группы: сначала одну, а по мере роста военной мощи BLUFOR — до трёх. Новая выдвигается через 30 минут после последнего развёртывания или потери.</Russian>
+                <French>Si vous préférez ne pas gérer vous-même une escouade HC, confiez-la à Overlord dans « Gestion d'escouade ». Elle devient un groupement tactique, affiché sur la carte. Overlord répartit ses groupements tactiques entre l'attaque de la zone ennemie connue la plus proche du QG et la défense : un sur chaque zone tenue, les autres patrouillent entre les localités connues, ou défendent le QG si aucune localité n'est connue. La posture dans « Gestion d'escouade » oriente cette répartition vers l'attaque ou la défense, et « Reprendre » rend un groupement tactique confié à votre haut commandement. Overlord déploie aussi ses propres groupements tactiques : un au départ, jusqu'à trois à mesure que la puissance militaire de BLUFOR augmente. Un nouveau part 30 minutes après le dernier déploiement ou la dernière perte.</French>
+                <Chinese>如果你不想親自指揮一支 HC 小隊，可以在「小隊管理」中將其交給 Overlord。它會成為一支特遣隊，顯示在地圖上。Overlord 會把特遣隊分配到進攻距總部最近的已知敵方區域和防守兩方面：每個己方區域一支，其餘在已知城鎮之間巡邏；若沒有已知城鎮，則防守總部。「小隊管理」中的態勢會讓這一分配偏向進攻或防守，「收回」可將已移交的特遣隊交還到你的高階指揮。Overlord 還會派出自己的特遣隊：起初一支，隨著 BLUFOR 軍力增長最多三支。每次部署或損失後 30 分鐘，會有一支新的特遣隊出發。</Chinese>
             </Key>
             <Key ID="STR_DUWS_T_ljw9ndqz">
                 <German>MP-Hinweise</German>

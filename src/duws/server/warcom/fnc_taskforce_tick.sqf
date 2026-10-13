@@ -36,32 +36,50 @@ private _visible = missionNamespace getVariable ["civ_visible", []];
 	if (_visible param [_forEachIndex, true]) then { _towns pushBack [text _x, getPos _x] };
 } forEach (missionNamespace getVariable ["civ_locations", []]);
 
+private _ready = (_taskforces apply {_x select 0}) select {!isNull _x && {local _x} && {(units _x) findIf {alive _x} >= 0}};
+
+// The stance weights the split but never empties a side: with two or more task forces, one attacks and one defends.
+private _attackers = [];
+if (_objectiveName != "") then {
+	private _n = count _ready;
+	private _want = round (_n * ([0.75, 0.5, 0.25] select DUWS_taskforce_stance));
+	if (_n > 1) then { _want = (_want max 1) min (_n - 1) };
+	// Those already on this assault stay and a posted defender goes last, so the split does not reshuffle every tick.
+	private _rank = [];
+	{
+		private _order = _x getVariable ["DUWS_taskforce_order", []];
+		private _key = switch (true) do {
+			case (_order isEqualTo ["capture", _objectiveName]): { 0 };
+			case ((_order param [0, ""]) == "defend"): { 2 };
+			default { 1 };
+		};
+		_rank pushBack [_key, leader _x distance2D _objectivePos, _forEachIndex];
+	} forEach _ready;
+	_rank sort true;
+	_attackers = (_rank select [0, _want]) apply { _ready select (_x select 2) };
+};
+
 // A standing defender keeps its zone, so a new capture does not reshuffle every post.
 private _posts = [];
-if (_objectiveName == "") then {
-	private _open = zone_namePOS_pairs select { _x params ["", "_zp"]; (WARCOM_zones_controled_by_BLUFOR findIf {(_x distance2D _zp) < 1}) >= 0 };
-	private _free = [];
-	{
-		_x params ["_group"];
-		if (!isNull _group && {local _group} && {(units _group) findIf {alive _x} >= 0}) then {
-			private _order = _group getVariable ["DUWS_taskforce_order", []];
-			private _kept = _open findIf {(_order param [0, ""]) == "defend" && {(_x select 1) isEqualTo (_order select 2)}};
-			if (_kept >= 0) then {
-				(_open deleteAt _kept) params ["_zoneName", "_zonePos"];
-				_posts pushBack [_group, _zoneName, _zonePos];
-			} else {
-				_free pushBack _group;
-			};
-		};
-	} forEach _taskforces;
-	{
-		if (_free isEqualTo []) exitWith {};
-		_x params ["_zoneName", "_zonePos"];
-		private _near = 0;
-		{ if ((leader _x distance2D _zonePos) < (leader (_free select _near) distance2D _zonePos)) then { _near = _forEachIndex } } forEach _free;
-		_posts pushBack [_free deleteAt _near, _zoneName, _zonePos];
-	} forEach _open;
-};
+private _open = zone_namePOS_pairs select { _x params ["", "_zp"]; (WARCOM_zones_controled_by_BLUFOR findIf {(_x distance2D _zp) < 1}) >= 0 };
+private _free = [];
+{
+	private _order = _x getVariable ["DUWS_taskforce_order", []];
+	private _kept = _open findIf {(_order param [0, ""]) == "defend" && {(_x select 1) isEqualTo (_order select 2)}};
+	if (_kept >= 0) then {
+		(_open deleteAt _kept) params ["_zoneName", "_zonePos"];
+		_posts pushBack [_x, _zoneName, _zonePos];
+	} else {
+		_free pushBack _x;
+	};
+} forEach (_ready - _attackers);
+{
+	if (_free isEqualTo []) exitWith {};
+	_x params ["_zoneName", "_zonePos"];
+	private _near = 0;
+	{ if ((leader _x distance2D _zonePos) < (leader (_free select _near) distance2D _zonePos)) then { _near = _forEachIndex } } forEach _free;
+	_posts pushBack [_free deleteAt _near, _zoneName, _zonePos];
+} forEach _open;
 
 // Deleting waypoints leaves currentWaypoint where it was, so a squad handed over mid-orders would skip the new ones.
 private _fnc_attack = {
@@ -102,7 +120,7 @@ private _live = [];
 			private _arrived = currentWaypoint _group >= count waypoints _group;
 			private _postIdx = _posts findIf {(_x select 0) isEqualTo _group};
 			switch (true) do {
-				case (_objectiveName != ""): {
+				case (_group in _attackers): {
 					if (_order isNotEqualTo ["capture", _objectiveName]) then {
 						// Regroup just outside the ring the garrison wakes on, so the squad meets it formed rather than strung out.
 						private _ring = (([_objectiveKey] call fnc_site_at) getOrDefault ["radius", 0])

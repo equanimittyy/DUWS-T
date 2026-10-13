@@ -373,6 +373,8 @@ WARCOM_opfor_ap_earned = 0;publicVariable "WARCOM_opfor_ap_earned";
 WARCOM_blufor_tier = 0;publicVariable "WARCOM_blufor_tier";
 WARCOM_opfor_tier = 0;publicVariable "WARCOM_opfor_tier";
 WARCOM_init_done = false;publicVariable "WARCOM_init_done";
+// Overlord's task force stance, an index into fnc_taskforce_tick's attack shares: 0 attack, 1 balanced, 2 defend.
+DUWS_taskforce_stance = 1;publicVariable "DUWS_taskforce_stance";
 
 // Declared here, not in fnc_WARCOM_init: the area-of-influence read (DUWS_fnc_aoi_covers /
 // _bandPos) resolves zone control off this list, and hardpoint generation samples the band a full

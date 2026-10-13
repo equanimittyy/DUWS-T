@@ -157,7 +157,7 @@ class squad_mng_dialog
             x = 1 * GUI_GRID_W + GUI_GRID_X;
             y = 17 * GUI_GRID_H + GUI_GRID_Y;
             w = 26 * GUI_GRID_W;
-            h = 4 * GUI_GRID_H;
+            h = 3 * GUI_GRID_H;
             colorBackground[] = {0,0,0,1};
         };
         class taskforce_list: RscControlsGroup
@@ -166,7 +166,17 @@ class squad_mng_dialog
             x = 1 * GUI_GRID_W + GUI_GRID_X;
             y = 17 * GUI_GRID_H + GUI_GRID_Y;
             w = 26 * GUI_GRID_W;
-            h = 4 * GUI_GRID_H;
+            h = 3 * GUI_GRID_H;
+        };
+        class taskforce_stance_button: RscButton
+        {
+            idc = 1605;
+            sizeEx = 0.025;
+            x = 8 * GUI_GRID_W + GUI_GRID_X;
+            y = 20.2 * GUI_GRID_H + GUI_GRID_Y;
+            w = 12 * GUI_GRID_W;
+            h = 1.1 * GUI_GRID_H;
+            tooltip = "$STR_DUWS_T_TASKFORCE_STANCE_TIP";
         };
         class leave_button: RscButton
         {
