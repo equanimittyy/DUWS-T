@@ -26,6 +26,33 @@ private _visible = missionNamespace getVariable ["civ_visible", []];
 	if (_visible param [_forEachIndex, true]) then { _towns pushBack [text _x, getPos _x] };
 } forEach (missionNamespace getVariable ["civ_locations", []]);
 
+// A standing defender keeps its zone, so a new capture does not reshuffle every post.
+private _posts = [];
+if (_objectiveName == "") then {
+	private _open = zone_namePOS_pairs select { _x params ["", "_zp"]; (WARCOM_zones_controled_by_BLUFOR findIf {(_x distance2D _zp) < 1}) >= 0 };
+	private _free = [];
+	{
+		_x params ["_group"];
+		if (!isNull _group && {local _group} && {(units _group) findIf {alive _x} >= 0}) then {
+			private _order = _group getVariable ["DUWS_taskforce_order", []];
+			private _kept = _open findIf {(_order param [0, ""]) == "defend" && {(_x select 1) isEqualTo (_order select 2)}};
+			if (_kept >= 0) then {
+				(_open deleteAt _kept) params ["_zoneName", "_zonePos"];
+				_posts pushBack [_group, _zoneName, _zonePos];
+			} else {
+				_free pushBack _group;
+			};
+		};
+	} forEach _taskforces;
+	{
+		if (_free isEqualTo []) exitWith {};
+		_x params ["_zoneName", "_zonePos"];
+		private _near = 0;
+		{ if ((leader _x distance2D _zonePos) < (leader (_free select _near) distance2D _zonePos)) then { _near = _forEachIndex } } forEach _free;
+		_posts pushBack [_free deleteAt _near, _zoneName, _zonePos];
+	} forEach _open;
+};
+
 // Deleting waypoints leaves currentWaypoint where it was, so a squad handed over mid-orders would skip the new ones.
 private _fnc_attack = {
 	params ["_group", "_dest", ["_stage", []]];
@@ -37,6 +64,14 @@ private _fnc_attack = {
 		_first setWaypointTimeout [STAGE_WAIT, STAGE_WAIT, STAGE_WAIT];
 	};
 	_group setCurrentWaypoint _first;
+};
+
+private _fnc_hold = {
+	params ["_group", "_post"];
+	[_group, "", _post] call DUWS_fnc_opcom_applyOrder;
+	private _hold = _group addWaypoint [_post, 0];
+	_hold setWaypointType "HOLD";
+	_group setCurrentWaypoint _hold;
 };
 
 private _live = [];
@@ -54,6 +89,7 @@ private _live = [];
 		if (local _group) then {
 			private _order = _group getVariable ["DUWS_taskforce_order", []];
 			private _arrived = currentWaypoint _group >= count waypoints _group;
+			private _postIdx = _posts findIf {(_x select 0) isEqualTo _group};
 			switch (true) do {
 				case (_objectiveName != ""): {
 					if (_order isNotEqualTo ["capture", _objectiveName]) then {
@@ -74,23 +110,14 @@ private _live = [];
 						};
 					};
 				};
-				case (_towns isEqualTo []): {
-					private _kind = ["defend", "hq"] select (WARCOM_zones_controled_by_BLUFOR isEqualTo []);
-					if ((_order param [0, ""]) != _kind) then {
-						private _post = WARCOM_blu_hq_pos;
-						private _target = "";
-						if (_kind == "defend") then {
-							_post = [WARCOM_zones_controled_by_BLUFOR, leader _group] call BIS_fnc_nearestPosition;
-							_target = (zone_namePOS_pairs select (zone_namePOS_pairs findIf {((_x select 1) distance2D _post) < 1})) select 0;
-						};
-						[_group, "", _post] call DUWS_fnc_opcom_applyOrder;
-						private _hold = _group addWaypoint [_post, 0];
-						_hold setWaypointType "HOLD";
-						_group setCurrentWaypoint _hold;
-						_group setVariable ["DUWS_taskforce_order", [_kind, _target]];
+				case (_postIdx >= 0): {
+					(_posts select _postIdx) params ["", "_zoneName", "_zonePos"];
+					if (_order isNotEqualTo ["defend", _zoneName, _zonePos]) then {
+						[_group, _zonePos] call _fnc_hold;
+						_group setVariable ["DUWS_taskforce_order", ["defend", _zoneName, _zonePos]];
 					};
 				};
-				default {
+				case (_towns isNotEqualTo []): {
 					if ((_order param [0, ""]) != "patrol" || {_arrived}) then {
 						private _legs = _towns select {(_x select 1) isNotEqualTo (_order param [2, []])};
 						if (_legs isNotEqualTo []) then {
@@ -99,6 +126,12 @@ private _live = [];
 							[_group, count waypoints _group - 1] setWaypointCompletionRadius PATROL_ARRIVE;
 							_group setVariable ["DUWS_taskforce_order", ["patrol", _townName, _townPos]];
 						};
+					};
+				};
+				default {
+					if (_order isNotEqualTo ["hq"]) then {
+						[_group, WARCOM_blu_hq_pos] call _fnc_hold;
+						_group setVariable ["DUWS_taskforce_order", ["hq"]];
 					};
 				};
 			};
