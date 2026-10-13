@@ -410,7 +410,7 @@ territory shows no readout.
 | Garrison reinforce / fortify | `server/missions/fnc_map_readout_buy.sqf` | AP 10 / 15, OPCOM's own prices (`OPCOM_AP_REINFORCE` / `OPCOM_AP_FORTIFY`) |
 | Death | `client/client_init.sqf:166,175` | `DUWSMP_CP_death_cost` (0–10, default 2), plus the holder's consumable slate |
 | Raise Funds (money) | `server/civ_missions/fnc_civ_mission_give.sqf` | 9-15 `Money_roll`, pooled by the players at the giver, carried money first and then the bank; not refunded on a cancel or the giver's death |
-| Vendor purchase (money) | `server/vendors/fnc_vendor_buy.sqf` | carried money first and then the bank: 1-7 `Money_roll` for gear, 1.2 per CP of the request-menu price for a vehicle; more on the OPFOR, Everything and HQ lists, less in a town with good reputation ([`civilian_shops.md`](civilian_shops.md#prices)) |
+| Vendor purchase (money) | `server/vendors/fnc_vendor_buy.sqf` | carried money first and then the bank: 1-6 `Money_roll` a pack for gear, times the packs bought, and 1.2 per CP of the request-menu price for a vehicle; less in a town with good reputation ([`civilian_shops.md`](civilian_shops.md#prices)) |
 
 ## Who may spend
 

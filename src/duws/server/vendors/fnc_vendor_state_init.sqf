@@ -53,10 +53,10 @@ fnc_vendor_discount = {
 };
 
 // The stock picker's entries for one type, and the server's whitelist with them: a purchase is refused
-// unless the class is on the list it was priced from. A vehicle dealer opens on its own town's traffic.
+// unless the class is on the list it was picked from. A vehicle dealer opens on its own town's traffic.
 fnc_vendor_lists = {
 	params ["_type"];
-	if (_type isEqualTo "hq") exitWith { ["hq"] };
+	if (_type isEqualTo "hq") exitWith { ["blufor"] };
 	if (([_type] call fnc_vendor_kind) isEqualTo "gear") exitWith { ["blufor", "opfor", "all"] };
 	["civilian", "blufor", "opfor", "all"]
 };
@@ -133,19 +133,20 @@ fnc_vendor_poolCounts = {
 	DUWS_arsenalLimited || {!(_class in (missionNamespace getVariable ["DUWS_friendlyArsenal", []]))}
 };
 
+// _cat is the stock row's index into the gear categories.
 fnc_vendor_packSize = {
-	params ["_class"];
+	params ["_class", "_cat"];
 	private _mag = configFile >> "CfgMagazines" >> _class;
-	if (!isClass _mag) exitWith { 1 };
+	if (!isClass _mag) exitWith {
+		[1, 10] select (((DUWS_vendorCategories get "gear") param [_cat, ""]) isEqualTo "STR_DUWS_T_VENDOR_CAT_ITEM")
+	};
 	private _sim = getText (configFile >> "CfgAmmo" >> getText (_mag >> "ammo") >> "simulation");
-	if (_sim in ["shotMissile", "shotRocket"]) exitWith { 2 };
+	if (_sim in ["shotMissile", "shotRocket"]) exitWith { 1 };
 	// shotShell is the 40 mm grenade round.
 	if (_sim in [
 		"shotGrenade", "shotShell", "shotSmoke", "shotSmokeX", "shotIlluminating",
 		"shotMine", "shotBoundingMine", "shotDirectionalBomb", "shotPipeBomb", "shotTimeBomb"
 	]) exitWith { 3 };
-	// The belt-fed line fnc_IsMG draws.
-	if (getNumber (_mag >> "count") >= 100) exitWith { 3 };
 	5
 };
 

@@ -2,7 +2,7 @@
 // fnc_faction_query enforces for the faction browser.
 /*
     One stock list. Params: [kind ("gear" | "car" | "boat"), list ("civilian" | "blufor" | "opfor" |
-    "all" | "hq")]. Returns [[displayName, class, category], ...] sorted by display name, where
+    "all")]. Returns [[displayName, class, category], ...] sorted by display name, where
     category indexes the kind's DUWS_vendorCategories list.
 
     Built once per list and cached. The "all" sweep walks whole configs, which is far too much to pay on
@@ -11,9 +11,6 @@
 */
 if (!isServer) exitWith { [] };
 params [["_kind", "gear"], ["_list", "all"]];
-
-// The HQ list is the BLUFOR list under another name: the name is what carries its markup.
-if (_list isEqualTo "hq") exitWith { [_kind, "blufor"] call fnc_vendor_stock };
 
 private _cacheVar = format ["DUWS_vendorStock_%1_%2", _kind, _list];
 private _cached = missionNamespace getVariable [_cacheVar, []];
@@ -97,7 +94,7 @@ private _fnc_rows = {
         // Priced first: the price function is the one place that decides what may be sold at all, so
         // a row can never reach the catalogue without a number the server will honour.
         if (!isNull _cfg && {!(toLower _x in _taken)} && {getNumber (_cfg >> "scope") == 2}
-            && {([_x, _list] call fnc_vendor_price) > 0}) then {
+            && {([_x] call fnc_vendor_price) > 0}) then {
             private _name = getText (_cfg >> "displayName");
             _rows pushBack [if (_name isEqualTo "") then {_x} else {_name}, _x, [_x] call _fnc_category];
         };

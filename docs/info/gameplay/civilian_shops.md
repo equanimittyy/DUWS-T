@@ -105,7 +105,7 @@ Alpha is the reveal channel. The marker starts at 0 and `fnc_civ_town_reveal.sqf
 with the town, so the map does not show every shop on the island at start, and hardcore mode needs no
 separate path.
 
-Colour is the state channel. `fnc_vendor_markerPaint` (`fnc_vendor_state_init.sqf:81`) paints
+Colour is the state channel. `fnc_vendor_markerPaint` (`fnc_vendor_state_init.sqf:96`) paints
 `ColorGrey` during a cooldown, and otherwise the town's band colour from `fnc_civ_townBand`, so a
 shop in an enemy-held town shows the OPFOR red that explains its refusal. The paint reads the stored
 cooldown and the town's reputation, never a unit handle, so it stays correct while the town sleeps.
@@ -126,14 +126,14 @@ opens a town's shops. The check runs twice:
 | Where | Reads | Role |
 |---|---|---|
 | Catalogue open (`fnc_vendor_catalogue.sqf:26`) | The town centre in the broadcast `DUWS_enemy_town_pos` | Advisory. `civ_town_rep` is server-only, so `fnc_civ_repAt` returns 0 on a client |
-| Purchase (`fnc_vendor_buy.sqf:38`) | `fnc_civ_repAt` | Authoritative |
+| Purchase (`fnc_vendor_buy.sqf:42`) | `fnc_civ_repAt` | Authoritative |
 
 The refusal is a hint that names the town (`STR_DUWS_T_VENDOR_HOSTILE`). No catalogue shows behind
 it.
 
 ## Catalogue
 
-The `vendor_catalogue` dialog uses idc block 8901-8916. Its layout is the request dialog's
+The `vendor_catalogue` dialog uses idc block 8901-8917. Its layout is the request dialog's
 (`request_menu.hpp`), so that the two menus look alike: the item window is where the main window is,
 and the stock list is the strip on the right. The item window shows three boxes (Money, Price and
 Discount), the preview and the details. The preview shows `editorPreview` for a vehicle and the
@@ -143,6 +143,10 @@ The strip holds the stock picker, the category picker and the filter above the l
 the icon, the name and the price. A row that the player cannot pay for is grey. The category picker
 lists only the categories that the current stock list has, plus All. In the All view, a grey heading
 starts each category.
+
+A quantity box beside the two buy buttons sets how many packs one purchase buys. The Price box shows
+the total, and adds the count and the pack price when the count is more than 1. The buy buttons grey
+when the total is more than the money. A Car or Boat Dealer disables the box at 1.
 
 | Kind | Categories | Classifier |
 |---|---|---|
@@ -177,7 +181,7 @@ An Arms Dealer offers three lists. A Car or Boat Dealer offers four, filtered to
 | Everything | Every scope-2 class in `CfgWeapons`, `CfgMagazines` and `CfgGlasses`, plus `Bag_Base` backpacks | Every scope-2 class in `CfgVehicles` |
 
 Each class appears on one list only. OPFOR drops the classes that BLUFOR sells, and Everything drops
-the classes that every other list sells (`fnc_vendor_stock.sqf:28-37`), so one item never shows at
+the classes that every other list sells (`fnc_vendor_stock.sqf:81-90`), so one item never shows at
 two prices.
 
 The side lists come from `fnc_faction_unit_keylist`. A man key's kit is read from config:
@@ -201,34 +205,31 @@ input is fixed at campaign start. The build is on the server because a class tha
 resolve must not be sellable, which is the rule `fnc_faction_query` applies to the faction browser.
 Everything is the config as installed, so a modded server sells its mods.
 
-The arsenal mode does not gate the stock. A foreign or heavy class costs more instead, which keeps
-the shops apart from the captured-materiel rules of `DUWS_arsenalLimited`.
+The arsenal mode does not gate the stock. A heavy class costs more instead, which keeps the shops
+apart from the captured-materiel rules of `DUWS_arsenalLimited`.
 
 ## Prices
 
-`fnc_vendor_price` prices a class by what it is, not by a per-class table, so a modded class needs
-no entry. It returns -1 for a class that no vendor may sell, and the stock build drops every such
-class, so it is the one sellability gate. `Money_roll` itself is never sellable.
+`fnc_vendor_price` prices one pack of a class by what the class is, not by a per-class table, so a
+modded class needs no entry. It returns -1 for a class that no vendor may sell, and the stock build
+drops every such class, so it is the one sellability gate. `Money_roll` itself is never sellable.
 
 | Class | Base price |
 |---|---|
-| Magazine, glasses, other `CfgWeapons` item | 1 |
-| Handgun, backpack with a load | 2 |
+| Magazine, glasses, handgun, attachment, any other `CfgWeapons` item with no armor | 1 |
+| Worn armor, usually a vest or headgear, by the highest `armor` in its `HitpointsProtectionInfo` | 2 below 16, 3 at 16 or more |
+| Primary weapon, backpack with a load | 2 |
+| Launcher | 3 |
 | Backpack with no load (`maximumLoad` 0): a static weapon part or a UAV | 6 |
-| Primary weapon | 3 |
-| Launcher | 5 |
 | Vehicle | 1.2 × its request-menu CP price (`DUWS_fnc_vehPrice`) |
-
-The OPFOR, Everything and HQ lists carry a markup: 1.1 on a vehicle and 1.5 on gear. A smaller gear
-markup would round away to nothing on single-digit prices.
 
 Town reputation gives a discount at every shop in the town (`fnc_vendor_discount`): 10% at 10 and
 20% at 20, the reputation cap. The server sends the discount with each stock list, and the
 catalogue shows it in the Discount box in BLUFOR blue.
 
-The price is `max(1, floor(base × markup × (100 − discount) / 100))`. One rounding covers every
-rate, so a marked-up, discounted vehicle does not round down twice, and the floor of 1 stops a
-discounted item from going free.
+The price is `max(1, floor(base × (100 − discount) / 100))`. One rounding covers both rates, so a
+discounted vehicle does not round down twice, and the floor of 1 stops a discounted item from going
+free.
 
 ## Purchase
 
@@ -239,30 +240,39 @@ the price to be wrong. It refuses on the first check that fails:
 1. The vendor is dead, or the buyer is more than 4 m away.
 2. The town is hostile.
 3. The list is not one of this vendor's lists, or the class is not on it. So a hand-made
-   `remoteExec` cannot buy a tank from an Arms Dealer, or name the BLUFOR list to skip the markup.
+   `remoteExec` cannot buy a tank from an Arms Dealer.
 4. The class has no price.
 5. The destination is the arsenal and the arsenal does not count the class.
 6. The destination is the garage and that domain's pool is full. Land, air and boat have separate
    caps.
-7. `fnc_money_spend` finds too little money, carried and banked together.
+7. `fnc_money_spend` finds too little money for the pack price times the count, carried and banked
+   together.
+
+Before any check, the count of packs is floored and raised to at least 1, because a forged count
+below 1 would turn the charge into a payout.
 
 Each purchase offers two destinations:
 
 | Bought | Stored at base | Taken now |
 |---|---|---|
-| Gear | The arsenal: the pack size is added to the captured-materiel pool, then `publicVariable "DUWS_capturedPool"`, because the setter does not broadcast | `fnc_vendor_grant` on the buyer's machine, one piece at a time: the item's own empty equipment slot, then the first worn container with room, then a ground holder at the buyer |
+| Gear | The arsenal: the pack size times the count is added to the captured-materiel pool, then `publicVariable "DUWS_capturedPool"`, because the setter does not broadcast | `fnc_vendor_grant` on the buyer's machine, one piece at a time: the item's own empty equipment slot, then the first worn container with room, then a ground holder at the buyer |
 | Vehicle | The garage: a spec pushed onto `DUWS_garage_stored` | `fnc_depot_carry_spawn` at the buyer, then the R3F carry of a garage retrieval (`fnc_depot_place_r3f`) |
 
-A magazine sells as a pack (`fnc_vendor_packSize`, `fnc_vendor_state_init.sqf:136`). Every other
-gear class sells as one piece. The price is for the whole pack. The catalogue details, the tooltips
-of both buy buttons and the purchase hint show the pack size, for example `5 x` before the name.
+Gear sells in packs (`fnc_vendor_packSize`, `fnc_vendor_state_init.sqf:137`). The price is for one
+pack, and a purchase buys the number of packs in the quantity box. The catalogue details show the
+pack size, for example `5 x` before the name. The tooltips of both buy buttons and the purchase hint
+show the total piece count.
 
-| Magazine | Pack |
+| Gear | Pack |
 |---|---|
-| Rocket or missile, read from the ammo `simulation` | 2 |
+| Rocket or missile, read from the ammo `simulation` | 1 |
 | Grenade (hand or 40 mm) or explosive, read from the ammo `simulation` | 3 |
-| 100 rounds or more, the belt-fed line of `fnc_IsMG` | 3 |
 | Every other magazine | 5 |
+| Every class in the Items category: first aid kits, NVGs, binoculars, GPS, radios, terminals and tools | 10 |
+| Everything else | 1 |
+
+The Items rule reads the stock row's category, so a class sells in tens only where the catalogue
+files it under Items.
 
 The arsenal counts a class only in Limited mode, or when the class is not on `DUWS_friendlyArsenal`.
 A friendly class is already unlimited on the shelf, so storing one buys nothing.
@@ -273,7 +283,7 @@ The ground holder comes from `fnc_money_drop`, which puts a weapon or a backpack
 backpack cargo. Item cargo accepts both but never renders them, so a dropped rifle disappeared.
 
 A bought vehicle has no live original, so its garage spec is built in factory state
-(`fnc_vendor_buy.sqf:83`). The hitpoints field is `[[],[],[]]` and never `[]`, because
+(`fnc_vendor_buy.sqf:88`). The hitpoints field is `[[],[],[]]` and never `[]`, because
 `DUWS_fnc_vehSpecApply` destructures it into three arrays.
 
 The carry for a vehicle taken now passes `_baseBound` as false: the buyer stands in a town, not
@@ -288,10 +298,7 @@ catalogue. `fnc_BluHQinit` marks the crate as a vendor of type `hq` and sends it
 The `hq` row of `DUWS_vendorTypes` has the site `hq`, and `_fnc_canHost` refuses that site, so the
 draft never puts the type in a town.
 
-The counter offers one list, `hq`. Its stock is the BLUFOR list of the Arms Dealer, from the same
-build and cache (`fnc_vendor_stock.sqf:15`). Its price takes the 1.5 gear markup of the OPFOR list,
-so a friendly town's Arms Dealer stays the cheaper source of BLUFOR's own issue. Because `hq` is the
-counter's only list, a hand-made `remoteExec` that names the BLUFOR list at the crate is refused.
+The counter offers one list: the BLUFOR list of the Arms Dealer, from the same build and cache.
 
 The crate has no town, so the counter never refuses as hostile, gives no reputation discount and has
 no greeting. It works in every `CIV_PRESENCE` mode, because the crate and the money exist in each.

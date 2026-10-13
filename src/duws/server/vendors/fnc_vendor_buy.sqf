@@ -2,17 +2,20 @@
 // catalogue only greyed. Nothing a client sends is trusted: its town list is a broadcast copy, its
 // money count is a snapshot, and in co-op two players can spend the same note.
 /*
-    Sells one class to one player. Params: [_vendor, _buyer, _class, _list, _store].
-    _list is the stock list the class was picked from, which sets its price. _store picks the second
-    destination -- the arsenal for gear, the garage for a vehicle -- against taking it here and now.
+    Sells one class to one player. Params: [_vendor, _buyer, _class, _list, _store, _qty].
+    _list is the stock list the class was picked from. _store picks the second destination -- the
+    arsenal for gear, the garage for a vehicle -- against taking it here and now. _qty counts packs of
+    gear; the catalogue sends 1 for a vehicle.
     Every answer goes to the buyer alone; a purchase is nobody else's news.
 
     Everything that can refuse the sale is asked before the money moves. A charge that cannot be
     delivered would have to be refunded, and a refund is a second place for the price to be wrong.
 */
 if (!isServer) exitWith {};
-params ["_vendor", "_buyer", "_class", ["_list", ""], ["_store", false]];
+params ["_vendor", "_buyer", "_class", ["_list", ""], ["_store", false], ["_qty", 1, [0]]];
 if (isNull _vendor || isNull _buyer) exitWith {};
+// A forged count below one would turn the charge into a payout.
+_qty = 1 max floor _qty;
 
 private _fnc_say = {
     params ["_line"];
@@ -40,12 +43,14 @@ if (_rep <= -10) exitWith {
     [format [localize "STR_DUWS_T_VENDOR_HOSTILE", _vendor getVariable ["DUWS_vendor_townName", ""]]] remoteExec ["hint", _buyer];
 };
 
-// A hand-made remoteExec must not buy a tank from an arms dealer, nor name the BLUFOR list for an
-// OPFOR class to dodge the markup, so the class has to be on the list it is priced from.
+// A hand-made remoteExec must not buy a tank from an arms dealer, so the class has to be on one of
+// this vendor's lists.
 if !(_list in ([_type] call fnc_vendor_lists)) exitWith {};
-if ((([_kind, _list] call fnc_vendor_stock) findIf { (_x select 1) isEqualTo _class }) < 0) exitWith {};
+private _rows = [_kind, _list] call fnc_vendor_stock;
+private _at = _rows findIf { (_x select 1) isEqualTo _class };
+if (_at < 0) exitWith {};
 
-private _price = [_class, _list, [_rep] call fnc_vendor_discount] call fnc_vendor_price;
+private _price = [_class, [_rep] call fnc_vendor_discount] call fnc_vendor_price;
 if (_price < 0) exitWith {};
 
 // Outside Limited mode a friendly class is already unlimited on the shelf, so stocking it would buy
@@ -63,18 +68,18 @@ if (_store && {_domainIndex >= 0}
     [localize "STR_DUWS_T_GARAGE_POOL_FULL"] remoteExec ["hint", _buyer];
 };
 
-if !([_buyer, _price] call fnc_money_spend) exitWith { [localize "STR_DUWS_T_VENDOR_BROKE"] remoteExec ["hint", _buyer] };
+if !([_buyer, _price * _qty] call fnc_money_spend) exitWith { [localize "STR_DUWS_T_VENDOR_BROKE"] remoteExec ["hint", _buyer] };
 
 if (_gear) exitWith {
-    private _pack = [_class] call fnc_vendor_packSize;
+    private _count = _qty * ([_class, (_rows select _at) select 2] call fnc_vendor_packSize);
     if (_store) exitWith {
-        [_class, ([_class] call fnc_captured_pool_getCount) + _pack] call fnc_captured_pool_setCount;
+        [_class, ([_class] call fnc_captured_pool_getCount) + _count] call fnc_captured_pool_setCount;
         // The setter deliberately does not broadcast -- its other callers batch several writes behind
         // one publish -- so a single sale has to publish for itself or no client sees the shelf move.
         publicVariable "DUWS_capturedPool";
-        ["STR_DUWS_T_VENDOR_BOUGHT_ARSENAL", _pack] call _fnc_bought;
+        ["STR_DUWS_T_VENDOR_BOUGHT_ARSENAL", _count] call _fnc_bought;
     };
-    [_class, _pack] remoteExec ["fnc_vendor_grant", _buyer];
+    [_class, _count] remoteExec ["fnc_vendor_grant", _buyer];
 };
 
 // A bought vehicle has no live original to capture a spec from, so one is built in factory state. The

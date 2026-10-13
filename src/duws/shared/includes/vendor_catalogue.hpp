@@ -2,7 +2,7 @@
 // one family: the item window where the main window sits, the stock list as the strip on the right,
 // and the close button on its own row beneath, where EXIT is.
 //
-// idc block 8901-8916; the nearest neighbours are the faction browser's 8620-8655 and rest_menu's
+// idc block 8901-8917; the nearest neighbours are the faction browser's 8620-8655 and rest_menu's
 // 8700-8721. DUWS_vendor_target is set by fnc_vendor_catalogue before the dialog opens -- a dialog
 // control has no access to the addAction's _target.
 class vendor_catalogue
@@ -171,21 +171,32 @@ class vendor_catalogue
             h = 15.1 * GUI_GRID_H;
             sizeEx = 0.025;
         };
+        class vendor_qty: RscEdit
+        {
+            idc = 8917;
+            text = "1";
+            x = 22.2 * GUI_GRID_W + GUI_GRID_X;
+            y = 20.4 * GUI_GRID_H + GUI_GRID_Y;
+            w = 2 * GUI_GRID_W;
+            h = 1.5 * GUI_GRID_H;
+            sizeEx = 0.025;
+            tooltip = "$STR_DUWS_T_VENDOR_QTY_TT";
+        };
         class vendor_take: RscButton
         {
             idc = 8913;
             text = "$STR_DUWS_T_VENDOR_TAKE";
             sizeEx = 0.025;
-            x = 22.2 * GUI_GRID_W + GUI_GRID_X;
+            x = 24.5 * GUI_GRID_W + GUI_GRID_X;
             y = 20.4 * GUI_GRID_H + GUI_GRID_Y;
-            w = 8.5 * GUI_GRID_W;
+            w = 7.35 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
         };
         class vendor_store: vendor_take
         {
             idc = 8914;
             text = "$STR_DUWS_T_VENDOR_STORE";
-            x = 31 * GUI_GRID_W + GUI_GRID_X;
+            x = 32.15 * GUI_GRID_W + GUI_GRID_X;
         };
 
         class vendor_close: RscButton

@@ -8894,6 +8894,18 @@
                 <Chinese>購買 %1 件至軍械庫。</Chinese>
                 <Spanish>Comprar al Arsenal, cantidad: %1.</Spanish>
             </Key>
+            <Key ID="STR_DUWS_T_VENDOR_QTY_TT">
+                <Original>Quantity to buy.</Original>
+                <English>Quantity to buy.</English>
+                <Chinesesimp>购买数量。</Chinesesimp>
+                <German>Kaufmenge.</German>
+                <Polish>Ilość do kupienia.</Polish>
+                <Czech>Počet ke koupi.</Czech>
+                <Russian>Количество для покупки.</Russian>
+                <French>Quantité à acheter.</French>
+                <Chinese>購買數量。</Chinese>
+                <Spanish>Cantidad a comprar.</Spanish>
+            </Key>
             <Key ID="STR_DUWS_T_VENDOR_HOSTILE">
                 <Original>The trader refuses to deal with you while %1 is hostile towards you.</Original>
                 <English>The trader refuses to deal with you while %1 is hostile towards you.</English>
