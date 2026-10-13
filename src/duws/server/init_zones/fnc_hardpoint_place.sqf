@@ -105,6 +105,8 @@ fnc_hardpoint_garrison = {
         };
     } forEach _tokens;
 
+    // Read by the OPCOM sighting sweep; set on every raise, since each raise makes new groups.
+    { (group _x) setVariable ["DUWS_hpKey", _key] } forEach _men;
     _men
 };
 

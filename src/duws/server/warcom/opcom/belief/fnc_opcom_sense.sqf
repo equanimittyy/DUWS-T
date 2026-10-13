@@ -32,9 +32,11 @@ private _seen = createHashMap;
 private _east = allGroups select {side _x == east};
 private _stride = 1 max (ceil ((count _east) / OPCOM_SENSE_BATCH));
 for "_gi" from (DUWS_opcom_tick % _stride) to ((count _east) - 1) step _stride do {
-    private _obs = leader (_east select _gi);
+    private _grp = _east select _gi;
+    private _obs = leader _grp;
     if (alive _obs) then {
         private _known = _obs nearTargets OPCOM_SENSE_RANGE;
+        private _contact = false;
         if (isNil "DUWS_opcom_ntProbed" && {_known isNotEqualTo []}) then {
             DUWS_opcom_ntProbed = true;
             ["DEBUG", "OPCOM", format ["nearTargets sample = %1", _known select 0]] call fnc_log;
@@ -49,6 +51,7 @@ for "_gi" from (DUWS_opcom_tick % _stride) to ((count _east) - 1) step _stride d
                     ["DEBUG", "OPCOM", format ["nearTargets stale sample age=%1 obj=%2", _age, _tgt]] call fnc_log;
                 };
                 if (_age <= OPCOM_TICK_PERIOD) then {
+                    _contact = true;
                     private _g = group _tgt;
                     private _k = netId _g;
                     if (_age < ((_seen getOrDefault [_k, [[], 0, 1e9]]) select 2)) then {
@@ -59,6 +62,11 @@ for "_gi" from (DUWS_opcom_tick % _stride) to ((count _east) - 1) step _stride d
                 };
             };
         } forEach _known;
+        // A hardpoint garrison in COMBAT with BLUFOR in sight is taken as firing, and a firing position gives itself away.
+        if (_contact && {behaviour _obs isEqualTo "COMBAT"}) then {
+            private _hpKey = _grp getVariable ["DUWS_hpKey", ""];
+            if (_hpKey isNotEqualTo "") then { [_hpKey] call DUWS_fnc_hardpointContactReveal };
+        };
     };
 };
 

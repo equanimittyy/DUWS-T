@@ -52,7 +52,7 @@ globals and the static-role table every zone garrison uses
 ([`faction_system.md#static-weapons-resolve-at-placement`](faction_system.md#static-weapons-resolve-at-placement))
 — hardcoding a unit or turret classname is the one change that breaks mod-free operation and faction
 auto-detection. `opfor_ARTY_X` is the one core that is a vehicle rather than a static, resolved and
-crewed on a separate path in `fnc_hardpoint_garrison` (`fnc_hardpoint_place.sqf:58-109`): thawed and
+crewed on a separate path in `fnc_hardpoint_garrison` (`fnc_hardpoint_place.sqf:58-111`): thawed and
 crewed in place rather than dropped and settled, because it already sits on its own tracks.
 
 `MG`, `AT`, `GMG`, `AA` and `ROADBLOCK` are the types the weight tables roll
@@ -111,7 +111,7 @@ unit-tested independently of the terrain read that feeds it:
   flat and open for AA, defilade for a mortar, a symmetric crest for a radio mast — plus a mutual-support
   bonus for sitting within interlock range of a hardpoint already down.
 
-**Type is rolled before ground is read.** `fnc_hardpoint_lay` (`fnc_hardpoint_place.sqf:175-203`)
+**Type is rolled before ground is read.** `fnc_hardpoint_lay` (`fnc_hardpoint_place.sqf:177-205`)
 draws the whole slate of types for a pass up front from the pass's base-weight map, then hunts each
 rolled type a handful of candidate sites (`HP_TYPE_DRAWS` = 18, `:113`), scores each with
 `fnc_hardpoint_score`, and weight-picks among whatever scored above zero. A type that finds no site
@@ -190,7 +190,7 @@ a civilian job) skip all of this and are laid whole through `fnc_hardpoint_minef
 area-of-influence band; the roadblock net is the exception, drawing each block on the line from BLU HQ to
 a zone (kept where the OPFOR field is positive) and snapping it to a road, a main road preferred. The two
 flank lines and the observation posts sample the band their own way. `fnc_hardpoint_band_pool`
-(`fnc_hardpoint_place.sqf:262`) draws band points uniformly over the whole map, once. A per-zone draw
+(`fnc_hardpoint_place.sqf:264`) draws band points uniformly over the whole map, once. A per-zone draw
 would give a small zone's band as many sites as a large one's. The
 flank lines split the pool at its median distance to BLU HQ: the backline takes the far half and the
 frontline the near half, one nest per zone each. Every pool site keeps `HP_POOL_ZONE_GAP` (300 m) clear of
@@ -205,7 +205,7 @@ that one owns what the band *is* and what a tower buys the enemy.
 All of it — the zone ring and the standalone band (one radio tower, the two flank lines, an AA net,
 the observation-post net and the roadblock net) — runs in one generation phase after zone build-out
 and civilian init (`fnc_init_OPFOR_WARCOM.sqf:82-148`), under the same progress banner the other
-phases use. `fnc_hardpoint_plan_counts` (`fnc_hardpoint_place.sqf:390`)
+phases use. `fnc_hardpoint_plan_counts` (`fnc_hardpoint_place.sqf:392`)
 rolls every zone's ring, both flank-line counts, the observation-post count and the roadblock targets
 before any of it is laid, so the banner totals real hardpoints rather than counting zones. The tower
 is not rolled: generation retries it until it stands, and gives up only on a map with no band ground.
@@ -215,7 +215,7 @@ is not rolled: generation retries it until it stands, and gives up only on a map
 A hardpoint registers as a site the same way a zone does — `fnc_site_register`,
 `fnc_site_occupant_register`, `fnc_site_hooks_set` (`server/misc/fnc_site_stream_init.sqf:19,49,87`)
 — so the shared poller tests it against the same per-pass player list rather than paying a spatial
-query per hardpoint (`fnc_hardpoint_register`, `server/init_zones/fnc_hardpoint_stream.sqf:410-517`).
+query per hardpoint (`fnc_hardpoint_register`, `server/init_zones/fnc_hardpoint_stream.sqf:422-529`).
 What differs from a zone is the lifecycle: one gun-and-garrison emplacement that wakes, sleeps and
 can be cleared, never captured or retaken.
 
@@ -248,11 +248,11 @@ composition's own deploy rebuilds members with `createVehicle`, which would hand
 A minefield instead streams on its own path, square by square ([Siting](#siting)).
 On registration, every member of their
 composition is re-filed through `fnc_duws_keep` with `_pinned = true`
-(`fnc_hardpoint_stream.sqf:484`), which sets `DUWS_noStow` and excludes the object from
+(`fnc_hardpoint_stream.sqf:496`), which sets `DUWS_noStow` and excludes the object from
 `fnc_duws_stow`'s crewed-member refusal and its delete pass
 (`server/misc/fnc_composition_stream_init.sqf:38-46,93-100`). Every other type stows and redeploys
 like an ordinary composition: garrisons are raised fresh from `DUWS_fnc_teamRoster` on each raise
-(`fnc_hardpoint_garrison`, `fnc_hardpoint_place.sqf:58-109`), a fixed per-type token — the same team
+(`fnc_hardpoint_garrison`, `fnc_hardpoint_place.sqf:58-111`), a fixed per-type token — the same team
 composition and size whether the hardpoint is razed and rebuilt in hour one or hour five. Nothing in
 the codebase scales hardpoint garrison size to `WARCOM_opfor_ap`.
 
@@ -260,7 +260,7 @@ the codebase scales hardpoint garrison size to `WARCOM_opfor_ap`.
 
 An `OP` is a lookout, not a strongpoint: it fields a close security team on the post and a recon
 patrol screening wide, and while it stands it runs a recon screen against the player. Standalone OPs
-are seeded at generation on a per-zone coin flip (`HP_OBS_P` = 0.5, `fnc_hardpoint_place.sqf:389`) —
+are seeded at generation on a per-zone coin flip (`HP_OBS_P` = 0.5, `fnc_hardpoint_place.sqf:391`) —
 at most one OP out in the band per zone — counted into the generation banner and sited off the flank
 lines' uniform band pool (`fnc_hardpoint_site_obs`, `:313`), facing away from the nearest zone. They are
 not rolled from any weight table.
@@ -284,7 +284,7 @@ burst's clear keeps any belief in those cells. Otherwise a post near a base woul
 
 ## Clearance
 
-`DUWS_fnc_hardpointClearCheck` (`fnc_hardpoint_stream.sqf:84-133`) runs on the shared per-hardpoint
+`DUWS_fnc_hardpointClearCheck` (`fnc_hardpoint_stream.sqf:96-145`) runs on the shared per-hardpoint
 tick and branches on type family:
 
 | Family | Cleared when |
@@ -303,18 +303,18 @@ Judged only while the hardpoint is deployed (`DUWS_hpPeak_<key>` present), so a 
 empty roster is never read as one beaten — the same guard a zone's own capture test uses.
 
 Clearing is latched and destructive to the record, not a flag: `DUWS_fnc_hardpointClear`
-(`:160-217`) deletes the row from `DUWS_hardpoints` outright (`:171`) rather than marking it cleared
+(`:172-229`) deletes the row from `DUWS_hardpoints` outright (`:183`) rather than marking it cleared
 in place, so a re-manned gun cannot un-clear what the player already took. Survivors are left where
 they fell, flagged for the cleanup sweep once the player is clear (`DUWS_binMe`, `:186`, on the
 default lifetime) rather than deleted in front of anyone — a hardpoint can fall with defenders still
 alive, since no clear condition asks for the whole garrison dead. The composition is
-released through `fnc_duws_release` (`:191`) like any other, so wrecks stay for the sweep rather than
+released through `fnc_duws_release` (`:203`) like any other, so wrecks stay for the sweep rather than
 vanish with the clear.
 
 ## Reveal
 
 Every hardpoint gets a marker on registration: shape `"ICON"`, type `"loc_Bunker"`, coloured by side,
-with the type token as its text (`fnc_hardpoint_stream.sqf:441-448`) — one icon shape for every type,
+with the type token as its text (`fnc_hardpoint_stream.sqf:453-460`) — one icon shape for every type,
 distinguished by label rather than by symbol. The marker's alpha and the revealed flag start at the rule
 in [`intel_system.md`](intel_system.md#what-is-hidden-depends-on-when-it-came-into-existence): a hardpoint
 laid by campaign generation is shown outside hardcore and hidden under it, and one built in play
@@ -327,12 +327,26 @@ hardpoint's own key rather than position, the way `fnc_zone_reveal` owns its fla
 `fnc_civ_town_reveal` owns `civ_visible`. It announces each reveal as an Allseer line on SUB-NET, naming
 the type (`DUWS_hardpointName`) and the nearest zone or town (`DUWS_fnc_hardpointNearestPlace`).
 
-Two ways a hidden standalone hardpoint is found. **Proximity**: each standalone hardpoint registers a
-server trigger that fires when a player comes within 100 m (`HP_REVEAL_RADIUS`,
-`fnc_hardpoint_stream.sqf:13`), as a zone reveals on entry. A trigger checks every 0.5 s, where the site
-pass would let a driver cross the 100 m disc between two polls. It retires on firing, or with the
+A hidden standalone hardpoint is found in three ways. **Proximity**: each standalone hardpoint registers a
+server trigger that fires when a BLUFOR unit, player or AI, comes within 100 m (`HP_REVEAL_RADIUS`,
+`fnc_hardpoint_stream.sqf:13`). A trigger checks every 0.5 s, where the site pass would let a driver cross
+the 100 m disc between two polls. It tests `side group` over each unit's crew rather than using a `WEST`
+activation, because a disguised player is captive and a captive's `side` reads civilian
+([gotchas](../architecture/arma_engine_gotchas.md#a-captive-units-side-reads-civilian-but-its-side-group-does-not)).
+The condition runs only while something stands inside the disc: usually the hardpoint's own garrison
+while it is raised, and a resident battery's crew at all times. It retires on firing, or with the
 hardpoint's clear. **Intel**: `fnc_intel_payout` draws `"HP"` as one of its kinds whenever an unrevealed
 standalone hardpoint is in reach (`server/search/fnc_intel_payout.sqf:68-73`).
+
+**Contact**: a garrison in a fight gives its position away. OPCOM's sighting sweep
+(`fnc_opcom_sense.sqf`) already reads the `nearTargets` of every live OPFOR group. When a hardpoint's
+group has a fix on a BLUFOR unit, player or AI, that is no older than one OPCOM tick, and its leader's
+behaviour is `COMBAT`, `DUWS_fnc_hardpointContactReveal` reveals the hardpoint. A fight at a zone
+hardpoint reveals its zone instead, and the zone's reveal carries the zone's hardpoints.
+`fnc_hardpoint_garrison` tags each group with its hardpoint's key (`DUWS_hpKey`) on every raise,
+because a raise makes new groups. The check adds no `nearTargets` query. Past `OPCOM_SENSE_BATCH` (8)
+live OPFOR groups, the sweep takes a slice of them per tick, so the reveal can lag the first shots by a
+few ticks.
 
 A minefield is also found when its first mine is gone: set off, disarmed or destroyed. The clear check
 reads its mine list every tick, and reveals the field once fewer mines are armed than were laid. Revealing
@@ -360,7 +374,7 @@ anything back. Every hardpoint except a minefield pays, zone and standalone alik
 artillery or mortar hardpoint, of which a radio also pays `10 AP` and artillery `5 AP`. CP runs
 through `fnc_cp_adjust` and any AP through `fnc_ap_adjust`, each on its own carded notification naming
 the type and nearest zone or town — a single combined card buried the AP gain in the CP badge
-(`DUWS_fnc_hardpointClear`, `fnc_hardpoint_stream.sqf:208-216`; `notifications.hpp`, `HPdestroyed` /
+(`DUWS_fnc_hardpointClear`, `fnc_hardpoint_stream.sqf:220-228`; `notifications.hpp`, `HPdestroyed` /
 `HPdestroyedAP`). A zone hardpoint's bounty is paid on top of the zone's own capture bounty. A minefield
 pays nothing, a hazard removed rather than a garrison beaten, but its clear is still carded without a
 bounty badge (`HPcleared`).

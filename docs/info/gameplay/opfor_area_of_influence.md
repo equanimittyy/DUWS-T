@@ -92,7 +92,7 @@ drift push.
 A tower's only effect is its `AOI_TOWER_REACH` coverage, which `DUWS_fnc_aoi_covers` reads live
 from the `DUWS_hardpoints` registry, so a destroyed tower's coverage goes when its row does.
 Campaign generation always places one tower in the band before the other band passes, so they sample
-the band it widens (`fnc_hardpoint_site_radio`, `server/init_zones/fnc_hardpoint_place.sqf:361`). It
+the band it widens (`fnc_hardpoint_site_radio`, `server/init_zones/fnc_hardpoint_place.sqf:363`). It
 takes the best of 24 band draws by OPCOM's own tower Value; civilian init runs before hardpoint
 generation so that the towns exist to weigh. OPCOM builds the rest in play, up to
 `AOI_OPFOR_TOWER_CAP` (4) standing or on their way, the start tower included (`DUWS_opcom_assetCap`,
@@ -128,7 +128,7 @@ annulus around a random OPFOR zone, out to `AOI_ZONE_REACH` past the zone's edge
 draw only where `fnc_aoi_field_at` is positive and `fnc_aoi_in_any_zone` is false. Every band
 placer except the two flank lines and the observation posts goes through it (directly, or via the per-emplacement
 anchor/candidate pair `fnc_hardpoint_band_anchor` / `fnc_hardpoint_band_cand`,
-`fnc_hardpoint_place.sqf:241-256`), so all of them sample the same ground the same way. The flank
+`fnc_hardpoint_place.sqf:243-258`), so all of them sample the same ground the same way. The flank
 lines and the observation posts sample the band uniformly over the whole map instead, so a site's odds do
 not depend on which zone's band it falls in ([`hardpoints.md`](hardpoints.md#siting)); siting mechanics beyond the
 candidate source — terrain survey, per-type score, facing, spacing — are shared with the zone ring and

@@ -55,8 +55,8 @@ if (_kind isEqualTo "zone") then {
     };
 };
 
-// Found on foot (walking into the zone, nearing the hardpoint) wins too: intel payouts skip a live target, so
-// only the player can have revealed it.
+// Found on the ground (a player walking into the zone, BLUFOR nearing the hardpoint, a fight with its garrison)
+// wins too; intel payouts skip a live target.
 private _fnc_found = if (_kind isEqualTo "hp") then {
     { (DUWS_hardpoints findIf { ((_x select 0) isEqualTo _hpKey) && {_x select 5} }) >= 0 }
 } else {

@@ -34,8 +34,8 @@ OPFOR build during play stays hidden in both.
 | OPCOM units under orders | **hidden** | **hidden** |
 
 A zone hardpoint is never hidden apart from its zone. The zone's reveal reveals its hardpoints, and one
-that OPFOR builds in a found zone starts shown. Only standalone hardpoints are left for intel and
-proximity to find.
+that OPFOR builds in a found zone starts shown. A fight at a hidden zone's hardpoint reveals the zone
+([`hardpoints.md`](hardpoints.md#reveal)). Intel and proximity look for standalone hardpoints only.
 
 So normal mode has a live intel channel answering "what has changed", and hardcore has that plus
 everything generation produced, answering "where is the war". Normal mode's channel is the two kinds
@@ -156,7 +156,8 @@ player out of one currency still has a route.
 |---|---|
 | Body search | not capped; each team search in the last 15 minutes lowers the chance of the next ([§A corpse search walks a ladder](#a-corpse-search-walks-a-ladder)) |
 | Side-mission objective | flagged with certainty; reaching the object is the gate |
-| Walking into a zone or town, or within 100 m of a standalone hardpoint | not applicable; it reveals the ground the player is standing on and rolls nothing |
+| A player walking into a zone or town, or any BLUFOR unit within 100 m of a standalone hardpoint | not applicable; it reveals the ground that BLUFOR stand on and rolls nothing |
+| A hardpoint's garrison in a fight with BLUFOR, players or AI | not applicable; the fight gives the position away and rolls nothing |
 | Civilian frisk | flagged with certainty; the arrest is the price, and its success chance carries the odds |
 | Intelligence Center | by the odds its level sets, the unbought level included — one roll per OPCOM tick ([§The Intelligence Center](#the-intelligence-center)) |
 

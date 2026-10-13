@@ -31,6 +31,18 @@ DUWS_fnc_hardpointZoneFound = {
     _zk isNotEqualTo "" && {(zone_namePOS_pairs findIf { (_x select 2) && {([_x select 1] call fnc_zone_key) isEqualTo _zk} }) > -1}
 };
 
+// A zone hardpoint is never shown apart from its zone, so a fight there reveals the zone, which carries its hardpoints.
+DUWS_fnc_hardpointContactReveal = {
+    params ["_key"];
+    private _i = DUWS_hardpoints findIf { (_x select 0) isEqualTo _key };
+    if (_i < 0) exitWith {};
+    (DUWS_hardpoints select _i) params ["", "", "", "", "_zk", "_shown"];
+    if (_shown) exitWith {};
+    if (_zk isEqualTo "") exitWith { ["ONE", _key] call fnc_hardpoint_reveal };
+    private _z = zone_namePOS_pairs findIf { ([_x select 1] call fnc_zone_key) isEqualTo _zk };
+    if (_z > -1) then { ["ONE", (zone_namePOS_pairs select _z) select 1] call fnc_zone_reveal };
+};
+
 // Dispatched, not inline: the raise re-crews statics through DUWS_fnc_manStatics, which sleeps in the
 // drop-and-settle, and the poller holds every other site's clock.
 DUWS_fnc_hardpointRaiseWorker = {
@@ -457,10 +469,11 @@ fnc_hardpoint_register = {
     if (_zoneKey isEqualTo "") then {
         private _revealTrg = createTrigger ["EmptyDetector", _pos, false];
         _revealTrg setTriggerArea [HP_REVEAL_RADIUS, HP_REVEAL_RADIUS, 0, false];
-        _revealTrg setTriggerActivation ["ANYPLAYER", "PRESENT", false];
+        _revealTrg setTriggerActivation ["ANY", "PRESENT", false];
         _revealTrg setVariable ["DUWS_hpKey", _key];
+        // By side group, as the site poller tests: a disguised player is captive, and a captive's side reads civilian.
         _revealTrg setTriggerStatements [
-            "this",
+            "this && {(thisList findIf { ((crew _x) findIf { side group _x == west }) > -1 }) > -1}",
             "['ONE', thisTrigger getVariable 'DUWS_hpKey'] call fnc_hardpoint_reveal; deleteVehicle thisTrigger",
             ""
         ];
