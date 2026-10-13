@@ -613,7 +613,9 @@ fnc_captured_pool_collect = {
 		{ [_x select 1] call _walk } forEach _nested;
 	};
 	private _full = DUWS_paramArsenal == 1;
+	private _sources = [_crate, _veh] select { !isNull _x };
 	private _total = 0;
+	private _credited = [];
 	{
 		private _src = _x;
 		private _got = createHashMap;
@@ -629,11 +631,13 @@ fnc_captured_pool_collect = {
 				_total = _total + _y;
 				if (_x == "Money_roll" || {!_full && {!([_x] call fnc_captured_pool_unpooled)}}) then {
 					[_x, ([_x] call fnc_captured_pool_getCount) + _y] call fnc_captured_pool_setCount;
+					_credited pushBack [_x, _y];
 				};
 			};
 		} forEach _got;
-	} forEach ([_crate, _veh] select { !isNull _x });
+	} forEach _sources;
 
+	if (duws_log_level >= 4) then { ["DEBUG", "GEAR", format ["pool collect %1: from=%2 pieces=%3 credited=%4", name _caller, _sources apply { typeOf _x }, _total, _credited]] call fnc_log; };
 	if (_total == 0) exitWith { [localize "STR_DUWS_T_ARSENAL_COLLECT_NONE"] remoteExec ["hint", _caller]; };
 	publicVariable "DUWS_capturedPool";
 	private _msg = format [localize "STR_DUWS_T_ARSENAL_COLLECT_DONE", _total];
