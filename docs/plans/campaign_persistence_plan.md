@@ -728,9 +728,9 @@ Making reveal personal is a design change to the intel system, not a persistence
 would mean per-player markers everywhere.
 
 **Task forces are the one kind of live AI that the save keeps.** A task force is a squad that the
-team paid for and handed to Overlord, that a leaving player's High Command left behind, or the one
-free task force that Overlord spawns. The free one is saved with a flag, so a load keeps its losses and
-it still fills the cap of one, and the time left until the next one is saved with it. Nothing
+team paid for and handed to Overlord, that a leaving player's High Command left behind, or a free
+task force that Overlord spawns. A free one is saved with a flag, so a load keeps its losses and it
+still counts toward the cap, and the time left until the next one is saved with it. Nothing
 else brings it back, and the reconciliation pass does not refund it
 ([§What live state costs](#what-live-state-costs-and-who-pays-it-back)), so a restart without it
 would lose the team's investment. The save records the men and the vehicles, not the group, because a
