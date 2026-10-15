@@ -23,7 +23,6 @@ DUWS_T is a dynamic, persistent campaign generator that simulates full military 
 [*] Real persistence system saved directly to your profile. DUWS-T now supports persistent gameplay in either SP, MP or dedicated servers
 [*] Translations: Simplified and Traditional Chinese, Russian, Spanish, Polish, Czech, French and German
 [/list]
-[url=https://steamcommunity.com/sharedfiles/filedetails/changelog/3685431219]See more in the changelog...[/url]
 
 [img]https://i.imgur.com/XRMd0Dv.png[/img]
 This campaign encourages tactical planning and maneuvering; one small mistake can lead to heavy losses for your army - OPCOM is not a pushover. Since much of DUWS_T has been revised, if you’re new to Arma 3 or haven’t played the DUWS series before, I recommend starting with the [b]default parameters[/b].
@@ -67,6 +66,10 @@ A: Yes, but this mission was designed for modern warfare, so you might see thing
 [*] Original DUWS_X by Killa Tomata.
 [*] DUWS by Kibot. DUWS-R edition by Frito and UltraNoobian.
 [*] R3F Logistics System by Madbull, HALO jump script by Ghost, AIS Medical by Phantom, plus plenty of scripting inspiration from talented creators on the Bohemia Forums.
+[*] And a special thanks to the DUWS-T v2.0 playtesters! Their feedback was invaluable.
 [/list]
 
-Looking for the source code? See it here https://github.com/equanimittyy/DUWS-T
+[b]Looking for the source code? See it here:[/b] https://github.com/equanimittyy/DUWS-T
+
+[b]Or the raw .pbo file? See it here:[/b]
+https://drive.google.com/drive/folders/1nviyCMck8iASNj-GbNOj4YRVRIe03Ae4?usp=sharing
