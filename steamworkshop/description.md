@@ -1,7 +1,7 @@
 [img]https://i.imgur.com/tUHEZdp.png[/img]
 [b][i]Dynamic Universal War System Tactics[/i][/b]
 
-[b]DUWS_T v2.0 now available![/b]
+[b]DUWS_T v2.0 now available![/b] 
 
 [b]DUWS_T[/b]
 After months of hard work, I’m pleased to present DUWS_T, packed with plenty of new content for players to explore
@@ -68,3 +68,5 @@ A: Yes, but this mission was designed for modern warfare, so you might see thing
 [*] DUWS by Kibot. DUWS-R edition by Frito and UltraNoobian.
 [*] R3F Logistics System by Madbull, HALO jump script by Ghost, AIS Medical by Phantom, plus plenty of scripting inspiration from talented creators on the Bohemia Forums.
 [/list]
+
+Looking for the source code? See it here https://github.com/equanimittyy/DUWS-T
