@@ -1,7 +1,7 @@
-[img]duws_t_banner.png[/img]
+[img]https://i.imgur.com/tUHEZdp.png[/img]
 [b][i]Dynamic Universal War System Tactics[/i][/b]
 
-[b]DUWS_T v2.0 now available![/b] [url=https://steamcommunity.com/sharedfiles/filedetails/changelog/3685431219]See more in the changelog...[/url]
+[b]DUWS_T v2.0 now available![/b]
 
 [b]DUWS_T[/b]
 After months of hard work, I’m pleased to present DUWS_T, packed with plenty of new content for players to explore
@@ -10,7 +10,7 @@ DUWS_T is a dynamic, persistent campaign generator that simulates full military 
 
 [b]No mods required![/b]
 
-[img]duws_t_sub_features.png[/img]
+[img]https://i.imgur.com/y4rlwnL.png[/img]
 [list]
 [*] New enemy commander (OPCOM) based on real RTS AI logic. It builds up its zones and launches assaults, flanks and QRFs
 [*] New hardpoint system: MG, AT and AA nests, roadblocks, observation posts, radio towers, artillery and minefields - the battlefield is no longer confined to pre-defined zones and is more dynamic than ever
@@ -25,14 +25,14 @@ DUWS_T is a dynamic, persistent campaign generator that simulates full military 
 [/list]
 [url=https://steamcommunity.com/sharedfiles/filedetails/changelog/3685431219]See more in the changelog...[/url]
 
-[img]duws_t_sub_how_to_play.png[/img]
+[img]https://i.imgur.com/XRMd0Dv.png[/img]
 This campaign encourages tactical planning and maneuvering; one small mistake can lead to heavy losses for your army - OPCOM is not a pushover. Since much of DUWS_T has been revised, if you’re new to Arma 3 or haven’t played the DUWS series before, I recommend starting with the [b]default parameters[/b].
 
 In short, spend time doing small missions and work up incrementally. Save money, CP and AP to purchase assets you need to progress Army Tiers. Do civilian side missions against bandits first if OPFOR proves too much. Conduct recon missions to find OPFOR positions before executing larger operations and destroy their positions as this will net you CP and cost OPCOM AP to rebuild. Beware their QRFs, but these too cost AP for OPCOM to send, so eliminating these will make OPFOR weaker.
 
 If you want to learn as you play, see the DUWS-T manual in the map screen.
 
-[img]duws_t_sub_faq.png[/img]
+[img]https://i.imgur.com/VXQc01r.png[/img]
 [b]Q: Does this mission require XXX mods?[/b]
 A: No. As long as your PC isn’t a total potato, it’ll run just fine.
 
@@ -54,7 +54,7 @@ A: Doesn’t matter. I’ll take every bug report seriously.
 [b]Q: Can I simulate Vietnam War or WWII in this mission?[/b]
 A: Yes, but this mission was designed for modern warfare, so you might see things like modern stuff showing up in a WWII setting - especially buildings.
 
-[img]duws_t_sub_community.png[/img]
+[img]https://i.imgur.com/pmpIqta.png[/img]
 [list]
 [*] [b]QQ Group:[/b] 825283430
 [*] [b]Discord:[/b] [url=https://discord.gg/GDrvusv99t]https://discord.gg/GDrvusv99t[/url]
