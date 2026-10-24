@@ -68,14 +68,16 @@ registers it as a standalone hardpoint, and from the Clear Minefield civilian mi
 thinned field and reveals it at once ([`side_mission_catalogue.md`](side_mission_catalogue.md)).
 OPCOM's builds roll only the types OPFOR's tier has unlocked (`DUWS_hardpointTier`), under caps that count every
 standing OPFOR hardpoint, seeded ones included, and every build still siting or on its truck
-(`DUWS_fnc_opcom_hpOpen`). Three types cap flat campaign-wide: `RADIO` at `AOI_OPFOR_TOWER_CAP` (4), `MORTAR` at
+(`DUWS_fnc_opcom_hpOpen`). Three asset types cap flat campaign-wide: `RADIO` at `AOI_OPFOR_TOWER_CAP` (4), `MORTAR` at
 `OPCOM_CAP_MORTAR` (2) and `ARTY` at `OPCOM_CAP_ARTY` (1). `AT`, `AA`, `GMG` and `OP` cap at their
 `OPCOM_CAP_HP_TYPE_PER_ZONE` factor times the campaign's zone count; `MG` and `ROADBLOCK` carry no cap of their own.
-A `MINEFIELD` caps the same way per variant, `MINEFIELD_AT` at 1 a zone and `MINEFIELD_AP` at 2. The variant is
+A `MINEFIELD` caps flat per variant, `MINEFIELD_AT` at `OPCOM_CAP_MINEFIELD_AT` (2) and `MINEFIELD_AP` at
+`OPCOM_CAP_MINEFIELD_AP` (2): campaign generation lays no belt, so no seed grows with the zone count, and one belt
+is hundreds of mines. The variant is
 read from `DUWS_opcom_mineVariants`, which OPCOM's belts, the recon mission's field and a debug field write to. The
 recon mission lays no field while the AP cap is full. A Clear Minefield job's thinned field writes no variant, so it
 counts only toward the all-types cap.
-All types together, the flat-capped three included, cap at `OPCOM_CAP_HP_PER_ZONE` (12) times the zone count. The
+All types together, the flat-capped types included, cap at `OPCOM_CAP_HP_PER_ZONE` (12) times the zone count. The
 per-zone caps scale because the seed does, at about 7 hardpoints a zone. Within the caps, a build's Value leans toward
 the archetype's `hpMix` (`appraisal/fnc_opcom_archetypes.sqf`), where a type's share is its weight over the mix's sum:
 a type past its share of the standing hardpoints of the mix's types builds less, and one short of it builds more. A

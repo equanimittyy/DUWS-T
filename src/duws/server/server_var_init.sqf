@@ -827,11 +827,15 @@ OPCOM_AP_PER_ROUND = createHashMapFromArray [["MORTAR", 1], ["ARTY", 2]];
 // Mortar pits and batteries are the only permanent-crew hardpoints, so their count bounds the resident AI.
 OPCOM_CAP_MORTAR = 2;
 OPCOM_CAP_ARTY = 1;
+// Belts per variant, flat: generation seeds none, so no seed grows with the zone count, and one belt is hundreds of
+// mines. Tune.
+OPCOM_CAP_MINEFIELD_AT = 2;
+OPCOM_CAP_MINEFIELD_AP = 2;
 // These types, and all types together, cap per campaign zone with the seeded hardpoints counted: the seed
 // grows with the zone count, so a flat cap would sit under a large campaign's seed and far over a small one's.
 OPCOM_CAP_HP_PER_ZONE = 12;
 OPCOM_CAP_HP_TYPE_PER_ZONE = createHashMapFromArray [
-    ["AT", 2], ["AA", 2], ["GMG", 1], ["OP", 2], ["MINEFIELD_AT", 1], ["MINEFIELD_AP", 2]
+    ["AT", 2], ["AA", 2], ["GMG", 1], ["OP", 2]
 ];
 // Supply trucks sit outside the unit cap: OPCOM_SUPPLY_CLASS bounds them, and counting them would let a full
 // roster stall every supply buy.

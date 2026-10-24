@@ -6,9 +6,10 @@ DUWS_opcom_assetPrice = createHashMapFromArray [
     ["RADIO", OPCOM_AP_TOWER], ["OP", OPCOM_AP_OP], ["MORTAR", OPCOM_AP_MORTAR], ["ARTY", OPCOM_AP_ARTY]
 ];
 
-// Flat, unlike the per-zone caps: the guns' cap is the resident AI's.
+// Flat, unlike the per-zone caps: the guns' cap is the resident AI's, and a mine belt's is its mine count.
 DUWS_opcom_assetCap = createHashMapFromArray [
-    ["RADIO", AOI_OPFOR_TOWER_CAP], ["MORTAR", OPCOM_CAP_MORTAR], ["ARTY", OPCOM_CAP_ARTY]
+    ["RADIO", AOI_OPFOR_TOWER_CAP], ["MORTAR", OPCOM_CAP_MORTAR], ["ARTY", OPCOM_CAP_ARTY],
+    ["MINEFIELD_AT", OPCOM_CAP_MINEFIELD_AT], ["MINEFIELD_AP", OPCOM_CAP_MINEFIELD_AP]
 ];
 
 // Siting and on-truck builds count too, or two trucks fill a cap's last slot or carry two posts to one spot.
