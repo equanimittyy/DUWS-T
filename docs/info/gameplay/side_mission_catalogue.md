@@ -535,7 +535,7 @@ counts toward the objective. The mines are revealed to OPFOR alone, so the bandi
 (`fnc_civ_mission_hostages.sqf`). The houses are the five enterable houses nearest the site, all within 150 m.
 Each house holds one hostage and a team of three bandits (rifleman, autogunner, grenadier) spread through it,
 and a blue `Hostage` marker pins each hostage, so the task pins the site with no search area. When the team of a
-house is dead, its hostage is free: the town gains 1 reputation at once, the marker goes, and the hostage walks
+house is dead or unconscious, its hostage is free: the town gains 1 reputation at once, the marker goes, and the hostage walks
 home, still captive so that nobody shoots him, until the map sweep takes him. One alarm serves every house. When
 any bandit, a house team or a pair, holds a live sighting of a player for 3 s, a 300 s clock starts that nothing
 stops, and when it runs out, every hostage still held is executed. The sighting test and the execution are those
