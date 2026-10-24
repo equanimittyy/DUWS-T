@@ -348,7 +348,8 @@ so it moves no faster than a truck delivers.
   evenly and a 2 makes a type twice as common as a 1. Balanced's `hpMix` is MG 2, roadblock 2, AT 1, AA 1, GMG 1, and
   AT and AP minefield 0.5 each. The asset builds (tower, OP, mortar and battery) stay out of the mix and weigh each by
   its own action weight ([§Archetype](#archetype-phase-7)): a cap, not a share, bounds how many stand, and a flat-capped type
-  in the mix would hold a share its cap never fills, which pushes every other type over its own. A minefield is
+  in the mix would hold a share its cap never fills, which pushes every other type over its own. The two minefield
+  variants are flat-capped and still in the mix, so the share past their cap does that. A minefield is
   counted by variant, which OPCOM's belts, the recon mission's field and a debug field record; a Clear Minefield
   job's thinned field records none, so it stays out of the mix and the variant caps. The mix reads 1 at the
   target, below 1 past it and above 1 short of it, so a cheap type cannot fill the caps ahead of the rest. It tilts
@@ -471,7 +472,7 @@ The debug harness spends outside the pick and is not capped.
 | `OPCOM_CAP_GARRISON` (2) | a Garrison's zone | the combatants homed at that zone, the set its reserve pool fields |
 | `OPCOM_SUPPLY_CLASS` (1 a class) | every supply action of the class | the trucks out on an errand of the class: Rapport has its own class, a standalone hardpoint and a Minefield share one, and a tower, OP, mortar or battery build has its own |
 | `OPCOM_CAP_HP_PER_ZONE` (12) × zones | every Build and Minefield | every standing OPFOR hardpoint of every type, towers, OPs and guns included, seeded ones included, and every build still siting or on its truck |
-| per type × zones | a Build or Minefield of that type | the same, by type, and by variant for a minefield ([§What the commander builds](#what-the-commander-builds)) |
+| per type, × zones or flat | a Build or Minefield of that type | the same, by type, and by variant for a minefield ([§What the commander builds](#what-the-commander-builds)) |
 
 - **Supply trucks sit outside the unit cap.** The class cap bounds the trucks in flight. If the trucks counted, a
   full roster would stop every supply action.
@@ -1083,9 +1084,10 @@ hardpoint and a build still on its truck:
 | 4 Armour (350) | + artillery battery (max 1 alive) |
 | 5 Jets (600) | nothing new |
 
-The tower, the mortar pit and the battery cap flat: the guns' cap is the resident AI's. AT, AA, OP and AP
-minefield cap at 2 a campaign zone, GMG and AT minefield at 1 (`OPCOM_CAP_HP_TYPE_PER_ZONE`).
-MG and roadblock carry no cap of their own. All types together, the flat-capped three included, cap at
+The tower, the mortar pit and the battery cap flat: the guns' cap is the resident AI's. The AT and AP minefields
+cap flat at 2 belts each (`OPCOM_CAP_MINEFIELD_AT`, `OPCOM_CAP_MINEFIELD_AP`). AT, AA and OP cap at 2 a campaign
+zone, GMG at 1 (`OPCOM_CAP_HP_TYPE_PER_ZONE`).
+MG and roadblock carry no cap of their own. All types together, the flat-capped types included, cap at
 `OPCOM_CAP_HP_PER_ZONE` (12) a zone ([§Caps](#caps)).
 
 A standalone hardpoint's garrison stays fixed per type (`DUWS_hardpointGarrison`); a zone hardpoint fields only its

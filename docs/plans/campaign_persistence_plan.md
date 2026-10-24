@@ -349,7 +349,7 @@ table above: anything the replay rebuilds must not also be restored, or it is do
 | Server config | input | every global the setup screens broadcast |
 | Mission params | input | the gameplay lobby params of `params_modern.hpp`, applied over the lobby's own picks |
 | Callsign | input | `duws_callsign` |
-| Faction list edits | input | `DUWS_factionListEdits`: the player's main, added and dropped classes per edited vehicle role ([`faction_system.md`](../info/gameplay/faction_system.md#the-confirmation-screen)) |
+| Faction table | input | `duws_faction_locked`: the confirmed value of every role key, with the main, added and dropped classes of each edited vehicle role ([`faction_system.md`](../info/gameplay/faction_system.md#the-confirmation-screen)) |
 
 **The write stamp is `systemTimeUTC`, and it is a label and a tiebreak, nothing else.** The load
 screen has to say how old a save is, and two carried copies of one campaign need an ordering; UTC
@@ -1071,7 +1071,7 @@ function runs unchanged.
 | `server/server_var_init.sqf` (`server_init.sqf:8`) | Runs, then the snapshot overwrites |
 | `fnc_moreUrban_locations` (`:13`) | **Skipped** — a terrain scan recorded taking 140 s, and placement is already decided |
 | Setup gates, `chosen_hq_placement` / `createzone_server` (`:161,166`) | Pre-satisfied by the gate |
-| Faction init (`:60-156`) | Runs — classnames must be re-resolved against whatever mods are loaded now. Then `fnc_faction_edits_apply` applies the saved faction list edits over the new pools. The restore has to publish the result itself: the loop that broadcasts every schema key and the request-menu catalogue is the setup loop this gate skips, and no faction file runs on a client to fill the gap |
+| Faction init (`:60-156`) | Runs — classnames must be re-resolved against whatever mods are loaded now. Then `fnc_faction_apply_locked` lays the saved faction table over the new pools, less each class that the session lacks, and `fnc_faction_edits_apply` re-bases each edited vehicle role on the new detection. The restore has to publish the result itself: the loop that broadcasts every schema key and the request-menu catalogue is the setup loop this gate skips, and no faction file runs on a client to fill the gap |
 | `fnc_create_ammo_lists` (`:189`) | Runs — the friendly class list re-resolves against the loaded mods. In Limited its pool seed covers only the classes the campaign never seeded ([§The arsenal](#the-arsenal-the-shelf-is-rebuilt-the-pool-is-stored)) |
 | `fnc_bluHQinit` (`:192`) | Runs, from the saved `PosOfBLUHQ`. It rebuilds the whole HQ deterministically, which is why persisting one position is enough. The officer spawns alive, so a saved officer death applies after this step. The arsenal crate starts empty, and `DUWS_fnc_restoreBases` fills it with the saved contents. The opening money goes to the bank only on a new campaign, because a load restores the bank before this step |
 | `fnc_init_OPFOR_WARCOM` (`:205`) | Runs, with the locator bypassed as above |
@@ -1204,12 +1204,12 @@ write plus the end hooks loses at most one interval of progress.
 incompatible format silently produces a broken campaign. Refusing it and starting fresh is worse
 for the player in that moment and better every other time.
 
-**Faction classnames are re-resolved, not restored.** A player who removes a faction mod between
-sessions gets whatever auto-detection now picks, not a campaign full of missing classnames.
-Storing resolved classnames would pin the campaign to a mod set, which is exactly what the
-mission's no-hard-dependency rule refuses. The player's vehicle-list edits are the one exception: they
-are stored as intent (main, added, dropped) and applied over the new detection, and a class the session
-lacks is skipped, so the campaign never depends on the mod that supplied it
+**The confirmed faction table is restored, less the classes the session lacks.** A load fields the roster
+that the player confirmed at setup, because a fresh detection picks at random in places and the player's
+SELECT picks exist nowhere else. Each saved class is checked against the session, and a role with no class
+left keeps what auto-detection now picks, so a player who removes a faction mod gets a playable campaign,
+not one full of missing classnames. The vehicle-list edits stay stored as intent (main, added, dropped) and
+are applied over the new detection
 ([`faction_system.md`](../info/gameplay/faction_system.md#the-confirmation-screen)).
 
 **The campaign idles at zero players.** Reasoning above. The cost is that a persistent dedicated
