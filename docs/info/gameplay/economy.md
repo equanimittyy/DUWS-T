@@ -157,7 +157,7 @@ mechanisms differ in:
 | Slot | none | one of `support_max_slots` per copy |
 | Flag | broadcast, and recorded in `DUWS_support_permanent` | client-local, true while a copy is held |
 | Refund | never | 100% of what one copy charged, the latest copy first |
-| On death | untouched | lost, `support_death_refund` of the slate returned |
+| On death | untouched | lost, `support_death_refund` of the slate returned, unless `DUWS_SupportsOnDeath` keeps it |
 
 The split is not new; it was latent and unnamed. The four base facilities — arsenal, HALO, vehicle
 repair, vehicle recycle — already broadcast their flag and already sat outside the slot cap, while
@@ -223,6 +223,11 @@ Both constants are in `server/server_var_init.sqf` and broadcast because clients
 `support_max_slots` (8) and `support_death_refund` (0.5, a share of both currencies). The death share
 is half so that walking an item back to a base still beats dying with it — a bigger share makes dying
 a cheaper way to liquidate a slate, which inverts what the death penalty is for.
+
+**The host can keep the slate through death.** With the `DUWS_SupportsOnDeath` lobby parameter at Kept
+(default Lost), the killed handler in `client/client_init.sqf` skips `fnc_support_wipe`. The held copies
+stay in the 0-8 menu after respawn, and no refund is paid. The parameter is a campaign rule, so a load
+takes the value of the saved campaign, not the lobby's (`server/persistence/fnc_campaign_store.sqf`).
 
 ## Money: carried and banked
 

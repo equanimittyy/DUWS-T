@@ -155,4 +155,12 @@ class Params {
         default = 0;
     };
 
+    // Kept spares only the consumable slate: a permanent support is the team's, and no death touches it.
+    class DUWS_SupportsOnDeath {
+        title = "Supports on Death";
+        values[] = {0,1};
+        texts[] = {"Lost (half refunded)","Kept"};
+        default = 0;
+    };
+
 };

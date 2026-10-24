@@ -178,7 +178,7 @@ player addEventHandler ["killed", {
         };
         // The consumable slate dies with the body. Inside the killhouse it does not, for the same
         // reason the CP penalty is waived there: a training death is not a battlefield one.
-        [] call fnc_support_wipe;
+        if ((missionNamespace getVariable ["DUWS_paramSupportsOnDeath", 0]) == 0) then { [] call fnc_support_wipe };
     };
 }];
 
