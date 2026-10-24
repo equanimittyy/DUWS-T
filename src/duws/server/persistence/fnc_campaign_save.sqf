@@ -120,7 +120,7 @@ DUWS_fnc_campaignSnapshot = {
         ["bluSel", missionNamespace getVariable ["selectedFaction_BLU", ""]],
         ["opfSel", missionNamespace getVariable ["selectedFaction_OPF", ""]],
         ["bluData", BLUfactionDataTemp], ["opfData", OPFfactionDataTemp],
-        ["edits", missionNamespace getVariable ["DUWS_factionListEdits", []]]
+        ["locked", duws_faction_locked]
     ]];
 
     _s set ["hq", PosOfBLUHQ];

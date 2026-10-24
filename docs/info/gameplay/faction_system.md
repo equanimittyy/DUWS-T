@@ -135,7 +135,7 @@ it is an overwrite rather than a reconciliation. `server/warcom/fnc_faction_appl
 the server at the commit and broadcasts every key, so every client reads the confirmed table, a joining
 client included. The table already holds every row's whole pool, because the screen builds its rows from
 `DUWS_factionPreviewPools`. The commit therefore runs `fnc_faction_augment` only when no table was locked
-(the debug quickstart). A second pass would rebuild each pool from its representative and undo the list
+(the debug quickstart, or a load of a save that predates the saved table). A second pass would rebuild each pool from its representative and undo the list
 edits.
 
 **A vehicle role is an edited list.** EDIT on a vehicle row opens `startup_faction_key_list`
@@ -152,8 +152,8 @@ when no rung holds it. The list is the main first, then the base minus the drops
 entry is the representative, so the single-class readers get the main. The main cannot be removed, because
 a removal would silently re-parent the role to the next entry. Each locked vehicle row carries its record, and the
 server rebuilds the row from the record with `fnc_faction_edits_apply` instead of trusting the client's
-list. That function gates the list through `fnc_faction_keep` and keeps the records in
-`DUWS_factionListEdits`, so a later detection can apply them again.
+list. That function gates the list through `fnc_faction_keep`. The records stay in the locked table, so a load
+applies them again over that session's detection.
 
 A record applied over a later detection can name a class that the session lacks, for example after the
 player removes a mod. `fnc_faction_edits_apply` handles each case:
@@ -163,6 +163,14 @@ player removes a mod. `fnc_faction_edits_apply` handles each case:
 | `main` | The base falls back to the pool that resolution built, as if `main` were `""` |
 | A class in `added` | `fnc_faction_keep` removes it |
 | Every class in the resolved list | The key keeps the pool that resolution built, and a WARN names the key |
+
+**A load restores the confirmed table.** The campaign save keeps `duws_faction_locked` whole, and
+`DUWS_fnc_restoreApply` (`server/persistence/fnc_campaign_restore.sqf`) puts it back before the commit, so a
+load takes the same `fnc_faction_apply_locked` path as a new campaign. A fresh detection cannot stand in for the
+table, because `fnc_factionGen` picks at random in places and the player's SELECT picks exist nowhere else. A value
+row loses each class that the session lacks. A row with no class left is dropped with a WARN and keeps the value
+that detection resolved. A save that predates the saved table carries only its list records, and the load
+applies them over the new detection.
 
 `shared/faction_lib/fnc_faction_schema.sqf` is the single source for which keys exist. It returns
 `[key, group, kind, required]` per side and feeds the screen's rows, `fnc_custom_faction_parse`'s

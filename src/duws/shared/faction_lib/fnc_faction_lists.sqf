@@ -76,5 +76,4 @@ fnc_faction_edits_apply = {
             ["INFO", "FACTION", format ["%1 list edits applied: %2", _key, _list]] call fnc_log;
         };
     } forEach _rows;
-    DUWS_factionListEdits = _rows;
 };

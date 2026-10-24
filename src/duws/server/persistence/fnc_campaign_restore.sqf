@@ -95,9 +95,6 @@ DUWS_fnc_restoreAnswer = {
         publicVariable "DUWS_setupPhase";
         false
     };
-    // Reached from the faction screen's Back, a table a confirmation locked would otherwise be laid over the load.
-    duws_faction_locked = [];
-    publicVariable "duws_faction_locked";
     [_choice select 0, _data] call DUWS_fnc_restoreApply;
     DUWS_setupPhase = "load";
     publicVariable "DUWS_setupPhase";
@@ -214,6 +211,26 @@ DUWS_fnc_restoreApply = {
         _x params ["_var", "_sel"];
         if (_sel isEqualType "" && {isClass (configFile >> "CfgFactionClasses" >> _sel)}) then { missionNamespace setVariable [_var, _sel, true] };
     } forEach [["selectedFaction_BLU", _f getOrDefault ["bluSel", ""]], ["selectedFaction_OPF", _f getOrDefault ["opfSel", ""]]];
+    // Whole, because detection rolls at random in places and would field a different roster. Only classes this
+    // install defines go back, so a removed mod falls back to detection. A list-edit row skips the check:
+    // fnc_faction_edits_apply re-bases and gates it itself.
+    duws_faction_locked = (_f getOrDefault ["locked", []]) apply {
+        _x params ["_side", "_rows"];
+        private _kinds = createHashMapFromArray (([_side] call fnc_faction_schema) apply { [_x select 0, _x select 2] });
+        private _kept = [];
+        {
+            _x params ["_key", "_value", ["_record", []]];
+            if (_record isNotEqualTo [] || {_value isEqualTo ""} || {_value isEqualTo []}) then { _kept pushBack _x; continue };
+            private _classes = [[[_value], _value] select (_value isEqualType []), _kinds getOrDefault [_key, ""]] call fnc_faction_keep;
+            if (_classes isEqualTo []) then {
+                ["WARN", "FACTION", format ["%1: no saved class is in this install -- kept the resolved value", _key]] call fnc_log;
+            } else {
+                _kept pushBack [_key, [_classes select 0, _classes] select (_value isEqualType [])];
+            };
+        } forEach _rows;
+        [_side, _kept]
+    };
+    publicVariable "duws_faction_locked";
 
     PosOfBLUHQ = _d get "hq"; publicVariable "PosOfBLUHQ";
     AO_direction = _d getOrDefault ["ao", []]; publicVariable "AO_direction";

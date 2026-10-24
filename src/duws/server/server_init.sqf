@@ -179,10 +179,10 @@ while {!(["BOOT", "chosen_hq_placement (player is placing HQ)", {chosen_hq_place
 
 // A locked table already holds every row's whole pool (the screen builds from the preview pools), and
 // re-expanding from the representative would undo the player's list edits: drops come back, adds go.
-// Only a commit with no table, the debug quickstart, still needs the pass.
+// Only a commit with no table, the debug quickstart or a save that predates the saved table, still needs the pass.
 if (duws_faction_locked isEqualTo []) then { [] call fnc_faction_augment; };
-// A load has no locked table: its edits are the saved intent, laid over what this install detected.
-if (DUWS_campaignLoaded) then { [(DUWS_restore get "factions") getOrDefault ["edits", []]] call fnc_faction_edits_apply };
+// A save that predates the saved table carries only its vehicle-list edits.
+if (DUWS_campaignLoaded && {duws_faction_locked isEqualTo []}) then { [(DUWS_restore get "factions") getOrDefault ["edits", []]] call fnc_faction_edits_apply };
 
 // A side with no static MG leaves each composition's vanilla placeholder standing instead -- the
 // one case where a zone garrisons itself with the wrong side's gun. Checked here, not at each

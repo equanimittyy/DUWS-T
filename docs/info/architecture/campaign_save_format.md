@@ -165,8 +165,10 @@ checks map, an `ended` flag, and that every faction, addon vehicle set and DLC t
 present in this session's loaded mods before a save is even offered (`fn_setupMonitor.sqf:34-42`).
 
 For DUWS_T the mod-set check maps onto faction auto-detection: the save stores the detected
-faction *identity*, not resolved classnames, and a save whose faction is no longer detectable is
-labelled as such on the load screen rather than loaded into a campaign of missing classnames.
+faction *identity*, and a save whose faction is no longer detectable is labelled as such on the load
+screen rather than loaded into a campaign of missing classnames. The save also stores the confirmed
+faction table as classnames, but a load keeps only the classes that the session defines, so a missing
+class falls back to detection instead of reaching a spawner.
 
 **An ended campaign, won or lost, is refused, on its header and again on its payload,** so an
 import of one is refused too. A won campaign holds every zone, so a load of it meets the win
