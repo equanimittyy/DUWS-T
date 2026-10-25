@@ -899,6 +899,10 @@ needs to bring one in.
 - **Export** copies the selected campaign to the clipboard. It is here, not in the session, because
   the in-session save control is SITREP, and SITREP already carries the campaign to the caller's
   profile.
+- **Edit Params** changes the lobby parameters saved with the selected campaign before it loads, under a
+  warning that a mid-campaign edit can have unintended consequences. The saved value outranks the lobby's,
+  so without this control a host could never change a campaign rule once the campaign has started
+  ([`campaign_save_format.md`](../info/architecture/campaign_save_format.md)).
 
 **The fork goes at the head of the existing chain, not inside it.** Setup runs as one chain on the
 game master's machine today (`client/client_init.sqf:84-98`):
