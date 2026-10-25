@@ -942,6 +942,7 @@ fnc_campaign_fork_select = compile preprocessFileLineNumbers "duws\client\dialog
 fnc_campaign_fork_action = compile preprocessFileLineNumbers "duws\client\dialog\fnc_campaign_fork_action.sqf";publicVariable "fnc_campaign_fork_action";
 fnc_campaign_fork_reopen = compile preprocessFileLineNumbers "duws\client\dialog\fnc_campaign_fork_reopen.sqf";publicVariable "fnc_campaign_fork_reopen";
 fnc_campaign_reply = compile preprocessFileLineNumbers "duws\client\dialog\fnc_campaign_reply.sqf";publicVariable "fnc_campaign_reply";
+fnc_campaign_params = compile preprocessFileLineNumbers "duws\client\dialog\fnc_campaign_params.sqf";publicVariable "fnc_campaign_params";
 fnc_callsign_back = compile preprocessFileLineNumbers "duws\client\dialog\fnc_callsign_back.sqf";publicVariable "fnc_callsign_back";
 fnc_callsign_confirm = compile preprocessFileLineNumbers "duws\client\dialog\fnc_callsign_confirm.sqf";publicVariable "fnc_callsign_confirm";
 fnc_process_enviro_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_process_enviro_menu.sqf";publicVariable "fnc_process_enviro_menu";

@@ -146,7 +146,7 @@ for decades from that epoch, where seconds since 1970 do not.
 The scan reads the index, checks each header against this session, and publishes the rows for the
 load screen as `DUWS_saveList`: `[id, header pairs, refusal key]` per campaign, newest first, with the
 header as pairs so the broadcast stays plain arrays. Nothing deserialises a payload until a campaign
-is chosen. On choice the server parses and checks the payload before it accepts the answer
+is chosen or its parameters are opened. On choice the server parses and checks the payload before it accepts the answer
 (`DUWS_fnc_saveChoose`), so a payload that fails leaves the load screen open. The restore then parses
 it again into `DUWS_restore` and replays the builders against it.
 
@@ -175,6 +175,15 @@ import of one is refused too. A won campaign holds every zone, so a load of it m
 condition on the first check and ends again. Which events lose the campaign is its
 `DUWS_LoseConditions`. The loss setters read that parameter, and a load takes it from the snapshot,
 not from the lobby. So a host cannot re-open a lost campaign when they change the parameter.
+
+**The load screen can edit a campaign's saved lobby parameters.** EDIT PARAMS asks the server for the
+values that a load of the selected save would apply (`DUWS_fnc_saveParams`), and shows a row for each
+parameter in `DUWS_campaignParams` except those in `DUWS_campaignParamsFixed`. Civilian Towns is fixed,
+because a load replays the towns that its save holds. The edits go to the server with LOAD.
+`DUWS_fnc_restoreAnswer` keeps only an editable parameter with a value from its own `values[]`, and
+lays each edit over the saved value before the restore runs, so the next save writes it. The dialog
+warns that an edit mid-campaign can have unintended consequences. An ended campaign is refused before
+any edit applies.
 
 ## Version and migration
 

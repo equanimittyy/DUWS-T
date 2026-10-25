@@ -2919,6 +2919,78 @@
                 <Chinese>戰役已複製到剪貼簿。</Chinese>
                 <Spanish>Campaña copiada al portapapeles.</Spanish>
             </Key>
+            <Key ID="STR_DUWS_T_fork_params">
+                <Original>EDIT PARAMS</Original>
+                <English>EDIT PARAMS</English>
+                <Chinesesimp>编辑参数</Chinesesimp>
+                <German>PARAMETER BEARBEITEN</German>
+                <Polish>EDYTUJ PARAMETRY</Polish>
+                <Czech>UPRAVIT PARAMETRY</Czech>
+                <Russian>ИЗМЕНИТЬ ПАРАМЕТРЫ</Russian>
+                <French>MODIFIER PARAMÈTRES</French>
+                <Chinese>編輯參數</Chinese>
+                <Spanish>EDITAR PARÁMETROS</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_params_tip">
+                <Original>Change the mission parameters saved with the selected campaign</Original>
+                <English>Change the mission parameters saved with the selected campaign</English>
+                <Chinesesimp>更改所选战役保存的任务参数</Chinesesimp>
+                <German>Ändert die mit der ausgewählten Kampagne gespeicherten Missionsparameter</German>
+                <Polish>Zmienia parametry misji zapisane z wybraną kampanią</Polish>
+                <Czech>Změní parametry mise uložené s vybranou kampaní</Czech>
+                <Russian>Изменить параметры миссии, сохранённые с выбранной кампанией</Russian>
+                <French>Modifie les paramètres de mission enregistrés avec la campagne sélectionnée</French>
+                <Chinese>變更所選戰役儲存的任務參數</Chinese>
+                <Spanish>Cambia los parámetros de misión guardados con la campaña seleccionada</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_params_frame">
+                <Original>Campaign Parameters</Original>
+                <English>Campaign Parameters</English>
+                <Chinesesimp>战役参数</Chinesesimp>
+                <German>Kampagnenparameter</German>
+                <Polish>Parametry kampanii</Polish>
+                <Czech>Parametry kampaně</Czech>
+                <Russian>Параметры кампании</Russian>
+                <French>Paramètres de la campagne</French>
+                <Chinese>戰役參數</Chinese>
+                <Spanish>Parámetros de la campaña</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_params_warn">
+                <Original>Editing certain mission parameters mid-campaign can have unintended consequences.</Original>
+                <English>Editing certain mission parameters mid-campaign can have unintended consequences.</English>
+                <Chinesesimp>在战役中途修改某些任务参数可能会带来意想不到的后果。</Chinesesimp>
+                <German>Das Ändern bestimmter Missionsparameter mitten in der Kampagne kann unbeabsichtigte Folgen haben.</German>
+                <Polish>Zmiana niektórych parametrów misji w trakcie kampanii może mieć niezamierzone skutki.</Polish>
+                <Czech>Změna některých parametrů mise uprostřed kampaně může mít nezamýšlené následky.</Czech>
+                <Russian>Изменение некоторых параметров миссии посреди кампании может привести к непредвиденным последствиям.</Russian>
+                <French>Modifier certains paramètres de mission en cours de campagne peut avoir des conséquences inattendues.</French>
+                <Chinese>在戰役中途修改某些任務參數可能會帶來意想不到的後果。</Chinese>
+                <Spanish>Cambiar ciertos parámetros de misión a mitad de campaña puede tener consecuencias imprevistas.</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_params_apply">
+                <Original>APPLY</Original>
+                <English>APPLY</English>
+                <Chinesesimp>应用</Chinesesimp>
+                <German>ÜBERNEHMEN</German>
+                <Polish>ZASTOSUJ</Polish>
+                <Czech>POUŽÍT</Czech>
+                <Russian>ПРИМЕНИТЬ</Russian>
+                <French>APPLIQUER</French>
+                <Chinese>套用</Chinese>
+                <Spanish>APLICAR</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_params_cancel">
+                <Original>CANCEL</Original>
+                <English>CANCEL</English>
+                <Chinesesimp>取消</Chinesesimp>
+                <German>ABBRECHEN</German>
+                <Polish>ANULUJ</Polish>
+                <Czech>ZRUŠIT</Czech>
+                <Russian>ОТМЕНИТЬ</Russian>
+                <French>ANNULER</French>
+                <Chinese>取消</Chinese>
+                <Spanish>CANCELAR</Spanish>
+            </Key>
             <Key ID="STR_DUWS_T_LOAD_BAD_VERSION">
                 <Original>Saved by another version of the mission</Original>
                 <English>Saved by another version of the mission</English>

@@ -31,6 +31,9 @@ DUWS_campaignParams = [
     ["DUWS_TownGeneration", "DUWS_paramTownGen", 0],
     ["DUWS_SupportsOnDeath", "DUWS_paramSupportsOnDeath", 0]
 ];
+// Read only when the campaign is generated (fnc_civ_selectTowns.sqf), so the load screen cannot edit it: a load
+// replays the towns its save holds.
+DUWS_campaignParamsFixed = ["DUWS_TownGeneration"];
 
 // The input groups: a snapshot without one of these would roll fresh ground under the campaign's name.
 DUWS_saveInputs = ["settings", "factions", "hq", "zones", "hardpoints"];

@@ -7,6 +7,7 @@ switch (_kind) do {
 		{ ctrlEnable [_x, true] } forEach [9807, 9810];
 		[] call fnc_campaign_fork_select;
 	};
+	case "params": { ["open", _arg] call fnc_campaign_params };
 	case "export": {
 		copyToClipboard _arg;
 		hint localize "STR_DUWS_T_fork_exported";

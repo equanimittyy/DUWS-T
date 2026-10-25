@@ -1,5 +1,5 @@
 // ESC is eaten like every setup screen's: escaping this one would leave the server waiting on a question nobody
-// can answer. idc block 9800-9811, above the FOB manager's 9745.
+// can answer. idc block 9800-9812, above the FOB manager's 9745.
 class duws_campaign_fork
 {
     idd = -1;
@@ -64,7 +64,7 @@ class duws_campaign_fork
             x = 25.5 * GUI_GRID_W + GUI_GRID_X;
             y = 3 * GUI_GRID_H + GUI_GRID_Y;
             w = 13.5 * GUI_GRID_W;
-            h = 12.5 * GUI_GRID_H;
+            h = 10.7 * GUI_GRID_H;
             colorBackground[] = {0,0,0,0.3};
         };
         class fork_paste_label: RscText
@@ -141,6 +141,94 @@ class duws_campaign_fork
             x = 32 * GUI_GRID_W + GUI_GRID_X;
             tooltip = "$STR_DUWS_T_fork_export_tip";
             action = "['export'] spawn fnc_campaign_fork_action;";
+        };
+        class fork_params: fork_delete
+        {
+            idc = 9812;
+            text = "$STR_DUWS_T_fork_params";
+            x = 25.5 * GUI_GRID_W + GUI_GRID_X;
+            y = 14 * GUI_GRID_H + GUI_GRID_Y;
+            w = 13.5 * GUI_GRID_W;
+            tooltip = "$STR_DUWS_T_fork_params_tip";
+            action = "['params'] spawn fnc_campaign_fork_action;";
+        };
+    };
+};
+
+// Over the load screen, from EDIT PARAMS. fnc_campaign_params.sqf adds a row per editable param at the two anchors'
+// columns, one anchor height and a fifth apart; the box holds seven rows. idc block 9813-9818.
+class duws_campaign_params
+{
+    idd = -1;
+    movingenable = false;
+    onLoad = "uiNamespace setVariable ['DUWS_forkParamsDisplay', _this select 0];";
+
+    class ControlsBackground
+    {
+        class params_background: RscText
+        {
+            idc = -1;
+            x = 5 * GUI_GRID_W + GUI_GRID_X;
+            y = 4 * GUI_GRID_H + GUI_GRID_Y;
+            w = 30 * GUI_GRID_W;
+            h = 16.5 * GUI_GRID_H;
+            colorBackground[] = {0.2, 0.4, 0.2, 1};
+        };
+    };
+
+    class controls
+    {
+        class params_frame: RscFrame
+        {
+            idc = 9813;
+            text = "$STR_DUWS_T_fork_params_frame";
+            x = 5 * GUI_GRID_W + GUI_GRID_X;
+            y = 4 * GUI_GRID_H + GUI_GRID_Y;
+            w = 30 * GUI_GRID_W;
+            h = 16.5 * GUI_GRID_H;
+        };
+        class params_warn: RscStructuredText
+        {
+            idc = 9814;
+            x = 6 * GUI_GRID_W + GUI_GRID_X;
+            y = 5.2 * GUI_GRID_H + GUI_GRID_Y;
+            w = 28 * GUI_GRID_W;
+            h = 2 * GUI_GRID_H;
+        };
+        class params_label_anchor: RscText
+        {
+            idc = 9817;
+            text = "";
+            x = 6 * GUI_GRID_W + GUI_GRID_X;
+            y = 7.6 * GUI_GRID_H + GUI_GRID_Y;
+            w = 12 * GUI_GRID_W;
+            h = 1.2 * GUI_GRID_H;
+        };
+        class params_value_anchor: params_label_anchor
+        {
+            idc = 9818;
+            x = 18.5 * GUI_GRID_W + GUI_GRID_X;
+            w = 15.5 * GUI_GRID_W;
+        };
+        class params_apply: RscButton
+        {
+            idc = 9815;
+            text = "$STR_DUWS_T_fork_params_apply";
+            x = 6 * GUI_GRID_W + GUI_GRID_X;
+            y = 18.3 * GUI_GRID_H + GUI_GRID_Y;
+            w = 7 * GUI_GRID_W;
+            h = 1.5 * GUI_GRID_H;
+            sizeEx = 0.05;
+            colorBackground[] = {1, 0, 0, 0.5};
+            action = "['apply'] call fnc_campaign_params;";
+        };
+        class params_cancel: params_apply
+        {
+            idc = 9816;
+            text = "$STR_DUWS_T_fork_params_cancel";
+            x = 27 * GUI_GRID_W + GUI_GRID_X;
+            colorBackground[] = {0.35, 0.35, 0.35, 0.5};
+            action = "closeDialog 2;";
         };
     };
 };

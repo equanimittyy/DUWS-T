@@ -81,7 +81,7 @@ class Params {
     };
 
     // The rules a campaign was played under: a loaded campaign keeps its own value for each row below and
-    // overrides the lobby's (server/persistence/fnc_campaign_store.sqf).
+    // overrides the lobby's (server/persistence/fnc_campaign_store.sqf). Only the load screen's EDIT PARAMS changes it.
     class DUWS_Divider_Saved {
         title = "--- Persistent (Save-bound) ---";
         values[] = {0};

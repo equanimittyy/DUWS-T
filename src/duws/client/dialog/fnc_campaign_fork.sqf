@@ -12,4 +12,6 @@ while { DUWS_setupPhase isEqualTo "choose" } do {
 	};
 	sleep 0.25;
 };
+// An open params dialog would take the closeDialog and leave the load screen up.
+(uiNamespace getVariable ["DUWS_forkParamsDisplay", displayNull]) closeDisplay 2;
 closeDialog 0;

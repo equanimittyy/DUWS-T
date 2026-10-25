@@ -21,8 +21,8 @@ DUWS_fnc_restoreCheck = {
     ""
 };
 
-// The fork's answer: [] for a new campaign, [id, usePrev] to load one. A load that fails leaves the fork open, so
-// only the timeout's own pick falls through to a new campaign.
+// The fork's answer: [] for a new campaign, [id, usePrev, param edits] to load one. A load that fails leaves the fork
+// open, so only the timeout's own pick falls through to a new campaign.
 DUWS_fnc_saveChoose = {
     params [["_choice", []]];
     if (!isNil "DUWS_loadChoice") exitWith {};
@@ -77,6 +77,24 @@ DUWS_fnc_restoreRead = {
     [_data, [_data] call DUWS_fnc_restoreCheck]
 };
 
+DUWS_fnc_paramEditable = {
+    params ["_param"];
+    (DUWS_campaignParams findIf { (_x select 0) isEqualTo _param }) >= 0 && {!(_param in DUWS_campaignParamsFixed)}
+};
+
+// -> the asker's EDIT PARAMS: [id, [[param, value], ...]], each value the one a load of this save would apply.
+DUWS_fnc_saveParams = {
+    params ["_id"];
+    ([_id, false] call DUWS_fnc_restoreRead) params ["_data", "_why"];
+    if (_why isNotEqualTo "") exitWith { ["loadRefused", _why] remoteExec ["fnc_campaign_reply", remoteExecutedOwner] };
+    private _saved = _data getOrDefault ["params", createHashMap];
+    private _rows = (DUWS_campaignParams select { [_x select 0] call DUWS_fnc_paramEditable }) apply {
+        _x params ["_param", "_global"];
+        [_param, _saved getOrDefault [_param, missionNamespace getVariable _global]]
+    };
+    ["params", [_id, _rows]] remoteExec ["fnc_campaign_reply", remoteExecutedOwner];
+};
+
 // -> true when the answer loaded a campaign.
 DUWS_fnc_restoreAnswer = {
     params ["_choice"];
@@ -95,6 +113,17 @@ DUWS_fnc_restoreAnswer = {
         publicVariable "DUWS_setupPhase";
         false
     };
+    // Laid over the saved values, so the restore applies the edits and the next save keeps them.
+    _choice params ["", "", ["_edits", [], [[]]]];
+    private _params = _data getOrDefault ["params", createHashMap];
+    {
+        _x params [["_param", ""], ["_value", -1]];
+        if ([_param] call DUWS_fnc_paramEditable && {_value in getArray (missionConfigFile >> "Params" >> _param >> "values")}) then {
+            _params set [_param, _value];
+            ["INFO", "SAVE", format ["load screen edit: %1 = %2", _param, _value]] call fnc_log;
+        };
+    } forEach _edits;
+    _data set ["params", _params];
     [_choice select 0, _data] call DUWS_fnc_restoreApply;
     DUWS_setupPhase = "load";
     publicVariable "DUWS_setupPhase";

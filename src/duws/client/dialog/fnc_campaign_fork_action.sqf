@@ -2,7 +2,7 @@
 params ["_action"];
 private _sel = lbCurSel 9802;
 private _row = if (_sel < 0) then { [] } else { DUWS_saveList param [lbValue [9802, _sel], []] };
-private _fnc_lock = { { ctrlEnable [_x, false] } forEach [9807, 9808, 9809, 9810, 9811] };
+private _fnc_lock = { { ctrlEnable [_x, false] } forEach [9807, 9808, 9809, 9810, 9811, 9812] };
 
 switch (_action) do {
 	case "new": {
@@ -14,7 +14,8 @@ switch (_action) do {
 	case "load": {
 		if (_row isEqualTo [] || {(_row select 2) isNotEqualTo ""}) exitWith {};
 		call _fnc_lock;
-		[[_row select 0, false]] remoteExec ["DUWS_fnc_saveChoose", 2];
+		[[_row select 0, false, (missionNamespace getVariable ["DUWS_forkParamEdits", createHashMap]) getOrDefault [_row select 0, []]]]
+			remoteExec ["DUWS_fnc_saveChoose", 2];
 	};
 	case "delete": {
 		if (_row isEqualTo []) exitWith {};
@@ -31,5 +32,9 @@ switch (_action) do {
 	case "export": {
 		if (_row isEqualTo []) exitWith {};
 		[_row select 0] remoteExec ["DUWS_fnc_saveExport", 2];
+	};
+	case "params": {
+		if (_row isEqualTo [] || {(_row select 2) isNotEqualTo ""}) exitWith {};
+		[_row select 0] remoteExec ["DUWS_fnc_saveParams", 2];
 	};
 };

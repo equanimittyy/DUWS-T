@@ -35,6 +35,6 @@ if (_row isNotEqualTo []) then {
 };
 ((uiNamespace getVariable ["DUWS_forkDisplay", displayNull]) displayCtrl 9803) ctrlSetStructuredText parseText
 	format ["<t size='0.85'>%1</t>", _text];
-ctrlEnable [9808, _row isNotEqualTo [] && {(_row select 2) isEqualTo ""}];
+{ ctrlEnable [_x, _row isNotEqualTo [] && {(_row select 2) isEqualTo ""}] } forEach [9808, 9812];
 ctrlEnable [9809, _row isNotEqualTo []];
 ctrlEnable [9811, _row isNotEqualTo []];
