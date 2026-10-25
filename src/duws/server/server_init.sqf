@@ -395,6 +395,12 @@ if (isServer) then {
 
     addMissionEventHandler ["Ended", { ["mission end"] call DUWS_fnc_campaignSave }];
     addMissionEventHandler ["MPEnded", { ["mission end"] call DUWS_fnc_campaignSave }];
+    // On the default persistent = 0 a dedicated server unloads the mission once the last player is gone, so this is
+    // the session's last chance to write, whatever the autosave interval.
+    addMissionEventHandler ["PlayerDisconnected", {
+        params ["", "_uid"];
+        if (([_uid] call DUWS_fnc_humanCount) == 0) then { ["last player out"] call DUWS_fnc_campaignSave };
+    }];
 
     // Swept, not paid per batch, so a burst of kills lands as one card per player.
     [] spawn {

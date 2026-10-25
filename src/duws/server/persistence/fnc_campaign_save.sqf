@@ -1,12 +1,14 @@
 // Locality: server. What each group holds: docs/plans/campaign_persistence_plan.md#the-snapshot.
 if (!isServer) exitWith {};
 
-// Seconds; 0 leaves only the manual and mission-end writes. The host's, never the snapshot's.
+// Seconds; 0 leaves only the SITREP, last-player-out and mission-end writes. The host's, never the snapshot's.
 DUWS_autosaveInterval = ["DUWS_AutosaveInterval", 900] call BIS_fnc_getParamValue;
 
 // Humans only: a headless client is in allPlayers, and one alone would hold the campaign open with nobody playing.
+// A leaver can still be in allPlayers while their disconnect is handled, so the caller can leave them out.
 DUWS_fnc_humanCount = {
-    count (allPlayers - entities "HeadlessClient_F")
+    params [["_exceptUID", ""]];
+    { getPlayerUID _x isNotEqualTo _exceptUID } count (allPlayers - entities "HeadlessClient_F")
 };
 
 // Day 1 is the date boot sets (server/server_init.sqf).
@@ -282,19 +284,16 @@ DUWS_fnc_campaignSave = {
 };
 
 // A write sets the next deadline, so a manual save pushes the timer out rather than being followed seconds later
-// by an automatic one. Writes while anybody was on since the last pass, so the first empty pass banks the session.
+// by an automatic one. An empty server skips the write: the last player out already banked the session.
 DUWS_fnc_autosaveLoop = {
     ["INFO", "SAVE", format ["autosave every %1 s", DUWS_autosaveInterval]] call fnc_log;
     if (DUWS_autosaveInterval <= 0) exitWith {};
     DUWS_saveDue = time + DUWS_autosaveInterval;
-    private _hadPlayers = true;
     while {true} do {
         try {
             sleep 10;
             if (time >= DUWS_saveDue) then {
-                private _now = ([] call DUWS_fnc_humanCount) > 0;
-                if (_now || _hadPlayers) then { ["interval"] call DUWS_fnc_campaignSave } else { DUWS_saveDue = time + DUWS_autosaveInterval };
-                _hadPlayers = _now;
+                if (([] call DUWS_fnc_humanCount) > 0) then { ["interval"] call DUWS_fnc_campaignSave } else { DUWS_saveDue = time + DUWS_autosaveInterval };
             };
         } catch {
             ["ERROR", "SAVE", format ["autosave pass threw, thread held alive: %1", _exception]] call fnc_log;
