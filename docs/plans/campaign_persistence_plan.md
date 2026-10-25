@@ -44,7 +44,9 @@ directory of whichever machine is the server — the host's profile for a hosted
 **It is the default rather than the only option, because it is reported broken on Linux servers.**
 Antistasi ships the choice between it and `profileNamespace` as a control on its own load screen,
 defaulted off on Linux with the reason printed on the control. So the namespace and its flush are
-each reached through one function and named nowhere else; the fallback is then a one-line change.
+each reached through one function and named nowhere else; the fallback is then a one-line change. A
+Linux server takes the fallback
+([`campaign_save_format.md`](../info/architecture/campaign_save_format.md#the-namespace-is-resolved-at-runtime-not-hardcoded)).
 That indirection, and the rest of the container the snapshot travels in, are
 [`campaign_save_format.md`](../info/architecture/campaign_save_format.md). `profileNamespace` stays the fallback rather
 than the default because it is shared by every mission on the box, so a player clearing one
@@ -201,8 +203,8 @@ means the snapshot has to carry the whole job, and a player pressing Escape expe
 somewhere obvious to be sent instead.
 
 **Dedicated server, `persistent = 0` (the default).** The mission ends when the last player
-disconnects and everything in memory goes with it. Nothing writes on the disconnect, so what
-survives is the last autosave, SITREP or mission-end write.
+disconnects and everything in memory goes with it. So the last player's disconnect writes the campaign
+(`PlayerDisconnected` in `server/server_init.sqf`), whatever the autosave interval.
 
 **Dedicated server, `persistent = 1`.** The mission keeps running with nobody connected. That is
 the configuration this mission wants for a persistent campaign, and it raises a design question
