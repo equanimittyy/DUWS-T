@@ -1,12 +1,32 @@
 // Locality: server. Shape and reasons: docs/info/architecture/campaign_save_format.md. The namespace and its flush
-// are named only in the first two functions, so a host whose store does not read back is a one-line change.
+// are named only in the first two functions and the one-time Linux move, so the store is chosen in one place.
 if (!isServer) exitWith {};
 
 // Compared as a number: a snapshot written by another format is refused, never read field by field.
 DUWS_saveFormat = 1;
 
-DUWS_fnc_saveNamespace = { missionProfileNamespace };
-DUWS_fnc_saveFlush = { saveMissionProfileNamespace };
+// A Linux server keeps the store in profileNamespace: Antistasi reports that missionProfileNamespace does not work
+// there.
+DUWS_saveOnLinux = (productVersion select 6) isEqualTo "Linux";
+DUWS_fnc_saveNamespace = { [missionProfileNamespace, profileNamespace] select DUWS_saveOnLinux };
+DUWS_fnc_saveFlush = { if (DUWS_saveOnLinux) then { saveProfileNamespace } else { saveMissionProfileNamespace } };
+
+// Once: a Linux host whose missionProfileNamespace did work keeps the campaigns written there. The flag, not an empty
+// index, says it is done, or a host who deleted every campaign would get them all back.
+if (DUWS_saveOnLinux && {!(profileNamespace getVariable ["DUWST_savesMoved", false])}) then {
+    private _rows = missionProfileNamespace getVariable ["DUWST_saves", []];
+    if (_rows isEqualType [] && {_rows isNotEqualTo []}) then {
+        {
+            private _key = format ["DUWST_save_%1", _x select 0];
+            { profileNamespace setVariable [_x, missionProfileNamespace getVariable [_x, ""]] } forEach [_key, _key + "_prev"];
+        } forEach _rows;
+        profileNamespace setVariable ["DUWST_saves", _rows];
+        profileNamespace setVariable ["DUWST_saveRows", count _rows];
+        ["INFO", "SAVE", format ["Linux server: %1 campaigns copied to profileNamespace", count _rows]] call fnc_log;
+    };
+    profileNamespace setVariable ["DUWST_savesMoved", true];
+    saveProfileNamespace;
+};
 
 // Every global the setup screens broadcast. One list, so the save and the re-broadcast cannot drift apart.
 DUWS_campaignSettings = [

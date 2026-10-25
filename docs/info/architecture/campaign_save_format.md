@@ -71,6 +71,13 @@ re-derived in `fn_setStatVariable.sqf:12-21`, `fn_returnSavedStat.sqf:11-24`,
 `fn_finalizeSave.sqf:37-46` and `fn_deleteSave.sqf:7-20`. Two functions written up front make a
 Linux fallback a one-line change instead of a sweep.
 
+**A Linux server uses `profileNamespace`.** `DUWS_saveOnLinux` reads the platform from
+`productVersion select 6`, and both functions switch on it. The report of the bug is Antistasi's, and
+DUWS_T has not seen the bug itself. A Linux host whose `missionProfileNamespace` did work would lose
+sight of its campaigns after the switch, so the first boot on Linux copies every campaign found there
+into `profileNamespace`. A flag (`DUWST_savesMoved`) marks the copy as done, because an empty index
+cannot: a host who deleted every campaign would get them all back.
+
 `profileNamespace` remains the fallback rather than the default because it is shared by every
 mission on the box, so a player clearing one mission's state risks another's.
 
@@ -152,7 +159,9 @@ it again into `DUWS_restore` and replays the builders against it.
 
 **`DUWS_saveStatus` tells an empty store from one that did not read back.** Every commit also writes
 the index's row count to `profileNamespace`, a second store. An empty index beside a count above zero
-reads as `unreadable`, and the load screen warns before New Game writes to the same store.
+reads as `unreadable`, and the load screen warns before New Game writes to the same store. On a Linux
+server the store is `profileNamespace` itself, so the count and the index are lost together and the
+check cannot tell.
 
 **Publish an empty result rather than nothing when there is no valid save.** The load screen waits
 on that variable, and a variable that is never set is indistinguishable from a server still
