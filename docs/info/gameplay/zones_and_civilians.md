@@ -73,7 +73,7 @@ Every zone asks it from its own trigger, every 0.5 s.
 | Test | Counts | Threshold |
 |---|---|---|
 | Presence | ground units of the attacking side inside the site radius | at least one |
-| Garrison beaten (`DUWS_fnc_garrisonBeaten`) | **only groups this site raised**, by roster, wherever they are, plus the tokens still in its reserve pool | at or below 15 % of the site's full token count. Skipped at tier 0, which holds no garrison: ground its holder has bought no tier on |
+| Garrison beaten (`DUWS_fnc_garrisonBeaten`) | **only groups this site raised**, by roster, wherever they are, plus the tokens still in its reserve pool. A group counts while one of its men stands, and an unconscious man (ACE, KAT) does not stand | at or below 15 % of the site's full token count. Skipped at tier 0, which holds no garrison: ground its holder has bought no tier on |
 | Ground held | **any** ground unit of either side inside the streaming ring (radius + 400 m), whoever raised it; aircraft do not count | the attacker outnumbers the defender |
 
 The zone capture trigger has no activation. A `this` gate would stop the function from being asked

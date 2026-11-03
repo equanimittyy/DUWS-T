@@ -191,7 +191,8 @@ DUWS_fnc_garrisonGroupCount = {
 	params ["_key"];
 	private _grps = [];
 	{
-		if (alive _x && {(_x getVariable ["DUWS_garrisonKey", ""]) == _key}) then {
+		// A medical mod (ACE, KAT) drops a man unconscious, not dead, and a group of bodies would hold the zone.
+		if (alive _x && {lifeState _x != "INCAPACITATED"} && {(_x getVariable ["DUWS_garrisonKey", ""]) == _key}) then {
 			_grps pushBackUnique (group _x);
 		};
 	} forEach ([_key] call fnc_zone_roster);

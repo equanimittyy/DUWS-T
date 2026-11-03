@@ -310,7 +310,8 @@ range, a SAM denying the airspace over the zone.
 `DUWS_fnc_garrisonBeaten {key}` (`src/duws/server/init_zones/fnc_garrison_reserve.sqf:10`) is the
 one capture line for a zone: standing groups plus pooled tokens, worn to **15 % of
 `full`'s token count**. A group counts as one whole token while any of its men stands, which is why
-the line sits above a tenth. A site with an unspent pool cannot fall on an empty perimeter — the pooled
+the line sits above a tenth. An unconscious man does not stand: a medical mod (ACE, KAT) drops a man
+unconscious instead of dead, and a group of men who look dead would otherwise hold the site. A site with an unspent pool cannot fall on an empty perimeter — the pooled
 tokens hold it above the line until the waves have spawned and been killed, so a player has to draw out
 and beat most of everything the site was ever worth, not just what happened to be standing when they
 arrived.
