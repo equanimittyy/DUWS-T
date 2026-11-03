@@ -462,7 +462,8 @@ R3F factory flag again, so a player can still sell it back to a factory.
 `<zoneKey>_builds` (`server/init_zones/fnc_zone_build.sqf`), and that key streams with the zone. The write reads
 the standing builds and the stowed records of each key to a class, a world position and the direction and up
 vectors. An attached build is not saved, as for the builder vehicle. Restore writes the rows back as stowed
-records, and deploys them at once when the zone is awake. The flag's credit balance is saved beside the builds,
+records, and deploys them at once when the zone is awake. A held zone at tier 0 never raises, so restore deploys its
+prefab, flag and builds itself after build-out has stowed them. The flag's credit balance is saved beside the builds,
 because nothing can derive it: R3F spends and refunds it, and a destroyed build takes its cost with it. Restore
 writes the balance after it repaints the held zones, because the repaint's capture gate sets it to 0.
 
