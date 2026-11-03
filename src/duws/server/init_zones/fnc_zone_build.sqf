@@ -75,8 +75,8 @@ DUWS_fnc_zoneCaptureArm = {
         if (!hasInterface || isNull _flg) exitWith {};
         [
             _flg, localize "STR_DUWS_T_ZONE_CAPTURE_ACTION",
-            "\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_secure_ca.paa",
-            "\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_secure_ca.paa",
+            "\A3\ui_f\data\map\markers\military\flag_CA.paa",
+            "\A3\ui_f\data\map\markers\military\flag_CA.paa",
             // The carry gate is the flag's OPFOR-held test (fnc_zone_flag_logistics).
             "(_target getVariable ['R3F_LOG_disabled', false]) && {_this distance _target < 5}",
             "!(_caller getVariable ['DUWS_zoneCaptureRefused', false])",
