@@ -220,7 +220,7 @@ drops every such class, so it is the one sellability gate. `Money_roll` itself i
 | Worn armor, usually a vest or headgear, by the highest `armor` in its `HitpointsProtectionInfo` | 2 below 16, 3 at 16 or more |
 | Primary weapon, backpack with a load | 2 |
 | Launcher | 3 |
-| Backpack with no load (`maximumLoad` 0): a static weapon part or a UAV | 6 |
+| Backpack with no load (`maximumLoad` 0): a static weapon part or a UAV | 5 |
 | Vehicle | 1.2 × its request-menu CP price (`DUWS_fnc_vehPrice`) |
 | Civilian ground vehicle (config `side` 3) | 1.2 × the CP price of the `lightUnarmed` band, which reads only the seats |
 
