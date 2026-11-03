@@ -18,6 +18,7 @@ if (!isServer) exitWith {};
 if (isNil "CIV_PRESENCE" || {CIV_PRESENCE in ["NONE", "RAVAGE", "WBK"]}) exitWith {};
 
 while {true} do {
+	["town events", RANDOM_EVENT_TICK_MAX] call fnc_loopBeat;
 	// A throw would kill this daemon for the whole session (see fnc_repetitive_cleanup). Gated with
 	// nested if rather than exitWith/continue: inside a while body those read as end-of-iteration, not
 	// as "skip the rest, keep the clock".

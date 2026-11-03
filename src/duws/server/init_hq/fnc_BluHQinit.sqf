@@ -228,9 +228,12 @@ hq_blu1 = _officer; publicVariable "hq_blu1";
     // reliable primitive that stops bullets, blasts and setDamage alike while the ring is clear,
     // which a per-hit HandleDamage veto could not. Killable only while OPFOR hold the ring.
     while { alive hq_blu1 } do {
+        ["HQ officer watcher", 1] call fnc_loopBeat;
         hq_blu1 allowDamage (([getPos hq_blu1, OFFICER_GUARD_RADIUS, EAST] call fnc_side_count_at) > 0);
         sleep 1;
     };
+    // Ends with the officer by design, so its silence after that is not a fault.
+    DUWS_loopBeats deleteAt "HQ officer watcher";
     if (DUWS_officerLost) exitWith {};
     ["alert", [localize "STR_DUWS_T_OFFICER_KILLED_TITLE", localize "STR_DUWS_T_OFFICER_KILLED"]]
         remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];

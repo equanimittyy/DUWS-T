@@ -17,6 +17,7 @@ private _fnc_offer = {
 };
 
 while {true} do {
+	["Zeus sync", 30] call fnc_loopBeat;
 	// A throw would kill this daemon for the whole session (see fnc_repetitive_cleanup).
 	try {
 

@@ -8,6 +8,7 @@ if (!isServer) exitWith {};
 
 [] spawn {
 	while {true} do {
+		["AI master control", 610] call fnc_loopBeat;
 		// A throw would kill this daemon for the whole session (see fnc_repetitive_cleanup).
 		try {
 		// Map-wide but one-shot: the aim value never varies, so a unit that has taken it is skipped

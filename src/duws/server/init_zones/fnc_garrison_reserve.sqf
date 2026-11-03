@@ -601,6 +601,7 @@ DUWS_fnc_garrisonReservePass = {
 DUWS_fnc_garrisonReserveLoop = {
     if (!isServer) exitWith {};
     while {true} do {
+        ["garrison reserve", DUWS_zoneReservePollPeriod] call fnc_loopBeat;
         // A throw would kill this daemon for the whole session (see fnc_repetitive_cleanup).
         try {
         uiSleep DUWS_zoneReservePollPeriod;

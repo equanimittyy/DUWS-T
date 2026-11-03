@@ -223,6 +223,7 @@ must never be used as a tag — `[DUWS][INFO][SRV][DUWS]` breaks tag filtering.
 | `HALO` | AI HALO insertion |
 | `MARKERS` | the vendored unit-marker pack |
 | `PERF` | the server's once-a-minute DEBUG heartbeat: frame rate, the longest frame, entity counts and the most numerous scheduled scripts; plus a `hitch` line for each frame of 150 ms or more |
+| `LOOP` | the start of each server loop that runs for the whole campaign, and an `ERROR` when one stops beating |
 
 Useful greps: `\[DUWS\]\[ERROR\]` for failures only, `\[DUWS\]\[[A-Z]*\]\[HOST\]` to separate the
 host's two halves, `\[DUWS\]\[.*\]\[ZONES\]` to follow campaign generation end to end,
@@ -255,6 +256,17 @@ progress, so the call site decides. Boot preconditions wrap it in
 `while {!([...] call fnc_waitLogged)} do {}`, which re-waits forever — loud, but it will never let the
 server proceed without an HQ position or a faction table. `fnc_waitLogged` sleeps, so it is
 scheduled-only: callers must be inside `spawn`/`execVM`, never `call`.
+
+### Why every campaign loop beats
+
+A server loop that dies or stalls writes nothing to the `.rpt`. An engine error does not stop a
+scheduled script, and no mission code uses `throw`, so the `try/catch` around each loop never fires.
+Each server loop that runs for the whole campaign therefore calls `fnc_loopBeat` once a pass, with
+its name and its period, and its first beat logs `<name> started`. The cleanup pass calls
+`fnc_loopCheck`, which logs one `ERROR` for a loop that has not beaten for three periods (60 s at
+least). A loop that then beats again logs `beat again after N s silent`, which marks a stall, not a
+death. The cleanup loop hosts the check, so it is the one loop whose death goes unreported.
+`\[DUWS\]\[.*\]\[LOOP\]` lists every start and every silence.
 
 ### The registry self-check
 

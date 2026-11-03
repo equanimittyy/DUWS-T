@@ -28,6 +28,7 @@ fnc_guard_register = {
 // Re-assert the lock on every live guarded object (countering a mod's re-add); drop any that have gone.
 fnc_guard_watch = {
 	while {true} do {
+		["asset guard", 30] call fnc_loopBeat;
 		// A throw would kill this daemon for the whole session (see fnc_repetitive_cleanup).
 		try {
 			{ [_x] call fnc_guard_lock } forEach DUWS_guarded;

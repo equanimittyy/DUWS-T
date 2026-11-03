@@ -256,6 +256,7 @@ if (ZeusStatus != 0) then {
 // is read each pass because a debug session can raise it mid-game.
 [] spawn {
     while {true} do {
+        ["perf monitor", 60] call fnc_loopBeat;
         sleep 60;
         if (duws_log_level >= 4) then {
             // diag_fpsMin spans only 16 frames, so it misses a lone long frame between samples.
@@ -405,6 +406,7 @@ if (isServer) then {
     // Swept, not paid per batch, so a burst of kills lands as one card per player.
     [] spawn {
         while {true} do {
+            ["kill income", kill_cp_period] call fnc_loopBeat;
             sleep kill_cp_period;
             {
                 private _uid = getPlayerUID _x;
@@ -524,6 +526,7 @@ if (isNil "DUWS_cooldownMonitor_running") then {
         ];
 
         while {true} do {
+            ["cooldown monitor", 60] call fnc_loopBeat;
             {
                 private _player = _x;
                 if (!isNull _player) then {

@@ -1,6 +1,6 @@
 // Locality: all machines -- compiled first thing by server/server_init.sqf and
 // client/client_init.sqf, before the function registry, so the registry self-check and
-// every boot milestone can use it. Defines fnc_log and fnc_waitLogged.
+// every boot milestone can use it.
 
 // Raise to 4 to get DEBUG. Left alone if a caller set it earlier, so a debug session can
 // pin the level before init runs.
@@ -67,6 +67,38 @@ fnc_waitLogged = {
             _timeout, _label]] call fnc_log;
     };
     _ok
+};
+
+// A campaign loop that dies or stalls leaves no error, only silence: an engine error does not stop a scheduled
+// script, and nothing in the mission throws, so no try/catch ever fires. Mission time, because the loops sleep on
+// it, so a paused game reads no loop as late. Session state, not saved: a load starts every loop again.
+// Guarded: a host compiles this file twice (server_init, then client_init), and a reset forgets the loops beating.
+if (isNil "DUWS_loopBeats") then { DUWS_loopBeats = createHashMap };
+
+fnc_loopBeat = {
+    params ["_name", "_period"];
+    private _beat = DUWS_loopBeats getOrDefault [_name, []];
+    if (_beat isEqualTo []) then {
+        ["INFO", "LOOP", format ["%1 started, beat every %2 s", _name, _period]] call fnc_log;
+    } else {
+        if (_beat select 2) then {
+            ["INFO", "LOOP", format ["%1 beat again after %2 s silent", _name, round (time - (_beat select 0))]] call fnc_log;
+        };
+    };
+    DUWS_loopBeats set [_name, [time, _period, false]];
+};
+
+// Run from the cleanup pass, so the cleanup loop is the one loop whose death this cannot report.
+fnc_loopCheck = {
+    {
+        _y params ["_last", "_period", "_reported"];
+        private _silent = time - _last;
+        // Floored: the check runs only every 30 s, and one loaded pass can outlast three short periods.
+        if (!_reported && {_silent > ((3 * _period) max 60)}) then {
+            _y set [2, true];
+            ["ERROR", "LOOP", format ["%1 silent for %2 s, expected a beat every %3 s", _x, round _silent, _period]] call fnc_log;
+        };
+    } forEach DUWS_loopBeats;
 };
 
 // Broadcast from the server only. Every machine compiles this file for itself, so a client

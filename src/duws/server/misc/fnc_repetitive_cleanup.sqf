@@ -80,6 +80,8 @@ private _disposed = [];
 private _pass = 0;
 
 while {true} do {
+    ["cleanup", 30] call fnc_loopBeat;
+    [] call fnc_loopCheck;
     // Interruptible interval, not a flat sleep: a forced sweep asked for just after a pass began
     // waiting would otherwise sit out the whole interval, and a cleanup button that does nothing
     // for thirty seconds reads as broken.

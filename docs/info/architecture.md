@@ -123,7 +123,7 @@ does not imply server-only.
 | `sounds/` | Ambient music loop |
 | `operative/` | Operatives: the team's roster under `server/`, which holds it and applies every change; the recruit/deploy menu under `client/` |
 | `includes/` | Dialog and config `.hpp` under `shared/`; the two `#include`d SQF bodies under `client/` |
-| `functions/` | Under `shared/`: the runs-anywhere bodies, plus `fnc_log_init.sqf`, which defines `fnc_log` and `fnc_waitLogged` |
+| `functions/` | Under `shared/`: the runs-anywhere bodies, plus `fnc_log_init.sqf`, which defines `fnc_log`, `fnc_waitLogged` and the loop liveness check (`fnc_loopBeat`, `fnc_loopCheck`) |
 
 ## Cross-cutting systems
 

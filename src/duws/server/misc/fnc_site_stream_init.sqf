@@ -271,6 +271,7 @@ fnc_site_poller = {
         values _cells
     };
     while {true} do {
+        ["site poller", SITE_TICK] call fnc_loopBeat;
         // A throw would kill this daemon for the whole session (see fnc_repetitive_cleanup).
         try {
         sleep SITE_TICK;

@@ -18,14 +18,17 @@ if (!isClass (configFile >> "CfgVehicles" >> "zombie_runner")) then {
 while {true} do {
     // A throw would kill this daemon for the whole session (see fnc_repetitive_cleanup).
     try {
+    // Beats in both waits: the day wait and the night loop each hold the thread for hours.
     waitUntil {
         sleep 60;
+        ["night horde", 120] call fnc_loopBeat;
         (daytime >= 20 || daytime < 5)
     };
 
     private _checkInterval = 2; // Test value; restore to 600 for production.
 
     while {daytime >= 20 || daytime < 5} do {
+        ["night horde", 120] call fnc_loopBeat;
         private _currentDay = date select 2;
 
         if (_lastHordeDate != _currentDay) then {

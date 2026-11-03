@@ -33,6 +33,7 @@ if !(_def isEqualTo []) exitWith {
     [_loopRand, _loopBase, _fogRand, _fogBase, _fogFixed] spawn {
         params ["_loopRand", "_loopBase", "_fogRand", "_fogBase", "_fogFixed"];
         while {true} do {
+            ["weather", 4200] call fnc_loopBeat;
             // A throw would kill this daemon for the whole session (see fnc_repetitive_cleanup).
             try {
             // Cloud patterns take about 50 minutes to change fully, so a shorter wait would set a
@@ -77,6 +78,7 @@ switch (weather_type) do {
         sleep (random [3000, 3900, 4200]);
         [] spawn {
             while {true} do {
+                ["weather", 4200] call fnc_loopBeat;
                 // A throw would kill this daemon for the whole session (see fnc_repetitive_cleanup).
                 try {
                 private _wait = random [3000, 3900, 4200];
@@ -93,6 +95,7 @@ switch (weather_type) do {
     case "none": {
         [] spawn {
             while {true} do {
+                ["weather", 1800] call fnc_loopBeat;
                 // A throw would kill this daemon for the whole session (see fnc_repetitive_cleanup).
                 try {
                 private _wait = random 1800;

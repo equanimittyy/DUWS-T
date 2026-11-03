@@ -18,7 +18,8 @@ private _tierCarry = 0;
 while {true} do {
     // Idle with nobody on: holds, cooldowns and staleness all count in ticks, so a frozen clock is a paused commander
     // rather than one that spends a night buying against a player who is asleep.
-    waitUntil { sleep OPCOM_TICK_PERIOD; ([] call DUWS_fnc_humanCount) > 0 };
+    // Beats inside the idle wait, or an empty server reads as a dead commander.
+    waitUntil { sleep OPCOM_TICK_PERIOD; ["OPCOM tick", OPCOM_TICK_PERIOD] call fnc_loopBeat; ([] call DUWS_fnc_humanCount) > 0 };
     // A throw would kill this daemon for the whole session (see fnc_repetitive_cleanup). _stage names the
     // stage in the catch so the RPT says what broke; the tick's work is dropped and retried next pass.
     DUWS_opcom_tick = DUWS_opcom_tick + 1;

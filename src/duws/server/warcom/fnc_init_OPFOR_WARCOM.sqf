@@ -23,6 +23,7 @@ if (DUWS_campaignLoaded) then {
     private _elapsed = 0;
     private _last = time;
     while {true} do {
+        ["economy", 10] call fnc_loopBeat;
         // A throw would kill this daemon for the whole session (see fnc_repetitive_cleanup).
         try {
             sleep 10;

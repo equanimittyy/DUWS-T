@@ -290,6 +290,7 @@ DUWS_fnc_autosaveLoop = {
     if (DUWS_autosaveInterval <= 0) exitWith {};
     DUWS_saveDue = time + DUWS_autosaveInterval;
     while {true} do {
+        ["autosave", 10] call fnc_loopBeat;
         try {
             sleep 10;
             if (time >= DUWS_saveDue) then {
