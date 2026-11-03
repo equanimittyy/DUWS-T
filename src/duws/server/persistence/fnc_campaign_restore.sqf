@@ -436,6 +436,14 @@ DUWS_fnc_restoreWorld = {
         };
         ([_zoneKey] call DUWS_fnc_zoneFlag) setVariable ["R3F_LOG_CF_credits", _credits, true];
     } forEach (_r getOrDefault ["zoneBuilds", []]);
+    // Only a raise deploys a zone, and a held zone with no tier never raises, so nothing else would bring back what its
+    // build-out stowed. A capture in play leaves the prefab, flag and builds standing; a load stands them again.
+    {
+        private _key = [_x] call fnc_zone_key;
+        if (([_key] call fnc_zone_tier) == 0) then {
+            [_key, [_key, "structure"] call fnc_site_occupant] call (DUWS_zoneStructureHooks get "wake");
+        };
+    } forEach _held;
     // A site the save held no ledger for had forgotten it, as a capture does; fnc_createZone has since stamped a
     // fresh OPFOR one over every zone, which would hand a held zone the enemy's garrison.
     if ("garrisons" in _r) then {

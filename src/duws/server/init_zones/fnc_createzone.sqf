@@ -268,7 +268,7 @@ private _trgVarName = format["trigger_%1_%2", floor abs (_zonePos select 0), flo
 missionNamespace setVariable [_trgVarName, _trg];
 _trg setVariable ["isZoneCaptureTrigger", true];
 
-// Counted last: a load's world restore waits on this count, and it finds the flag and capture trigger by name,
-// skipping a missing one silently.
+// Counted last: a load's world restore waits on this count. It finds the flag and capture trigger by name, skipping a
+// missing one silently, and it deploys a held zone's prefab, which the stow above would otherwise take back.
 zones_buildout_done = zones_buildout_done + 1;
 publicVariable "zones_buildout_done";
