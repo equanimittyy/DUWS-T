@@ -16,7 +16,7 @@ private _n = 0;
 {
     private _members = if (_x isKindOf "CAManBase") then { [_x] } else { crew _x };
     {
-        if (alive _x && {side _x == _side}) then {
+        if ((_x call fnc_unit_standing) && {side _x == _side}) then {
             _n = _n + 1;
         };
     } forEach _members;

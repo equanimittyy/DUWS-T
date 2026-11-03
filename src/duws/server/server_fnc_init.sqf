@@ -580,6 +580,7 @@ fnc_baseRangeMarker = compile preprocessFileLineNumbers "duws\server\misc\fnc_ba
 fnc_baseMarkDiscovered = compile preprocessFileLineNumbers "duws\server\misc\fnc_baseMarkDiscovered.sqf";
 // Not broadcast: it decides which players a base appearing is visible to, which only the server can.
 fnc_baseFade = compile preprocessFileLineNumbers "duws\server\misc\fnc_baseFade.sqf";
+fnc_unit_standing = compile preprocessFileLineNumbers "duws\server\misc\fnc_unit_standing.sqf";
 fnc_side_count_at = compile preprocessFileLineNumbers "duws\server\misc\fnc_side_count_at.sqf";
 fnc_hirePartisans_spawnDeployed = compile preprocessFileLineNumbers "duws\server\misc\fnc_hirePartisans_spawnDeployed.sqf";
 publicVariable "fnc_hirePartisans_spawnDeployed";

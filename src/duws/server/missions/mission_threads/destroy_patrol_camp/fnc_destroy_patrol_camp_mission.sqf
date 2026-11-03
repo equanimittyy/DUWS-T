@@ -135,7 +135,7 @@ private _build = {
 };
 
 // Win when every camp team is dead; the roaming patrols are ambience, not part of the census.
-private _done = { ({alive _x} count _this) == 0 };
+private _done = { ({_x call fnc_unit_standing} count _this) == 0 };
 
 if (!([18, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exitWith {};
 

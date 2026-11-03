@@ -316,7 +316,7 @@ private _markername2 = [_MissionPos, _radius, _taskId, localize "STR_DUWS_T_RAID
         if ([_deadline] call fnc_time_expired) exitWith { _outcome = "TIMEOUT"; true };
         // count _guards > 0 guards the build window: an empty list would read as "all guards down" and win on
         // the first breach.
-        if ((_realBldg getVariable ["DUWS_safehouse_breached", false]) && {count _guards > 0} && {({ alive _x } count _guards) == 0}) exitWith { _outcome = "WIN"; true };
+        if ((_realBldg getVariable ["DUWS_safehouse_breached", false]) && {count _guards > 0} && {({ _x call fnc_unit_standing } count _guards) == 0}) exitWith { _outcome = "WIN"; true };
         false
     };
 

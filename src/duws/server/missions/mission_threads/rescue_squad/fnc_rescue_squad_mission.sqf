@@ -273,12 +273,12 @@ sleep 6;
 // wiped after it came out both fail.
 waitUntil {
     sleep 2;
-    ((_cordonUnits findIf {alive _x}) < 0)
+    ((_cordonUnits findIf {_x call fnc_unit_standing}) < 0)
     || {[_deadline] call fnc_time_expired}
     || {(_squadUnits findIf {alive _x}) < 0}
 };
 
-if (((_cordonUnits findIf {alive _x}) >= 0) || {(_squadUnits findIf {alive _x}) < 0}) exitWith {
+if (((_cordonUnits findIf {_x call fnc_unit_standing}) >= 0) || {(_squadUnits findIf {alive _x}) < 0}) exitWith {
     DUWS_rsq_relieved = true;
     [_mission_name, _taskId, "FAILED", _BuildingPos, _radius, [_marker], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_squadfail"], false, _compKey, false, false] call fnc_mission_finish;
 };

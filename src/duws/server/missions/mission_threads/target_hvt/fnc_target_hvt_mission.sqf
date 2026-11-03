@@ -319,7 +319,7 @@ private _holdUntil = time + _holdMax;
 private _outcome = "";
 waitUntil {
     sleep 1;
-    if (!alive _hvt) exitWith { _outcome = "WIN"; true };
+    if !(_hvt call fnc_unit_standing) exitWith { _outcome = "WIN"; true };
     if ([_deadline] call fnc_time_expired) exitWith { _outcome = "TIMEOUT"; true };
     (time > _holdUntil) || {[_MissionPos, _radius] call fnc_duws_bluforNear}
 };
@@ -409,7 +409,7 @@ waitUntil {
         _hvtMarker setMarkerText "HVT";
         [localize "STR_DUWS_T_ALLSEER", localize "STR_DUWS_T_hvtflee"] remoteExec ["fnc_duws_dialogue", 0];
     };
-    if (!alive _hvt) exitWith { _outcome = "WIN"; true };
+    if !(_hvt call fnc_unit_standing) exitWith { _outcome = "WIN"; true };
     if (_hvt distance2D _destPos < _arrive) exitWith { _outcome = "ESCAPED"; true };
     if ([_deadline] call fnc_time_expired) exitWith { _outcome = "TIMEOUT"; true };
     false

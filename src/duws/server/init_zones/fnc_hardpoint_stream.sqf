@@ -137,7 +137,7 @@ DUWS_fnc_hardpointClearCheck = {
         [_key, _o] call DUWS_fnc_hardpointClear;
     };
     // Seat test first, so the poller makes the spatial query only once every gun is empty.
-    if ((DUWS_compositions getOrDefault [_key, []]) findIf { !isNull _x && {_x isKindOf "StaticWeapon"} && {alive gunner _x} } > -1) exitWith {};
+    if ((DUWS_compositions getOrDefault [_key, []]) findIf { !isNull _x && {_x isKindOf "StaticWeapon"} && {(gunner _x) call fnc_unit_standing} } > -1) exitWith {};
     // Owner-blind, as a zone's numbers test is: a passing patrol holds the ground too.
     private _side = [EAST, WEST] select ((_o get "hpSide") isEqualTo "blufor");
     if (([([_key] call fnc_site_at) get "pos", HP_CLEAR_RADIUS, _side, true] call fnc_side_count_at) > 0) exitWith {};

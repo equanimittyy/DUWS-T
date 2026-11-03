@@ -185,9 +185,8 @@ private _clearIcons = {
     private _confirmSince = -1;          // time the current unbroken sighting began; -1 = no contact
 
     while { alive _hostage } do {
-        // Garrison dead -> freed. Checked first so a wipe mid-countdown cancels the clock. A captor that a medical mod
-        // drops unconscious counts as down: he looks dead to the player, who would otherwise wait on him forever.
-        if ({ alive _x && { lifeState _x != "INCAPACITATED" } } count units _garrison == 0) exitWith {
+        // Garrison down -> freed. Checked first so a wipe mid-countdown cancels the clock.
+        if ({ _x call fnc_unit_standing } count units _garrison == 0) exitWith {
             _hostage setCaptive false;
             _hostage setVariable ["DUWS_hostage_freed", true, true];
             call _convergeRing;

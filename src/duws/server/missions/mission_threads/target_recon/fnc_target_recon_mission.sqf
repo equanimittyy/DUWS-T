@@ -60,7 +60,7 @@ private _build = {
     units _grp
 };
 
-private _done = { (_this findIf { alive _x }) < 0 };
+private _done = { (_this findIf { _x call fnc_unit_standing }) < 0 };
 
 if (!([17, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exitWith {};
 

@@ -17,7 +17,7 @@ if (isNull _grp) exitWith {
 _e set ["group", _grp];
 _e set ["patrols", [_site, floor random 3] call fnc_bandit_pairs];
 // Read from the entry, not a captured local: fnc_civ_mission_request re-runs it at the report.
-_e set ["won", { params ["_e"]; ({ alive _x } count units (_e get "group")) == 0 }];
+_e set ["won", { params ["_e"]; ({ _x call fnc_unit_standing } count units (_e get "group")) == 0 }];
 _e set ["lost", { false }];
 
 [_id, "STR_DUWS_T_CIVMISSION_CAMP_TITLE", "STR_DUWS_T_CIVMISSION_CAMP_DESC", "attack"] call fnc_civ_mission_present;

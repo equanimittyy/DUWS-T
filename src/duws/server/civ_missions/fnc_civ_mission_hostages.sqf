@@ -92,8 +92,7 @@ waitUntil {
     private _keep = [];
     {
         _x params ["_h", "_grp", "_mk"];
-        // An unconscious captor counts as down, as in fnc_rescue_hostage_mission.
-        if (alive _h && {({ alive _x && { lifeState _x != "INCAPACITATED" } } count units _grp) > 0}) then {
+        if (alive _h && {({ _x call fnc_unit_standing } count units _grp) > 0}) then {
             _keep pushBack _x;
         } else {
             deleteMarker _mk;
