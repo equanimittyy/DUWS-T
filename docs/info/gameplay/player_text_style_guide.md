@@ -287,7 +287,7 @@ the opening runs client-side (the drops, arty), `name _caller` where it runs on 
 | Mechanism | Produces | Used for |
 | --- | --- | --- |
 | `addAction` | An instant scroll entry | Almost everything |
-| `BIS_fnc_holdActionAdd` | A hold-to-complete entry with an icon and progress ring | Searching bodies and containers, loading a vehicle, the disguise panel |
+| `BIS_fnc_holdActionAdd` | A hold-to-complete entry with an icon and progress ring | Searching bodies and containers, loading a vehicle, the disguise panel, Capture Zone at a zone flag |
 | `fnc_open_action_menu` | A dialog listbox opened *by* one scroll entry | Collapsing a cluster of related entries into a single scroll row |
 
 `src/duws/client/dialog/fnc_open_action_menu.sqf` is the escape hatch from scroll-menu sprawl:
@@ -325,7 +325,7 @@ call sites pass a stringtable key and never write markup themselves.
 | `ACT_UTIL` | `#00b7ff` | 20 | Local effect only: toggles, readouts, dev tools |
 | `ACT_COMMIT` | `#ff1111` | 10 | Spends CP or commits a shared asset; not freely undone |
 | *(none)* | plain | 40 | The rescue-pilot set |
-| *(none)* | plain | 30 | Hold-to-search entries, identified by icon instead |
+| *(none)* | plain | 30 | Hold-to-search entries and Capture Zone, identified by icon instead |
 | *(none)* | plain | -100 | Loot into vehicle, a hold entry kept last, below the engine's own entries for the vehicle |
 
 **Colour lives in the header, not in `stringtable.xml`.** A value carrying its own `<t>` markup

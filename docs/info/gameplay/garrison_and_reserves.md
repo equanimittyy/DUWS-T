@@ -323,9 +323,9 @@ tokens in the pool. A prefab's turret crews carry no reserve tag, so they do not
 
 `garrisonBeaten` alone never takes ground. `DUWS_fnc_siteTaken`
 (`src/duws/server/init_zones/fnc_garrison_reserve.sqf`) is the one rule for a zone capture and a zone
-retake. It also needs an attacking ground unit inside the site radius, and the
-attacker outnumbering the defender over the streaming ring (radius + 400 m), ground units only, counted
-owner-blind. All three must hold unbroken for `DUWS_captureHold` (20 s,
+retake. It also needs an attacking ground unit inside the site radius, no hardpoint of the defender's
+standing in the zone, and the attacker outnumbering the defender over the streaming ring (radius + 400 m),
+ground units only, counted owner-blind. All four must hold unbroken for `DUWS_captureHold` (20 s,
 `src/duws/server/server_var_init.sqf`), and the function stamps that hold itself.
 
 The zone trigger runs it as its condition, twice a second.

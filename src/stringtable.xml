@@ -5180,6 +5180,90 @@
                 <Chinese>需要等級 I 以上。</Chinese>
                 <Spanish>Requiere Nivel I+.</Spanish>
             </Key>
+            <Key ID="STR_DUWS_T_ZONE_CAPTURE_ACTION">
+                <Original>Capture Zone</Original>
+                <English>Capture Zone</English>
+                <Chinesesimp>夺取区域</Chinesesimp>
+                <German>Zone einnehmen</German>
+                <Polish>Zdobądź strefę</Polish>
+                <Czech>Obsadit zónu</Czech>
+                <Russian>Захватить зону</Russian>
+                <French>Capturer la zone</French>
+                <Chinese>奪取區域</Chinese>
+                <Spanish>Capturar zona</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_ZONE_CAPTURE_REFUSED">
+                <Original>Cannot capture zone %1:</Original>
+                <English>Cannot capture zone %1:</English>
+                <Chinesesimp>无法夺取区域 %1：</Chinesesimp>
+                <German>Zone %1 kann nicht eingenommen werden:</German>
+                <Polish>Nie można zdobyć strefy %1:</Polish>
+                <Czech>Zónu %1 nelze obsadit:</Czech>
+                <Russian>Невозможно захватить зону %1:</Russian>
+                <French>Impossible de capturer la zone %1 :</French>
+                <Chinese>無法奪取區域 %1：</Chinese>
+                <Spanish>No se puede capturar la zona %1:</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_ZONE_CAPTURE_DEPLOYING">
+                <Original>The enemy garrison is still deploying.</Original>
+                <English>The enemy garrison is still deploying.</English>
+                <Chinesesimp>敌方驻军仍在部署中。</Chinesesimp>
+                <German>Die feindliche Garnison wird noch eingesetzt.</German>
+                <Polish>Wrogi garnizon wciąż się rozmieszcza.</Polish>
+                <Czech>Nepřátelská posádka se stále nasazuje.</Czech>
+                <Russian>Вражеский гарнизон ещё развёртывается.</Russian>
+                <French>La garnison ennemie est encore en cours de déploiement.</French>
+                <Chinese>敵方駐軍仍在部署中。</Chinese>
+                <Spanish>La guarnición enemiga aún se está desplegando.</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_ZONE_CAPTURE_GARRISON">
+                <Original>The enemy garrison is not broken yet.</Original>
+                <English>The enemy garrison is not broken yet.</English>
+                <Chinesesimp>敌方驻军尚未被击溃。</Chinesesimp>
+                <German>Die feindliche Garnison ist noch nicht zerschlagen.</German>
+                <Polish>Wrogi garnizon nie został jeszcze rozbity.</Polish>
+                <Czech>Nepřátelská posádka ještě není rozbitá.</Czech>
+                <Russian>Вражеский гарнизон ещё не разбит.</Russian>
+                <French>La garnison ennemie n'est pas encore brisée.</French>
+                <Chinese>敵方駐軍尚未被擊潰。</Chinese>
+                <Spanish>La guarnición enemiga aún no ha sido derrotada.</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_ZONE_CAPTURE_PRESENCE">
+                <Original>No BLUFOR unit is inside the zone.</Original>
+                <English>No BLUFOR unit is inside the zone.</English>
+                <Chinesesimp>区域内没有 BLUFOR 单位。</Chinesesimp>
+                <German>Keine BLUFOR-Einheit befindet sich in der Zone.</German>
+                <Polish>W strefie nie ma żadnej jednostki BLUFOR.</Polish>
+                <Czech>V zóně není žádná jednotka BLUFOR.</Czech>
+                <Russian>В зоне нет ни одного бойца BLUFOR.</Russian>
+                <French>Aucune unité BLUFOR n'est dans la zone.</French>
+                <Chinese>區域內沒有 BLUFOR 單位。</Chinese>
+                <Spanish>No hay ninguna unidad BLUFOR dentro de la zona.</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_ZONE_CAPTURE_HARDPOINT">
+                <Original>The enemy still has a hardpoint in the zone.</Original>
+                <English>The enemy still has a hardpoint in the zone.</English>
+                <Chinesesimp>敌方在区域内仍有据点。</Chinesesimp>
+                <German>Der Feind hält noch einen Stützpunkt in der Zone.</German>
+                <Polish>Wróg wciąż ma punkt oporu w strefie.</Polish>
+                <Czech>Nepřítel má v zóně stále opěrný bod.</Czech>
+                <Russian>У противника в зоне ещё есть опорный пункт.</Russian>
+                <French>L'ennemi tient encore un point d'appui dans la zone.</French>
+                <Chinese>敵方在區域內仍有據點。</Chinese>
+                <Spanish>El enemigo aún tiene un punto fuerte en la zona.</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_ZONE_CAPTURE_OUTNUMBERED">
+                <Original>BLUFOR do not outnumber OPFOR in and around the zone.</Original>
+                <English>BLUFOR do not outnumber OPFOR in and around the zone.</English>
+                <Chinesesimp>区域及周边的 BLUFOR 兵力未超过 OPFOR。</Chinesesimp>
+                <German>BLUFOR ist OPFOR in und um die Zone zahlenmäßig nicht überlegen.</German>
+                <Polish>BLUFOR nie ma przewagi liczebnej nad OPFOR w strefie i wokół niej.</Polish>
+                <Czech>BLUFOR nemá v zóně a jejím okolí početní převahu nad OPFOR.</Czech>
+                <Russian>BLUFOR не превосходит OPFOR числом в зоне и вокруг неё.</Russian>
+                <French>BLUFOR n'est pas en supériorité numérique sur OPFOR dans la zone et ses environs.</French>
+                <Chinese>區域及周邊的 BLUFOR 兵力未超過 OPFOR。</Chinese>
+                <Spanish>BLUFOR no supera en número a OPFOR en la zona y sus alrededores.</Spanish>
+            </Key>
             <Key ID="STR_DUWS_T_check_vehicle_status">
                 <Original>Check Vehicle Status</Original>
                 <English>Check Vehicle Status</English>
@@ -19082,16 +19166,16 @@
                 <Spanish>Sobre la captura de zonas</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_HELP_ZONES_HINT">
-                <Original>Red zones are enemy-held objectives guarded by a garrison. To capture one, fight the garrison until it is badly weakened and your troops in the area outnumber theirs. The zone's flag then turns green.</Original>
-                <English>Red zones are enemy-held objectives guarded by a garrison. To capture one, fight the garrison until it is badly weakened and your troops in the area outnumber theirs. The zone's flag then turns green.</English>
-                <Chinesesimp>红色区域是由驻军把守的敌占目标。要夺取该区域，需与驻军交战，直到其大幅削弱、且你在该区域的兵力超过对方。此时区域的旗帜就会变为绿色。</Chinesesimp>
-                <German>Rote Zonen sind vom Feind gehaltene Ziele, die von einer Garnison bewacht werden. Um eine Zone einzunehmen, bekämpfst du die Garnison, bis sie stark geschwächt ist und deine Truppen in der Umgebung ihre zahlenmäßig übertreffen. Die Flagge der Zone wird dann grün.</German>
-                <Polish>Czerwone strefy to cele przetrzymywane przez wroga, strzeżone przez garnizon. Aby zdobyć strefę, walcz z garnizonem, aż zostanie mocno osłabiony, a twoje siły w okolicy przewyższą liczebnie jego. Flaga strefy zmieni się wtedy na zieloną.</Polish>
-                <Czech>Červené zóny jsou nepřátelské cíle střežené posádkou. Chceš-li zónu obsadit, bojuj s posádkou, dokud není výrazně oslabená a tvé jednotky v okolí nepřeváží počtem ty jejich. Vlajka zóny se poté změní na zelenou.</Czech>
-                <Russian>Красные зоны — это удерживаемые противником объекты, которые обороняет гарнизон. Чтобы захватить зону, нужно ослабить гарнизон и добиться численного превосходства своих войск в этом районе. После этого флаг зоны становится зелёным.</Russian>
-                <French>Les zones rouges sont des objectifs tenus par l'ennemi et gardés par une garnison. Pour en capturer une, affrontez la garnison jusqu'à ce qu'elle soit sérieusement affaiblie et que vos troupes soient plus nombreuses que les siennes dans la zone. Le drapeau de la zone passe alors au vert.</French>
-                <Chinese>紅色區域是由駐軍把守的敵占目標。要奪取該區域，需與駐軍交戰，直到其大幅削弱、且你在該區域的兵力超過對方。此時區域的旗幟就會變為綠色。</Chinese>
-                <Spanish>Las zonas rojas son objetivos en manos enemigas custodiados por una guarnición. Para capturar una, combate a la guarnición hasta debilitarla gravemente y consigue que tus tropas en la zona superen en número a las suyas. Entonces la bandera de la zona se pone verde.</Spanish>
+                <Original>Red zones are enemy-held objectives guarded by a garrison. To capture one, fight the garrison until it is badly weakened, clear every hardpoint inside the zone, and make your troops in the area outnumber theirs. Hold that for 20 seconds and the zone's flag turns blue. Capture Zone on the flag takes it faster, or tells you what still holds it.</Original>
+                <English>Red zones are enemy-held objectives guarded by a garrison. To capture one, fight the garrison until it is badly weakened, clear every hardpoint inside the zone, and make your troops in the area outnumber theirs. Hold that for 20 seconds and the zone's flag turns blue. Capture Zone on the flag takes it faster, or tells you what still holds it.</English>
+                <Chinesesimp>红色区域是由驻军把守的敌占目标。要夺取该区域，需与驻军交战直到其大幅削弱，清除区域内的所有据点，并使你在该区域的兵力超过对方。保持 20 秒后，区域的旗帜就会变为蓝色。在旗帜处使用“夺取区域”可更快夺取，或显示仍在阻止夺取的原因。</Chinesesimp>
+                <German>Rote Zonen sind vom Feind gehaltene Ziele, die von einer Garnison bewacht werden. Um eine Zone einzunehmen, bekämpfst du die Garnison, bis sie stark geschwächt ist, schaltest jeden Stützpunkt in der Zone aus und sorgst dafür, dass deine Truppen in der Umgebung ihre zahlenmäßig übertreffen. Hältst du das 20 Sekunden lang, wird die Flagge der Zone blau. „Zone einnehmen“ an der Flagge nimmt sie schneller ein oder zeigt dir, was sie noch hält.</German>
+                <Polish>Czerwone strefy to cele przetrzymywane przez wroga, strzeżone przez garnizon. Aby zdobyć strefę, walcz z garnizonem, aż zostanie mocno osłabiony, oczyść każdy punkt oporu w strefie i zadbaj, by twoje siły w okolicy przewyższały liczebnie jego. Utrzymaj to przez 20 sekund, a flaga strefy zmieni się na niebieską. „Zdobądź strefę” przy fladze zdobywa ją szybciej albo pokazuje, co jeszcze blokuje jej zdobycie.</Polish>
+                <Czech>Červené zóny jsou nepřátelské cíle střežené posádkou. Chceš-li zónu obsadit, bojuj s posádkou, dokud není výrazně oslabená, vyřaď každý opěrný bod v zóně a zajisti, aby tvé jednotky v okolí převážily počtem ty jejich. Udrž to 20 sekund a vlajka zóny se změní na modrou. „Obsadit zónu“ u vlajky ji obsadí rychleji, nebo ti ukáže, co ještě brání jejímu obsazení.</Czech>
+                <Russian>Красные зоны — это удерживаемые противником объекты, которые обороняет гарнизон. Чтобы захватить зону, нужно ослабить гарнизон, зачистить все опорные пункты в зоне и добиться численного превосходства своих войск в этом районе. Продержись так 20 секунд, и флаг зоны станет синим. «Захватить зону» у флага захватывает её быстрее или показывает, что ещё мешает захвату.</Russian>
+                <French>Les zones rouges sont des objectifs tenus par l'ennemi et gardés par une garnison. Pour en capturer une, affrontez la garnison jusqu'à ce qu'elle soit sérieusement affaiblie, neutralisez chaque point d'appui de la zone et faites en sorte que vos troupes soient plus nombreuses que les siennes dans le secteur. Tenez ainsi 20 secondes et le drapeau de la zone passe au bleu. « Capturer la zone » au drapeau la prend plus vite, ou vous indique ce qui la tient encore.</French>
+                <Chinese>紅色區域是由駐軍把守的敵占目標。要奪取該區域，需與駐軍交戰直到其大幅削弱，清除區域內的所有據點，並使你在該區域的兵力超過對方。保持 20 秒後，區域的旗幟就會變為藍色。在旗幟處使用「奪取區域」可更快奪取，或顯示仍在阻止奪取的原因。</Chinese>
+                <Spanish>Las zonas rojas son objetivos en manos enemigas custodiados por una guarnición. Para capturar una, combate a la guarnición hasta debilitarla gravemente, limpia cada punto fuerte de la zona y consigue que tus tropas en el área superen en número a las suyas. Mantenlo 20 segundos y la bandera de la zona se pone azul. «Capturar zona» en la bandera la captura más rápido, o te indica qué la sigue reteniendo.</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_HELP_SUPPORTS">
                 <Original>Arsenal Modes</Original>

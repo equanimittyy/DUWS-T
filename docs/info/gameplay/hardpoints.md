@@ -23,8 +23,9 @@ phase (`server/warcom/fnc_init_OPFOR_WARCOM.sqf:82-148`, [below](#siting)), read
 garrison is never appended to a zone's own roster
 ([`zones_and_civilians.md#what-captures-a-zone`](zones_and_civilians.md#what-captures-a-zone)):
 clearing a zone hardpoint has no effect on the zone's break test, which reads only the zone's own
-groups and never references `DUWS_hardpoints`. A hardpoint's men still count in the capture's numbers
-test while they stand inside the zone's streaming ring, since that test is owner-blind.
+groups and never references `DUWS_hardpoints`. The capture rule has a separate hardpoint test, which
+refuses the zone while any hardpoint filed under it stands. A hardpoint's men also count in the capture's
+numbers test while they stand inside the zone's streaming ring, since that test is owner-blind.
 
 ## Hardpoint types
 

@@ -237,6 +237,7 @@ if (VERSION_X == "MODERN" || simple_zones_enable) then {
 		// Hold the flag out of Zeus so a game master cannot delete the zone marker (fnc_asset_guard).
 		[_flg] call fnc_guard_register;
 		[_flg, _zoneKey] call DUWS_fnc_siteBuildArm;
+		[_flg] call DUWS_fnc_zoneCaptureArm;
 		// OPFOR-held at spawn, so not yet movable.
 		[_flg, false] call fnc_zone_flag_logistics;
 	};

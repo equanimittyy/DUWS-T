@@ -14,27 +14,47 @@ DUWS_fnc_garrisonBeaten = {
     (([_key] call DUWS_fnc_garrisonGroupCount) + count ([_key] call DUWS_fnc_garrisonReserve)) <= (0.15 * _full)
 };
 
-// The one rule for taking a zone, in either direction: _side has a unit inside the site radius, the
-// defender's garrison is beaten, and _side outnumbers _foe over the streaming ring -- all held unbroken for
-// DUWS_captureHold. -> true once held.
+// The one rule for taking a zone, in either direction. -> the stringtable key of each failed test, [] when _side may
+// take the zone now. Without _all it returns at the first failure, cheapest first, so the trigger's poll of a zone
+// nobody is near stays a variable read.
+DUWS_fnc_siteTakeBlockers = {
+    params ["_key", "_profile", "_side", "_foe", ["_all", false]];
+    private _site = [_key] call fnc_site_at;
+    private _pos = _site get "pos";
+    private _radius = _site get "radius";
+    private _out = [];
+    // Tier 0 holds no garrison -- a zone BLUFOR hold until they build one -- so there is nothing to beat. A garrison
+    // that is not live (stowed, mid-raise) refuses, so ground is never taken before its men are placed.
+    if (([_key] call fnc_zone_tier) > 0) then {
+        if !([_key] call DUWS_fnc_garrisonHeld) exitWith { _out pushBack "STR_DUWS_T_ZONE_CAPTURE_DEPLOYING" };
+        if !([_key] call DUWS_fnc_garrisonBeaten) then { _out pushBack "STR_DUWS_T_ZONE_CAPTURE_GARRISON" };
+    };
+    if (!_all && {_out isNotEqualTo []}) exitWith { _out };
+    if (([_pos, _radius, _side, true] call fnc_side_count_at) == 0) then { _out pushBack "STR_DUWS_T_ZONE_CAPTURE_PRESENCE" };
+    if (!_all && {_out isNotEqualTo []}) exitWith { _out };
+    // A cleared hardpoint leaves the registry, so any row still filed under the zone stands.
+    private _foeTag = ["opfor", "blufor"] select (_foe isEqualTo west);
+    if ((DUWS_hardpoints findIf { (_x select 4) isEqualTo _key && {(_x select 3) isEqualTo _foeTag} }) >= 0) then {
+        _out pushBack "STR_DUWS_T_ZONE_CAPTURE_HARDPOINT";
+    };
+    if (!_all && {_out isNotEqualTo []}) exitWith { _out };
+    // The ring the garrison streams in, not the radius, so a flip leaves no outer-ring force the attacker never
+    // had to beat.
+    private _ring = _radius + ((DUWS_streamProfiles get _profile) select 0);
+    if (([_pos, _ring, _side, true] call fnc_side_count_at) <= ([_pos, _ring, _foe, true] call fnc_side_count_at)) then {
+        _out pushBack "STR_DUWS_T_ZONE_CAPTURE_OUTNUMBERED";
+    };
+    _out
+};
+
 // One stamp per site, tagged with the side, so a direction's stamp never carries over a flip into the other.
 // Mission time, so a savegame cannot strand it.
 DUWS_fnc_siteTaken = {
     params ["_key", "_profile", "_side", "_foe"];
-    private _site = [_key] call fnc_site_at;
-    private _pos = _site get "pos";
-    private _radius = _site get "radius";
-    // The ring the garrison streams in, not the radius, so a flip leaves no outer-ring force the attacker never
-    // had to beat.
-    private _ring = _radius + ((DUWS_streamProfiles get _profile) select 0);
-    // Tier 0 holds no garrison -- a zone BLUFOR hold until they build one -- so there is nothing to beat. A garrison
-    // that is not live (stowed, mid-raise) refuses, so ground is never taken before its men are placed.
-    private _tier = [_key] call fnc_zone_tier;
-    private _won = (_tier == 0 || {([_key] call DUWS_fnc_garrisonHeld) && {[_key] call DUWS_fnc_garrisonBeaten}})
-        && {([_pos, _radius, _side, true] call fnc_side_count_at) > 0}
-        && {([_pos, _ring, _side, true] call fnc_side_count_at) > ([_pos, _ring, _foe, true] call fnc_side_count_at)};
     private _var = format ["DUWS_takeSince_%1", _key];
-    if (!_won) exitWith { missionNamespace setVariable [_var, nil]; false };
+    if (([_key, _profile, _side, _foe] call DUWS_fnc_siteTakeBlockers) isNotEqualTo []) exitWith {
+        missionNamespace setVariable [_var, nil]; false
+    };
     private _held = missionNamespace getVariable [_var, []];
     if ((_held param [0, sideUnknown]) != _side) then {
         _held = [_side, time];
