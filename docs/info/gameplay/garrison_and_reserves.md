@@ -20,8 +20,8 @@ ledger call, composition filter and raise below: a zone answers `"BLU"` when BLU
 (`fnc_zone_bluforHeld`), and `"OPF"` otherwise.
 
 A garrison crews whatever the ground carries, so a zone the player holds mans its prefab's guns with their
-own men; only a raise reaches that pass, which is why it happens exactly when they have a garrison and not
-before. OPCOM reads a BLUFOR garrison at its **true force**, not a nominal — the commander is omniscient
+own men. A raise runs that pass at every tier, so a zone at tier 0 mans its guns and fields no other men.
+OPCOM reads a BLUFOR garrison at its **true force**, not a nominal — the commander is omniscient
 about what the player has built, and the territorial figure it used to read is now only the floor for
 BLUFOR ground carrying no garrison. A sighted group on a live BLUFOR garrison's roster keeps its belief row but
 adds nothing to the force grid, because the site's deposit already counts it

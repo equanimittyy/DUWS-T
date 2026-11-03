@@ -137,7 +137,7 @@ DUWS_fnc_crewCompositionStatics = {
 
 // The prefab crews guns at build time and never runs again, so a stowed-then-redeployed composition
 // comes back with empty guns unless re-crewed here. Crewed for whoever holds the zone: the emplacements
-// go with the ground, and only a raise reaches this, so BLUFOR man them exactly when they have a garrison.
+// go with the ground.
 DUWS_fnc_zoneManStatics = {
     params ["_pos", "_key"];
     private _side = [_key] call DUWS_fnc_garrisonSideOf;
@@ -257,8 +257,7 @@ DUWS_zoneHooks = createHashMapFromArray [["tick", {
     };
 
     if !(_o get "awake") exitWith {
-        // Tier, not ownership: tier 0 is ground with no garrison on it, which is where BLUFOR start.
-        if (_here && {!(_o get "awaitVacate")} && {([_key] call fnc_zone_tier) > 0}) then {
+        if (_here && {!(_o get "awaitVacate")}) then {
             _o set ["holder", _holder];
             _o set ["raising", true];
             missionNamespace setVariable [ZONE_RAISE_SLOT(_key), nil];

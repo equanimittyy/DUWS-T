@@ -363,10 +363,9 @@ while a squadmate mans one of them (`DUWS_fnc_zoneBuildSleep`), because a stow w
 if the mod uses that category.
 
 **A held zone's flag redeploys its gun crews for 2 CP.** The flag's Redeploy Gun Crews action does the same to the
-zone's prefab guns and its builds together (`DUWS_fnc_zoneRedeploy`, `fnc_zone_build.sqf`). It works only on a zone
-at tier I or higher. A zone with a tier raises, and the raise adopts every seated gunner into the garrison roster that
-the zone's stream-out collects (`DUWS_fnc_zoneManStatics`). A tier-0 zone never raises, so nothing would collect its
-gunners. The action sits under Clear and does not need Fortification I.
+zone's prefab guns and its builds together (`DUWS_fnc_zoneRedeploy`, `fnc_zone_build.sqf`). It works at every tier,
+because every zone raises, and the raise adopts each seated gunner into the garrison roster that the zone's
+stream-out collects (`DUWS_fnc_zoneManStatics`). The action sits under Clear and does not need Fortification I.
 
 **R3F moves and sells a manned build.** R3F refuses to move or sell an object with a crew. A build whose only crew is
 friendly AI outside every player's group is the exception (`DUWS_fnc_buildCrewFree`): the Move action and the direct
@@ -427,8 +426,7 @@ and intel levels.
 **A build belongs to the factory that made it.** R3F reports each build to `DUWS_fnc_buildRegister`, which files it
 under the factory's own key, `<siteKey>_builds`. That key is separate from the site's key, so a clear removes the
 builds and leaves the site's composition. A zone's wake and sleep hooks deploy and stow the key with the zone
-(`fnc_zone_stream_init.sqf`). A held zone at tier 0 never raises, so its prefab, flag and builds stay up from the
-capture on, and a load deploys them again after build-out stows them (`DUWS_fnc_restoreWorld`). The sleep does not stow it while a build is carried or loaded in a vehicle,
+(`fnc_zone_stream_init.sqf`). The sleep does not stow it while a build is carried or loaded in a vehicle,
 because a stow deletes the object from R3F's hands. A base never streams, so its builds always stand. A FOB's
 builds go to the sweep when the FOB is dismantled or destroyed (`fnc_fob_deregister.sqf`).
 
@@ -839,7 +837,7 @@ That counter exists because `amount_zones_created` cannot answer the question: `
 bumps it on entry, so it counts zones *started*. `fnc_createzone.sqf` bumps the build-out counter as its
 last step, after the prefab, the flag, the capture trigger and the stow of an unvisited zone. A load's
 world restore waits on the counter: it finds each held zone's flag and trigger by name and skips a
-missing one without an error, and it deploys a held tier-0 zone that the stow would otherwise take back.
+missing one without an error.
 The comparison is against `count serv_zones_array` rather than
 `zones_number` because the origin keep-out (`fnc_locatorzones_random.sqf:171-177`) can silently drop a
 zone slot, and a `zones_number` target would then never be reached.

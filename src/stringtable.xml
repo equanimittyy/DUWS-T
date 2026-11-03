@@ -5168,18 +5168,6 @@
                 <Chinese>砲組正在重新部署中。</Chinese>
                 <Spanish>Las dotaciones de artillería ya se están redesplegando.</Spanish>
             </Key>
-            <Key ID="STR_DUWS_T_ZONE_REDEPLOY_NO_TIER">
-                <Original>Requires Tier I+.</Original>
-                <English>Requires Tier I+.</English>
-                <Chinesesimp>需要等级 I 及以上。</Chinesesimp>
-                <German>Erfordert Stufe I+.</German>
-                <Polish>Wymaga Poziomu I+.</Polish>
-                <Czech>Vyžaduje úroveň I+.</Czech>
-                <Russian>Требуется уровень I+.</Russian>
-                <French>Requiert le palier I+.</French>
-                <Chinese>需要等級 I 以上。</Chinese>
-                <Spanish>Requiere Nivel I+.</Spanish>
-            </Key>
             <Key ID="STR_DUWS_T_ZONE_CAPTURE_ACTION">
                 <Original>Capture Zone</Original>
                 <English>Capture Zone</English>

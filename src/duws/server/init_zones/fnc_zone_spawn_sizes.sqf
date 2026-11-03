@@ -320,6 +320,8 @@ fnc_zone_spawn = {
     private _roster = [_zoneKey] call fnc_zone_roster;
 
     private _tier = [_zoneKey] call fnc_zone_tier;
+    // Live with no men, so a first tier bought while it stands re-stands it and a gun built on it is crewed.
+    if (_tier == 0) exitWith { [_zoneKey, true] call DUWS_fnc_garrisonSetLive };
     private _side = [_zoneKey] call DUWS_fnc_garrisonSideOf;
     private _x1 = [_tier, _side] call DUWS_fnc_zoneSpawnList;
     if (_x1 isEqualTo []) exitWith {
