@@ -5205,16 +5205,16 @@
                 <Spanish>La guarnición enemiga aún se está desplegando.</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_ZONE_CAPTURE_GARRISON">
-                <Original>The enemy garrison is not broken yet.</Original>
-                <English>The enemy garrison is not broken yet.</English>
-                <Chinesesimp>敌方驻军尚未被击溃。</Chinesesimp>
-                <German>Die feindliche Garnison ist noch nicht zerschlagen.</German>
-                <Polish>Wrogi garnizon nie został jeszcze rozbity.</Polish>
-                <Czech>Nepřátelská posádka ještě není rozbitá.</Czech>
-                <Russian>Вражеский гарнизон ещё не разбит.</Russian>
-                <French>La garnison ennemie n'est pas encore brisée.</French>
-                <Chinese>敵方駐軍尚未被擊潰。</Chinese>
-                <Spanish>La guarnición enemiga aún no ha sido derrotada.</Spanish>
+                <Original>The enemy garrison is still active, with reinforcements on the way.</Original>
+                <English>The enemy garrison is still active, with reinforcements on the way.</English>
+                <Chinesesimp>敌方驻军仍在活动，增援正在途中。</Chinesesimp>
+                <German>Die feindliche Garnison ist noch aktiv, Verstärkung ist unterwegs.</German>
+                <Polish>Wrogi garnizon jest wciąż aktywny, a posiłki są w drodze.</Polish>
+                <Czech>Nepřátelská posádka je stále aktivní a posily jsou na cestě.</Czech>
+                <Russian>Вражеский гарнизон всё ещё активен, подкрепления в пути.</Russian>
+                <French>La garnison ennemie est toujours active, des renforts sont en route.</French>
+                <Chinese>敵方駐軍仍在活動，增援正在途中。</Chinese>
+                <Spanish>La guarnición enemiga sigue activa, con refuerzos en camino.</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_ZONE_CAPTURE_PRESENCE">
                 <Original>No BLUFOR unit is inside the zone.</Original>
