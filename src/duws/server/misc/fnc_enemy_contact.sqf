@@ -1,5 +1,4 @@
-// Locality: server -- named by the zone and HQ presence triggers, both created server-local so
-// the alert is raised once however the engine treats a global trigger's statement.
+// Locality: server.
 //
 // A notification rather than a radio line: the dialogue channel is for things somebody says, and a
 // contact report the player has to act on was scrolling past under the chatter. Not a hint either

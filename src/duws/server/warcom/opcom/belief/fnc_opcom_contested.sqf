@@ -1,6 +1,5 @@
 // Locality: server, executed at load by server_fnc_init ([] call compile) so it can define several
-// functions. Site contest is a belief fact, rebuilt once per OPCOM tick from the settled store (after decay
-// and prune), so every reader in a tick sees one snapshot.
+// functions. Site contest is rebuilt once per OPCOM tick, so every reader in a tick sees one snapshot.
 if (!isServer) exitWith {};
 
 // A group netId is an "ent:id" string; zone/FOB/HQ-keyed rows are standing knowledge, not a sighting.
@@ -9,27 +8,29 @@ DUWS_fnc_opcom_beliefIsSighting = {
     _key isEqualType "" && {(_key find ":") >= 1}
 };
 
-// Contested: a BLUFOR sighting within one grid cell of the site's edge -- some OPFOR knows BLUFOR is there. Zones,
-// towns and bases alike, so a garrison buy and a base's upkeep read the same rule wherever they land.
+// OPFOR only, yet one test on either side's ground: at a BLUFOR site it finds the attackers, at an OPFOR site the
+// defenders fighting back. Zones, towns and bases alike, so a garrison buy and a base's upkeep read the same rule.
 DUWS_fnc_opcom_contestedUpdate = {
-    private _sighted = [];
-    {
-        if ([_x] call DUWS_fnc_opcom_beliefIsSighting) then { _sighted pushBack (DUWS_opcom_belief_pos select _forEachIndex) };
-    } forEach DUWS_opcom_belief_key;
     private _contested = createHashMap;
-    if (_sighted isNotEqualTo []) then {
-        {
-            private _key = _x;
-            if ((_key select [0, 5]) in ["zone_", "town_"] || {(_key select [0, 4]) == "FOB_"} || {_key == "HQ"}) then {
-                private _site = [_key] call fnc_site_at;
-                private _pos = _site getOrDefault ["pos", []];
-                private _reach = (_site getOrDefault ["radius", 0]) + OPCOM_GRID_CELL;
-                if (_pos isNotEqualTo [] && {(_sighted findIf { (_x distance2D _pos) <= _reach }) >= 0}) then {
-                    _contested set [_key, true];
+    {
+        private _key = _x;
+        private _site = _y;
+        if ((_key select [0, 5]) in ["zone_", "town_"] || {(_key select [0, 4]) == "FOB_"} || {_key == "HQ"}) then {
+            private _men = [];
+            {
+                {
+                    if (side _x == EAST && {_x call fnc_unit_standing} && {[_x] call fnc_duws_engaged}) then { _men pushBack _x };
+                } forEach ([crew _x, [_x]] select (_x isKindOf "CAManBase"));
+            } forEach ((_site get "pos") nearEntities [["CAManBase", "LandVehicle", "Air"], _site get "radius"]);
+            if (_men isNotEqualTo []) then {
+                _contested set [_key, true];
+                if (!(_key in DUWS_opcom_contested) && {_key == "HQ" || {(_key select [0, 4]) == "FOB_"}
+                    || {(_key select [0, 5]) == "zone_" && {[_key] call fnc_zone_bluforHeld}}}) then {
+                    [_site getOrDefault ["label", ""], _men] call fnc_enemy_contact;
                 };
             };
-        } forEach keys DUWS_sites;
-    };
+        };
+    } forEach DUWS_sites;
     DUWS_opcom_contested = _contested;
     // R3F's create and sale run on the clients, which cannot read this server-side store.
     private _keys = keys _contested;

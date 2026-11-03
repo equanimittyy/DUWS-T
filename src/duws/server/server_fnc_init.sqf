@@ -593,8 +593,7 @@ fnc_veh_set_comp_damage = compile preprocessFileLineNumbers "duws\server\misc\fn
 // bounces it. createVehicle is global, so the one server-simulated object networks to every machine on its own.
 fnc_throw = compile preprocessFileLineNumbers "duws\server\misc\fnc_throw.sqf";
 fnc_enterlocation = compile preprocessFileLineNumbers "duws\server\misc\fnc_enterlocation.sqf";
-// Not broadcast: the two triggers that name it are created server-local, and it creates global
-// markers, so exactly one machine may run it.
+// Not broadcast: it creates global markers, so exactly one machine may run it.
 fnc_enemy_contact = compile preprocessFileLineNumbers "duws\server\misc\fnc_enemy_contact.sqf";
 // Straight-line water probe the convoy threads and the client-side HVT offer picker use to reject an
 // approach bearing that crosses the sea. Broadcast for that picker call site (fnc_hvt_dest_pick).

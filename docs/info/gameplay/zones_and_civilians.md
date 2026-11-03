@@ -35,9 +35,8 @@ the centroid of `House`/`Building` objects within 400 m (`:96-117`), `findSafePo
 (`:113`), nudge 5 m off the nearest road (`:119-123`). Then distance-from-HQ (`:131`), spacing
 (`:133-145`) and 500 m origin keep-out (`:148-151`) gates, then `spawn fnc_createZone` (`:158`). The
 spacing gate measures edge to edge: `zones_spacing` is the gap between two zones' discs, half the
-maximum radius, so the contact trigger at 1.5 times a zone's radius stops short of its neighbour. The
-`else` branch (`:127-150`) is the older random-then-snap-to-building behaviour, with a 10-try
-validation loop.
+maximum radius. The `else` branch (`:127-150`) is the older random-then-snap-to-building behaviour,
+with a 10-try validation loop.
 
 **Build-out** places markers, clears obstacles for prefab zones (`:61-87`), spawns a weighted prefab
 (`:89-139`), and wires the spawn-wait, presence and capture triggers. A ring of 3-4 fortification
@@ -287,8 +286,8 @@ wiped rather than one that was never there.
 the banner. Each spends BLUFOR AP at OPCOM's price for the same buy
 (`OPCOM_AP_REINFORCE` 10, `OPCOM_AP_FORTIFY` 15). A button
 shows only when its buy changes something: Reinforce needs a lost token and a step of at least one token,
-and Fortify needs a tier below IV. While OPCOM counts the site as contested (an OPFOR sighting of BLUFOR
-within the site's radius plus one grid cell, `DUWS_fnc_opcom_siteContested`), the buttons are disabled
+and Fortify needs a tier below IV. While the site is contested (an engaged OPFOR soldier stands inside the
+site's radius, `DUWS_fnc_opcom_siteContested`), the buttons are disabled
 and the readout says so. `fnc_map_readout_offer` decides what the buttons offer, and
 `fnc_map_readout_buy` asks it again on the server before it spends, so a stale button cannot buy. Both
 accept only a zone reference.
@@ -383,14 +382,25 @@ from them. When BLUFOR take the zone back, the builds count against the flag aga
 as long as the base stands.
 
 **A contested site refuses its factory and its redeploy.** The contest is the one that disables Reinforce and Fortify
-(`DUWS_fnc_opcom_siteContested`). The HQ and each FOB are sites for it too, so the reach of a base is its 500 m site
-radius (`base_garrison_sleep_range`) plus one grid cell. While the contest holds, the site's factory creates nothing and
-takes no sale, Clear Fortifications removes nothing, and the 2 CP redeploy of the zone, the HQ or a FOB charges
+(`DUWS_fnc_opcom_siteContested`). The HQ and each FOB are sites for it too, so a base is contested while an engaged
+OPFOR soldier stands inside its 500 m site radius (`base_garrison_sleep_range`). While the contest holds, the site's
+factory creates nothing and takes no sale, Clear Fortifications removes nothing, and the 2 CP redeploy of the zone, the HQ or a FOB charges
 nothing. The actions stay visible, and each one tells the player "Contested: enemies nearby." The server checks Clear
 and the redeploys (`DUWS_fnc_siteBuildClear`, `DUWS_fnc_zoneRedeploy`, `fnc_redeployHQUnits.sqf`,
 `fnc_redeployFOBUnits.sqf`). R3F creates and sells on the client, so `DUWS_fnc_opcom_contestedUpdate` publishes the
 contested site keys (`DUWS_contestedSites`) when they change. R3F's create and sale scripts test the factory's site
 against that list (`DUWS_fnc_buildContested`).
+
+**A contest is a fight inside the site, not a sighting.** A site is contested while a standing OPFOR soldier inside
+its radius is engaged: his behaviour is `COMBAT`, or he knows about a player (`fnc_duws_engaged`). The same test
+serves both sides' ground. At a BLUFOR site it finds the attackers, and at an OPFOR site it finds the defenders who
+fight back. OPCOM rebuilds the set each tick (`DUWS_fnc_opcom_contestedUpdate`). An enemy who crosses the site
+unseen does not contest it. A group scripted into `COMBAT`, such as a side mission's guards, contests the site it
+stands in until it dies.
+
+**A contest at a BLUFOR site raises the contact card.** When a contest starts at the HQ, a FOB or a zone BLUFOR hold,
+every player gets the enemy contact card, with a map mark on each engaged group (`fnc_enemy_contact`). The card fires
+once for each contest, so a fight that runs on does not repeat it.
 
 **The credits are R3F's own running balance.** R3F spends a factory's credits on a build and refunds them on a
 sale. A destroyed build is lost: nothing refunds it. A build costs at most 150 credits

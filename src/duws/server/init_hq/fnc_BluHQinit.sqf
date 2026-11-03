@@ -372,14 +372,6 @@ str(_markername) setMarkerType "mil_flag";
 str(_markername) setMarkerColor "ColorBlue";
 str(_markername) setMarkerText "Main Base";
 
-// Server-local, matching the zone's contact trigger: a global trigger runs its statement on every
-// machine, which would raise the alert and drop its markers once per player.
-_trgWarning = createTrigger["EmptyDetector",PosOfBLUHQ,false];
-_trgWarning setTriggerArea[300,300,0,false];
-_trgWarning setTriggerActivation["EAST","PRESENT",true];
-_trgWarning setTriggerStatements["this", "['Main Base', thisList] call fnc_enemy_contact;", ""];
-_trgWarning setTriggerTimeout [10, 10, 10, true];
-
 private _respawnXY = _medTent modelToWorld [-0.243752, -7.28516, 0];
 private _respawnPos = [
     _respawnXY select 0,

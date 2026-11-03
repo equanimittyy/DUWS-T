@@ -139,26 +139,6 @@ _trg2 setTriggerStatements["this", format["['%1',%2,'%3','%4',thislist] spawn fn
 // Handle not filed: nothing ever deletes this trigger, so there's no reader to keep one for -- unlike the capture
 // trigger beside it, filed under trigger_<x>_<y> because fnc_captured/fnc_blufor_cap rewrite it on ownership change.
 
-// Only the enemy-contact direction reports: walking into enemy ground is visible to the player already, but a
-// counter-attack on zone they hold isn't. Server-local per fnc_captured.sqf:15's unproven trigger-locality question.
-private _trgEnemy = createTrigger ["EmptyDetector", _zonePos, false];
-_trgEnemy setTriggerArea [_size * 1.5, _size * 1.5, 0, false];
-_trgEnemy setTriggerActivation ["EAST", "PRESENT", true];
-// Carried on the trigger, not formatted into the statement string, so this position never becomes text and back.
-_trgEnemy setVariable ["DUWS_zonePos", _zonePos];
-_trgEnemy setVariable ["DUWS_zoneName", _name];
-// Tested as BLUFOR-held rather than not-OPFOR-held, so a zone in neither list stays quiet.
-// The <1m distance2D check here is identity ("is this the zone"), not proximity -- it can't use == because the
-// far side round-tripped through a formatted statement string; the epsilon is arbitrary slop, unrelated to streaming radii.
-_trgEnemy setTriggerStatements [
-    "this && {private _p = thisTrigger getVariable ['DUWS_zonePos', []];
-        (WARCOM_zones_controled_by_BLUFOR findIf { (_x distance2D _p) < 1 }) >= 0}",
-    "[thisTrigger getVariable ['DUWS_zoneName', ''], thisList] call fnc_enemy_contact;",
-    ""
-];
-// Same debounce as the HQ's: OPFOR patrolling across the boundary would otherwise re-report on every pass.
-_trgEnemy setTriggerTimeout [10, 10, 10, true];
-
 _spawnPos = _zonePos;
 
 // The key everything about this zone files under (stow, stream thread, garrison peak, spawn flag). Derived once
@@ -182,7 +162,7 @@ private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])
 
 // Registered with the shared poller (owns the streaming clock): a streaming loop and a tail loop handshake per
 // zone, and raise needs 2 AI but hold only 1 -- hysteresis against a zone flickering at the edge of the force that took it.
-[_zoneKey, _spawnPos, _size] call fnc_site_register;
+([_zoneKey, _spawnPos, _size] call fnc_site_register) set ["label", _name];
 private _occ = [_zoneKey, "garrison", EAST, "zone"] call fnc_site_occupant_register_profile;
 _occ set ["minAIHold", 1];
 // airRingCommitted wakes the garrison for a committing aircraft (inbound heli, UAV on-station) that the
@@ -257,7 +237,6 @@ _trg setTriggerArea [_size, _size, 0, false];
 // No activation: DUWS_fnc_siteTaken tests presence itself and stamps its own hold, which a `this` gate would stop
 // it resetting when the attacker steps out. The re-arm handlers swap only the statement.
 _trg setTriggerActivation ["NONE", "PRESENT", true];
-// Carried on the trigger, not formatted into the condition -- same reason as the enemy-contact trigger above.
 _trg setVariable ["DUWS_zoneKey", _zoneKey];
 // 7th arg is the retired CP-bounty slot, always 0 now: liberation pays a flat bonus (fnc_captured), not a
 // worth-scaled one, and no CP rides a recapture. _points here is separate -- the zone's permanent worth,

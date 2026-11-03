@@ -1,4 +1,4 @@
-// Locality: server; the trigger bodies below run on the machine that triggers them, not here (callers remoteExec to target 2).
+// Locality: server -- callers remoteExec to target 2.
 
 _foundPickupPos = _this select 0;
 _fob_owner = _this select 2;
@@ -68,7 +68,7 @@ if (count _fadePlayers > 0) then {
 private _fobKey = format ["FOB_%1", netId _fob];
 _fob setVariable ["DUWS_siteKey", _fobKey];
 _fob setVariable ["DUWS_marker", _markerstr];
-[_fobKey, _foundPickupPos, base_garrison_sleep_range, "freeze"] call fnc_site_register;
+([_fobKey, _foundPickupPos, base_garrison_sleep_range, "freeze"] call fnc_site_register) set ["label", format ["FOB %1", _fobname]];
 [_fob, _fobKey] call DUWS_fnc_baseBuildArm;
 // Woken by players or by hostiles. A garrison that cannot be woken by an attacker is a garrison
 // that loses its base while nobody is looking; the shared BLUFOR test cannot answer it, because
@@ -82,24 +82,6 @@ _fob setVariable ["DUWS_marker", _markerstr];
 
 // No arrival trigger: it existed only to announce a friendly element reaching the FOB, and the
 // hardcore reveal fnc_enterlocation still does is keyed on a zone name, which a FOB never has.
-
-// warning trigger when an enemy approaches the camp -- the same red contact card and map mark the
-// HQ raises, through fnc_enemy_contact. The FOB label is baked into the statement as a literal:
-// the trigger evaluates later with no local scope, so _fobname is out of reach by then.
-_trgWarning = createTrigger["EmptyDetector",_foundPickupPos];
-_trgWarning setTriggerArea[450,450,0,false];
-_trgWarning setTriggerActivation["EAST","PRESENT",true];
-_trgWarning setTriggerStatements[
-    "this",
-    format["[%1, thisList] call fnc_enemy_contact;", str(format ["FOB %1", _fobname])],
-    ""
-];
-// Filed under the rounded trigger position, which is the only key fnc_FOB_cleanup can rebuild
-// from the FOB position it is handed.
-missionNamespace setVariable [
-    format["trigfob2%1%2",round (_foundPickupPos select 0),round (_foundPickupPos select 1)],
-    _trgWarning
-];
 
 Array_of_FOBS = Array_of_FOBS + [_fob];
 publicVariable "Array_of_FOBS";
