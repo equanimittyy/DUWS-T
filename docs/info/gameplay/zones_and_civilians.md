@@ -805,8 +805,11 @@ in `fnc_init_OPFOR_WARCOM.sqf` after its `serv_zones_array` wait and fires once
 `zones_buildout_done >= count serv_zones_array`.
 
 That counter exists because `amount_zones_created` cannot answer the question: `fnc_createzone.sqf:19`
-bumps it on entry, so it counts zones *started*, and the function never returns — its tail is a
-permanent despawn monitor. The comparison is against `count serv_zones_array` rather than
+bumps it on entry, so it counts zones *started*. `fnc_createzone.sqf` bumps the build-out counter as its
+last step, after the prefab, the flag, the capture trigger and the stow of an unvisited zone. A load's
+world restore waits on the counter: it finds each held zone's flag and trigger by name and skips a
+missing one without an error.
+The comparison is against `count serv_zones_array` rather than
 `zones_number` because the origin keep-out (`fnc_locatorzones_random.sqf:171-177`) can silently drop a
 zone slot, and a `zones_number` target would then never be reached.
 

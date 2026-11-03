@@ -180,11 +180,6 @@ private _zoneTier = [_zoneKey] call fnc_zone_tier_roll;
 private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1;
 [_zoneKey, [[_zoneTier] call DUWS_fnc_zoneSpawnList, _mult] call DUWS_fnc_scaleComposition] call DUWS_fnc_garrisonSetFull;
 
-// Last point this function can report completion: what follows (OPFOR spawn, then a permanent despawn monitor)
-// never returns.
-zones_buildout_done = zones_buildout_done + 1;
-publicVariable "zones_buildout_done";
-
 // Registered with the shared poller (owns the streaming clock): a streaming loop and a tail loop handshake per
 // zone, and raise needs 2 AI but hold only 1 -- hysteresis against a zone flickering at the edge of the force that took it.
 [_zoneKey, _spawnPos, _size] call fnc_site_register;
@@ -272,3 +267,8 @@ _trg setTriggerStatements ["[thisTrigger getVariable 'DUWS_zoneKey', 'zone', WES
 private _trgVarName = format["trigger_%1_%2", floor abs (_zonePos select 0), floor abs (_zonePos select 1)];
 missionNamespace setVariable [_trgVarName, _trg];
 _trg setVariable ["isZoneCaptureTrigger", true];
+
+// Counted last: a load's world restore waits on this count, and it finds the flag and capture trigger by name,
+// skipping a missing one silently.
+zones_buildout_done = zones_buildout_done + 1;
+publicVariable "zones_buildout_done";
