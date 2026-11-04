@@ -14,7 +14,7 @@
 //                                   (shape ["saturate", radius] | ["creep", width, length, bearing]; a creep ignores rounds)
 //   ["teleport", id, pos]           -- snap `id` (stored point + live group) to a pos, then hold on guard there
 //   ["list"] / ["clear"]            -- dump every tasking's state / delete all and empty the store
-// e.g. ["recruit", "rifles", getPosASL player] call fnc_opcom_debug_task;
+// e.g. private _cmd = DUWS_opcom_cmds get "OPF"; ["recruit", "rifles", getPosASL player] call fnc_opcom_debug_task;
 params ["_verb", ["_a", ""], ["_b", ""], ["_c", ""]];
 if (!isServer) exitWith { ["WARN", "OPCOMDBG", "must run on the server"] call fnc_log; -1 };
 
