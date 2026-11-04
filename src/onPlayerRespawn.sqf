@@ -21,7 +21,7 @@ player setUnitLoadout ([DUWS_deathLoadout, _keep] call DUWS_fnc_loadout_keep);
 private _savedFace = player getVariable ["Saved_Face", ""];
 private _savedSpeaker = player getVariable ["Saved_Speaker", ""];
 if (_savedFace != "") then { player setFace _savedFace; };
-if (_savedSpeaker != "") then { player setSpeaker _savedSpeaker; };
+if (_savedSpeaker != "") then { [player, _savedSpeaker] remoteExec ["setSpeaker", 0, player]; };
 player_fatigue = missionNamespace getVariable ["DUWS_paramFatigue", 1];
 player enableStamina (player_fatigue != 0);
 player addRating 10000000;

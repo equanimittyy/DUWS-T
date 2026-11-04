@@ -284,6 +284,8 @@ hint localize "STR_DUWS_T_zu4bxt24";
     if (count _combatUnits > 0) then {
         private _template = selectRandom _combatUnits;
         player setUnitLoadout (getUnitLoadout _template);
+        // Every slot carries an English voice; setSpeaker is local-effect, so it goes to every machine.
+        if (speaker _template != "") then { [player, speaker _template] remoteExec ["setSpeaker", 0, player]; };
     } else {
         systemChat localize "STR_DUWS_T_loadout_copy_none";
     };
