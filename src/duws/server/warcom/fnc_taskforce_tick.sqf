@@ -14,7 +14,7 @@ if (time >= DUWS_taskforce_spawnAt && {({_x select 3} count (missionNamespace ge
 private _taskforces = missionNamespace getVariable ["DUWS_taskforces", []];
 if (_taskforces isEqualTo []) exitWith {};
 // Advanced leaves the orders to BLUFOR's commander; the timer, the markers and the list status stay here.
-if (DUWS_paramBluforCommander == 0) then { [_taskforces] call fnc_taskforce_orders };
+if ("BLU" in DUWS_opcom_cmds) then { [_taskforces] call fnc_taskforce_commander } else { [_taskforces] call fnc_taskforce_orders };
 
 private _live = [];
 {

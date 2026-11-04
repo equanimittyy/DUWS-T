@@ -55,6 +55,10 @@ if (_taskforces isEqualTo []) exitWith {
 		case "patrol": { format [localize "STR_DUWS_T_TASKFORCE_PATROL", _target] };
 		case "defend": { format [localize "STR_DUWS_T_TASKFORCE_DEFEND", _target] };
 		case "hq": { localize "STR_DUWS_T_TASKFORCE_DEFEND_HQ" };
+		case "hold": { format [localize "STR_DUWS_T_TASKFORCE_HOLD", _target] };
+		case "stage": { format [localize "STR_DUWS_T_TASKFORCE_STAGE", _target] };
+		case "respond": { format [localize "STR_DUWS_T_TASKFORCE_RESPOND", _target] };
+		case "probe": { format [localize "STR_DUWS_T_TASKFORCE_PROBE", _target] };
 		default { localize "STR_DUWS_T_TASKFORCE_AWAITING" };
 	};
 

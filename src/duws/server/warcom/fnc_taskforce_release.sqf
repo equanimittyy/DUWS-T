@@ -10,6 +10,13 @@ if (_i < 0) exitWith {};
 (_taskforces deleteAt _i) params ["", "_marker", "_tfName"];
 missionNamespace setVariable ["DUWS_taskforces", _taskforces, true];
 deleteMarker _marker;
+// Unbound at once, so no BLUFOR task step orders the squad after the player has it; fnc_taskforce_commander drops it.
+private _store = ((missionNamespace getVariable ["DUWS_opcom_cmds", createHashMap]) getOrDefault ["BLU", createHashMap]) getOrDefault ["taskings", []];
+private _ti = _store findIf { (_x get "grp") isEqualTo netId _group };
+if (_ti >= 0) then {
+	(_store select _ti) set ["grp", ""];
+	(_store select _ti) set ["taskforce", ""];
+};
 
 // A stale order would read as already given if the squad is handed over again, and it would never move.
 _group setVariable ["DUWS_taskforce_order", nil];

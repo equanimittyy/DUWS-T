@@ -18432,6 +18432,54 @@
                 <Chinese>防守 %1</Chinese>
                 <Spanish>Defender %1</Spanish>
             </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_HOLD">
+                <Original>Hold position at %1</Original>
+                <English>Hold position at %1</English>
+                <Chinesesimp>在 %1 坚守阵地</Chinesesimp>
+                <German>Stellung halten: %1</German>
+                <Polish>Trzymać pozycję: %1</Polish>
+                <Czech>Držet pozici: %1</Czech>
+                <Russian>Удерживать позицию: %1</Russian>
+                <French>Tenir la position : %1</French>
+                <Chinese>在 %1 堅守陣地</Chinese>
+                <Spanish>Mantener la posición: %1</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_STAGE">
+                <Original>Stage for %1</Original>
+                <English>Stage for %1</English>
+                <Chinesesimp>集结进攻 %1</Chinesesimp>
+                <German>Sammeln für %1</German>
+                <Polish>Zbiórka przed %1</Polish>
+                <Czech>Shromáždění před %1</Czech>
+                <Russian>Сбор перед %1</Russian>
+                <French>Ralliement pour %1</French>
+                <Chinese>集結進攻 %1</Chinese>
+                <Spanish>Reunión para %1</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_RESPOND">
+                <Original>Respond to contact at %1</Original>
+                <English>Respond to contact at %1</English>
+                <Chinesesimp>支援 %1 的交火</Chinesesimp>
+                <German>Feindkontakt: %1</German>
+                <Polish>Reakcja na kontakt: %1</Polish>
+                <Czech>Reakce na kontakt: %1</Czech>
+                <Russian>Ответ на контакт: %1</Russian>
+                <French>Réaction au contact : %1</French>
+                <Chinese>支援 %1 的交火</Chinese>
+                <Spanish>Respuesta al contacto: %1</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_PROBE">
+                <Original>Probe %1</Original>
+                <English>Probe %1</English>
+                <Chinesesimp>侦察 %1</Chinesesimp>
+                <German>Aufklärung: %1</German>
+                <Polish>Rozpoznanie: %1</Polish>
+                <Czech>Průzkum: %1</Czech>
+                <Russian>Разведка: %1</Russian>
+                <French>Reconnaissance : %1</French>
+                <Chinese>偵察 %1</Chinese>
+                <Spanish>Reconocimiento: %1</Spanish>
+            </Key>
             <Key ID="STR_DUWS_T_TASKFORCE_TAKEBACK">
                 <Original>Take back</Original>
                 <English>Take back</English>
