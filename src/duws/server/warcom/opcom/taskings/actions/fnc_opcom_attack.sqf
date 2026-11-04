@@ -13,7 +13,7 @@ if (!isServer) exitWith {};
 // there. An assault's reach 1 sweeps the cells beside the fight, where closing straight from the line would bunch the
 // wave onto one fire mission's worth of ground. A flank's maneuver hooks round the fight to OPCOM_HOOK_K, the weakest
 // side first, and waits there until the role it names reads engaged, since an envelopment arriving before the
-// defenders are committed to the front is worth nothing. Lambda bends its march around believed BLUFOR
+// defenders are committed to the front is worth nothing. Lambda bends its march around the believed enemy
 // (fnc_opcom_task): an enveloping role is worth only what it reaches unseen, where the fight is the point of the fix's
 // march.
 DUWS_opcom_attackRoles = createHashMapFromArray [
@@ -39,7 +39,7 @@ DUWS_fnc_opcom_rallyAt = {
     _out
 };
 
-// Believed BLUFOR in a jump-off's block, less the target's own: that block is the fight the fix draws, alike from every
+// The believed enemy in a jump-off's block, less the target's own: that block is the fight the fix draws, alike from every
 // side.
 DUWS_fnc_opcom_sideForce = {
     params ["_at", "_jump"];
@@ -277,7 +277,7 @@ DUWS_fnc_opcom_boundForce = {
     _force
 };
 
-// The force an attack binds over the believed BLUFOR force at its target, both as the 3x3 block reads them.
+// The force an attack binds over the believed enemy force at its target, both as the 3x3 block reads them.
 DUWS_fnc_opcom_musterRatio = {
     params ["_attack"];
     ([_attack get "pos"] call DUWS_fnc_opcom_blockForce) params ["", "_ene"];
@@ -393,7 +393,8 @@ DUWS_fnc_opcom_buildupStep = {
         if (count _live < count (_x get "units")) then { _lost = true };
         _units append _live;
     } forEach (_attack get "roles");
-    // A loss while staging means BLUFOR found the rally: the survivors go free rather than wait there for the next.
+    // A loss while staging means the enemy found the rally, or a task force was taken back: the survivors go free
+    // rather than wait there for the next.
     if (_lost) exitWith { [_attack, "aborted: a staging unit was lost"] call DUWS_fnc_opcom_attackClose };
     private _r = [_attack] call DUWS_fnc_opcom_musterRatio;
     private _ready = ((_attack get "roles") findIf { (_x get "required") && {(_x get "units") isEqualTo []} }) < 0

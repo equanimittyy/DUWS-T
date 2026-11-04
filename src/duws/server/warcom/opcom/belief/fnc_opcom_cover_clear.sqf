@@ -3,10 +3,6 @@
 // re-confirmed this tick (time < tick). Detection re-stamps a still-present subject to this tick before this
 // runs, so it survives; only a stamp whose position the sweep just disproved goes. Guaranteed sensors only
 // (recon, a fired OP post) -- a fallible nearTargets miss is no proof, the reason its miss never stamps either.
-//
-// Assumes every belief is a mobile group (true today: all faucets stamp BLUFOR group netIds). A static
-// discovered subject -- the zone / FOB / HQ keys belief_init reserves -- must be excluded before one is ever
-// written, else an overflight that does not re-detect it as a group would un-discover it.
 params ["_point", "_k", ["_blind", []]];
 
 private _w  = DUWS_opcom_grid_w;

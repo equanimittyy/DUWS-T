@@ -7,8 +7,8 @@ private _zero = DUWS_opcom_grid_land apply { 0 };
 
 _cmd set ["belief_key", []];    // subject: an enemy group netId
 _cmd set ["belief_pos", []];    // [x,y,0] as last observed, never a live lookup (the sense edge gate enforces it)
-_cmd set ["belief_time", []];   // DUWS_opcom_tick at the observation
-_cmd set ["belief_str", []];    // believed enemy force there
+_cmd set ["belief_time", []];
+_cmd set ["belief_str", []];
 
 _cmd set ["grid_fri", +_zero];
 _cmd set ["grid_ene", +_zero];
@@ -51,7 +51,7 @@ _cmd set ["tickCache", createHashMap];
 _cmd set ["aiEvents", []];
 _cmd set ["aiSeq", 0];
 
-_cmd set ["dbg_fresh", 0];              // groups the sense sweep found freshly-sensed last tick, for the debug line
+_cmd set ["dbg_fresh", 0];
 _cmd set ["dbg_route", [0, 0, 0, 0]];   // grid A* runs, cells expanded, seconds and frames this tick, for the debug line
 _cmd set ["dbg_pick", []];
 _cmd
