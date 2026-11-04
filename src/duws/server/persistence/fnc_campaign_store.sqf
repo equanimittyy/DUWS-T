@@ -49,6 +49,7 @@ DUWS_campaignParams = [
     ["DUWS_ArmsStock", "DUWS_paramArmsStock", 0],
     ["DUWS_RestWeather", "DUWS_paramRestWeather", 1],
     ["DUWS_LoseConditions", "DUWS_paramLoseConditions", 0],
+    ["DUWS_LowPopOfficer", "DUWS_paramLowPopOfficer", 0],
     ["DUWS_TownGeneration", "DUWS_paramTownGen", 0],
     ["DUWS_SupportsOnDeath", "DUWS_paramSupportsOnDeath", 0]
 ];

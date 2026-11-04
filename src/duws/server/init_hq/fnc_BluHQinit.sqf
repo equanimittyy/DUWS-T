@@ -229,7 +229,9 @@ hq_blu1 = _officer; publicVariable "hq_blu1";
     // which a per-hit HandleDamage veto could not. Killable only while OPFOR hold the ring.
     while { alive hq_blu1 } do {
         ["HQ officer watcher", 1] call fnc_loopBeat;
-        hq_blu1 allowDamage (([getPos hq_blu1, OFFICER_GUARD_RADIUS, EAST] call fnc_side_count_at) > 0);
+        private _lowPop = DUWS_paramLowPopOfficer > 0
+            && {count (allPlayers - entities "HeadlessClient_F") <= DUWS_paramLowPopOfficer};
+        hq_blu1 allowDamage (!_lowPop && {([getPos hq_blu1, OFFICER_GUARD_RADIUS, EAST] call fnc_side_count_at) > 0});
         sleep 1;
     };
     // Ends with the officer by design, so its silence after that is not a fault.

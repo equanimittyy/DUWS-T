@@ -79,6 +79,7 @@ DUWS_paramTrackAmmo = ["DUWS_TrackAmmo", 0] call BIS_fnc_getParamValue;publicVar
 DUWS_paramArmsStock = ["DUWS_ArmsStock", 0] call BIS_fnc_getParamValue;publicVariable "DUWS_paramArmsStock";
 DUWS_paramRestWeather = ["DUWS_RestWeather", 1] call BIS_fnc_getParamValue;publicVariable "DUWS_paramRestWeather";
 DUWS_paramLoseConditions = ["DUWS_LoseConditions", 0] call BIS_fnc_getParamValue;publicVariable "DUWS_paramLoseConditions";
+DUWS_paramLowPopOfficer = ["DUWS_LowPopOfficer", 0] call BIS_fnc_getParamValue;publicVariable "DUWS_paramLowPopOfficer";
 DUWS_paramTownGen = ["DUWS_TownGeneration", 0] call BIS_fnc_getParamValue;publicVariable "DUWS_paramTownGen";
 DUWS_paramSupportsOnDeath = ["DUWS_SupportsOnDeath", 0] call BIS_fnc_getParamValue;publicVariable "DUWS_paramSupportsOnDeath";
 

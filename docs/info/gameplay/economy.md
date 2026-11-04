@@ -145,6 +145,10 @@ survives him can spend nothing. Both events raise a red card for the team under 
 campaign that survives one still reports it. Escalation itself is switched off elsewhere, by the
 `escalation_enabled` environment-menu option.
 
+The `DUWS_LowPopOfficer` parameter (default Off, a campaign rule saved with the snapshot) makes the
+officer unkillable while the server holds that many players or fewer, headless clients not counted. The
+officer watcher reads the count each second, so a join or a leave changes the protection at once.
+
 ## Supports: permanent and consumable
 
 One catalogue, `fnc_support_catalogue` in `client/supports/fnc_supports_init.sqf`, holds every row of the

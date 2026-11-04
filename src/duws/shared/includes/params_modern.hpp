@@ -155,6 +155,13 @@ class Params {
         default = 0;
     };
 
+    class DUWS_LowPopOfficer {
+        title = "Low Pop Officer Protection";
+        values[] = {0,1,2,3,4,5,6,7,8,9,10};
+        texts[] = {"Off","Up to 1 player","Up to 2 players","Up to 3 players","Up to 4 players","Up to 5 players","Up to 6 players","Up to 7 players","Up to 8 players","Up to 9 players","Up to 10 players"};
+        default = 0;
+    };
+
     // Read once, at generation (fnc_civ_selectTowns.sqf): a load replays the towns its save holds.
     class DUWS_TownGeneration {
         title = "Civilian Towns";
