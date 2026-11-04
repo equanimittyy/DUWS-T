@@ -178,4 +178,13 @@ class Params {
         default = 0;
     };
 
+    // What orders Overlord's task forces: Simple their standing orders, Advanced a second OPCOM commander with no
+    // economy. The load screen's EDIT PARAMS can switch a campaign, which keeps its task forces either way.
+    class DUWS_BluforCommander {
+        title = "BLUFOR Commander AI";
+        values[] = {0,1};
+        texts[] = {"Simple","Advanced"};
+        default = 0;
+    };
+
 };

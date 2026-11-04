@@ -3,18 +3,26 @@
 // OPCOM_TICK_PERIOD steps movement finer rather than breaking it.
 if (!isServer) exitWith {};
 
-// The commander record: every function under the tick reads its state from _cmd, through dynamic scope.
-private _cmd = createHashMapFromArray [
-    ["side", east], ["enemySide", west], ["wallet", true], ["streams", true],
-    ["enemyZones", "WARCOM_zones_controled_by_BLUFOR"], ["covers", fnc_aoi_opfor_covers],
-    ["captureRest", "garrison"], ["actions", DUWS_opcom_actions]
-];
 call fnc_opcom_belief_init;
 call fnc_opcom_grid_init;
 call fnc_opcom_tasking_init;
-call DUWS_fnc_opcom_pickStateInit;
+private _cmds = createHashMapFromArray [["OPF", [[
+    ["side", east], ["enemySide", west], ["wallet", true], ["streams", true],
+    ["enemyZones", "WARCOM_zones_controled_by_BLUFOR"], ["covers", fnc_aoi_opfor_covers],
+    ["captureRest", "garrison"], ["actions", DUWS_opcom_actions]
+]] call fnc_opcom_cmd_new]];
+if (DUWS_paramBluforCommander == 1) then {
+    _cmds set ["BLU", [[
+        ["side", west], ["enemySide", east], ["wallet", false], ["streams", false],
+        ["enemyZones", "WARCOM_zones_controled_by_OPFOR"], ["covers", fnc_aoi_blufor_covers],
+        ["captureRest", "guard"], ["actions", []]
+    ]] call fnc_opcom_cmd_new];
+};
 // Registered only once built: a dirty mark from another thread writes into every registered record.
-DUWS_opcom_cmds = createHashMapFromArray [["OPF", _cmd]];
+DUWS_opcom_cmds = _cmds;
+// The commander record: every function under the tick reads its state from _cmd, through dynamic scope. OPFOR's
+// stages run under this one, BLUFOR's under their own below.
+private _cmd = _cmds get "OPF";
 if (DUWS_campaignLoaded) then {
     // Once the FOBs stand: the restore re-keys OPCOM's hold on each FOB to the one rebuilt in its place.
     while {!(["SAVE", "the restored FOBs", {!("bases" in DUWS_restorePending)}, 300] call fnc_waitLogged)} do {};
@@ -24,6 +32,18 @@ if (DUWS_campaignLoaded) then {
 // The drip's fractions of an AP, to the wallet and to the tier, paid out whole because fnc_ap_adjust keeps both whole.
 private _dripCarry = 0;
 private _tierCarry = 0;
+private _fnc_pick = {
+    _cmd set ["dbg_pick", []];
+    _cmd set ["pickDebt", (_cmd get "pickDebt") + (_cmd get "picksPerTick")];
+    private _picks = floor (_cmd get "pickDebt");
+    _cmd set ["pickDebt", (_cmd get "pickDebt") - _picks];
+    if (_picks == 0 && {(_cmd get "pickOnce") isNotEqualTo ""}) then { _picks = 1 };
+    for "_k" from 1 to _picks do {
+        // A second pick must see the truck, wallet and sites the first one spent.
+        call DUWS_fnc_opcom_tickCacheReset;
+        call fnc_opcom_pick;
+    };
+};
 while {true} do {
     // Idle with nobody on: holds, cooldowns and staleness all count in ticks, so a frozen clock is a paused commander
     // rather than one that spends a night buying against a player who is asleep.
@@ -32,7 +52,7 @@ while {true} do {
     // A throw would kill this daemon for the whole session (see fnc_repetitive_cleanup). _stage names the
     // stage in the catch so the RPT says what broke; the tick's work is dropped and retried next pass.
     DUWS_opcom_tick = DUWS_opcom_tick + 1;
-    _cmd set ["dbg_route", [0, 0, 0, 0]];
+    { _y set ["dbg_route", [0, 0, 0, 0]] } forEach _cmds;
     private _stage = "";
     // Per-stage wall time for the DEBUG line. Scheduled, so a figure includes any time the scheduler held the stage.
     private _dbg = duws_log_level >= 4;
@@ -76,16 +96,18 @@ while {true} do {
             ["OPF", _ap, "opcom_drip", _earned, "DEBUG"] call fnc_ap_adjust;
         };
         // Pick after the step, so it sees this tick's arrivals and deaths.
-        "pick" call _enter;
-        _cmd set ["dbg_pick", []];
-        _cmd set ["pickDebt", (_cmd get "pickDebt") + (_cmd get "picksPerTick")];
-        private _picks = floor (_cmd get "pickDebt");
-        _cmd set ["pickDebt", (_cmd get "pickDebt") - _picks];
-        if (_picks == 0 && {(_cmd get "pickOnce") isNotEqualTo ""}) then { _picks = 1 };
-        for "_k" from 1 to _picks do {
-            // A second pick must see the truck, wallet and sites the first one spent.
-            call DUWS_fnc_opcom_tickCacheReset;
-            call fnc_opcom_pick;
+        "pick" call _enter;      call _fnc_pick;
+        // BLUFOR's commander: OPFOR's stages but those of a wallet, a stream, a build or a base it does not have.
+        if ("BLU" in _cmds) then {
+            private _cmd = _cmds get "BLU";
+            "bluSense" call _enter;    call fnc_opcom_sense;
+            "bluPatrol" call _enter;   call fnc_opcom_patrol_sense;
+            "bluDecay" call _enter;    call fnc_opcom_decay;
+            "bluPrune" call _enter;    call fnc_opcom_belief_prune;
+            "bluBookkeep" call _enter; call DUWS_fnc_opcom_bookkeep;
+            "bluTaskstep" call _enter; call fnc_opcom_task_step;
+            "bluAttacks" call _enter;  call DUWS_fnc_opcom_attackStep;
+            "bluPick" call _enter;     call _fnc_pick;
         };
         // BLUFOR task-force upkeep rides this tick rather than a timer of its own; last, so a fault costs OPCOM nothing.
         "taskforces" call _enter; call fnc_taskforce_tick;

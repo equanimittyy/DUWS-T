@@ -1,8 +1,8 @@
-// Locality: server. Builds the influence-grid substrate once, at OPCOM init: the two live force layers and the static
-// layer cached under them (zeroed; the grid stage's first tick is a dirty-all), the per-cell arrays it never rebuilds
-// -- a land mask and water connectivity -- and the coverage layer, a per-cell last-swept tick the sensors stamp and the
-// rebuild never touches (accumulating memory, not a live layer). Server-local, numbers only, never persisted; a
-// restored campaign refills the live layers on its first tick and re-learns coverage from cold.
+// Locality: server. Builds the influence grid's geometry once, at OPCOM init: the per-cell arrays it never rebuilds -- a
+// land mask, water connectivity and the landmasses. Each commander's layers over it are its record's
+// (fnc_opcom_cmd_new): the two live force layers and the static layer cached under them, and the coverage layer, a
+// per-cell last-swept tick the sensors stamp and the rebuild never touches. Server-local, numbers only, never persisted;
+// a restored campaign refills the live layers on its first tick and re-learns coverage from cold.
 //
 // Only the play box is calculated. The full-width lattice is allocated so every reader keeps the absolute
 // _cy * _w + _cx index, but surfaceIsWater and the water flood fill run only inside the box (DUWS_opcom_box, a
@@ -43,20 +43,10 @@ DUWS_opcom_box = [_minCx, _minCy, _maxCx, _maxCy];
 DUWS_opcom_grid_w = _w;                       // cell width; every reader indexes _cy * _w + _cx
 
 private _land = []; _land resize _n;          // true = land, passable to ground
-private _zero = []; _zero resize _n;
 
 // Cheap default for every slot so none is left nil; the costly surfaceIsWater runs only inside the box.
-for "_i" from 0 to (_n - 1) do {
-    _land set [_i, false];
-    _zero set [_i, 0];
-};
-_cmd set ["grid_fri", +_zero];
-_cmd set ["grid_ene", +_zero];
-// Last-swept tick per cell, a full span in the past so an unswept cell reads max staleness via the same formula, no sentinel.
-_cmd set ["grid_seen", _zero apply { -OPCOM_COVER_SPAN }];
-_cmd set ["grid_traffic", +_zero];           // believed force last crossing, decayed on read
-_cmd set ["grid_trafficTick", +_zero];
-DUWS_opcom_routeBlank = _zero apply { -1 };
+for "_i" from 0 to (_n - 1) do { _land set [_i, false] };
+DUWS_opcom_routeBlank = _land apply { -1 };
 for "_cy" from _minCy to _maxCy do {
     for "_cx" from _minCx to _maxCx do {
         _land set [_cy * _w + _cx, !(surfaceIsWater [(_cx + 0.5) * _cell, (_cy + 0.5) * _cell])];
@@ -75,20 +65,6 @@ private _forceLand = {
 { [getPos _x] call _forceLand } forEach (missionNamespace getVariable ["civ_locations", []]);
 
 DUWS_opcom_grid_land = _land;
-_cmd set ["needStatic", _land apply { 0 }];
-_cmd set ["needBase", _land apply { 0 }];
-_cmd set ["bandCells", []];
-_cmd set ["needCells", []];
-_cmd set ["bandSig", []];
-_cmd set ["depositSig", []];
-_cmd set ["needBuilding", false];
-
-_cmd set ["gridStaticFri", +_zero];
-_cmd set ["gridStaticEne", +_zero];
-_cmd set ["gridSrc", createHashMap];
-_cmd set ["gridAwake", createHashMap];
-_cmd set ["gridDirty", createHashMap];
-_cmd set ["gridDirtyAll", true];
 
 // Connected components of the cells whose land flag is _want, 8-connected as A* steps. Bounded to the box so out-of-box
 // cells (land=false by default) are not flooded into one bogus giant water body. -> [cell -> component or -1, sizes].

@@ -156,7 +156,7 @@ class duws_campaign_fork
 };
 
 // Over the load screen, from EDIT PARAMS. fnc_campaign_params.sqf adds a row per editable param at the two anchors'
-// columns, one anchor height and a fifth apart; the box holds ten rows. idc block 9813-9818.
+// columns, one anchor height and a fifth apart; the box holds eleven rows. idc block 9813-9818.
 class duws_campaign_params
 {
     idd = -1;
@@ -169,9 +169,9 @@ class duws_campaign_params
         {
             idc = -1;
             x = 5 * GUI_GRID_W + GUI_GRID_X;
-            y = 2.5 * GUI_GRID_H + GUI_GRID_Y;
+            y = 1 * GUI_GRID_H + GUI_GRID_Y;
             w = 30 * GUI_GRID_W;
-            h = 21 * GUI_GRID_H;
+            h = 22.5 * GUI_GRID_H;
             colorBackground[] = {0.2, 0.4, 0.2, 1};
         };
     };
@@ -183,15 +183,15 @@ class duws_campaign_params
             idc = 9813;
             text = "$STR_DUWS_T_fork_params_frame";
             x = 5 * GUI_GRID_W + GUI_GRID_X;
-            y = 2.5 * GUI_GRID_H + GUI_GRID_Y;
+            y = 1 * GUI_GRID_H + GUI_GRID_Y;
             w = 30 * GUI_GRID_W;
-            h = 21 * GUI_GRID_H;
+            h = 22.5 * GUI_GRID_H;
         };
         class params_warn: RscStructuredText
         {
             idc = 9814;
             x = 6 * GUI_GRID_W + GUI_GRID_X;
-            y = 3.7 * GUI_GRID_H + GUI_GRID_Y;
+            y = 2.2 * GUI_GRID_H + GUI_GRID_Y;
             w = 28 * GUI_GRID_W;
             h = 2 * GUI_GRID_H;
         };
@@ -200,7 +200,7 @@ class duws_campaign_params
             idc = 9817;
             text = "";
             x = 6 * GUI_GRID_W + GUI_GRID_X;
-            y = 6.1 * GUI_GRID_H + GUI_GRID_Y;
+            y = 4.6 * GUI_GRID_H + GUI_GRID_Y;
             w = 12 * GUI_GRID_W;
             h = 1.2 * GUI_GRID_H;
         };

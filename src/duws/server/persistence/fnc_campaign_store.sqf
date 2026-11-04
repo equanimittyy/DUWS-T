@@ -52,7 +52,8 @@ DUWS_campaignParams = [
     ["DUWS_LowPopOfficer", "DUWS_paramLowPopOfficer", 0],
     ["DUWS_TownGeneration", "DUWS_paramTownGen", 0],
     ["DUWS_SupportsOnDeath", "DUWS_paramSupportsOnDeath", 0],
-    ["DUWS_Bandits", "DUWS_paramBandits", 0]
+    ["DUWS_Bandits", "DUWS_paramBandits", 0],
+    ["DUWS_BluforCommander", "DUWS_paramBluforCommander", 0]
 ];
 // Read only when the campaign is generated (fnc_civ_selectTowns.sqf), so the load screen cannot edit it: a load
 // replays the towns its save holds.

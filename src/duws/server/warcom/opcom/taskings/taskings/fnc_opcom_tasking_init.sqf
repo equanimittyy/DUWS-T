@@ -1,19 +1,9 @@
-// Locality: server. Builds the tasking store and its data tables once at init. Server-local, never broadcast --
-// OPCOM orders only server-local groups. A tasking is a field-keyed hashMap of numbers/strings/arrays only, so a
-// record stays serialisable and holds no object handle: `grp` is a live group's netId, resolved with
-// groupFromNetId, never the handle (docs/info/architecture/arma_engine_gotchas.md). `pos` is the world point the
-// grid samples force at, never a cell the tasking is bound to.
+// Locality: server. Builds the tasking data tables once at init; each commander's store is its record's
+// (fnc_opcom_cmd_new). Server-local, never broadcast -- OPCOM orders only server-local groups. A tasking is a
+// field-keyed hashMap of numbers/strings/arrays only, so a record stays serialisable and holds no object handle: `grp`
+// is a live group's netId, resolved with groupFromNetId, never the handle (docs/info/architecture/arma_engine_gotchas.md).
+// `pos` is the world point the grid samples force at, never a cell the tasking is bound to.
 if (!isServer) exitWith {};
-
-_cmd set ["taskings", []];
-_cmd set ["taskSeq", 0];
-_cmd set ["attacks", []];
-_cmd set ["attackSeq", 0];
-// A tick, not a duration: DUWS_opcom_tick is saved.
-_cmd set ["attackReadyTick", 0];
-_cmd set ["supplyReadyTick", createHashMap];
-// Not saved: a load starts every battery ready.
-_cmd set ["batteryReadyTick", createHashMap];
 
 // The one buyable-unit table (docs/plans/opcom/opcom_plan.md): row -> [composition, flags]. Bare tokens resolve
 // to the "none" posture, so the unit takes OPCOM's order, not a standing circuit. No price column -- OPCOM_AP_UNIT

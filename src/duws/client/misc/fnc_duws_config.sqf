@@ -108,6 +108,7 @@ private _paramsBody = ("MISSION PARAMETERS" call _hdr) + ([
     ["Supports on Death", ["DUWS_SupportsOnDeath", 0, ["Lost", "Kept"], [0,1], "DUWS_paramSupportsOnDeath"] call _param],
     ["Bandits", ["DUWS_Bandits", 0,
         ["Full", "No DLC", "No Apex DLC", "No Contact DLC"], [0,1,2,3], "DUWS_paramBandits"] call _param],
+    ["BLUFOR Commander AI", ["DUWS_BluforCommander", 0, ["Simple", "Advanced"], [0,1], "DUWS_paramBluforCommander"] call _param],
     ["Default Garbage Lifetime", format ["%1 min",
         (["DUWS_CleanupLifetime", 300] call BIS_fnc_getParamValue) / 60]],
     ["Autosave", ["DUWS_AutosaveInterval", 900,
