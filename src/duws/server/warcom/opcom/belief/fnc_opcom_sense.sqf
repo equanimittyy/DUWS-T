@@ -1,13 +1,13 @@
 // Locality: server. The direct-sighting sweep -- one perception pass on the engine's own last-seen. Each
-// live OPFOR observer reports the BLUFOR it senses now (nearTargets, gated on a fresh position age); each
+// live observer of the commander's side reports the enemy it senses now (nearTargets, gated on a fresh position age); each
 // freshly-seen group is stamped with the observer's remembered position (element 0, NOT the live position),
 // its firepower (the force model, fnc_opcom_force) and the tick. A group nobody senses holds at last-seen
 // and decays; force is the firepower at that sighting, held between sightings.
 //
-// An observer is any live east group, whatever raised it -- a de-virt tasking, a zone garrison, a
-// side-mission spawn -- so the batch stagger below throttles every OPFOR sensor, not only taskings.
+// An observer is any live group of the commander's side, whatever raised it -- a de-virt tasking, a zone garrison, a
+// side-mission spawn -- so the batch stagger below throttles every sensor, not only taskings.
 //
-// Two engine traps shape this (see arma_engine_gotchas.md). `east knowsAbout` is side-wide and lingers high
+// Two engine traps shape this (see arma_engine_gotchas.md). A side's `knowsAbout` is side-wide and lingers high
 // while anyone merely remembers a target, so it cannot tell a watched mover from a ghost -- hence the
 // observer/nearTargets model, not a knowsAbout gate. And the live position drags belief to a teleport
 // destination -- hence the remembered position, which the engine advances only on a real observation.
@@ -23,16 +23,18 @@ private _NT_POS    = 0;   // observer's remembered (last-known) position of the 
 private _NT_OBJECT = 4;   // the sensed target object (objNull when only its type is known)
 private _NT_POSAGE = 5;   // seconds since the observer last fixed the target's position (age)
 
-// Freshest sighting this tick per BLUFOR group netId: [rememberedPos, men-count, age]. Age within a tick =
+// Freshest sighting this tick per enemy group netId: [rememberedPos, men-count, age]. Age within a tick =
 // seen now (vs still-remembered); lowest-age observer wins when several see the same group.
 private _seen = createHashMap;
 // Past OPCOM_SENSE_BATCH observers, sense a slice per tick, not all: a mass de-virt would else multiply
 // nearTargets by group count with clustered observers re-fixing the same groups. Lossless -- the stride
 // stays far inside OPCOM_BELIEF_FRESH, so a sighting is deferred a tick or two, never dropped.
-private _east = allGroups select {side _x == (_cmd get "side")};
-private _stride = 1 max (ceil ((count _east) / OPCOM_SENSE_BATCH));
-for "_gi" from (DUWS_opcom_tick % _stride) to ((count _east) - 1) step _stride do {
-    private _grp = _east select _gi;
+private _side = _cmd get "side";
+private _enemySide = _cmd get "enemySide";
+private _observers = allGroups select {side _x == _side};
+private _stride = 1 max (ceil ((count _observers) / OPCOM_SENSE_BATCH));
+for "_gi" from (DUWS_opcom_tick % _stride) to ((count _observers) - 1) step _stride do {
+    private _grp = _observers select _gi;
     private _obs = leader _grp;
     if (alive _obs) then {
         private _known = _obs nearTargets OPCOM_SENSE_RANGE;
@@ -43,7 +45,7 @@ for "_gi" from (DUWS_opcom_tick % _stride) to ((count _east) - 1) step _stride d
         };
         {
             private _tgt = _x select _NT_OBJECT;
-            if (!isNull _tgt && {side (group _tgt) == (_cmd get "enemySide")} && {!([_tgt] call fnc_disguise_active)}) then {
+            if (!isNull _tgt && {side (group _tgt) == _enemySide} && {!([_tgt] call fnc_disguise_active)}) then {
                 private _age = _x select _NT_POSAGE;
                 // Confirms element 5 grows for a remembered target; if it never fires, 5 is not age (pivot to nearTargetsCurrent).
                 if (isNil "DUWS_opcom_ntStaleProbed" && {_age > OPCOM_TICK_PERIOD}) then {
@@ -63,7 +65,7 @@ for "_gi" from (DUWS_opcom_tick % _stride) to ((count _east) - 1) step _stride d
             };
         } forEach _known;
         // A hardpoint garrison in COMBAT with BLUFOR in sight is taken as firing, and a firing position gives itself away.
-        if (_contact && {(_cmd get "side") isEqualTo east} && {behaviour _obs isEqualTo "COMBAT"}) then {
+        if (_contact && {_side isEqualTo east} && {behaviour _obs isEqualTo "COMBAT"}) then {
             private _hpKey = _grp getVariable ["DUWS_hpKey", ""];
             if (_hpKey isNotEqualTo "") then { [_hpKey] call DUWS_fnc_hardpointContactReveal };
         };
