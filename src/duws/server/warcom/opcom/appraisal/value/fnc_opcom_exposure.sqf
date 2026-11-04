@@ -7,7 +7,8 @@ if (!isServer) exitWith {};
 // as far as intel has found it: its revealed zones and the OPFOR-banded towns on the map.
 DUWS_fnc_opcom_enemyGroundSweep = {
     if ((_cmd get "side") isEqualTo west) exitWith {
-        private _out = (zone_namePOS_pairs select { (_x select 2) && {[[_x select 1] call fnc_zone_key] call DUWS_fnc_opcom_enemyHeld} })
+        private _held = (call DUWS_fnc_opcom_enemyZones) apply { [_x] call fnc_zone_key };
+        private _out = (zone_namePOS_pairs select { (_x select 2) && {([_x select 1] call fnc_zone_key) in _held} })
             apply { _x select 1 };
         private _visible = missionNamespace getVariable ["civ_visible", []];
         {
