@@ -5,9 +5,10 @@
 #define PATROL_ARRIVE 100
 #define FIRST_SPAWN   300
 #define RESPAWN       1800
+#define FREE_MAX      6
 
-// Free task forces alive at each BLUFOR tier: capped, so ignored ones cannot pile up as permanently simulated AI.
-private _freeCap = [1, 1, 2, 2, 3] select (([WARCOM_blufor_ap_earned] call DUWS_fnc_ap_tier) - 1);
+// Free task forces alive: capped, so ignored ones cannot pile up as permanently simulated AI.
+private _freeCap = FREE_MAX min (([1, 1, 2, 2, 3] select (([WARCOM_blufor_ap_earned] call DUWS_fnc_ap_tier) - 1)) + count WARCOM_zones_controled_by_BLUFOR);
 if (isNil "DUWS_taskforce_spawnAt") then { DUWS_taskforce_spawnAt = time + FIRST_SPAWN };
 if (time >= DUWS_taskforce_spawnAt && {({_x select 3} count (missionNamespace getVariable ["DUWS_taskforces", []])) < _freeCap}) then {
 	call fnc_taskforce_spawn;
