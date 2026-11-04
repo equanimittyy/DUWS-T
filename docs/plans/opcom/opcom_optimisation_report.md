@@ -204,7 +204,7 @@ calls of the whole appraisal, tens of thousands of calls a pick. `DUWS_opcom_box
 on, and `DUWS_fnc_opcom_deposit` already reads it directly (`fnc_opcom_grid_sources.sqf:13`).
 
 **Fix.** `fnc_opcom_grid_init.sqf` set `DUWS_opcom_grid_w` before the box, with a town loop that can yield between
-them; it now sets the box first. The coordinate functions require a caller to guard on `isNil "DUWS_opcom_grid_w"`
+them; it now sets the box first. The coordinate functions are read only once OPCOM init has finished
 (`fnc_opcom_grid_coords.sqf:2`), so the five reads that had a default (these two, `fnc_opcom_route.sqf`,
 `fnc_opcom_ports.sqf` and `debug/fnc_debug_opcom_grid.sqf`) read the box directly.
 
