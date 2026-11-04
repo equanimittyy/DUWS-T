@@ -10,6 +10,7 @@
 # Packed / binarized missions and addons — rebuildable from the unpacked source.
 *.pbo
 *.ebo
+/DUWS_T*.zip
 # PBO Manager's in-progress write, renamed to *.pbo on success. Untracked and
 # short-lived, so a repack running during a `git add -A` aborts the whole stage
 # when the file disappears between git's scan and its stat.

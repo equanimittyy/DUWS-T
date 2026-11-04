@@ -1,5 +1,6 @@
 @echo off
-rem Repack the flat src\ mission source into DUWS_T_<hash>.altis.pbo at the repo root.
+rem Repack the flat src\ mission source into DUWS_T_<hash>.altis.pbo at the repo root. A prod
+rem build also zips a copy per terrain into DUWS_T_<hash>.zip for release.
 rem Wraps the vendored PBO Manager console CLI (Windows only). See README.md.
 setlocal EnableExtensions
 cd /d "%~dp0"
@@ -73,8 +74,14 @@ set "BUILT=unknown"
 for /f "delims=" %%i in ('powershell -NoProfile -Command "Get-Date -Format s"') do set "BUILT=%%i"
 
 rem Hash the source commit into the .pbo name so each build is a distinct file on disk.
-set "MISSION=DUWS_T_%STAMP%%DIRTYNAME%.altis"
+set "BASE=DUWS_T_%STAMP%%DIRTYNAME%"
+set "MISSION=%BASE%.altis"
 set "OUT=%MISSION%.pbo"
+
+set "BUILD="
+set /p "BUILD=[repack] Build dev or prod? [D/p] "
+set "PROD="
+if /I "%BUILD%"=="p" set "PROD=1"
 
 rem Confirm before overwriting the packed mission; default is No.
 if exist "%OUT%" (
@@ -82,6 +89,7 @@ if exist "%OUT%" (
 ) else (
   echo [repack] This will build %OUT% at the repo root.
 )
+if defined PROD echo [repack] Prod also zips a copy per terrain into %BASE%.zip.
 set "CONFIRM="
 set /p "CONFIRM=[repack] Are you sure? [y/N] "
 if /I not "%CONFIRM%"=="y" (
@@ -117,9 +125,9 @@ if not exist "%STAGE%\%MISSION%\duws\shared\includes\build_stamp.hpp" (
 )
 
 echo [repack] Packing to %OUT% ...
-rem Remove any prior build left in the repo root so only this build's .pbo remains;
-rem each source produces a distinctly-named .pbo and stale ones would otherwise pile up.
-del /q "DUWS_T*.altis.pbo" 2>nul
+rem Clear every prior build from the repo root so only this build's output remains;
+rem each source produces distinctly-named files and stale ones would otherwise pile up.
+del /q "DUWS_T*.pbo" "DUWS_T*.zip" 2>nul
 "%PBOC%" pack "%STAGE%\%MISSION%" -o .
 if errorlevel 1 (
   echo [repack] ERROR: pboc.exe failed.
@@ -142,7 +150,28 @@ if errorlevel 1 (
   exit /b 1
 )
 
-echo [repack] Done. Wrote %OUT%
+if not defined PROD (
+  echo [repack] Done. Wrote %OUT%
+  exit /b 0
+)
+call :zip_release
+if errorlevel 1 exit /b 1
+echo [repack] Done. Wrote %OUT% and %BASE%.zip
+exit /b 0
+
+:zip_release
+rem Arma takes the terrain from the .<world>. part of the filename, so the release ships one
+rem copy per terrain. Livonia's world name is enoch.
+echo [repack] Zipping a copy per terrain to %BASE%.zip ...
+mkdir "%STAGE%"
+for %%w in (altis enoch stratis malden tanoa) do copy /y "%OUT%" "%STAGE%\%BASE%.%%w.pbo" >nul
+powershell -NoProfile -Command "Compress-Archive -Path '%STAGE%\*' -DestinationPath '%BASE%.zip' -Force"
+if errorlevel 1 (
+  echo [repack] ERROR: release zip failed.
+  rmdir /s /q "%STAGE%"
+  exit /b 1
+)
+rmdir /s /q "%STAGE%"
 exit /b 0
 
 :stage_working

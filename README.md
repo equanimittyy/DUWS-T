@@ -50,7 +50,11 @@ won't run in the Linux devcontainer):
   It first prompts (via `scripts/pick_commit.ps1`) for the source to pack — the live `src/`
   working tree (default, Enter), one of the last five commits, or any commit hash typed in;
   a commit build packs that commit's `src/` pristine via `git archive`, so it is never `-dirty`.
-  It also deletes any prior `DUWS_T*.altis.pbo` in the root, so only the newest build remains.
+  It then asks for a dev or prod build (default dev, Enter). A dev build packs only the Altis
+  `.pbo`, which is faster. A prod build also zips a copy of the `.pbo` per terrain into
+  `DUWS_T_<hash>.zip` for release: `altis`, `enoch` (Livonia), `stratis`, `malden` and `tanoa`.
+  Both delete every `DUWS_T*.pbo` and `DUWS_T*.zip` in the root first, so only the newest
+  build remains.
 
 Edit the mission as `.sqf` / `.hpp` / etc. under `src/`; the packed `.pbo` stays
 build output (git-ignored).
