@@ -4,10 +4,10 @@
 //
 // Per tasking: refresh -> step -> ferry -> stream. The first two come from DUWS_opcom_orders (fnc_opcom_orders.sqf);
 // the stages here are the liveness-bound half, and the step context is the one place liveness is read.
-// Every tasking streams through _deVirtIfNear / _stowIfFar, a ferry carry included: fnc_opcom_ferry scripts the
-// carry, never when it streams. A unit renders only when it has something to engage -- a player or a live BLUFOR
-// group within K -- and a spot out of the players' sight to stand on (DUWS_fnc_opcom_devirtSpot), and never as a
-// `garrison`: it rests virtual, defending through the zone's reserve pool.
+// A streaming commander's every tasking streams through _deVirtIfNear / _stowIfFar, a ferry carry included:
+// fnc_opcom_ferry scripts the carry, never when it streams. A unit renders only when it has something to engage -- a
+// player or a live BLUFOR group within K -- and a spot out of the players' sight to stand on
+// (DUWS_fnc_opcom_devirtSpot), and never as a `garrison`: it rests virtual, defending through the zone's reserve pool.
 if (!isServer) exitWith {};
 
 private _w = DUWS_opcom_grid_w;
@@ -51,7 +51,8 @@ private _deVirtIfNear = {
 private _stowIfFar = {
     params ["_t", "_ldr", "_hold"];
     private _k = DUWS_opcom_streamK getOrDefault [_t get "moveType", 1];
-    if (_hold || {([getPosASL _ldr] call _nearestBluforCells) <= _k}) exitWith { _t set ["farTicks", 0]; false };
+    // With no BLUFOR cells read, every squad would read far and stow.
+    if (!_streams || {_hold} || {([getPosASL _ldr] call _nearestBluforCells) <= _k}) exitWith { _t set ["farTicks", 0]; false };
     private _far = (_t getOrDefault ["farTicks", 0]) + 1;
     _t set ["farTicks", _far];
     if (_far < OPCOM_REVIRT_GRACE) exitWith { false };
@@ -109,8 +110,8 @@ private _ferryStage = {
 private _streamStage = {
     params ["_t", "_ctx"];
     _ctx params ["", "_grp", "_live", "_engaged"];
-    if (!_live) exitWith { if (_streams) then { [_t] call _deVirtIfNear } };
-    if (_streams && {[_t, leader _grp, _engaged] call _stowIfFar}) exitWith {
+    if (!_live) exitWith { [_t] call _deVirtIfNear };
+    if ([_t, leader _grp, _engaged] call _stowIfFar) exitWith {
         if ((_t getOrDefault ["settleZone", ""]) isNotEqualTo "") then { [_t, _t get "settleZone"] call DUWS_fnc_opcom_garrisonInto };
     };
     // A live group with no active waypoint idles until stowed; guard and ferry hold without one by design.
