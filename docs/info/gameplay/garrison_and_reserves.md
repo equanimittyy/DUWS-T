@@ -20,7 +20,9 @@ ledger call, composition filter and raise below: a zone answers `"BLU"` when BLU
 (`fnc_zone_bluforHeld`), and `"OPF"` otherwise.
 
 A garrison crews whatever the ground carries, so a zone the player holds mans its prefab's guns with their
-own men. A raise runs that pass at every tier, so a zone at tier 0 mans its guns and fields no other men.
+own men. A raise runs at every tier, but a zone at tier 0 stands its prefab and builds and mans
+no gun: a gunner is a live WEST group, and it would render the OPCOM attacker that takes unmanned ground virtually
+(`fnc_opcom_capture.sqf`).
 OPCOM reads a BLUFOR garrison at its **true force**, not a nominal — the commander is omniscient
 about what the player has built, and the territorial figure it used to read is now only the floor for
 BLUFOR ground carrying no garrison. A sighted group on a live BLUFOR garrison's roster keeps its belief row but

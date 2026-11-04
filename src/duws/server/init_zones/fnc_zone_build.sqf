@@ -55,6 +55,9 @@ DUWS_fnc_zoneRedeploy = {
     if (_flg getVariable ["DUWS_redeployBusy", false]) exitWith {
         (localize "STR_DUWS_T_ZONE_REDEPLOY_BUSY") remoteExec ["hint", _owner];
     };
+    if (([_key] call fnc_zone_tier) == 0) exitWith {
+        (localize "STR_DUWS_T_ZONE_REDEPLOY_NO_TIER") remoteExec ["hint", _owner];
+    };
     if (commandpointsblu1 < 2) exitWith {
         (localize "STR_DUWS_T_e95mc4lv") remoteExec ["hint", _owner];
     };

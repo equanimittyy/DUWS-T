@@ -157,7 +157,9 @@ DUWS_fnc_zoneManStatics = {
         forEach (_statics select {count crew _x > 0});
 
     private _guns = _statics select {count crew _x == 0};
-    if (count _guns == 0) exitWith {};
+    // None at tier 0: a gunner is a live WEST group, and it would render the OPCOM attacker that takes unmanned ground
+    // virtually (fnc_opcom_capture.sqf).
+    if (count _guns == 0 || {([_key] call fnc_zone_tier) == 0}) exitWith {};
     // Every empty gun is crewed regardless of attrition: attrition thins what a garrison can field
     // (men, vehicles), and a static weapon is neither -- it's already standing. A worn-down zone therefore keeps the same guns and fewer of everything else.
     private _types = _guns apply {_man};

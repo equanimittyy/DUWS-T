@@ -313,7 +313,8 @@ unit inside the radius and OPFOR outnumbering BLUFOR over the same ring, held fo
 `DUWS_captureHold`. A BLUFOR-held zone starts at tier 0, so there is no garrison test until the player
 buys one. A virtual OPCOM attacker has no units to count, so OPCOM runs the zone's retake statement itself
 once one has stood inside the radius for `DUWS_captureHold` — but only on a zone at tier 0
-(`fnc_opcom_capture.sqf`). A garrisoned zone has to be beaten, and standing its men up is what renders the
+(`fnc_opcom_capture.sqf`). A tier-0 zone still raises its prefab and builds, but mans no gun, because a gunner is a
+live WEST group and would render that attacker. A garrisoned zone has to be beaten, and standing its men up is what renders the
 attacker to fight them: the site poller wakes a BLUFOR-held site for a virtual attacker as readily as a
 live one, and any live WEST group renders an OPCOM tasking within K. Both directions are re-armed on every ownership change, in `fnc_captured.sqf`,
 `fnc_blufor_cap.sqf` and `fnc_opfor_cap.sqf`, so the statement lives in four places and has to move in
@@ -352,7 +353,8 @@ Every factory builds from the `Fortifications` and `Static` categories. The play
 or `simple_zones_enable`.
 
 **A built static weapon gets a gunner.** A zone's wake mans its builds with its own guns, for the side that holds
-the zone (`DUWS_fnc_zoneManStatics`). A gun placed while the zone's garrison stands is manned at once, and a base mans
+the zone (`DUWS_fnc_zoneManStatics`). A gun placed while the zone's garrison stands is manned at once. A zone at
+tier 0 mans neither. A base mans
 every built gun when it is placed and when a load restores it (`DUWS_fnc_buildCrewSite`). The 2 CP redeploy of the HQ
 or a FOB replaces every build gunner with a new one, as it replaces the crews of the base's own guns
 (`DUWS_fnc_buildRecrew`). An enemy gunner, a squadmate or a drone's own AI keeps the gun. The gunners are not saved.
@@ -362,9 +364,9 @@ while a squadmate mans one of them (`DUWS_fnc_zoneBuildSleep`), because a stow w
 if the mod uses that category.
 
 **A held zone's flag redeploys its gun crews for 2 CP.** The flag's Redeploy Gun Crews action does the same to the
-zone's prefab guns and its builds together (`DUWS_fnc_zoneRedeploy`, `fnc_zone_build.sqf`). It works at every tier,
-because every zone raises, and the raise adopts each seated gunner into the garrison roster that the zone's
-stream-out collects (`DUWS_fnc_zoneManStatics`). The action sits under Clear and does not need Fortification I.
+zone's prefab guns and its builds together (`DUWS_fnc_zoneRedeploy`, `fnc_zone_build.sqf`). It refuses a zone at
+tier 0, which mans no gun. At tier I and above the raise adopts each seated gunner into the garrison roster that the
+zone's stream-out collects (`DUWS_fnc_zoneManStatics`). The action sits under Clear and does not need Fortification I.
 
 **R3F moves and sells a manned build.** R3F refuses to move or sell an object with a crew. A build whose only crew is
 friendly AI outside every player's group is the exception (`DUWS_fnc_buildCrewFree`): the Move action and the direct

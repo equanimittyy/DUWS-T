@@ -5180,6 +5180,18 @@
                 <Chinese>砲組正在重新部署中。</Chinese>
                 <Spanish>Las dotaciones de artillería ya se están redesplegando.</Spanish>
             </Key>
+            <Key ID="STR_DUWS_T_ZONE_REDEPLOY_NO_TIER">
+                <Original>Gun crews need a garrison. Fortify to Tier I first.</Original>
+                <English>Gun crews need a garrison. Fortify to Tier I first.</English>
+                <Chinesesimp>炮组需要驻军。请先加固至等级 I。</Chinesesimp>
+                <German>Geschützbesatzungen brauchen eine Garnison. Befestige zuerst auf Stufe I.</German>
+                <Polish>Obsługi dział wymagają garnizonu. Najpierw umocnij do poziomu I.</Polish>
+                <Czech>Obsluhy zbraní vyžadují posádku. Nejprve opevni na úroveň I.</Czech>
+                <Russian>Расчётам орудий нужен гарнизон. Сначала укрепи до уровня I.</Russian>
+                <French>Les équipages de pièces exigent une garnison. Fortifiez d'abord au palier I.</French>
+                <Chinese>砲組需要駐軍。請先加固至等級 I。</Chinese>
+                <Spanish>Las dotaciones de artillería necesitan una guarnición. Fortifica primero a Nivel I.</Spanish>
+            </Key>
             <Key ID="STR_DUWS_T_ZONE_CAPTURE_ACTION">
                 <Original>Capture Zone</Original>
                 <English>Capture Zone</English>

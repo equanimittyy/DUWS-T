@@ -157,7 +157,7 @@ DUWS_fnc_buildCrewSite = {
     params ["_guns", "_site"];
     if (_site == "") exitWith {};
     if ((_site select [0, 5]) isNotEqualTo "zone_") exitWith { [_guns, true] call DUWS_fnc_buildCrew };
-    if !([_site] call DUWS_fnc_garrisonHeld) exitWith {};
+    if (!([_site] call DUWS_fnc_garrisonHeld) || {([_site] call fnc_zone_tier) == 0}) exitWith {};
     [_guns, ([_site] call DUWS_fnc_garrisonSideOf) isEqualTo "BLU", [_site] call fnc_zone_roster] call DUWS_fnc_buildCrew;
 };
 
