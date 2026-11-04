@@ -3,7 +3,7 @@
 if (!isServer) exitWith {};
 params ["_caller", ["_since", 0]];
 if (isNull _caller || {isNil "DUWS_opcom_cmds"}) exitWith {};
-private _cmd = DUWS_opcom_cmds get "OPF";
+private _cmd = DUWS_opcom_cmds get (missionNamespace getVariable ["DUWS_opcom_dbgSide", "OPF"]);
 
 #define AI_ROWS_MAX 6
 
@@ -78,6 +78,7 @@ private _limits = [
     [format ["Tier %1", WARCOM_opfor_tier]]
 ];
 
-private _header = format ["OPCOM AI  %1   %2   tick %3", toUpper (_cmd get "aiMode"), _cmd get "archetype", DUWS_opcom_tick];
+private _header = format ["%1  %2   %3   tick %4", ["OPCOM AI", "BLUFOR AI"] select ((_cmd get "side") isEqualTo west),
+    toUpper (_cmd get "aiMode"), _cmd get "archetype", DUWS_opcom_tick];
 [_header, _rows, (_cmd get "aiEvents") select { (_x select 0) > _since }, _cmd get "aiSeq", _limits]
     remoteExecCall ["fnc_debug_opcom_ai_feed", _caller];

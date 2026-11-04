@@ -64,8 +64,11 @@ switch (_page) do {
     };
 
     case "opcom": {
-        ["OPCOM", [
-            DBG_BACK("root"),
+        private _rows = [DBG_BACK("root")];
+        if ((missionNamespace getVariable ["DUWS_paramBluforCommander", 0]) == 1) then {
+            _rows pushBack ["Commander: switch OPFOR / BLUFOR", { ["commander", "", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], DBG_ACTION];
+        };
+        ["OPCOM", _rows + [
             ["Mode: off",           { ["aimode", "off", "", "", player] remoteExec ["fnc_debug_opcom", 2] },    [], DBG_ACTION],
             ["Mode: random",        { ["aimode", "random", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], DBG_ACTION],
             ["Mode: weighted",      { ["aimode", "weighted", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], DBG_ACTION],

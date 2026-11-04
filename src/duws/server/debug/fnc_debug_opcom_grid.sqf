@@ -9,7 +9,7 @@ params ["_requester", ["_forceOn", false], ["_staleOn", false], ["_needOn", fals
 if (isNil "DUWS_opcom_cmds") exitWith {
     ["DEBUG", "OPCOM", "overlay gather: OPCOM init not finished, nothing sent"] call fnc_log;
 };
-private _cmd = DUWS_opcom_cmds get "OPF";
+private _cmd = DUWS_opcom_cmds get (missionNamespace getVariable ["DUWS_opcom_dbgSide", "OPF"]);
 
 private _w = DUWS_opcom_grid_w;
 private _cell = OPCOM_GRID_CELL;

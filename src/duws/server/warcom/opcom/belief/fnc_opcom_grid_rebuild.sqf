@@ -56,8 +56,8 @@ private _ene = +(_cmd get "gridStaticEne");
 _cmd set ["grid_fri", _fri];
 _cmd set ["grid_ene", _ene];
 
-if (!isNil "DUWS_opcom_gridDriftAsk") then {
-    private _caller = DUWS_opcom_gridDriftAsk;
+if (!isNil "DUWS_opcom_gridDriftAsk" && {(DUWS_opcom_gridDriftAsk select 1) isEqualTo (_cmd get "side")}) then {
+    private _caller = DUWS_opcom_gridDriftAsk select 0;
     DUWS_opcom_gridDriftAsk = nil;
     [_caller] call DUWS_fnc_opcom_gridDrift;
 };

@@ -5,7 +5,10 @@
 if (!isServer) exitWith {};
 params ["_verb", ["_a", ""], ["_b", ""], ["_c", ""], ["_caller", objNull]];
 if (isNull _caller || {isNil "DUWS_opcom_cmds"}) exitWith {};
-private _cmd = DUWS_opcom_cmds get "OPF";
+// The hand-driven orders, the mode, Pick once and Difficulty act on the commander the Commander row picks; recruits,
+// buys, supply, fires and ferries are OPFOR's alone.
+private _cmd = DUWS_opcom_cmds get (["OPF", missionNamespace getVariable ["DUWS_opcom_dbgSide", "OPF"]] select (_verb in
+    ["tasklist", "sightinglist", "task", "intercept", "teleport", "list", "unitstatus", "clear", "aimode", "griddrift", "pickonce", "difficulty"]));
 
 switch (_verb) do {
     case "recruitlist": {
@@ -203,8 +206,17 @@ switch (_verb) do {
         ["INFO", "OPCOM", format ["AI mode -> %1", _a]] call fnc_log;
         format ["OPCOM AI: mode %1.", _a] remoteExec ["hint", _caller];
     };
+    case "commander": {
+        if !("BLU" in DUWS_opcom_cmds) exitWith {
+            "OPCOM debug: BLUFOR's commander runs only with the BLUFOR Commander AI param at Advanced." remoteExec ["hint", _caller];
+        };
+        DUWS_opcom_dbgSide = ["BLU", "OPF"] select ((missionNamespace getVariable ["DUWS_opcom_dbgSide", "OPF"]) isEqualTo "BLU");
+        // The AI overlay diffs one commander's orders from poll to poll, so a switch rebaselines it.
+        DUWS_opcom_aiPollTick = -99;
+        format ["OPCOM debug: the %1 commander.", ["OPFOR", "BLUFOR"] select (DUWS_opcom_dbgSide isEqualTo "BLU")] remoteExec ["hint", _caller];
+    };
     case "griddrift": {
-        DUWS_opcom_gridDriftAsk = _caller;
+        DUWS_opcom_gridDriftAsk = [_caller, _cmd get "side"];
         "OPCOM grid: drift check runs on the next tick." remoteExec ["hint", _caller];
     };
     case "pickonce": {
