@@ -168,7 +168,11 @@ fnc_vendor_query = {
 	// Sent with every list rather than once per open, so a list switch also picks up a reputation move.
 	private _town = _vendor getVariable ["DUWS_vendor_town", -1];
 	private _discount = [[_town] call fnc_civ_repAt] call fnc_vendor_discount;
-	[_replyVar, [_kind, _list, _town] call fnc_vendor_stock, _discount] remoteExecCall ["fnc_vendor_reply", _requester];
+	private _rows = [_kind, _list, _town] call fnc_vendor_stock;
+	// Server-side only: fnc_vendor_buy checks a town purchase against what this catalogue shows, so a
+	// rotation while it is open withdraws nothing.
+	if (_list isEqualTo "town") then { _requester setVariable ["DUWS_armsShown", [_town, _rows]] };
+	[_replyVar, _rows, _discount] remoteExecCall ["fnc_vendor_reply", _requester];
 };
 
 // Blocks on the answer, so every caller has to be scheduled.

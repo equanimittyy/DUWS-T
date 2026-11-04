@@ -10,8 +10,8 @@
     civilian pools are all resolved at campaign start and never rewritten.
 
     "town" is the exception: the Limited arms stock (DUWS_paramArmsStock), rolled per town for each
-    rotation window from the other three gear lists. The roll is stored, not cached, because the
-    purchase check must see the stock the catalogue showed, and a load must resume it (armsStock).
+    rotation window from the other three gear lists. The roll is stored, not cached, because every
+    visit in a window must see one stock, and a load must resume it (armsStock).
 */
 if (!isServer) exitWith { [] };
 params [["_kind", "gear"], ["_list", "all"], ["_town", -1]];
@@ -29,8 +29,7 @@ if (_list isEqualTo "town") exitWith {
     private _magCat = _order find "STR_DUWS_T_VENDOR_CAT_MAGAZINE";
     private _gunCats = ["STR_DUWS_T_VENDOR_CAT_PRIMARY", "STR_DUWS_T_VENDOR_CAT_HANDGUN", "STR_DUWS_T_VENDOR_CAT_LAUNCHER"] apply { _order find _x };
 
-    // Atomic: two players at one shop must not each roll, or the catalogue and the purchase check would
-    // read different stock.
+    // Atomic: two players at one shop must not each roll and see different stock.
     private _picks = [];
     isNil {
         private _now = call fnc_campaign_now;

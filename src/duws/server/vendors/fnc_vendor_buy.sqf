@@ -46,10 +46,14 @@ if (_rep <= -10) exitWith {
 // A hand-made remoteExec must not buy a tank from an arms dealer, so the class has to be on one of
 // this vendor's lists.
 if !(_list in ([_type] call fnc_vendor_lists)) exitWith {};
-private _rows = [_kind, _list, _vendor getVariable ["DUWS_vendor_town", -1]] call fnc_vendor_stock;
+private _rows = if (_list isEqualTo "town") then {
+    (_buyer getVariable ["DUWS_armsShown", [-1, []]]) params ["_shownTown", "_shown"];
+    [[], _shown] select (_shownTown == (_vendor getVariable ["DUWS_vendor_town", -1]))
+} else {
+    [_kind, _list] call fnc_vendor_stock
+};
 private _at = _rows findIf { (_x select 1) isEqualTo _class };
-// A town stock can rotate while the catalogue is open.
-if (_at < 0) exitWith { if (_list isEqualTo "town") then { ["STR_DUWS_T_VENDOR_SOLD_OUT"] call _fnc_say } };
+if (_at < 0) exitWith {};
 
 private _price = [_class, [_rep] call fnc_vendor_discount] call fnc_vendor_price;
 if (_price < 0) exitWith {};

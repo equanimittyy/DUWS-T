@@ -223,12 +223,13 @@ together (`fnc_vendor_stock.sqf`):
 A rotation window is 30 minutes of the campaign clock (`fnc_campaign_now`), so a rest that skips time
 also rotates the stock. The first stock request after a window ends starts a new window and clears
 every town's roll. A town rolls on its first request in the window. The roll is stored in
-`DUWS_armsStock` and not rolled again for each request, because the purchase check must see the
-stock that the catalogue showed. The roll runs inside `isNil`, so two players who open the same shop
-at the same time see the same stock.
+`DUWS_armsStock` and not rolled again for each request, so every visit in the window sees the same
+stock. The roll runs inside `isNil`, so two players who open the same shop at the same time see the
+same stock.
 
-A purchase of a class that rotated out while the catalogue was open gets the vendor line
-`STR_DUWS_T_VENDOR_SOLD_OUT`.
+A purchase checks the rows that the server last sent to the buyer's catalogue, not the current roll.
+`fnc_vendor_query` stores them on the buyer as `DUWS_armsShown`, on the server only, with the town.
+So a rotation while the catalogue is open does not take a row away from the player.
 
 The snapshot saves the rolls and the seconds left in the window as `armsStock`, so a load resumes the
 same stock. The param is a campaign rule, so the save keeps it too.
@@ -268,8 +269,9 @@ the price to be wrong. It refuses on the first check that fails:
 
 1. The vendor is dead, or the buyer is more than 4 m away.
 2. The town is hostile.
-3. The list is not one of this vendor's lists, or the class is not on it. So a hand-made
-   `remoteExec` cannot buy a tank from an Arms Dealer.
+3. The list is not one of this vendor's lists, or the class is not on it. For In Stock, the list is
+   the rows that the buyer's catalogue was sent. So a hand-made `remoteExec` cannot buy a tank from
+   an Arms Dealer.
 4. The class has no price.
 5. The destination is the arsenal and the arsenal does not count the class.
 6. The destination is the garage and that domain's pool is full. Land, air and boat have separate

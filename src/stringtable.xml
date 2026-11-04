@@ -9122,18 +9122,6 @@
                 <Chinese>軍械庫中已有該物品。</Chinese>
                 <Spanish>El arsenal ya tiene eso en existencias.</Spanish>
             </Key>
-            <Key ID="STR_DUWS_T_VENDOR_SOLD_OUT">
-                <Original>That's gone. I've got new stock now.</Original>
-                <English>That's gone. I've got new stock now.</English>
-                <Chinesesimp>那个已经没了，我刚换了一批货。</Chinesesimp>
-                <German>Das ist weg. Ich hab jetzt neue Ware.</German>
-                <Polish>Tego już nie ma. Mam teraz nowy towar.</Polish>
-                <Czech>To už je pryč. Teď mám novou nabídku.</Czech>
-                <Russian>Этого уже нет. У меня теперь новый товар.</Russian>
-                <French>Je n'en ai plus. J'ai du nouveau stock maintenant.</French>
-                <Chinese>那個已經沒了，我剛換了一批貨。</Chinese>
-                <Spanish>Eso ya no está. Ahora tengo existencias nuevas.</Spanish>
-            </Key>
             <Key ID="STR_DUWS_T_VENDOR_BOUGHT">
                 <Original>%1 purchased.</Original>
                 <English>%1 purchased.</English>
