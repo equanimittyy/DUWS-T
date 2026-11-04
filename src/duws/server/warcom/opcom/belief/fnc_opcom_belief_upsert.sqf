@@ -5,16 +5,16 @@
 
 params ["_key", "_pos", "_str"];
 
-private _i = DUWS_opcom_belief_key findIf { _x isEqualTo _key };
+private _i = (_cmd get "belief_key") findIf { _x isEqualTo _key };
 if (_i < 0) then {
-    DUWS_opcom_belief_key  pushBack _key;
-    DUWS_opcom_belief_pos  pushBack _pos;
-    DUWS_opcom_belief_time pushBack DUWS_opcom_tick;
-    DUWS_opcom_belief_str  pushBack _str;
+    (_cmd get "belief_key")  pushBack _key;
+    (_cmd get "belief_pos")  pushBack _pos;
+    (_cmd get "belief_time") pushBack DUWS_opcom_tick;
+    (_cmd get "belief_str")  pushBack _str;
 } else {
-    DUWS_opcom_belief_pos  set [_i, _pos];
-    DUWS_opcom_belief_time set [_i, DUWS_opcom_tick];
-    DUWS_opcom_belief_str  set [_i, _str];
+    (_cmd get "belief_pos")  set [_i, _pos];
+    (_cmd get "belief_time") set [_i, DUWS_opcom_tick];
+    (_cmd get "belief_str")  set [_i, _str];
 };
 
 // A sighting is also an observation, so refresh coverage at the sighted cell -- else seeing a threat leaves

@@ -3,7 +3,7 @@
 
 params ["_i"];
 
-DUWS_opcom_belief_key  deleteAt _i;
-DUWS_opcom_belief_pos  deleteAt _i;
-DUWS_opcom_belief_time deleteAt _i;
-DUWS_opcom_belief_str  deleteAt _i;
+(_cmd get "belief_key")  deleteAt _i;
+(_cmd get "belief_pos")  deleteAt _i;
+(_cmd get "belief_time") deleteAt _i;
+(_cmd get "belief_str")  deleteAt _i;

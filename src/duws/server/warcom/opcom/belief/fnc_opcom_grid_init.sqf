@@ -42,24 +42,21 @@ DUWS_opcom_box = [_minCx, _minCy, _maxCx, _maxCy];
 // After the box: a caller guards on DUWS_opcom_grid_w alone, and the coordinate functions read the box.
 DUWS_opcom_grid_w = _w;                       // cell width; every reader indexes _cy * _w + _cx
 
-DUWS_opcom_grid_fri = []; DUWS_opcom_grid_fri resize _n;
-DUWS_opcom_grid_ene = []; DUWS_opcom_grid_ene resize _n;
-DUWS_opcom_grid_seen = []; DUWS_opcom_grid_seen resize _n;   // last-swept tick per cell
 private _land = []; _land resize _n;          // true = land, passable to ground
-DUWS_opcom_grid_traffic = []; DUWS_opcom_grid_traffic resize _n;           // believed force last crossing, decayed on read
-DUWS_opcom_grid_trafficTick = []; DUWS_opcom_grid_trafficTick resize _n;
+private _zero = []; _zero resize _n;
 
 // Cheap default for every slot so none is left nil; the costly surfaceIsWater runs only inside the box.
-// seen inits a full span in the past so an unswept cell reads max staleness via the same formula, no sentinel.
 for "_i" from 0 to (_n - 1) do {
     _land set [_i, false];
-    DUWS_opcom_grid_fri set [_i, 0];
-    DUWS_opcom_grid_ene set [_i, 0];
-    DUWS_opcom_grid_seen set [_i, -OPCOM_COVER_SPAN];
-    DUWS_opcom_grid_traffic set [_i, 0];
-    DUWS_opcom_grid_trafficTick set [_i, 0];
+    _zero set [_i, 0];
 };
-DUWS_opcom_routeBlank = DUWS_opcom_grid_fri apply { -1 };
+_cmd set ["grid_fri", +_zero];
+_cmd set ["grid_ene", +_zero];
+// Last-swept tick per cell, a full span in the past so an unswept cell reads max staleness via the same formula, no sentinel.
+_cmd set ["grid_seen", _zero apply { -OPCOM_COVER_SPAN }];
+_cmd set ["grid_traffic", +_zero];           // believed force last crossing, decayed on read
+_cmd set ["grid_trafficTick", +_zero];
+DUWS_opcom_routeBlank = _zero apply { -1 };
 for "_cy" from _minCy to _maxCy do {
     for "_cx" from _minCx to _maxCx do {
         _land set [_cy * _w + _cx, !(surfaceIsWater [(_cx + 0.5) * _cell, (_cy + 0.5) * _cell])];
@@ -78,20 +75,20 @@ private _forceLand = {
 { [getPos _x] call _forceLand } forEach (missionNamespace getVariable ["civ_locations", []]);
 
 DUWS_opcom_grid_land = _land;
-DUWS_opcom_needStatic = _land apply { 0 };
-DUWS_opcom_needBase = _land apply { 0 };
-DUWS_opcom_bandCells = [];
-DUWS_opcom_needCells = [];
-DUWS_opcom_bandSig = [];
-DUWS_opcom_depositSig = [];
-DUWS_opcom_needBuilding = false;
+_cmd set ["needStatic", _land apply { 0 }];
+_cmd set ["needBase", _land apply { 0 }];
+_cmd set ["bandCells", []];
+_cmd set ["needCells", []];
+_cmd set ["bandSig", []];
+_cmd set ["depositSig", []];
+_cmd set ["needBuilding", false];
 
-DUWS_opcom_gridStaticFri = +DUWS_opcom_grid_fri;
-DUWS_opcom_gridStaticEne = +DUWS_opcom_grid_ene;
-DUWS_opcom_gridSrc = createHashMap;
-DUWS_opcom_gridAwake = createHashMap;
-DUWS_opcom_gridDirty = createHashMap;
-call DUWS_fnc_opcom_gridDirtyAll;
+_cmd set ["gridStaticFri", +_zero];
+_cmd set ["gridStaticEne", +_zero];
+_cmd set ["gridSrc", createHashMap];
+_cmd set ["gridAwake", createHashMap];
+_cmd set ["gridDirty", createHashMap];
+_cmd set ["gridDirtyAll", true];
 
 // Connected components of the cells whose land flag is _want, 8-connected as A* steps. Bounded to the box so out-of-box
 // cells (land=false by default) are not flooded into one bogus giant water body. -> [cell -> component or -1, sizes].

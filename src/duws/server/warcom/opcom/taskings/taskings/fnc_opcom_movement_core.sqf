@@ -25,9 +25,9 @@ DUWS_fnc_opcom_pace = {
         if (!isNil "_r") then { _id = _r getOrDefault ["boundTo", -1] };
     };
     if (_id < 0) exitWith { _own };
-    private _i = DUWS_opcom_attacks findIf { (_x get "id") == _id };
-    if (_i < 0 || {((DUWS_opcom_attacks select _i) get "kind") isEqualTo "qrf"}) exitWith { _own };
-    _own max ([DUWS_opcom_attacks select _i] call DUWS_fnc_opcom_attackPace)
+    private _i = (_cmd get "attacks") findIf { (_x get "id") == _id };
+    if (_i < 0 || {(((_cmd get "attacks") select _i) get "kind") isEqualTo "qrf"}) exitWith { _own };
+    _own max ([(_cmd get "attacks") select _i] call DUWS_fnc_opcom_attackPace)
 };
 
 // Returns "arrived", "water" (a transportable unit stopped at a ferry leg's near shore), "blocked" (a replan found

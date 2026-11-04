@@ -32,11 +32,11 @@ switch (_verb) do {
         if (isNil "_t") then { -1 } else { _t get "id" }
     };
     case "task": {
-        private _i = DUWS_opcom_taskings findIf { (_x get "id") isEqualTo _a };
+        private _i = (_cmd get "taskings") findIf { (_x get "id") isEqualTo _a };
         if (_i < 0) then {
             ["WARN", "OPCOMDBG", format ["no tasking id %1", _a]] call fnc_log; false
         } else {
-            private _t = DUWS_opcom_taskings select _i;
+            private _t = (_cmd get "taskings") select _i;
             _t set ["hold", 0]; _t set ["boundTo", -1];
             private _ok = [_t, _b, _c] call fnc_opcom_task;
             // A hand order carries no Value; any positive stand-in has taxiBind pick the hull saving the most time.
@@ -45,11 +45,11 @@ switch (_verb) do {
         };
     };
     case "garrison": {
-        private _i = DUWS_opcom_taskings findIf { (_x get "id") isEqualTo _a };
+        private _i = (_cmd get "taskings") findIf { (_x get "id") isEqualTo _a };
         if (_i < 0) then {
             ["WARN", "OPCOMDBG", format ["no tasking id %1", _a]] call fnc_log; false
         } else {
-            private _t = DUWS_opcom_taskings select _i;
+            private _t = (_cmd get "taskings") select _i;
             private _site = [_b] call fnc_site_at;
             private _pos = _site getOrDefault ["pos", []];
             if (_pos isEqualTo []) then {
@@ -61,11 +61,11 @@ switch (_verb) do {
         };
     };
     case "supply": {
-        private _i = DUWS_opcom_taskings findIf { (_x get "id") isEqualTo _a };
+        private _i = (_cmd get "taskings") findIf { (_x get "id") isEqualTo _a };
         if (_i < 0) then {
             ["WARN", "OPCOMDBG", format ["no tasking id %1", _a]] call fnc_log; false
         } else {
-            private _t = DUWS_opcom_taskings select _i;
+            private _t = (_cmd get "taskings") select _i;
             if !(_c isEqualType [] && {_c isNotEqualTo []}) exitWith {
                 ["WARN", "OPCOMDBG", format ["supply: tasking %1 needs an errand", _a]] call fnc_log; false
             };
@@ -74,9 +74,9 @@ switch (_verb) do {
         };
     };
     case "intercept": {
-        private _i = DUWS_opcom_taskings findIf { (_x get "id") isEqualTo _a };
+        private _i = (_cmd get "taskings") findIf { (_x get "id") isEqualTo _a };
         if (_i < 0) exitWith { ["WARN", "OPCOMDBG", format ["no tasking id %1", _a]] call fnc_log; false };
-        private _t = DUWS_opcom_taskings select _i;
+        private _t = (_cmd get "taskings") select _i;
         _t set ["hold", 0]; _t set ["boundTo", -1];
         [_t, "intercept", _b] call fnc_opcom_task
     };
@@ -97,7 +97,7 @@ switch (_verb) do {
             ["WARN", "OPCOMDBG", format ["fire: %1 is still firing its last mission", _a]] call fnc_log; 0
         };
         _c params ["_rounds", "_shape"];
-        DUWS_opcom_batteryReadyTick deleteAt _a;
+        (_cmd get "batteryReadyTick") deleteAt _a;
         [_a, _b, _rounds, _shape] call DUWS_fnc_opcom_fireMission
     };
     case "zone": {
@@ -112,9 +112,9 @@ switch (_verb) do {
         };
     };
     case "teleport": {
-        private _i = DUWS_opcom_taskings findIf { (_x get "id") isEqualTo _a };
+        private _i = (_cmd get "taskings") findIf { (_x get "id") isEqualTo _a };
         if (_i < 0) exitWith { ["WARN", "OPCOMDBG", format ["no tasking id %1", _a]] call fnc_log; false };
-        private _t = DUWS_opcom_taskings select _i;
+        private _t = (_cmd get "taskings") select _i;
         // A live carry binds transport and rider by position; snapping one half alone strands the pair.
         if ((_t getOrDefault ["carrying", -1]) >= 0 || {(_t getOrDefault ["ridingOn", -1]) >= 0}) exitWith {
             ["WARN", "OPCOMDBG", format ["teleport: tasking %1 is mid-ferry -- release it first", _a]] call fnc_log; false
@@ -136,7 +136,7 @@ switch (_verb) do {
         true
     };
     case "list": {
-        ["INFO", "OPCOMDBG", format ["%1 tasking(s):", count DUWS_opcom_taskings]] call fnc_log;
+        ["INFO", "OPCOMDBG", format ["%1 tasking(s):", count (_cmd get "taskings")]] call fnc_log;
         {
             ["INFO", "OPCOMDBG", format ["  id %1 %2 %3/%4 pos %5 eff %6/%7 leg %8/%9 %10",
                 _x get "id", toUpper (_x getOrDefault ["menu", [(_x get "comp") param [0, ""]] call DUWS_fnc_tokenName]),
@@ -144,15 +144,15 @@ switch (_verb) do {
                 (_x get "pos") apply { round _x },
                 round (_x get "effForce"), round (_x get "fullForce"),
                 _x get "leg", count (_x get "route"), _x get "moveType"]] call fnc_log;
-        } forEach DUWS_opcom_taskings;
+        } forEach (_cmd get "taskings");
         true
     };
     case "clear": {
         { if ((_x get "grp") isNotEqualTo "") then {
             private _grp = groupFromNetId (_x get "grp");
             if (!isNull _grp) then { [_grp] call DUWS_fnc_opcom_despawn };
-        } } forEach DUWS_opcom_taskings;
-        DUWS_opcom_taskings = [];
+        } } forEach (_cmd get "taskings");
+        _cmd set ["taskings", []];
         ["INFO", "OPCOMDBG", "store cleared"] call fnc_log;
         true
     };

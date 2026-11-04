@@ -30,7 +30,7 @@ DUWS_opcom_siteMemo = createHashMap;
 DUWS_fnc_opcom_siteAll = {
     params ["_samples"];
     private _sites = createHashMap;
-    private _pool = +DUWS_opcom_bandCells;
+    private _pool = +(_cmd get "bandCells");
     private _cells = [];
     for "_k" from 1 to (_samples min count _pool) do { _cells pushBack (_pool deleteAt (floor random count _pool)) };
     if (_cells isEqualTo []) exitWith { DUWS_opcom_sites = _sites; 0 };
@@ -52,7 +52,7 @@ DUWS_fnc_opcom_siteAll = {
         _y params ["_valueFn", "_keep", "_readsAll"];
         if ([_type] call DUWS_fnc_opcom_hpOpen) then {
             private _others = [_type] call DUWS_fnc_opcom_assetsOf;
-            private _stamp = [DUWS_opcom_bandSig, _others, [[], DUWS_opcom_depositSig] select _readsAll];
+            private _stamp = [_cmd get "bandSig", _others, [[], _cmd get "depositSig"] select _readsAll];
             private _memo = DUWS_opcom_siteMemo getOrDefault [_type, [[], createHashMap]];
             if !((_memo select 0) isEqualTo _stamp) then { _memo = [_stamp, createHashMap]; DUWS_opcom_siteMemo set [_type, _memo] };
             private _vals = [];

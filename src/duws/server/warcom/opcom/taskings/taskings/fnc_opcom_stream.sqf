@@ -279,7 +279,7 @@ DUWS_fnc_opcom_bookkeep = {
                 };
             };
         };
-    } forEach DUWS_opcom_taskings;
+    } forEach (_cmd get "taskings");
 };
 
 // Bank surviving strength, take the leader's position, delete the group and its hulls; clear the route to replan.

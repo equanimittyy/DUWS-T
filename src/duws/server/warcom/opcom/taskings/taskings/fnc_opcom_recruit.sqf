@@ -31,8 +31,8 @@ if (_moveType isEqualTo "boat" && {[_homeZone] call DUWS_fnc_opcom_portOf < 0}) 
 
 if (_pay) then { ["OPF", -_cost, "opcom_recruit"] call fnc_ap_adjust };
 
-private _id = DUWS_opcom_taskSeq;
-DUWS_opcom_taskSeq = _id + 1;
+private _id = _cmd get "taskSeq";
+_cmd set ["taskSeq", _id + 1];
 private _pos = _spawnPos;
 if (_moveType isEqualTo "boat") then {
     _pos = [[_homeZone] call DUWS_fnc_opcom_portOf] call DUWS_fnc_opcom_c2w;
@@ -48,7 +48,7 @@ private _t = createHashMapFromArray [
     ["status", "virtual"], ["grp", ""], ["hold", 0], ["homeZone", _homeZone],
     ["carrying", -1], ["ridingOn", -1], ["embarked", false], ["returnZone", ""], ["boundTo", -1]
 ];
-DUWS_opcom_taskings pushBack _t;
+(_cmd get "taskings") pushBack _t;
 // A garrison never streams; a combatant is fielded only through its zone's reserve pool.
 if (_homeZone isNotEqualTo "") then { [_homeZone] call DUWS_fnc_opcom_zoneReserveSync };
 ["INFO", "OPCOM", format ["recruit: hired %1 (force %2, %3 AP) at %4 as tasking %5", _row, _force, _cost, _pos, _id]] call fnc_log;

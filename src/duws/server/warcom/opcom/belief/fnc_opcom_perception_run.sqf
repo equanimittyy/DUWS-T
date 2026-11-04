@@ -3,9 +3,14 @@
 // OPCOM_TICK_PERIOD steps movement finer rather than breaking it.
 if (!isServer) exitWith {};
 
+// The commander record: every function under the tick reads its state from _cmd, through dynamic scope.
+private _cmd = createHashMap;
 call fnc_opcom_belief_init;
 call fnc_opcom_grid_init;
 call fnc_opcom_tasking_init;
+call DUWS_fnc_opcom_pickStateInit;
+// Registered only once built: a dirty mark from another thread writes into every registered record.
+DUWS_opcom_cmds = createHashMapFromArray [["OPF", _cmd]];
 if (DUWS_campaignLoaded) then {
     // Once the FOBs stand: the restore re-keys OPCOM's hold on each FOB to the one rebuilt in its place.
     while {!(["SAVE", "the restored FOBs", {!("bases" in DUWS_restorePending)}, 300] call fnc_waitLogged)} do {};
@@ -23,7 +28,7 @@ while {true} do {
     // A throw would kill this daemon for the whole session (see fnc_repetitive_cleanup). _stage names the
     // stage in the catch so the RPT says what broke; the tick's work is dropped and retried next pass.
     DUWS_opcom_tick = DUWS_opcom_tick + 1;
-    DUWS_opcom_dbg_route = [0, 0, 0, 0];
+    _cmd set ["dbg_route", [0, 0, 0, 0]];
     private _stage = "";
     // Per-stage wall time for the DEBUG line. Scheduled, so a figure includes any time the scheduler held the stage.
     private _dbg = duws_log_level >= 4;
@@ -68,11 +73,11 @@ while {true} do {
         };
         // Pick after the step, so it sees this tick's arrivals and deaths.
         "pick" call _enter;
-        DUWS_opcom_dbg_pick = [];
-        DUWS_opcom_pickDebt = DUWS_opcom_pickDebt + DUWS_opcom_picksPerTick;
-        private _picks = floor DUWS_opcom_pickDebt;
-        DUWS_opcom_pickDebt = DUWS_opcom_pickDebt - _picks;
-        if (_picks == 0 && {DUWS_opcom_pickOnce isNotEqualTo ""}) then { _picks = 1 };
+        _cmd set ["dbg_pick", []];
+        _cmd set ["pickDebt", (_cmd get "pickDebt") + (_cmd get "picksPerTick")];
+        private _picks = floor (_cmd get "pickDebt");
+        _cmd set ["pickDebt", (_cmd get "pickDebt") - _picks];
+        if (_picks == 0 && {(_cmd get "pickOnce") isNotEqualTo ""}) then { _picks = 1 };
         for "_k" from 1 to _picks do {
             // A second pick must see the truck, wallet and sites the first one spent.
             call DUWS_fnc_opcom_tickCacheReset;
@@ -104,13 +109,13 @@ while {true} do {
         // format eats its args before fnc_log can drop the line, so these whole-grid count/selectMax scans
         // would run every tick even at the default level; gate them so they cost nothing unless DEBUG is on.
         if (_dbg) then {
-            DUWS_opcom_dbg_route params ["_rn", "_rCells", "_rSec", "_rFrames"];
+            (_cmd get "dbg_route") params ["_rn", "_rCells", "_rSec", "_rFrames"];
             ["DEBUG", "OPCOM", format ["grid tick=%1 w=%2 friCells=%3 eneCells=%4 maxFri=%5 maxEne=%6 belief=%7 fresh=%8 ms[%9] pick[%10] route[n=%11 cells=%12 ms=%13/%14]",
                 DUWS_opcom_tick, DUWS_opcom_grid_w,
-                {_x > 0.05} count DUWS_opcom_grid_fri,
-                {_x > 0.05} count DUWS_opcom_grid_ene,
-                selectMax DUWS_opcom_grid_fri, selectMax DUWS_opcom_grid_ene,
-                count DUWS_opcom_belief_pos, DUWS_opcom_dbg_fresh, _ms joinString " ", DUWS_opcom_dbg_pick joinString " ",
+                {_x > 0.05} count (_cmd get "grid_fri"),
+                {_x > 0.05} count (_cmd get "grid_ene"),
+                selectMax (_cmd get "grid_fri"), selectMax (_cmd get "grid_ene"),
+                count (_cmd get "belief_pos"), _cmd get "dbg_fresh", _ms joinString " ", (_cmd get "dbg_pick") joinString " ",
                 _rn, _rCells, round (_rSec * 1000), _rFrames]] call fnc_log;
         };
     } catch {

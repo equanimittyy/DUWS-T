@@ -23,7 +23,7 @@ DUWS_fnc_opcom_rosterSweep = {
             private _r = _x get "menu";
             _counts set [_r, (_counts getOrDefault [_r, 0]) + 1];
         };
-    } forEach DUWS_opcom_taskings;
+    } forEach (_cmd get "taskings");
     private _open = (keys DUWS_opcom_recruitMenu) select {
         (((DUWS_opcom_recruitMenu get _x) select 0) findIf { ([_x, "OPF"] call DUWS_fnc_tokenClass) isEqualTo "" }) < 0
     };
@@ -31,7 +31,7 @@ DUWS_fnc_opcom_rosterSweep = {
 };
 
 DUWS_fnc_opcom_unitCount = {
-    { !("supply" in (_x get "flags")) && {(_x get "status") isNotEqualTo "dead"} } count DUWS_opcom_taskings
+    { !("supply" in (_x get "flags")) && {(_x get "status") isNotEqualTo "dead"} } count (_cmd get "taskings")
 };
 
 // -> [[row, flags, moveType, force, price, mix], ...]: every row the faction can field now. An unpriced or forceless
@@ -313,6 +313,6 @@ DUWS_fnc_opcom_sourceName = {
 DUWS_fnc_opcom_dismiss = {
     params ["_ref", "_t"];
     if ((_ref select 0) isNotEqualTo "hire") exitWith {};
-    DUWS_opcom_taskings = DUWS_opcom_taskings - [_t];
+    _cmd set ["taskings", (_cmd get "taskings") - [_t]];
     [_t get "homeZone"] call DUWS_fnc_opcom_zoneReserveSync;
 };

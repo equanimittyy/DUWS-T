@@ -627,18 +627,18 @@ DUWS_fnc_restoreEscalation = {
 // again once it streams in.
 DUWS_fnc_restoreOpcom = {
     private _o = DUWS_restore getOrDefault ["opcom", createHashMap];
-    DUWS_opcom_archetype = _o getOrDefault ["archetype", DUWS_opcom_archetype];
+    _cmd set ["archetype", _o getOrDefault ["archetype", _cmd get "archetype"]];
     DUWS_opcom_tick = _o getOrDefault ["tick", 0];
     DUWS_opcom_hqKnown = _o getOrDefault ["hqKnown", false];
-    DUWS_opcom_taskSeq = _o getOrDefault ["taskSeq", 0];
-    DUWS_opcom_attackSeq = _o getOrDefault ["attackSeq", 0];
-    DUWS_opcom_attackReadyTick = _o getOrDefault ["attackReadyTick", 0];
-    DUWS_opcom_supplyReadyTick = _o getOrDefault ["supplyReadyTick", createHashMap];
+    _cmd set ["taskSeq", _o getOrDefault ["taskSeq", 0]];
+    _cmd set ["attackSeq", _o getOrDefault ["attackSeq", 0]];
+    _cmd set ["attackReadyTick", _o getOrDefault ["attackReadyTick", 0]];
+    _cmd set ["supplyReadyTick", _o getOrDefault ["supplyReadyTick", createHashMap]];
     DUWS_opcom_mineVariants = _o getOrDefault ["mineVariants", createHashMap];
     missionNamespace setVariable ["DUWS_hpOpcomSeq", _o getOrDefault ["hpSeq", 0]];
 
     private _saved = _o getOrDefault ["taskings", []];
-    DUWS_opcom_taskings = _saved select {
+    _cmd set ["taskings", _saved select {
         private _token = (_x getOrDefault ["comp", []]) param [0, ""];
         private _cls = _x getOrDefault ["spawnClass", ""];
         if (_cls isEqualTo "" || {isClass (configFile >> "CfgVehicles" >> _cls)} || {([[_token] call DUWS_fnc_tokenName] call DUWS_fnc_teamRow) isNotEqualTo []}) then {
@@ -650,11 +650,11 @@ DUWS_fnc_restoreOpcom = {
             _x set ["spawnClass", _new];
             _new isNotEqualTo ""
         }
-    };
-    DUWS_restoreDropped set ["units", count _saved - count DUWS_opcom_taskings];
-    private _ids = DUWS_opcom_taskings apply { _x get "id" };
-    DUWS_opcom_attacks = _o getOrDefault ["attacks", []];
-    { { _x set ["units", (_x get "units") select { _x in _ids }] } forEach (_x get "roles") } forEach DUWS_opcom_attacks;
+    }];
+    DUWS_restoreDropped set ["units", count _saved - count (_cmd get "taskings")];
+    private _ids = (_cmd get "taskings") apply { _x get "id" };
+    _cmd set ["attacks", _o getOrDefault ["attacks", []]];
+    { { _x set ["units", (_x get "units") select { _x in _ids }] } forEach (_x get "roles") } forEach (_cmd get "attacks");
     // The FOBs stand by now (fnc_opcom_perception_run).
     private _fobs = DUWS_restore getOrDefault ["fobs", []];
     private _rekey = createHashMap;
@@ -666,10 +666,10 @@ DUWS_fnc_restoreOpcom = {
     DUWS_opcom_fobsKnown = ((_o getOrDefault ["fobsKnown", []]) select { _x in _rekey }) apply { _rekey get _x };
     if (DUWS_opcom_hqKnown) then { [str blu_hq_markername] call fnc_baseMarkDiscovered };
     { if ((_x getVariable ["DUWS_siteKey", ""]) in DUWS_opcom_fobsKnown) then { [_x getVariable "DUWS_marker"] call fnc_baseMarkDiscovered } } forEach Array_of_FOBS;
-    { if ((_x get "target") in _rekey) then { _x set ["target", _rekey get (_x get "target")] } } forEach DUWS_opcom_attacks;
+    { if ((_x get "target") in _rekey) then { _x set ["target", _rekey get (_x get "target")] } } forEach (_cmd get "attacks");
     {
         if ((_x getOrDefault ["targetZone", ""]) in _rekey) then { _x set ["targetZone", _rekey get (_x get "targetZone")] };
-    } forEach DUWS_opcom_taskings;
+    } forEach (_cmd get "taskings");
 
     {
         private _r = [_x get "carrying"] call DUWS_fnc_opcom_byId;
@@ -678,16 +678,16 @@ DUWS_fnc_restoreOpcom = {
             _r set ["unloading", false];
             if !(_x getOrDefault ["embarked", false]) then { _r set ["ferryFrozen", false] };
         };
-    } forEach (DUWS_opcom_taskings select { (_x getOrDefault ["carrying", -1]) >= 0 });
+    } forEach ((_cmd get "taskings") select { (_x getOrDefault ["carrying", -1]) >= 0 });
     {
         private _tr = [_x get "ridingOn"] call DUWS_fnc_opcom_byId;
         if (isNil "_tr" || {(_tr getOrDefault ["carrying", -1]) != (_x get "id")}) then {
             _x set ["unloading", false];
             [_x] call DUWS_fnc_opcom_ferryUnbind;
         };
-    } forEach (DUWS_opcom_taskings select { (_x getOrDefault ["ridingOn", -1]) >= 0 });
+    } forEach ((_cmd get "taskings") select { (_x getOrDefault ["ridingOn", -1]) >= 0 });
     ["INFO", "SAVE", format ["OPCOM restored at tick %1: %2 taskings, %3 attacks", DUWS_opcom_tick,
-        count DUWS_opcom_taskings, count DUWS_opcom_attacks]] call fnc_log;
+        count (_cmd get "taskings"), count (_cmd get "attacks")]] call fnc_log;
     ["opcom"] call DUWS_fnc_restoreStepDone;
 };
 

@@ -5,4 +5,4 @@ if (isNil "DUWS_opcom_grid_w") exitWith {};
 params ["_point", "_k"];
 
 private _t = DUWS_opcom_tick;
-{ DUWS_opcom_grid_seen set [_x, _t] } forEach ([[_point] call DUWS_fnc_opcom_w2c, _k] call DUWS_fnc_opcom_blockCells);
+{ (_cmd get "grid_seen") set [_x, _t] } forEach ([[_point] call DUWS_fnc_opcom_w2c, _k] call DUWS_fnc_opcom_blockCells);

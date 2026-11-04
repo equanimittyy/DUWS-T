@@ -2,18 +2,24 @@
 // AI overlay reads.
 if (!isServer) exitWith {};
 
-DUWS_opcom_aiMode = "weighted";
-DUWS_opcom_pickOnce = "";
-// Carried as a debt, so a rate below 1 picks once every few ticks.
-DUWS_opcom_picksPerTick = 0.5;
-DUWS_opcom_pickDebt = 0;
-DUWS_opcom_aiEvents = [];
-DUWS_opcom_aiSeq = 0;
+DUWS_fnc_opcom_pickStateInit = {
+    _cmd set ["aiMode", "weighted"];
+    _cmd set ["pickOnce", ""];
+    // Carried as a debt, so a rate below 1 picks once every few ticks.
+    _cmd set ["picksPerTick", 0.5];
+    _cmd set ["pickDebt", 0];
+    _cmd set ["aiEvents", []];
+    _cmd set ["aiSeq", 0];
+    _cmd set ["archetype", "balanced"];
+    _cmd set ["tickCache", createHashMap];
+};
 
 // Read by sequence (fnc_debug_opcom_ai), so every watcher sees each line once whenever it polls.
 DUWS_fnc_opcom_aiEvent = {
     params ["_text"];
-    DUWS_opcom_aiSeq = DUWS_opcom_aiSeq + 1;
-    DUWS_opcom_aiEvents pushBack [DUWS_opcom_aiSeq, _text];
-    if (count DUWS_opcom_aiEvents > 10) then { DUWS_opcom_aiEvents deleteAt 0 };
+    private _seq = (_cmd get "aiSeq") + 1;
+    _cmd set ["aiSeq", _seq];
+    private _events = _cmd get "aiEvents";
+    _events pushBack [_seq, _text];
+    if (count _events > 10) then { _events deleteAt 0 };
 };

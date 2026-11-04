@@ -66,4 +66,4 @@ private _wcells = [];
             [_pos, _k, _blind] call fnc_opcom_cover_clear;
         };
     };
-} forEach DUWS_opcom_taskings;
+} forEach (_cmd get "taskings");

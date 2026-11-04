@@ -12,8 +12,8 @@
 if (!isServer) exitWith {};
 
 // High-to-low: a forward deleteAt shifts the unvisited rows down and skips one.
-for "_i" from (count DUWS_opcom_belief_key - 1) to 0 step -1 do {
-    private _key = DUWS_opcom_belief_key select _i;
+for "_i" from (count (_cmd get "belief_key") - 1) to 0 step -1 do {
+    private _key = (_cmd get "belief_key") select _i;
     // Only sighting rows resolve as groups: groupFromNetId would drop a zone/FOB/HQ row as a bogus orphan.
     if ([_key] call DUWS_fnc_opcom_beliefIsSighting) then {
         private _g = groupFromNetId _key;

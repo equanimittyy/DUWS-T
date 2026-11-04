@@ -10,7 +10,7 @@ DUWS_fnc_opcom_coverCountsSweep = {
     {
         (_x getOrDefault ["errand", []]) params [["_kind", ""], ["_to", []]];
         if (_kind in ["build", "mine"]) then { _pos pushBack _to };
-    } forEach DUWS_opcom_taskings;
+    } forEach (_cmd get "taskings");
     private _n = createHashMap;
     {
         { _n set [_x, (_n getOrDefault [_x, 0]) + 1] } forEach ([[_x] call DUWS_fnc_opcom_w2c, OPCOM_BLOCK_K] call DUWS_fnc_opcom_blockCells);

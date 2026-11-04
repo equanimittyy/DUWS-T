@@ -248,8 +248,8 @@ fnc_site_bluforOrAir = {
 fnc_site_hostileNear = {
     params ["_pos", "_ring"];
     if (([_pos, _ring, EAST] call fnc_side_count_at) > 0) exitWith { true };
-    if (isNil "DUWS_opcom_taskings") exitWith { false };
-    (DUWS_opcom_taskings findIf { (_x get "grp") isEqualTo "" && {((_x get "pos") distance2D _pos) < _ring} }) >= 0
+    if (isNil "DUWS_opcom_cmds") exitWith { false };
+    (((DUWS_opcom_cmds get "OPF") get "taskings") findIf { (_x get "grp") isEqualTo "" && {((_x get "pos") distance2D _pos) < _ring} }) >= 0
 };
 
 // Replaces a thread per zone plus a sleeper per FOB plus two town loops with one. The saving is the
@@ -295,8 +295,8 @@ fnc_site_poller = {
         // OPCOM's virtual units stand on no unit list, so a site closing with one would never see it --
         // and raising the garrison to meet it is what renders it (fnc_opcom_task_step).
         private _eastVirt = [];
-        if (!isNil "DUWS_opcom_taskings") then {
-            { if ((_x get "grp") isEqualTo "") then { _eastVirt pushBack (_x get "pos") } } forEach DUWS_opcom_taskings;
+        if (!isNil "DUWS_opcom_cmds") then {
+            { if ((_x get "grp") isEqualTo "") then { _eastVirt pushBack (_x get "pos") } } forEach ((DUWS_opcom_cmds get "OPF") get "taskings");
         };
         private _now = time;
         private _t0 = diag_tickTime;

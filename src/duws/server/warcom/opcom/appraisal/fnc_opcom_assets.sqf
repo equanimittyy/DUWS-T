@@ -36,7 +36,7 @@ DUWS_fnc_opcom_hpSweep = {
         (_x getOrDefault ["errand", []]) params [["_kind", ""], ["_to", []], ["_t", ""]];
         if (_kind isEqualTo "build") then { [_t, _to] call _add };
         if (_kind isEqualTo "mine") then { ["MINEFIELD", _to, _t select 0] call _add };
-    } forEach DUWS_opcom_taskings;
+    } forEach (_cmd get "taskings");
     [_byType, _byMix]
 };
 

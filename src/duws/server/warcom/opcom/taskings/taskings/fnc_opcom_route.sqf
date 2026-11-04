@@ -16,10 +16,10 @@ if (_moveType in ["wheeled", "tracked"]) exitWith {
     private _extra = if (_bends) then {
         [{
             params ["_arg", "", "_to", "_len"];
-            _arg params ["_lw", "_avoid"];
+            _arg params ["_lw", "_avoid", "_ene"];
             private _c = [_to] call DUWS_fnc_opcom_w2c;
-            _lw * (DUWS_opcom_grid_ene select _c) * _len / OPCOM_GRID_CELL + ([0, OPCOM_ROUTE_AVOID_PENALTY] select (_c in _avoid))
-        }, [OPCOM_ROUTE_LAMBDA * _lambda, _avoid]]
+            _lw * (_ene select _c) * _len / OPCOM_GRID_CELL + ([0, OPCOM_ROUTE_AVOID_PENALTY] select (_c in _avoid))
+        }, [OPCOM_ROUTE_LAMBDA * _lambda, _avoid, _cmd get "grid_ene"]]
     } else { [] };
     // The straight stub off the road would drive through whatever stands between the road and the dest.
     private _end = _destPos;
@@ -68,7 +68,7 @@ private _n    = _w * _w;
 DUWS_opcom_box params ["_bMinCx", "_bMinCy", "_bMaxCx", "_bMaxCy"];
 private _land = DUWS_opcom_grid_land;
 private _gwater = DUWS_opcom_grid_water;
-private _ene  = DUWS_opcom_grid_ene;
+private _ene  = _cmd get "grid_ene";
 private _water = DUWS_opcom_moveWater getOrDefault [_moveType, "land"];
 
 // A land type may cross navigable water (at the lift penalty below), so its passable set includes water cells.
@@ -150,12 +150,12 @@ while {count _open > 0 && {_guard < _n}} do {
 };
 
 if (duws_log_level >= 4) then {
-    DUWS_opcom_dbg_route = [
-        (DUWS_opcom_dbg_route select 0) + 1,
-        (DUWS_opcom_dbg_route select 1) + _guard,
-        (DUWS_opcom_dbg_route select 2) + diag_tickTime - _t0,
-        (DUWS_opcom_dbg_route select 3) + diag_frameNo - _f0
-    ];
+    _cmd set ["dbg_route", [
+        ((_cmd get "dbg_route") select 0) + 1,
+        ((_cmd get "dbg_route") select 1) + _guard,
+        ((_cmd get "dbg_route") select 2) + diag_tickTime - _t0,
+        ((_cmd get "dbg_route") select 3) + diag_frameNo - _f0
+    ]];
 };
 
 if (!_found) exitWith {

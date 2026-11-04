@@ -17,9 +17,9 @@ private _cy = floor (_c / _w);
 private _t  = DUWS_opcom_tick;
 
 // High-to-low: deleteAt shifts every later row down, so a forward walk would skip the row after each drop.
-for "_i" from (count DUWS_opcom_belief_key - 1) to 0 step -1 do {
-    if ((DUWS_opcom_belief_time select _i) < _t) then {
-        private _bc = [DUWS_opcom_belief_pos select _i] call DUWS_fnc_opcom_w2c;
+for "_i" from (count (_cmd get "belief_key") - 1) to 0 step -1 do {
+    if (((_cmd get "belief_time") select _i) < _t) then {
+        private _bc = [(_cmd get "belief_pos") select _i] call DUWS_fnc_opcom_w2c;
         if (!(_bc in _blind) && {((abs ((_bc mod _w) - _cx)) max (abs ((floor (_bc / _w)) - _cy))) <= _k}) then {
             [_i] call fnc_opcom_belief_deleteAt;
         };

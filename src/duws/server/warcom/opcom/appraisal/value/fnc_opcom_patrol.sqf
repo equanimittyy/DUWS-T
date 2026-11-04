@@ -4,7 +4,7 @@ if (!isServer) exitWith {};
 
 DUWS_fnc_opcom_stalenessAt = {
     params ["_c"];
-    ((DUWS_opcom_tick - (DUWS_opcom_grid_seen select _c)) / OPCOM_BELIEF_EXPIRE) min 1
+    ((DUWS_opcom_tick - ((_cmd get "grid_seen") select _c)) / OPCOM_BELIEF_EXPIRE) min 1
 };
 
 // The mean staleness of the 3x3 block about _pos, the block P(win) and the muster bars read.

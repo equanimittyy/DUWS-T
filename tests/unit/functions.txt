@@ -75,7 +75,6 @@ duws/server/init_zones/fnc_hardpoint_place.sqf::fnc_hardpoint_build
 duws/server/warcom/opcom/taskings/actions/fnc_opcom_fires.sqf::DUWS_fnc_opcom_creepGrid
 duws/server/warcom/opcom/taskings/actions/fnc_opcom_fires.sqf::DUWS_fnc_opcom_fireAim
 duws/server/warcom/opcom/belief/fnc_opcom_grid_sources.sqf::DUWS_fnc_opcom_deposit
-duws/server/warcom/opcom/belief/fnc_opcom_grid_sources.sqf::DUWS_fnc_opcom_gridDirty
 duws/server/warcom/opcom/appraisal/fnc_opcom_sources.sqf::DUWS_fnc_opcom_nearestOpen
 duws/server/warcom/opcom/appraisal/fnc_opcom_sources.sqf::DUWS_fnc_opcom_sourceRow
 duws/server/warcom/opcom/appraisal/fnc_opcom_sources.sqf::DUWS_fnc_opcom_bestSources

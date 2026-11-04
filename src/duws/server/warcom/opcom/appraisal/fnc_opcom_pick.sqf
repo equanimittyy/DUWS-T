@@ -1,9 +1,9 @@
 // Locality: server -- the OPCOM tick's pick stage (opcom_plan.md §The pick). `random` is kept as the unscored
 // control: uniform over actions before targets, so a target-rich action does not crowd out the rest.
-private _mode = DUWS_opcom_aiMode;
-if (DUWS_opcom_pickOnce isNotEqualTo "") then {
-    _mode = DUWS_opcom_pickOnce;
-    DUWS_opcom_pickOnce = "";
+private _mode = _cmd get "aiMode";
+if ((_cmd get "pickOnce") isNotEqualTo "") then {
+    _mode = _cmd get "pickOnce";
+    _cmd set ["pickOnce", ""];
 };
 if (_mode isEqualTo "off") exitWith {};
 
@@ -12,7 +12,7 @@ private _lap = diag_tickTime;
 private _frame = diag_frameNo;
 private _split = {
     if (_dbg) then {
-        DUWS_opcom_dbg_pick pushBack format ["%1=%2/%3", _this, round ((diag_tickTime - _lap) * 1000), diag_frameNo - _frame]
+        (_cmd get "dbg_pick") pushBack format ["%1=%2/%3", _this, round ((diag_tickTime - _lap) * 1000), diag_frameNo - _frame]
     };
     _lap = diag_tickTime;
     _frame = diag_frameNo;
@@ -21,7 +21,7 @@ private _split = {
 // Random mode sites on one band cell, so the control stays an unscored draw.
 private _siteValues = [[OPCOM_SITE_SAMPLES, 1] select (_mode isNotEqualTo "weighted")] call DUWS_fnc_opcom_siteAll;
 "site" call _split;
-if (_dbg) then { DUWS_opcom_dbg_pick pushBack format ["siteValues=%1", _siteValues] };
+if (_dbg) then { (_cmd get "dbg_pick") pushBack format ["siteValues=%1", _siteValues] };
 
 private _live = [];
 private _rowMs = [];
@@ -50,7 +50,7 @@ while {_i < _n} do {
     sleep 0;
 };
 "targets" call _split;
-if (_rowMs isNotEqualTo []) then { DUWS_opcom_dbg_pick pushBack format ["rows(%1)", _rowMs joinString " "] };
+if (_rowMs isNotEqualTo []) then { (_cmd get "dbg_pick") pushBack format ["rows(%1)", _rowMs joinString " "] };
 if (_live isEqualTo []) exitWith {};
 
 private _row = [];

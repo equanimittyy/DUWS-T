@@ -14,7 +14,7 @@ DUWS_fnc_opcom_zoneForcesSweep = {
             private _cur = _out getOrDefault [_hz, -1];
             if (_cur >= 0) then { _out set [_hz, _cur + (_x get "effForce")] };
         };
-    } forEach DUWS_opcom_taskings;
+    } forEach (_cmd get "taskings");
     _out
 };
 

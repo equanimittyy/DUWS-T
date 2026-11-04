@@ -674,6 +674,8 @@ blufor_B_X = "cls_blu_B";
 // and reserve pool from.
 // Test keys are not real sites, so the owner derivation has nothing to read. Every case below is OPFOR's.
 DUWS_fnc_garrisonSideOf = { "OPF" };
+// The ledger's writers mark OPCOM's grid dirty, and no case builds a commander record to mark.
+DUWS_fnc_opcom_gridDirty = {};
 
 missionNamespace setVariable ["DUWS_garrisonLost_svk", ["patrol"]];
 ["svk", ["patrol", "patrol", "team"]] call DUWS_fnc_garrisonSetFull;
@@ -1766,8 +1768,8 @@ private _coast = call fnc_test_zeroGrid;
 
 // --- DUWS_fnc_opcom_trafficAt: a sighting's force, halving every half-life ---
 OPCOM_TRAFFIC_HALFLIFE = 360;
-DUWS_opcom_grid_traffic = [8];
-DUWS_opcom_grid_trafficTick = [100];
+CMD_grid_traffic = [8];
+CMD_grid_trafficTick = [100];
 DUWS_opcom_tick = 100;
 ["trafficAt: a fresh stamp reads its whole force", [0] call DUWS_fnc_opcom_trafficAt, 8] call fnc_assertClose;
 DUWS_opcom_tick = 460;
@@ -1818,7 +1820,7 @@ DUWS_fnc_opcom_cellDist = { 1 };
 
 // --- DUWS_fnc_opcom_stalenessAt / DUWS_fnc_opcom_patrolCells: the ground a patrol sweeps on its way ---
 OPCOM_BELIEF_EXPIRE = 240;
-DUWS_opcom_grid_seen = [100, -140, 220];
+CMD_grid_seen = [100, -140, 220];
 DUWS_opcom_tick = 220;
 ["stalenessAt: a cell swept this tick reads fresh", [2] call DUWS_fnc_opcom_stalenessAt, 0] call fnc_assertClose;
 ["stalenessAt: half a horizon unseen reads half", [0] call DUWS_fnc_opcom_stalenessAt, 0.5] call fnc_assertClose;
@@ -1838,8 +1840,8 @@ DUWS_fnc_opcom_w2c = { params ["_p"]; (floor ((_p select 1) / 500)) * 10 + floor
 
 // --- DUWS_fnc_opcom_patrolValue: what the ground a patrol sweeps is worth ---
 DUWS_fnc_opcom_tickCached = { params ["", "_fn"]; call _fn };
-DUWS_opcom_grid_seen = [];
-for "_i" from 1 to 100 do { DUWS_opcom_grid_seen pushBack (DUWS_opcom_tick - OPCOM_BELIEF_EXPIRE) };
+CMD_grid_seen = [];
+for "_i" from 1 to 100 do { CMD_grid_seen pushBack (DUWS_opcom_tick - OPCOM_BELIEF_EXPIRE) };
 OPCOM_PATROL_SHARE = 0.2;
 ["patrolValue: wholly unseen ground pays its need at the share",
     [[2250, 2250, 0], [2250, 2250, 0], 0] call DUWS_fnc_opcom_patrolValue, 0.4] call fnc_assertClose;

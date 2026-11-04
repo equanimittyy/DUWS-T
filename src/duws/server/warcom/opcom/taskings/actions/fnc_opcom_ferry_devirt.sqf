@@ -175,6 +175,8 @@ DUWS_fnc_opcom_ferryDropBoard = {
     _veh setVariable ["DUWS_ferryUnloadEH", _veh addEventHandler ["GetOut", {
         params ["_v", "", "_u"];
         if (group _u isNotEqualTo (_v getVariable ["DUWS_ferryUnloadGrp", grpNull])) exitWith {};
+        // A handler inherits no scope, and only OPFOR runs a ferry.
+        private _cmd = DUWS_opcom_cmds get "OPF";
         private _r = [_v getVariable ["DUWS_ferryUnloadRider", -1]] call DUWS_fnc_opcom_byId;
         if (!isNil "_r" && {(_r getOrDefault ["ridingOn", -1]) >= 0}) then { [_r] call DUWS_fnc_opcom_ferryUnbind };
     }]];

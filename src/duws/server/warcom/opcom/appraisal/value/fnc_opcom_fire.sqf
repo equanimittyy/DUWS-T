@@ -25,6 +25,6 @@ DUWS_fnc_opcom_artyValue = {
     private _mass = 0;
     { if (((_x select 0) distance2D _pos) <= _reach) then { _mass = _mass + (_x select 1) } } forEach _seen;
     private _own = 0;
-    { if (((_x get "pos") distance2D _pos) < _spread) then { _own = _own + (_x get "effForce") } } forEach DUWS_opcom_taskings;
+    { if (((_x get "pos") distance2D _pos) < _spread) then { _own = _own + (_x get "effForce") } } forEach (_cmd get "taskings");
     ((_mass - _own) max 0) * (_mass / _total) * OPCOM_AP_PER_FORCE
 };

@@ -124,7 +124,7 @@ if (_knownOpfor) then {
     {
         if (_x select 2) then { _revealedZoneKeys pushBack ([_x select 1] call fnc_zone_key) };
     } forEach zone_namePOS_pairs;
-    private _contacts = DUWS_opcom_taskings select {
+    private _contacts = ((DUWS_opcom_cmds get "OPF") get "taskings") select {
         ((_x get "order") isNotEqualTo "garrison" || {(_x get "homeZone") in _revealedZoneKeys})
         && {[_x get "pos"] call _fnc_inReach}
     };

@@ -292,7 +292,7 @@ is the per-object cost this shape exists to avoid. `onPlayerKilled.sqf` strips e
 
 ## A contact is a snapshot
 
-An OPCOM unit is a virtual record (`DUWS_opcom_taskings`), a hashMap that marches a route every OPCOM tick
+An OPCOM unit is a virtual record (a tasking in OPFOR's commander record, `DUWS_opcom_cmds`), a hashMap that marches a route every OPCOM tick
 and only becomes real men when a player comes near. A contact is what intel makes of one: global markers on
 the position that record held at the moment the intel landed, and nothing after that.
 

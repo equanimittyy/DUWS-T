@@ -39,11 +39,10 @@ DUWS_fnc_opcom_gridZeroBox = {
 // mark that follows the write is always processed on a tick that sees the write.
 DUWS_fnc_opcom_gridDirty = {
     params ["_key"];
-    if (isNil "DUWS_opcom_gridDirty") exitWith {};
-    DUWS_opcom_gridDirty set [_key, true];
+    { (_y get "gridDirty") set [_key, true] } forEach (missionNamespace getVariable ["DUWS_opcom_cmds", createHashMap]);
 };
 
-DUWS_fnc_opcom_gridDirtyAll = { DUWS_opcom_gridDirtyAll = true };
+DUWS_fnc_opcom_gridDirtyAll = { { _y set ["gridDirtyAll", true] } forEach (missionNamespace getVariable ["DUWS_opcom_cmds", createHashMap]) };
 
 // Each source -> [key, static, layer, pos, weight, reach], or [] where it deposits nothing. Static means only a write
 // that marks the key can change its weight.
@@ -96,29 +95,29 @@ DUWS_fnc_opcom_gridMobile = {
         if ((_y select 2) isEqualTo "ene") then {
             { if (alive _x) then { _held set [netId (group _x), true] } } forEach ([_x] call fnc_site_roster);
         };
-    } forEach DUWS_opcom_gridAwake;
+    } forEach (_cmd get "gridAwake");
     // An expired stamp is already gone from the arrays.
     {
-        if !((DUWS_opcom_belief_key select _forEachIndex) in _held) then {
-            private _age = DUWS_opcom_tick - (DUWS_opcom_belief_time select _forEachIndex);
+        if !(((_cmd get "belief_key") select _forEachIndex) in _held) then {
+            private _age = DUWS_opcom_tick - ((_cmd get "belief_time") select _forEachIndex);
             private _decay = ((OPCOM_BELIEF_EXPIRE - _age) / (OPCOM_BELIEF_EXPIRE - OPCOM_BELIEF_FRESH)) max 0 min 1;
-            [_ene, _x, (DUWS_opcom_belief_str select _forEachIndex) * _decay, OPCOM_GRID_SPREAD] call DUWS_fnc_opcom_deposit;
+            [_ene, _x, ((_cmd get "belief_str") select _forEachIndex) * _decay, OPCOM_GRID_SPREAD] call DUWS_fnc_opcom_deposit;
         };
-    } forEach DUWS_opcom_belief_pos;
+    } forEach (_cmd get "belief_pos");
     // A tasking's group is in no holdings scan, so this is where its force enters the grid at all -- except a standing
     // defender, which its zone's live garrison force already holds.
     {
         private _ef = _x get "effForce";
         if (_ef > 0 && {!([_x] call DUWS_fnc_opcom_defenderStanding)}) then { [_fri, _x get "pos", _ef, OPCOM_GRID_SPREAD] call DUWS_fnc_opcom_deposit };
-    } forEach (missionNamespace getVariable ["DUWS_opcom_taskings", []]);
+    } forEach (_cmd get "taskings");
 };
 
 // Every source from scratch, cache bypassed. Run by the grid stage right after it publishes: the task step moves
 // taskings after the stage, so a check run anywhere else reads them where the published grid did not.
 DUWS_fnc_opcom_gridDrift = {
     params ["_caller"];
-    private _fri = [+DUWS_opcom_grid_fri] call DUWS_fnc_opcom_gridZeroBox;
-    private _ene = [+DUWS_opcom_grid_ene] call DUWS_fnc_opcom_gridZeroBox;
+    private _fri = [+(_cmd get "grid_fri")] call DUWS_fnc_opcom_gridZeroBox;
+    private _ene = [+(_cmd get "grid_ene")] call DUWS_fnc_opcom_gridZeroBox;
     {
         _x params ["", "", "_layer", "_pos", "_weight", "_reach"];
         [[_fri, _ene] select (_layer isEqualTo "ene"), _pos, _weight, _reach] call DUWS_fnc_opcom_deposit;
@@ -135,7 +134,7 @@ DUWS_fnc_opcom_gridDrift = {
         format ["%1 at %2", _gap, ([_at] call DUWS_fnc_opcom_c2w) apply { round _x }]
     };
     private _line = format ["grid drift: fri %1, ene %2 (a missed dirty mark reads above 0.05)",
-        [_fri, DUWS_opcom_grid_fri] call _worst, [_ene, DUWS_opcom_grid_ene] call _worst];
+        [_fri, _cmd get "grid_fri"] call _worst, [_ene, _cmd get "grid_ene"] call _worst];
     ["INFO", "OPCOM", _line] call fnc_log;
     _line remoteExec ["hint", _caller];
 };

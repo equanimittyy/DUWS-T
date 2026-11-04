@@ -5,17 +5,18 @@
 if (!isServer) exitWith {};
 params ["_requester", ["_forceOn", false], ["_staleOn", false], ["_needOn", false]];
 
-// The zone-port map is OPCOM init's last store, so its presence means every store below is built.
-if (isNil "DUWS_opcom_zonePort") exitWith {
+// The commander registry is OPCOM init's last write, so its presence means every store below is built.
+if (isNil "DUWS_opcom_cmds") exitWith {
     ["DEBUG", "OPCOM", "overlay gather: OPCOM init not finished, nothing sent"] call fnc_log;
 };
+private _cmd = DUWS_opcom_cmds get "OPF";
 
 private _w = DUWS_opcom_grid_w;
 private _cell = OPCOM_GRID_CELL;
-private _fri = DUWS_opcom_grid_fri;
-private _ene = DUWS_opcom_grid_ene;
+private _fri = _cmd get "grid_fri";
+private _ene = _cmd get "grid_ene";
 private _land = DUWS_opcom_grid_land;
-private _seen = DUWS_opcom_grid_seen;
+private _seen = _cmd get "grid_seen";
 private _tick = DUWS_opcom_tick;
 private _eps = 0.05;
 
@@ -64,8 +65,8 @@ for "_iy" from _bMinCy to _bMaxCy do {
 // Belief stamps: position, age in ticks, and the stamped threat (headcount with humans weighted).
 private _bel = [];
 {
-    _bel pushBack [_x, DUWS_opcom_tick - (DUWS_opcom_belief_time select _forEachIndex), DUWS_opcom_belief_str select _forEachIndex];
-} forEach DUWS_opcom_belief_pos;
+    _bel pushBack [_x, DUWS_opcom_tick - ((_cmd get "belief_time") select _forEachIndex), (_cmd get "belief_str") select _forEachIndex];
+} forEach (_cmd get "belief_pos");
 
 // Taskings -> [pos, OPFOR box icon, "KIND-ID:ORDER" tag]. KIND is the recruit-menu row (RECON_HELI, TRANS_HELI,
 // RIFLES...), so rows sharing a comp token (recon_heli/trans_heli both build ["transheli"]) still read apart;
@@ -115,7 +116,7 @@ private _wps = [];
         private _rp = _route select (count _route - 1);
         _wps pushBack [[_rp select 0, _rp select 1], [_code, format ["%1 %2", _code, _intent]] select (_intent isNotEqualTo "")];
     };
-} forEach (missionNamespace getVariable ["DUWS_opcom_taskings", []]);
+} forEach (_cmd get "taskings");
 
 ["DEBUG", "OPCOM", format ["overlay gather: %1 cells, %2 belief, %3 taskings, %4 waypoints -> %5", count _cells, count _bel, count _tasks, count _wps, _requester]] call fnc_log;
 

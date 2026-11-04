@@ -40,7 +40,7 @@ DUWS_fnc_opcom_ferryApproach = {
 // re-virtualises elsewhere). A fighting hull is skipped -- a hull lost mid-trip strands its bound rider.
 DUWS_fnc_opcom_ferryPool = {
     params [["_excludeId", -1], ["_moveTypes", ["boat", "rotary"]]];
-    DUWS_opcom_taskings select {
+    (_cmd get "taskings") select {
         ("transport" in (_x get "flags"))
         && {(_x get "id") != _excludeId}
         && {(_x get "moveType") in _moveTypes}

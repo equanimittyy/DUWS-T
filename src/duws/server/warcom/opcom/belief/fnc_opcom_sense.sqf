@@ -76,4 +76,4 @@ for "_gi" from (DUWS_opcom_tick % _stride) to ((count _east) - 1) step _stride d
     [_key, _pos, _str] call fnc_opcom_belief_upsert;
 } forEach (keys _seen);
 
-DUWS_opcom_dbg_fresh = count keys _seen;
+_cmd set ["dbg_fresh", count keys _seen];

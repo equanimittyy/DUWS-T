@@ -4,7 +4,7 @@
 if (!isServer) exitWith {};
 
 DUWS_fnc_opcom_freeSweep = {
-    DUWS_opcom_taskings select {
+    (_cmd get "taskings") select {
         DUWS_opcom_tick >= (_x get "hold")
             && {(_x get "status") isNotEqualTo "dead"}
             && {(_x getOrDefault ["ridingOn", -1]) < 0}

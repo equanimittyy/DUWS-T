@@ -5,15 +5,15 @@
 // grid samples force at, never a cell the tasking is bound to.
 if (!isServer) exitWith {};
 
-DUWS_opcom_taskings = [];
-DUWS_opcom_taskSeq  = 0;
-DUWS_opcom_attacks = [];
-DUWS_opcom_attackSeq = 0;
+_cmd set ["taskings", []];
+_cmd set ["taskSeq", 0];
+_cmd set ["attacks", []];
+_cmd set ["attackSeq", 0];
 // A tick, not a duration: DUWS_opcom_tick is saved.
-DUWS_opcom_attackReadyTick = 0;
-DUWS_opcom_supplyReadyTick = createHashMap;
+_cmd set ["attackReadyTick", 0];
+_cmd set ["supplyReadyTick", createHashMap];
 // Not saved: a load starts every battery ready.
-DUWS_opcom_batteryReadyTick = createHashMap;
+_cmd set ["batteryReadyTick", createHashMap];
 
 // The one buyable-unit table (docs/plans/opcom/opcom_plan.md): row -> [composition, flags]. Bare tokens resolve
 // to the "none" posture, so the unit takes OPCOM's order, not a standing circuit. No price column -- OPCOM_AP_UNIT
@@ -72,9 +72,9 @@ DUWS_fnc_opcom_moveType = {
 // A tasking record by id, or nil (the ferry binds transport<->rider by id, not handle).
 DUWS_fnc_opcom_byId = {
     params ["_id"];
-    private _i = DUWS_opcom_taskings findIf { (_x get "id") == _id };
+    private _i = (_cmd get "taskings") findIf { (_x get "id") == _id };
     if (_i < 0) exitWith { nil };
-    DUWS_opcom_taskings select _i
+    (_cmd get "taskings") select _i
 };
 
 // A resting unit an order may draw on -- never one an attack still binds, nor one garrisoned in a contested zone,

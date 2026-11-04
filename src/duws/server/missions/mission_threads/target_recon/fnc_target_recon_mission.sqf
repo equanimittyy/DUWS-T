@@ -35,6 +35,7 @@ private _build = {
     // (<1 km); a square near a road (<100 m) or on water is dropped.
     // Streamed rather than laid: a standalone hardpoint, not a mission prop, so it outlives the mission
     // and at this size would otherwise stand as hundreds of permanent mines.
+    private _cmd = DUWS_opcom_cmds get "OPF";
     if (random 1 < RECON_MINE_CHANCE
         && {(((call DUWS_fnc_opcom_hpSweep) select 1) getOrDefault ["MINEFIELD_AP", 0]) < (["MINEFIELD_AP"] call DUWS_fnc_opcom_hpCap)}) then {
         private _fieldPos = _targetpos getPos [_radius * 0.85, (_targetpos getDir _spawnPos) + 180];

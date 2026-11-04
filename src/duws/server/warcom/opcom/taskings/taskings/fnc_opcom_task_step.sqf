@@ -9,7 +9,6 @@
 // group within K -- and a spot out of the players' sight to stand on (DUWS_fnc_opcom_devirtSpot), and never as a
 // `garrison`: it rests virtual, defending through the zone's reserve pool.
 if (!isServer) exitWith {};
-if (isNil "DUWS_opcom_taskings") exitWith {};
 
 private _w = DUWS_opcom_grid_w;
 
@@ -179,6 +178,6 @@ private _stepOne = {
     };
 // Iterate the store directly, never a +copy -- + clones the nested hashMaps, so every _t set would be lost
 // (arma_engine_gotchas.md). Safe: nothing adds/removes elements in the loop.
-} forEach DUWS_opcom_taskings;
+} forEach (_cmd get "taskings");
 
-DUWS_opcom_taskings = DUWS_opcom_taskings select { !((_x get "status") in ["dead", "done"]) };
+_cmd set ["taskings", (_cmd get "taskings") select { !((_x get "status") in ["dead", "done"]) }];

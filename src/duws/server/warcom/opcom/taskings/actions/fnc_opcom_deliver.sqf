@@ -35,8 +35,8 @@ DUWS_fnc_opcom_build = {
     private _key = format ["hpopcom_%1", _seq];
     DUWS_opcom_buildsPending pushBack [_key, _type, _zoneKey, _anchor select 0, _refund];
     // Spawned: the builder sleeps in its crew drop, and the tick must never sleep.
-    [_type, _key, _zoneKey, _anchor, _refund] spawn {
-        params ["_type", "_key", "_zoneKey", "_anchor", "_refund"];
+    [_cmd, _type, _key, _zoneKey, _anchor, _refund] spawn {
+        params ["_cmd", "_type", "_key", "_zoneKey", "_anchor", "_refund"];
         private _at = _anchor select 0;
         private _cand = [DUWS_fnc_opcom_buildCand, fnc_hardpoint_zone_cand] select (_zoneKey isNotEqualTo "");
         private _res = [_type, _cand, _key, _zoneKey, _anchor] call fnc_hardpoint_spawn_sited;
@@ -56,8 +56,8 @@ DUWS_fnc_opcom_build = {
 DUWS_fnc_opcom_mineBuild = {
     params ["_pos", ["_variant", "AT"], ["_size", [1, 1]], ["_refund", 0]];
     // Spawned: the lay walks every square, and the tick must never carry it.
-    [_pos, _variant, _size, _refund] spawn {
-        params ["_pos", "_variant", "_size", "_refund"];
+    [_cmd, _pos, _variant, _size, _refund] spawn {
+        params ["_cmd", "_pos", "_variant", "_size", "_refund"];
         // Reads the locals around it, the way fnc_hardpoint_reveal's _fnc_paint does: a belt can fail on
         // the candidate or on every square of the grid, and both owe the same refund and the same line.
         private _fnc_noGround = {

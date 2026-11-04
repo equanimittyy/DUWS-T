@@ -232,10 +232,11 @@ DUWS_fnc_hardpointClear = {
 // every live EAST group -- allGroups holds only spawned groups, reaching OPFOR actually in play, not
 // virtualised garrisons behind the site poller. Convoy groups are skipped: revealing them would promote
 // a SAFE scripted column out of SAFE and false-trip a mission's under-attack test with no real contact.
-// No-ops until the grid is built (isNil guard below); the per-tick roll lives in DUWS_fnc_hardpointOPSense.
+// No-ops until OPCOM's record is built (isNil guard below); the per-tick roll lives in DUWS_fnc_hardpointOPSense.
 DUWS_fnc_hardpointOPBurst = {
     params ["_pos"];
-    if (isNil "DUWS_opcom_grid_w") exitWith {};
+    if (isNil "DUWS_opcom_cmds") exitWith {};
+    private _cmd = DUWS_opcom_cmds get "OPF";
     private _w = DUWS_opcom_grid_w;
     private _oc  = [_pos] call DUWS_fnc_opcom_w2c;
     private _ocx = _oc mod _w;
@@ -261,7 +262,7 @@ DUWS_fnc_hardpointOPBurst = {
     } forEach _blu;
 
     // A guaranteed belief write, not just the reveal above: a stowed post with no live observer still feeds
-    // the commander. No separate OPCOM guard needed -- belief is built before the grid, so it already exists.
+    // the commander.
     // Unique groups first: sightStr walks a whole group, so price once per group, not once per unit aboard.
     private _seenG = [];
     { _seenG pushBackUnique (group _x) } forEach _blu;
@@ -275,7 +276,7 @@ DUWS_fnc_hardpointOPBurst = {
 // Reads the registry live, so a cleared post drops out with no per-post loop to terminate. OPFOR posts
 // only: a BLUFOR OP (the dev tool can place one) must not report BLUFOR to OPFOR.
 DUWS_fnc_hardpointOPSense = {
-    if (isNil "DUWS_opcom_grid_w") exitWith {};
+    private _cmd = DUWS_opcom_cmds get "OPF";
     {
         if ((_x select 2) isEqualTo "OP" && {(_x select 3) isEqualTo "opfor"}) then {
             private _pos = _x select 1;

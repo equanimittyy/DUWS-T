@@ -30,6 +30,8 @@ while IFS= read -r line; do
     echo "[unit] extract failed: $fn from $file"; exit 2
   fi
 done < "$HERE/functions.txt"
+# sqf-vm has no hashmap get, so a read of the commander record runs off a global the cases set: _cmd get "f" is CMD_f.
+sed -i -E 's/_cmd get "([A-Za-z_]+)"/CMD_\1/g' "$DEFS"
 
 ALL="$TMP/all.sqf"
 cat "$HERE/harness.sqf" "$DEFS" "$HERE/cases.sqf" > "$ALL"

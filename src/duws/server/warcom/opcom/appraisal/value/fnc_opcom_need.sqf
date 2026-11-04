@@ -73,52 +73,52 @@ DUWS_fnc_opcom_needBandBuild = {
             };
         };
     };
-    DUWS_opcom_needBase = _need;
-    DUWS_opcom_bandCells = _band;
+    _cmd set ["needBase", _need];
+    _cmd set ["bandCells", _band];
 };
 
 DUWS_fnc_opcom_needDepositBuild = {
-    private _need = +DUWS_opcom_needBase;
+    private _need = +(_cmd get "needBase");
     {
         private _price = DUWS_opcom_assetPrice getOrDefault [_x select 2, 0];
         if (_price > 0 && {(_x select 3) isEqualTo "opfor"}) then {
             [_need, [_x select 1] call DUWS_fnc_opcom_w2c, _price] call DUWS_fnc_opcom_spread;
         };
     } forEach DUWS_hardpoints;
-    DUWS_opcom_needStatic = _need;
+    _cmd set ["needStatic", _need];
     // Patrol samples its destinations here: ground the field lights is the ground worth looking at.
     private _lit = [];
     { if (_x > 0) then { _lit pushBack _forEachIndex } } forEach _need;
-    DUWS_opcom_needCells = _lit;
+    _cmd set ["needCells", _lit];
 };
 
 // A change landing mid-build leaves the stored signature stale, so the next tick after the build refreshes again.
 DUWS_fnc_opcom_needRefresh = {
-    if (DUWS_opcom_needBuilding) exitWith {};
+    if (_cmd get "needBuilding") exitWith {};
     private _band = call DUWS_fnc_opcom_bandSig;
     private _deposit = call DUWS_fnc_opcom_depositSig;
-    if (_band isNotEqualTo DUWS_opcom_bandSig) exitWith {
+    if (_band isNotEqualTo (_cmd get "bandSig")) exitWith {
         private _why = [];
         // In DUWS_fnc_opcom_bandSig's part order.
         {
-            if ((_band select _forEachIndex) isNotEqualTo (DUWS_opcom_bandSig param [_forEachIndex, []])) then { _why pushBack _x };
+            if ((_band select _forEachIndex) isNotEqualTo ((_cmd get "bandSig") param [_forEachIndex, []])) then { _why pushBack _x };
         } forEach ["zones", "fobs", "hq", "towns", "radios"];
-        DUWS_opcom_bandSig = _band;
-        DUWS_opcom_depositSig = _deposit;
-        DUWS_opcom_needBuilding = true;
-        [_why joinString ","] spawn {
-            params ["_why"];
+        _cmd set ["bandSig", _band];
+        _cmd set ["depositSig", _deposit];
+        _cmd set ["needBuilding", true];
+        [_cmd, _why joinString ","] spawn {
+            params ["_cmd", "_why"];
             private _t = diag_tickTime;
             private _f = diag_frameNo;
             call DUWS_fnc_opcom_needBandBuild;
             call DUWS_fnc_opcom_needDepositBuild;
-            DUWS_opcom_needBuilding = false;
+            _cmd set ["needBuilding", false];
             ["DEBUG", "OPCOM", format ["need field rebuilt (%1): %2 band cells in %3 s over %4 frames",
-                _why, count DUWS_opcom_bandCells, (diag_tickTime - _t) toFixed 1, diag_frameNo - _f]] call fnc_log;
+                _why, count (_cmd get "bandCells"), (diag_tickTime - _t) toFixed 1, diag_frameNo - _f]] call fnc_log;
         };
     };
-    if (_deposit isEqualTo DUWS_opcom_depositSig) exitWith {};
-    DUWS_opcom_depositSig = _deposit;
+    if (_deposit isEqualTo (_cmd get "depositSig")) exitWith {};
+    _cmd set ["depositSig", _deposit];
     private _t = diag_tickTime;
     call DUWS_fnc_opcom_needDepositBuild;
     ["DEBUG", "OPCOM", format ["need deposits re-spread: %1 hardpoints in %2 ms", count _deposit, round ((diag_tickTime - _t) * 1000)]] call fnc_log;
@@ -127,5 +127,5 @@ DUWS_fnc_opcom_needRefresh = {
 DUWS_fnc_opcom_needAt = {
     params ["_c"];
     if !(DUWS_opcom_grid_land select _c) exitWith { 0 };
-    (DUWS_opcom_needStatic select _c) + ([_c] call DUWS_fnc_opcom_trafficAt) * OPCOM_AP_PER_FORCE * OPCOM_TRAFFIC_SHARE
+    ((_cmd get "needStatic") select _c) + ([_c] call DUWS_fnc_opcom_trafficAt) * OPCOM_AP_PER_FORCE * OPCOM_TRAFFIC_SHARE
 };

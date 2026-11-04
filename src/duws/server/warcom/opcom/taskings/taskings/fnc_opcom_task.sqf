@@ -43,8 +43,8 @@ if (_isErrand && {!("supply" in (_t get "flags"))}) exitWith {
 private _ik = "";
 if (_order isEqualTo "intercept") then {
     _ik = _target;
-    private _i = DUWS_opcom_belief_key findIf { _x isEqualTo _ik };
-    _target = if (_i < 0) then { [] } else { +(DUWS_opcom_belief_pos select _i) };
+    private _i = (_cmd get "belief_key") findIf { _x isEqualTo _ik };
+    _target = if (_i < 0) then { [] } else { +((_cmd get "belief_pos") select _i) };
 };
 if (_order isEqualTo "intercept" && {_target isEqualTo []}) exitWith {
     ["WARN", "OPCOM", format ["task: no belief row %1 to intercept", _ik]] call fnc_log; false

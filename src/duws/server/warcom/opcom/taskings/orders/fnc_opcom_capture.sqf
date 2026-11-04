@@ -96,7 +96,7 @@ DUWS_fnc_opcom_fobOverrun = {
         private _key = _fob getVariable ["DUWS_siteKey", ""];
         private _site = [_key] call fnc_site_at;
         private _held = alive _fob
-            && {(DUWS_opcom_taskings findIf {
+            && {((_cmd get "taskings") findIf {
                 (_x getOrDefault ["targetZone", ""]) isEqualTo _key && {_x getOrDefault ["inZone", false]}
                     && {!((_x get "status") in ["dead", "done"])}
                     // A virtual one with BLUFOR within K is still waiting to render.

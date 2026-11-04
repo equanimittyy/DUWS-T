@@ -16,7 +16,7 @@ DUWS_fnc_opcom_truckOffers = {
 };
 
 DUWS_fnc_opcom_supplyCount = {
-    { (_x getOrDefault ["errand", []]) isNotEqualTo [] && {(_x get "status") isNotEqualTo "dead"} } count DUWS_opcom_taskings
+    { (_x getOrDefault ["errand", []]) isNotEqualTo [] && {(_x get "status") isNotEqualTo "dead"} } count (_cmd get "taskings")
 };
 
 DUWS_fnc_opcom_supplyClass = {
@@ -28,8 +28,8 @@ DUWS_fnc_opcom_supplyClass = {
 DUWS_fnc_opcom_supplyOpen = {
     params ["_kind", ["_type", ""]];
     private _class = [_kind, _type] call DUWS_fnc_opcom_supplyClass;
-    DUWS_opcom_tick >= (DUWS_opcom_supplyReadyTick getOrDefault [_class, 0])
-        && {(DUWS_opcom_taskings findIf {
+    DUWS_opcom_tick >= ((_cmd get "supplyReadyTick") getOrDefault [_class, 0])
+        && {((_cmd get "taskings") findIf {
             (_x getOrDefault ["errand", []]) params [["_k", ""], "", ["_spec", ""]];
             ([_k, _spec] call DUWS_fnc_opcom_supplyClass) isEqualTo _class && {(_x get "status") isNotEqualTo "dead"}
         }) < 0}
@@ -41,7 +41,7 @@ DUWS_fnc_opcom_townsSupplied = {
     {
         (_x getOrDefault ["errand", []]) params [["_kind", ""], ["_town", -1]];
         if (_kind isEqualTo "rapport") then { _busy pushBackUnique _town };
-    } forEach DUWS_opcom_taskings;
+    } forEach (_cmd get "taskings");
     _busy
 };
 
@@ -57,7 +57,7 @@ DUWS_fnc_opcom_supplyRun = {
     private _class = [_kind, _spec] call DUWS_fnc_opcom_supplyClass;
     OPCOM_SUPPLY_COOLDOWN params ["_min", "_max"];
     private _n = _min + floor random (_max - _min + 1);
-    DUWS_opcom_supplyReadyTick set [_class, DUWS_opcom_tick + _n];
+    (_cmd get "supplyReadyTick") set [_class, DUWS_opcom_tick + _n];
     ["INFO", "OPCOM", format ["supply: no %1 truck for %2 ticks", _class, _n]] call fnc_log;
     true
 };

@@ -21,14 +21,14 @@ DUWS_fnc_opcom_fireTargetsSeen = {
     private _out = [];
     {
         if ([_x] call DUWS_fnc_opcom_beliefIsSighting) then {
-            private _age = DUWS_opcom_tick - (DUWS_opcom_belief_time select _forEachIndex);
-            private _pos = DUWS_opcom_belief_pos select _forEachIndex;
+            private _age = DUWS_opcom_tick - ((_cmd get "belief_time") select _forEachIndex);
+            private _pos = (_cmd get "belief_pos") select _forEachIndex;
             if (_age <= OPCOM_BELIEF_FRESH && {[_pos] call DUWS_fnc_opcom_fireClear}) then {
-                _out pushBack [_pos, DUWS_opcom_belief_str select _forEachIndex,
+                _out pushBack [_pos, (_cmd get "belief_str") select _forEachIndex,
                     1 - ((_age / OPCOM_BELIEF_EXPIRE) min 1)];
             };
         };
-    } forEach DUWS_opcom_belief_key;
+    } forEach (_cmd get "belief_key");
     _out
 };
 
@@ -42,7 +42,7 @@ DUWS_fnc_opcom_batteryFiring = {
 DUWS_fnc_opcom_batteryBusy = {
     params ["_key"];
     [_key] call DUWS_fnc_opcom_batteryFiring
-        || {(DUWS_opcom_attacks findIf { ((_x get "creep") param [0, ""]) isEqualTo _key }) >= 0}
+        || {((_cmd get "attacks") findIf { ((_x get "creep") param [0, ""]) isEqualTo _key }) >= 0}
 };
 
 DUWS_fnc_opcom_fireTargets = {
@@ -153,7 +153,7 @@ DUWS_fnc_opcom_creepTargets = {
                 };
             } forEach ([] call DUWS_fnc_opcom_batteries);
         };
-    } forEach DUWS_opcom_attacks;
+    } forEach (_cmd get "attacks");
     _out
 };
 
@@ -161,9 +161,9 @@ DUWS_fnc_opcom_creepTargets = {
 DUWS_fnc_opcom_creepRun = {
     params ["_target"];
     _target params ["_key", "_aid", "_start", "_shape"];
-    private _i = DUWS_opcom_attacks findIf { (_x get "id") isEqualTo _aid };
-    if (_i < 0 || {((DUWS_opcom_attacks select _i) get "creep") isNotEqualTo []}) exitWith { false };
-    (DUWS_opcom_attacks select _i) set ["creep", [_key, _start, _shape]];
+    private _i = (_cmd get "attacks") findIf { (_x get "id") isEqualTo _aid };
+    if (_i < 0 || {(((_cmd get "attacks") select _i) get "creep") isNotEqualTo []}) exitWith { false };
+    ((_cmd get "attacks") select _i) set ["creep", [_key, _start, _shape]];
     true
 };
 

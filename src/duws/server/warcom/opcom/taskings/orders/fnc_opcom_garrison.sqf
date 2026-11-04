@@ -6,17 +6,20 @@
 // Each unit contributes one marked token "opcomdef<id>:<name>", kept out of DUWS_garrisonFull so the base ledger ignores
 // its loss. A re-sync diffs against the tokens it added this awake session, not against the pool: a unit already drawn
 // onto the ground is out of the pool but still homed, and re-adding its token would field it twice.
+//
+// Only OPFOR garrisons a zone, so each entry point here reads OPFOR's record, whatever thread calls it.
 if (!isServer) exitWith {};
 
 DUWS_fnc_opcom_zoneReserveSync = {
     params ["_key"];
-    if (isNil "DUWS_opcom_taskings") exitWith {};
+    if (isNil "DUWS_opcom_cmds") exitWith {};
+    private _cmd = DUWS_opcom_cmds get "OPF";
     private _cvar = format ["DUWS_zoneCeiling_%1", _key];
     if (isNil { missionNamespace getVariable _cvar }) exitWith {};        // site stowed -- its next wake re-syncs
     private _avar = format ["DUWS_zoneReserveOpcom_%1", _key];
     private _had = missionNamespace getVariable [_avar, []];
     // Only combatants feed the pool; a noncombat unit rests attached, never spawned to defend.
-    private _want = (DUWS_opcom_taskings select {
+    private _want = ((_cmd get "taskings") select {
         (_x get "homeZone") isEqualTo _key && {(_x get "order") isEqualTo "garrison"}
             && {!("noncombat" in (_x get "flags"))} && {(_x get "status") != "dead"}
     }) apply { [_x] call DUWS_fnc_opcom_reserveToken };
@@ -65,12 +68,13 @@ DUWS_fnc_opcom_drawOut = {
 // the next raise would stand it again.
 DUWS_fnc_opcom_defenderLost = {
     params ["_key", "_token"];
-    private _i = DUWS_opcom_taskings findIf {
+    private _cmd = DUWS_opcom_cmds get "OPF";
+    private _i = (_cmd get "taskings") findIf {
         (_x get "homeZone") isEqualTo _key && {(_x get "order") isEqualTo "garrison"} && {(_x get "status") != "dead"}
             && {([_x] call DUWS_fnc_opcom_reserveToken) isEqualTo _token}
     };
     if (_i < 0) exitWith {};
-    private _t = DUWS_opcom_taskings select _i;
+    private _t = (_cmd get "taskings") select _i;
     _t set ["status", "dead"];
     [_key] call DUWS_fnc_opcom_zoneReserveSync;
     ["INFO", "OPCOM", format ["tasking %1 died defending %2", _t get "id", _key]] call fnc_log;
@@ -80,7 +84,8 @@ DUWS_fnc_opcom_defenderLost = {
 // tokens still unspawned in the reserve pool, and one turned loose would stand up inside ground OPFOR no longer hold.
 DUWS_fnc_opcom_siteLost = {
     params ["_key"];
-    if (isNil "DUWS_opcom_taskings") exitWith {};
+    if (isNil "DUWS_opcom_cmds") exitWith {};
+    private _cmd = DUWS_opcom_cmds get "OPF";
     private _doomed = [];
     {
         private _t = _x;
@@ -102,13 +107,13 @@ DUWS_fnc_opcom_siteLost = {
                 ["INFO", "OPCOM", format ["tasking %1 guards where it stands -- %2 is no longer OPFOR ground", _t get "id", _key]] call fnc_log;
             };
         };
-    } forEach DUWS_opcom_taskings;
+    } forEach (_cmd get "taskings");
     {
         if ((_x get "grp") isNotEqualTo "") then {
             private _grp = groupFromNetId (_x get "grp");
             if (!isNull _grp) then { [_grp] call DUWS_fnc_opcom_despawn };
         };
     } forEach _doomed;
-    DUWS_opcom_taskings = DUWS_opcom_taskings - _doomed;
+    _cmd set ["taskings", (_cmd get "taskings") - _doomed];
     [_key] call DUWS_fnc_opcom_zoneReserveSync;
 };

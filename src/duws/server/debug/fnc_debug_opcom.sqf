@@ -4,7 +4,8 @@
 // remote client. English-only, like the rest of the debug surface.
 if (!isServer) exitWith {};
 params ["_verb", ["_a", ""], ["_b", ""], ["_c", ""], ["_caller", objNull]];
-if (isNull _caller) exitWith {};
+if (isNull _caller || {isNil "DUWS_opcom_cmds"}) exitWith {};
+private _cmd = DUWS_opcom_cmds get "OPF";
 
 switch (_verb) do {
     case "recruitlist": {
@@ -49,7 +50,7 @@ switch (_verb) do {
         // their string key, which is how the picked row tells the step which orders it has (fnc_debug_opcom_step).
         // Live taskings included: fnc_opcom_task re-orders a de-virtualised group in place (reOrderLive), the
         // same primitive OPCOM's loop drives -- only a bound ferry carry is refused, and by the primitive.
-        private _rows = DUWS_opcom_taskings apply {
+        private _rows = (_cmd get "taskings") apply {
             [_x get "id", format ["id %1  %2/%3  %4  (%5)", _x get "id", _x get "order", _x get "status", _x get "moveType", ["virtual", "live"] select ((_x get "grp") isNotEqualTo "")]]
         };
         {
@@ -76,17 +77,17 @@ switch (_verb) do {
         private _rows = [];
         {
             if ([_x] call DUWS_fnc_opcom_beliefIsSighting) then {
-                private _bp = DUWS_opcom_belief_pos select _forEachIndex;
+                private _bp = (_cmd get "belief_pos") select _forEachIndex;
                 _rows pushBack [_caller distance2D _bp, _x, format ["%1  (%2 m away, force %3, %4 ticks old)", _x, round (_caller distance2D _bp),
-                    round (DUWS_opcom_belief_str select _forEachIndex), DUWS_opcom_tick - (DUWS_opcom_belief_time select _forEachIndex)]];
+                    round ((_cmd get "belief_str") select _forEachIndex), DUWS_opcom_tick - ((_cmd get "belief_time") select _forEachIndex)]];
             };
-        } forEach DUWS_opcom_belief_key;
+        } forEach (_cmd get "belief_key");
         if (_rows isEqualTo []) exitWith { "No BLUFOR sightings in OPCOM belief." remoteExec ["hint", _caller] };
         _rows sort true;
         ["Intercept which sighting?", _rows apply { [_x select 1, _x select 2] }, "intercept_row", _a] remoteExec ["fnc_debug_opcom_pick", _caller];
     };
     case "strandlist": {
-        private _rows = (DUWS_opcom_taskings select { (_x getOrDefault ["strandTicks", 0]) > 0 && {(_x getOrDefault ["ridingOn", -1]) < 0} })
+        private _rows = ((_cmd get "taskings") select { (_x getOrDefault ["strandTicks", 0]) > 0 && {(_x getOrDefault ["ridingOn", -1]) < 0} })
             apply { [_x get "id", format ["id %1  %2  %3  (stranded %4 ticks)", _x get "id", _x get "menu", _x get "order", _x get "strandTicks"]] };
         if (_rows isEqualTo []) exitWith { "No unit is stopped at a water leg." remoteExec ["hint", _caller] };
         ["Ferry which unit?", _rows, "ferry_rider", ""] remoteExec ["fnc_debug_opcom_pick", _caller];
@@ -135,8 +136,8 @@ switch (_verb) do {
         (if (_ok) then { format ["Teleported %1 -> %2.", _a, _b apply { round _x }] } else { format ["Teleport refused for %1 (gone / mid-ferry). See the log.", _a] }) remoteExec ["hint", _caller];
     };
     case "list": {
-        if (DUWS_opcom_taskings isEqualTo []) exitWith { "No taskings." remoteExec ["hint", _caller] };
-        private _lines = DUWS_opcom_taskings apply {
+        if ((_cmd get "taskings") isEqualTo []) exitWith { "No taskings." remoteExec ["hint", _caller] };
+        private _lines = (_cmd get "taskings") apply {
             format ["id %1  %2/%3  eff %4/%5  leg %6/%7  %8", _x get "id", _x get "order", _x get "status", round (_x get "effForce"), round (_x get "fullForce"), _x get "leg", count (_x get "route"), _x get "moveType"]
         };
         { diag_log format ["[OPCOMDBG] %1", _x] } forEach _lines;
@@ -145,9 +146,9 @@ switch (_verb) do {
     case "unitstatus": {
         // Nearest tasking to the map click: a de-virtualised one sits at its live leader, a still-virtual one
         // at its grid-tracked point. _a carries the clicked [x,y,z].
-        if (DUWS_opcom_taskings isEqualTo []) exitWith { "No taskings." remoteExec ["hint", _caller] };
+        if ((_cmd get "taskings") isEqualTo []) exitWith { "No taskings." remoteExec ["hint", _caller] };
         private _click = _a;
-        private _bestT = DUWS_opcom_taskings select 0;
+        private _bestT = (_cmd get "taskings") select 0;
         private _bd = 1e12;
         {
             private _p = _x get "pos";
@@ -157,7 +158,7 @@ switch (_verb) do {
             };
             private _d = _click distance2D _p;
             if (_d < _bd) then { _bd = _d; _bestT = _x };
-        } forEach DUWS_opcom_taskings;
+        } forEach (_cmd get "taskings");
         private _flags = _bestT get "flags";
         private _tgt = _bestT get "target";
         private _men = "-";
@@ -177,8 +178,8 @@ switch (_verb) do {
     case "ferry": {
         // The ferry fields "list" omits: live carry bindings and the free-lift pools. No excluded id, so each pool is
         // the exact set a debug bind picks from.
-        if (DUWS_opcom_taskings isEqualTo []) exitWith { "No taskings." remoteExec ["hint", _caller] };
-        private _carries = DUWS_opcom_taskings select { (_x getOrDefault ["carrying", -1]) >= 0 || {(_x getOrDefault ["ridingOn", -1]) >= 0} };
+        if ((_cmd get "taskings") isEqualTo []) exitWith { "No taskings." remoteExec ["hint", _caller] };
+        private _carries = (_cmd get "taskings") select { (_x getOrDefault ["carrying", -1]) >= 0 || {(_x getOrDefault ["ridingOn", -1]) >= 0} };
         private _lines = [];
         if (_carries isEqualTo []) then {
             _lines pushBack "No active carry.";
@@ -198,7 +199,7 @@ switch (_verb) do {
         "OPCOM store cleared." remoteExec ["hint", _caller];
     };
     case "aimode": {
-        DUWS_opcom_aiMode = _a;
+        _cmd set ["aiMode", _a];
         ["INFO", "OPCOM", format ["AI mode -> %1", _a]] call fnc_log;
         format ["OPCOM AI: mode %1.", _a] remoteExec ["hint", _caller];
     };
@@ -207,14 +208,14 @@ switch (_verb) do {
         "OPCOM grid: drift check runs on the next tick." remoteExec ["hint", _caller];
     };
     case "pickonce": {
-        DUWS_opcom_pickOnce = _a;
+        _cmd set ["pickOnce", _a];
         format ["OPCOM AI: one %1 pick on the next tick.", _a] remoteExec ["hint", _caller];
     };
     case "difficulty": {
         private _steps = [0.25, 0.5, 1, 2];
-        DUWS_opcom_picksPerTick = _steps select (((_steps find DUWS_opcom_picksPerTick) + 1) mod count _steps);
-        ["INFO", "OPCOM", format ["AI difficulty -> %1 picks per tick", DUWS_opcom_picksPerTick]] call fnc_log;
-        format ["OPCOM AI: %1 picks per tick.", DUWS_opcom_picksPerTick] remoteExec ["hint", _caller];
+        _cmd set ["picksPerTick", _steps select (((_steps find (_cmd get "picksPerTick")) + 1) mod count _steps)];
+        ["INFO", "OPCOM", format ["AI difficulty -> %1 picks per tick", _cmd get "picksPerTick"]] call fnc_log;
+        format ["OPCOM AI: %1 picks per tick.", _cmd get "picksPerTick"] remoteExec ["hint", _caller];
     };
     default {};
 };

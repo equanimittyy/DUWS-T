@@ -7,8 +7,8 @@ DUWS_fnc_opcom_blockForce = {
     private _fri = 0;
     private _ene = 0;
     {
-        _fri = _fri + (DUWS_opcom_grid_fri select _x);
-        _ene = _ene + (DUWS_opcom_grid_ene select _x);
+        _fri = _fri + ((_cmd get "grid_fri") select _x);
+        _ene = _ene + ((_cmd get "grid_ene") select _x);
     } forEach ([[_pos] call DUWS_fnc_opcom_w2c, 1] call DUWS_fnc_opcom_blockCells);
     [_fri, _ene]
 };

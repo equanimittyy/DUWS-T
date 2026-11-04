@@ -50,7 +50,7 @@ DUWS_fnc_opcom_attackSweep = {
     private _zones = call DUWS_fnc_opcom_zonesOpen;
     // A muster commits below the odds it launches at, so only a hopeless one holds.
     private _floor = [OPCOM_MUSTER_HOLD, 0] call DUWS_fnc_opcom_pWinAt;
-    private _busy = DUWS_opcom_taskings apply { _x getOrDefault ["targetZone", ""] };
+    private _busy = (_cmd get "taskings") apply { _x getOrDefault ["targetZone", ""] };
     private _out = createHashMapFromArray [["assault", []], ["flank", []]];
     private _fnc_sources = {
         params ["_at", "_near", "_flank"];
@@ -84,7 +84,7 @@ DUWS_fnc_opcom_attackSweep = {
             };
         } forEach ["assault", "flank"];
     };
-    if (DUWS_opcom_attackReadyTick <= DUWS_opcom_tick && {(DUWS_opcom_attacks findIf { (_x get "kind") isNotEqualTo "qrf" }) < 0}) then {
+    if ((_cmd get "attackReadyTick") <= DUWS_opcom_tick && {((_cmd get "attacks") findIf { (_x get "kind") isNotEqualTo "qrf" }) < 0}) then {
         {
             private _zk = [_x] call fnc_zone_key;
             [_zk, _x, ([_zk] call fnc_site_at) get "pos", [_zk] call DUWS_fnc_opcom_zoneLabel] call _fnc_consider;
@@ -125,7 +125,7 @@ DUWS_fnc_opcom_attackSweep = {
                     _v, _pw, _c];
             };
         };
-    } forEach DUWS_opcom_attacks;
+    } forEach (_cmd get "attacks");
     _out
 };
 
@@ -142,9 +142,9 @@ DUWS_fnc_opcom_attackRun = {
     _atk params ["_how", "_a", "_b", "_label", "_roles", "_kind"];
     private _attack = [];
     if (_how isEqualTo "join") then {
-        private _i = DUWS_opcom_attacks findIf { (_x get "id") isEqualTo _a };
+        private _i = (_cmd get "attacks") findIf { (_x get "id") isEqualTo _a };
         // A pick earlier this tick may have met the ideal bar or the unit cap.
-        if (_i >= 0 && {([DUWS_opcom_attacks select _i] call DUWS_fnc_opcom_joinBucket) >= 0}) then { _attack = DUWS_opcom_attacks select _i };
+        if (_i >= 0 && {([(_cmd get "attacks") select _i] call DUWS_fnc_opcom_joinBucket) >= 0}) then { _attack = (_cmd get "attacks") select _i };
     };
     if (_how isEqualTo "join" && {_attack isEqualTo []}) exitWith { false };
     private _landed = 0;
@@ -174,17 +174,17 @@ DUWS_fnc_opcom_qrfSweep = {
     private _floor = [OPCOM_MUSTER_HOLD, 0] call DUWS_fnc_opcom_pWinAt;
     private _sightings = [];
     {
-        private _bp = DUWS_opcom_belief_pos select _forEachIndex;
+        private _bp = (_cmd get "belief_pos") select _forEachIndex;
         if ([_x] call DUWS_fnc_opcom_beliefIsSighting && {[_bp] call fnc_aoi_opfor_covers} && {!([_bp] call DUWS_fnc_opcom_inBaseCells)}) then {
-            _sightings pushBack [DUWS_opcom_belief_str select _forEachIndex, _forEachIndex];
+            _sightings pushBack [(_cmd get "belief_str") select _forEachIndex, _forEachIndex];
         };
-    } forEach DUWS_opcom_belief_key;
+    } forEach (_cmd get "belief_key");
     _sightings sort false;
     private _fnc_value = {
         params ["_at"];
         private _str = 0;
         {
-            if (([DUWS_opcom_belief_pos select (_x select 1), _at] call DUWS_fnc_opcom_cellDist) <= 1) then { _str = _str + (_x select 0) };
+            if (([(_cmd get "belief_pos") select (_x select 1), _at] call DUWS_fnc_opcom_cellDist) <= 1) then { _str = _str + (_x select 0) };
         } forEach _sightings;
         [_at, _str] call DUWS_fnc_opcom_interceptValue
     };
@@ -202,11 +202,11 @@ DUWS_fnc_opcom_qrfSweep = {
             _out pushBack [[_members, _atk], _price, format ["%1 with %2", _label, _names], _v, _pw, _c];
         };
     };
-    private _qrfs = DUWS_opcom_attacks select { (_x get "kind") isEqualTo "qrf" };
+    private _qrfs = (_cmd get "attacks") select { (_x get "kind") isEqualTo "qrf" };
     private _taken = _qrfs apply { _x get "pos" };
     {
-        private _key = DUWS_opcom_belief_key select (_x select 1);
-        private _at = DUWS_opcom_belief_pos select (_x select 1);
+        private _key = (_cmd get "belief_key") select (_x select 1);
+        private _at = (_cmd get "belief_pos") select (_x select 1);
         if ((_taken findIf { ([_x, _at] call DUWS_fnc_opcom_cellDist) <= 1 }) < 0) then {
             // Taken before the gate, so a weaker sighting beside a lead its local defense holds opens none either.
             _taken pushBack _at;
@@ -229,11 +229,11 @@ DUWS_fnc_opcom_qrfSweep = {
 // One patrol per destination, for the reason one attacker goes at a zone: a second row on the same ground would only
 // crowd the shortlist with the same sweep twice.
 DUWS_fnc_opcom_patrolSweep = {
-    if (DUWS_opcom_needCells isEqualTo []) exitWith { [] };
+    if ((_cmd get "needCells") isEqualTo []) exitWith { [] };
     private _free = ((call DUWS_fnc_opcom_free) select { [_x get "flags", _x get "moveType"] call DUWS_fnc_opcom_isPatroller })
         apply { [_x] call DUWS_fnc_opcom_freeSource };
     private _zones = call DUWS_fnc_opcom_zonesOpen;
-    private _pool = +DUWS_opcom_needCells;
+    private _pool = +(_cmd get "needCells");
     private _dests = [];
     for "_i" from 1 to (OPCOM_PATROL_SAMPLES min count _pool) do {
         _dests pushBack ([_pool deleteAt (floor random count _pool)] call DUWS_fnc_opcom_c2w);
@@ -284,8 +284,8 @@ DUWS_fnc_opcom_probeSweep = {
         if ((_x get "state") isEqualTo "buildup" && {(_x get "kind") isNotEqualTo "qrf"}) then {
             _stakes set [_x get "target", [([_x] call DUWS_fnc_opcom_boundForce) * OPCOM_AP_PER_FORCE, _x get "pos", _x get "label"]];
         };
-    } forEach DUWS_opcom_attacks;
-    private _probed = (DUWS_opcom_taskings select { (_x get "order") isEqualTo "probe" }) apply { _x get "target" };
+    } forEach (_cmd get "attacks");
+    private _probed = ((_cmd get "taskings") select { (_x get "order") isEqualTo "probe" }) apply { _x get "target" };
     private _free = ((call DUWS_fnc_opcom_free) select { [_x get "flags", _x get "moveType"] call DUWS_fnc_opcom_isPatroller })
         apply { [_x] call DUWS_fnc_opcom_freeSource };
     private _zones = call DUWS_fnc_opcom_zonesOpen;
@@ -316,7 +316,7 @@ DUWS_fnc_opcom_homedSweep = {
             private _hz = _x get "homeZone";
             _out set [_hz, (_out getOrDefault [_hz, 0]) + 1];
         };
-    } forEach DUWS_opcom_taskings;
+    } forEach (_cmd get "taskings");
     _out
 };
 

@@ -32,9 +32,9 @@ DUWS_fnc_opcom_interceptLook = {
 // finds a group outside them or it guards.
 DUWS_fnc_opcom_interceptFollow = {
     params ["_t", "_live", ["_force", false]];
-    private _i = DUWS_opcom_belief_key findIf { _x isEqualTo (_t get "interceptKey") };
+    private _i = (_cmd get "belief_key") findIf { _x isEqualTo (_t get "interceptKey") };
     if (_i < 0) exitWith {};
-    private _bp = DUWS_opcom_belief_pos select _i;
+    private _bp = (_cmd get "belief_pos") select _i;
     if (!_force && {([_bp, _t get "target"] call DUWS_fnc_opcom_cellDist) <= 1}) exitWith {};
     if ([_bp] call DUWS_fnc_opcom_inBaseCells) exitWith {};
     _t set ["target", +_bp];
@@ -62,8 +62,8 @@ DUWS_fnc_opcom_interceptArrive = {
     };
     // The follow's one-cell tolerance leaves the waypoint up to 1 km off a fix taken at arm's length.
     // Movement-gated: re-issuing the SAD waypoint every tick restarts the AI's search.
-    private _i = DUWS_opcom_belief_key findIf { _x isEqualTo _next };
-    private _moved = _i >= 0 && {((DUWS_opcom_belief_pos select _i) distance2D (_t get "target")) > OPCOM_MOVE_ARRIVE};
+    private _i = (_cmd get "belief_key") findIf { _x isEqualTo _next };
+    private _moved = _i >= 0 && {(((_cmd get "belief_pos") select _i) distance2D (_t get "target")) > OPCOM_MOVE_ARRIVE};
     if (_switched || _moved) then { [_t, !isNull _grp, true] call DUWS_fnc_opcom_interceptFollow };
     false
 };

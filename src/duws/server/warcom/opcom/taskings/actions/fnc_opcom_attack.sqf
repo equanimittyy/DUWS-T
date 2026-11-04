@@ -46,7 +46,7 @@ DUWS_fnc_opcom_sideForce = {
     private _fight = [[_at] call DUWS_fnc_opcom_w2c, 1] call DUWS_fnc_opcom_blockCells;
     private _ene = 0;
     {
-        if !(_x in _fight) then { _ene = _ene + (DUWS_opcom_grid_ene select _x) };
+        if !(_x in _fight) then { _ene = _ene + ((_cmd get "grid_ene") select _x) };
     } forEach ([[_jump] call DUWS_fnc_opcom_w2c, 1] call DUWS_fnc_opcom_blockCells);
     _ene
 };
@@ -123,8 +123,8 @@ DUWS_fnc_opcom_attackBind = {
 // _roles as DUWS_fnc_opcom_stageRoles; the caller binds the units.
 DUWS_fnc_opcom_attackOpen = {
     params ["_kind", "_target", "_pos", "_label", "_roles"];
-    private _id = DUWS_opcom_attackSeq;
-    DUWS_opcom_attackSeq = _id + 1;
+    private _id = _cmd get "attackSeq";
+    _cmd set ["attackSeq", _id + 1];
     private _attack = createHashMapFromArray [
         ["id", _id], ["kind", _kind], ["target", _target], ["pos", _pos], ["label", _label],
         ["state", "buildup"], ["since", DUWS_opcom_tick], ["staged", -1], ["creep", []],
@@ -134,7 +134,7 @@ DUWS_fnc_opcom_attackOpen = {
                 ["waits", _waits], ["lambda", _lambda], ["lane", _lane]]
         }]
     ];
-    DUWS_opcom_attacks pushBack _attack;
+    (_cmd get "attacks") pushBack _attack;
     _attack
 };
 
@@ -154,9 +154,9 @@ DUWS_fnc_opcom_roleUnits = {
 // -> false once the QRF's lead sighting is no longer believed; else moves the attack onto it.
 DUWS_fnc_opcom_qrfFollow = {
     params ["_attack"];
-    private _i = DUWS_opcom_belief_key findIf { _x isEqualTo (_attack get "target") };
+    private _i = (_cmd get "belief_key") findIf { _x isEqualTo (_attack get "target") };
     if (_i < 0) exitWith { false };
-    _attack set ["pos", +(DUWS_opcom_belief_pos select _i)];
+    _attack set ["pos", +((_cmd get "belief_pos") select _i)];
     true
 };
 
@@ -165,7 +165,7 @@ DUWS_fnc_opcom_qrfFollow = {
 // pulling it back would re-order the QRF every tick two units' looks disagree.
 DUWS_fnc_opcom_qrfRekey = {
     params ["_attack"];
-    private _believed = { params ["_key"]; (DUWS_opcom_belief_key findIf { _x isEqualTo _key }) >= 0 };
+    private _believed = { params ["_key"]; ((_cmd get "belief_key") findIf { _x isEqualTo _key }) >= 0 };
     if ([_attack get "target"] call _believed) exitWith {};
     private _units = [];
     { _units append ([_attack, _x] call DUWS_fnc_opcom_roleUnits) } forEach (_attack get "roles");
@@ -210,7 +210,7 @@ DUWS_fnc_opcom_attackClose = {
     if ((_attack get "kind") isNotEqualTo "qrf") then {
         OPCOM_ATTACK_COOLDOWN params ["_min", "_max"];
         private _n = _min + floor random (_max - _min + 1);
-        DUWS_opcom_attackReadyTick = DUWS_opcom_tick + _n;
+        _cmd set ["attackReadyTick", DUWS_opcom_tick + _n];
         _outcome = format ["%1; no assault or flank for %2 ticks", _outcome, _n];
     };
     ["INFO", "OPCOM", format ["attack %1 (%2 %3) %4%5", _attack get "id", _attack get "kind", _attack get "label", _outcome,
@@ -433,6 +433,6 @@ DUWS_fnc_opcom_executionStep = {
 DUWS_fnc_opcom_attackStep = {
     {
         if ((_x get "state") isEqualTo "buildup") then { [_x] call DUWS_fnc_opcom_buildupStep } else { [_x] call DUWS_fnc_opcom_executionStep };
-    } forEach DUWS_opcom_attacks;
-    DUWS_opcom_attacks = DUWS_opcom_attacks select { (_x get "state") isNotEqualTo "done" };
+    } forEach (_cmd get "attacks");
+    _cmd set ["attacks", (_cmd get "attacks") select { (_x get "state") isNotEqualTo "done" }];
 };

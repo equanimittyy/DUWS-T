@@ -20,7 +20,7 @@ DUWS_fnc_campaignDay = {
 // A tasking holds no handle, only netIds (its group, a helipad, the group an intercept hunts), and none resolves in
 // the next session. A live group is read the way a stow reads it, so the unit comes back at the strength it had.
 DUWS_fnc_campaignTaskings = {
-    (missionNamespace getVariable ["DUWS_opcom_taskings", []]) apply {
+    (_cmd getOrDefault ["taskings", []]) apply {
         private _t = +_x;
         private _grp = groupFromNetId (_t getOrDefault ["grp", ""]);
         // A frozen rider's men despawn as they board, so a live read loses the ones aboard.
@@ -182,12 +182,13 @@ DUWS_fnc_campaignSnapshot = {
     _s set ["revealedTowns", _revealed];
 
     // Defaults cover the few seconds between mission_init_complete and the OPCOM thread's first init.
+    private _cmd = (missionNamespace getVariable ["DUWS_opcom_cmds", createHashMap]) getOrDefault ["OPF", createHashMap];
     _s set ["opcom", createHashMapFromArray [
-        ["archetype", DUWS_opcom_archetype],
-        ["taskings", call DUWS_fnc_campaignTaskings], ["taskSeq", missionNamespace getVariable ["DUWS_opcom_taskSeq", 0]],
-        ["attacks", missionNamespace getVariable ["DUWS_opcom_attacks", []]], ["attackSeq", missionNamespace getVariable ["DUWS_opcom_attackSeq", 0]],
-        ["attackReadyTick", missionNamespace getVariable ["DUWS_opcom_attackReadyTick", 0]],
-        ["supplyReadyTick", missionNamespace getVariable ["DUWS_opcom_supplyReadyTick", createHashMap]],
+        ["archetype", _cmd getOrDefault ["archetype", "balanced"]],
+        ["taskings", call DUWS_fnc_campaignTaskings], ["taskSeq", _cmd getOrDefault ["taskSeq", 0]],
+        ["attacks", _cmd getOrDefault ["attacks", []]], ["attackSeq", _cmd getOrDefault ["attackSeq", 0]],
+        ["attackReadyTick", _cmd getOrDefault ["attackReadyTick", 0]],
+        ["supplyReadyTick", _cmd getOrDefault ["supplyReadyTick", createHashMap]],
         ["tick", missionNamespace getVariable ["DUWS_opcom_tick", 0]], ["hqKnown", missionNamespace getVariable ["DUWS_opcom_hqKnown", false]],
         ["fobsKnown", missionNamespace getVariable ["DUWS_opcom_fobsKnown", []]],
         // Row for row with "fobs": a load renews the netId in a FOB's site key, so the restore re-keys by position.

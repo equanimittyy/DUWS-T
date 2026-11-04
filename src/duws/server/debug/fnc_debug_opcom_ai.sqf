@@ -2,7 +2,8 @@
 // may carry < > or &.
 if (!isServer) exitWith {};
 params ["_caller", ["_since", 0]];
-if (isNull _caller) exitWith {};
+if (isNull _caller || {isNil "DUWS_opcom_cmds"}) exitWith {};
+private _cmd = DUWS_opcom_cmds get "OPF";
 
 #define AI_ROWS_MAX 6
 
@@ -16,7 +17,7 @@ private _active = createHashMap;
             ["", format [" (%1)", _errand]] select (_errand isNotEqualTo ""),
             if (_zk isEqualTo "") then { mapGridPosition _tgt } else { [_zk] call DUWS_fnc_opcom_zoneLabel }]];
     };
-} forEach DUWS_opcom_taskings;
+} forEach (_cmd get "taskings");
 
 // Diffed per poll rather than per tick, so the overlay costs the loop nothing. A gap of more than two ticks since the
 // last poll rebaselines silently instead of reporting every order that ended while nobody watched.
@@ -67,7 +68,7 @@ private _slotsCap = 0;
 private _limits = [
     [format ["AP %1   income %2 per %3 min + %4 per tick   picks %5/tick", WARCOM_opfor_ap, round WARCOM_opfor_lastIncome,
         DUWS_econ_period / 60, ([count WARCOM_zones_controled_by_OPFOR, count WARCOM_createdZones] call DUWS_fnc_opcom_dripRate) toFixed 2,
-        DUWS_opcom_picksPerTick]],
+        _cmd get "picksPerTick"]],
     [["Units", call DUWS_fnc_opcom_unitCount, OPCOM_CAP_UNITS_PER_ZONE * count zone_meta_array], ["Supply", call DUWS_fnc_opcom_supplyCount, count ((values OPCOM_SUPPLY_CLASS) arrayIntersect (values OPCOM_SUPPLY_CLASS))],
         ["Garrisons full", _full, count _open]],
     [["Hardpoints", _hpAll, OPCOM_CAP_HP_PER_ZONE * count zone_meta_array], ["Zone slots", _slotsUsed, _slotsCap]],
@@ -77,6 +78,6 @@ private _limits = [
     [format ["Tier %1", WARCOM_opfor_tier]]
 ];
 
-private _header = format ["OPCOM AI  %1   %2   tick %3", toUpper DUWS_opcom_aiMode, DUWS_opcom_archetype, DUWS_opcom_tick];
-[_header, _rows, DUWS_opcom_aiEvents select { (_x select 0) > _since }, DUWS_opcom_aiSeq, _limits]
+private _header = format ["OPCOM AI  %1   %2   tick %3", toUpper (_cmd get "aiMode"), _cmd get "archetype", DUWS_opcom_tick];
+[_header, _rows, (_cmd get "aiEvents") select { (_x select 0) > _since }, _cmd get "aiSeq", _limits]
     remoteExecCall ["fnc_debug_opcom_ai_feed", _caller];

@@ -5,56 +5,56 @@
 if (!isServer) exitWith {};
 
 // Swapped before any holding is read, the order DUWS_fnc_opcom_gridDirty relies on.
-private _dirty = DUWS_opcom_gridDirty;
-DUWS_opcom_gridDirty = createHashMap;
+private _dirty = _cmd get "gridDirty";
+_cmd set ["gridDirty", createHashMap];
 
 private _static = {
     params ["_layer"];
-    [DUWS_opcom_gridStaticFri, DUWS_opcom_gridStaticEne] select (_layer isEqualTo "ene")
+    [_cmd get "gridStaticFri", _cmd get "gridStaticEne"] select (_layer isEqualTo "ene")
 };
 private _admit = {
     params ["_rec"];
     if (_rec isEqualTo []) exitWith {};
     _rec params ["_key", "_isStatic", "_layer", "_pos", "_weight", "_reach"];
-    if (!_isStatic) exitWith { DUWS_opcom_gridAwake set [_key, [_pos, _reach, _layer]] };
+    if (!_isStatic) exitWith { (_cmd get "gridAwake") set [_key, [_pos, _reach, _layer]] };
     if (_weight > 0) then {
         [[_layer] call _static, _pos, _weight, _reach] call DUWS_fnc_opcom_deposit;
-        DUWS_opcom_gridSrc set [_key, [_layer, _pos, _weight, _reach]];
+        (_cmd get "gridSrc") set [_key, [_layer, _pos, _weight, _reach]];
     };
 };
 
-if (DUWS_opcom_gridDirtyAll) then {
-    DUWS_opcom_gridDirtyAll = false;
-    [DUWS_opcom_gridStaticFri] call DUWS_fnc_opcom_gridZeroBox;
-    [DUWS_opcom_gridStaticEne] call DUWS_fnc_opcom_gridZeroBox;
-    DUWS_opcom_gridSrc = createHashMap;
-    DUWS_opcom_gridAwake = createHashMap;
+if (_cmd get "gridDirtyAll") then {
+    _cmd set ["gridDirtyAll", false];
+    [_cmd get "gridStaticFri"] call DUWS_fnc_opcom_gridZeroBox;
+    [_cmd get "gridStaticEne"] call DUWS_fnc_opcom_gridZeroBox;
+    _cmd set ["gridSrc", createHashMap];
+    _cmd set ["gridAwake", createHashMap];
     { [_x] call _admit } forEach (call DUWS_fnc_opcom_gridSources);
 };
 
 {
-    private _old = DUWS_opcom_gridSrc get _x;
+    private _old = (_cmd get "gridSrc") get _x;
     if (!isNil "_old") then {
         _old params ["_layer", "_pos", "_weight", "_reach"];
         // Negated from the cache, never re-priced: the inputs have already changed.
         [[_layer] call _static, _pos, -_weight, _reach] call DUWS_fnc_opcom_deposit;
-        DUWS_opcom_gridSrc deleteAt _x;
+        (_cmd get "gridSrc") deleteAt _x;
     };
-    DUWS_opcom_gridAwake deleteAt _x;
+    (_cmd get "gridAwake") deleteAt _x;
     [[_x] call DUWS_fnc_opcom_gridSourceOf] call _admit;
 } forEach keys _dirty;
 
 // Built on copies and assigned last, never written in place: a reader holding a layer across a yield, such as the
 // router, keeps one whole grid.
-private _fri = +DUWS_opcom_gridStaticFri;
-private _ene = +DUWS_opcom_gridStaticEne;
+private _fri = +(_cmd get "gridStaticFri");
+private _ene = +(_cmd get "gridStaticEne");
 {
     _y params ["_pos", "_reach", ["_layer", "fri"]];
     [[_fri, _ene] select (_layer isEqualTo "ene"), _pos, [_x] call DUWS_fnc_garrisonForce, _reach] call DUWS_fnc_opcom_deposit;
-} forEach DUWS_opcom_gridAwake;
+} forEach (_cmd get "gridAwake");
 [_fri, _ene] call DUWS_fnc_opcom_gridMobile;
-DUWS_opcom_grid_fri = _fri;
-DUWS_opcom_grid_ene = _ene;
+_cmd set ["grid_fri", _fri];
+_cmd set ["grid_ene", _ene];
 
 if (!isNil "DUWS_opcom_gridDriftAsk") then {
     private _caller = DUWS_opcom_gridDriftAsk;

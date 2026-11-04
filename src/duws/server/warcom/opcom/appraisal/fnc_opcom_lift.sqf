@@ -104,9 +104,9 @@ DUWS_fnc_opcom_liftRun = {
 // lift it can have now, a free hull or an affordable hire, and with neither it asks again next tick. Off with the pick,
 // so a commander switched off spends nothing.
 DUWS_fnc_opcom_ferryDispatch = {
-    if (DUWS_opcom_aiMode isEqualTo "off") exitWith {};
+    if ((_cmd get "aiMode") isEqualTo "off") exitWith {};
     // A hire joins the store mid-pass, so the pass walks its own list.
-    private _stranded = DUWS_opcom_taskings select {
+    private _stranded = (_cmd get "taskings") select {
         (_x getOrDefault ["strandTicks", 0]) > 0 && {(_x getOrDefault ["ridingOn", -1]) < 0} && {(_x get "status") isNotEqualTo "dead"}
     };
     {

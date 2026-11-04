@@ -27,7 +27,7 @@ DUWS_fnc_opcom_batteryPieces = {
 // A gun with no live gunner is out of the fight, so it must not hold a mission to its reach.
 DUWS_fnc_opcom_batteryReady = {
     params ["_key"];
-    if (DUWS_opcom_tick < (DUWS_opcom_batteryReadyTick getOrDefault [_key, 0])) exitWith { [] };
+    if (DUWS_opcom_tick < ((_cmd get "batteryReadyTick") getOrDefault [_key, 0])) exitWith { [] };
     ([_key] call DUWS_fnc_opcom_batteryPieces) select { alive (gunner _x) }
 };
 
@@ -89,8 +89,8 @@ DUWS_fnc_opcom_gunFire = {
         _g setVariable ["DUWS_opcomShotAt", time];
         _g setVehicleAmmo 1;
     }]];
-    [_key, _gun, _mag, _pts, _delay, _jitter, _price, _rest] spawn {
-        params ["_key", "_gun", "_mag", "_pts", "_delay", "_jitter", "_price", "_rest"];
+    [_cmd, _key, _gun, _mag, _pts, _delay, _jitter, _price, _rest] spawn {
+        params ["_cmd", "_key", "_gun", "_mag", "_pts", "_delay", "_jitter", "_price", "_rest"];
         sleep _delay;
         {
             if (!alive _gun || {!alive (gunner _gun)}) exitWith {};
@@ -105,7 +105,7 @@ DUWS_fnc_opcom_gunFire = {
         private _fired = _gun getVariable ["DUWS_opcomFired", 0];
         private _unfired = count _pts - _fired;
         if (_unfired > 0) then {
-            DUWS_opcom_batteryReadyTick set [_key, (DUWS_opcom_batteryReadyTick getOrDefault [_key, 0]) - _unfired * _rest];
+            (_cmd get "batteryReadyTick") set [_key, ((_cmd get "batteryReadyTick") getOrDefault [_key, 0]) - _unfired * _rest];
         };
         if (!alive _gun) exitWith {};
         _gun removeEventHandler ["Fired", _gun getVariable ["DUWS_opcomFireEH", -1]];
@@ -177,7 +177,7 @@ DUWS_fnc_opcom_fireMission = {
         _steps = _rows;
         _rounds = _rows * _perRow;
     };
-    DUWS_opcom_batteryReadyTick set [_key, DUWS_opcom_tick + OPCOM_ARTY_COOLDOWN];
+    (_cmd get "batteryReadyTick") set [_key, DUWS_opcom_tick + OPCOM_ARTY_COOLDOWN];
     private _rest = OPCOM_ARTY_COOLDOWN / (_rounds * count _guns);
     // One walk for the whole battery, so the pattern wanders as one rather than each gun scattering alone.
     private _drift = [];
