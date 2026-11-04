@@ -29,20 +29,13 @@ private _taskings = _cmd get "taskings";
 		private _i = _taskings findIf { (_x get "grp") isEqualTo netId _group };
 		if (_i < 0) then { _i = _taskings findIf { (_x get "grp") isEqualTo "" && {(_x getOrDefault ["taskforce", ""]) isEqualTo _tfName} } };
 		private _t = if (_i >= 0) then { _taskings select _i } else {
-			private _id = _cmd get "taskSeq";
-			_cmd set ["taskSeq", _id + 1];
 			private _pos = getPosASL leader _group;
 			private _force = [_group] call DUWS_fnc_opcom_effForceLive;
-			private _new = createHashMapFromArray [
-				["id", _id], ["order", "guard"], ["target", _pos], ["pos", _pos], ["moveType", _moveType],
-				["menu", "taskforce"], ["comp", []], ["spawnClass", ""], ["flags", []], ["taskforce", _tfName],
-				["fullForce", _force], ["effForce", _force],
-				["route", []], ["leg", 0], ["routeMode", "grid"],
-				["status", "moving"], ["grp", netId _group], ["hold", 0], ["homeZone", ""],
-				["carrying", -1], ["ridingOn", -1], ["embarked", false], ["returnZone", ""], ["boundTo", -1]
-			];
-			_taskings pushBack _new;
-			["INFO", "OPCOM", format ["BLUFOR commander takes task force %1 as tasking %2", _tfName, _id]] call fnc_log;
+			private _new = [[
+				["order", "guard"], ["target", _pos], ["pos", _pos], ["moveType", _moveType], ["menu", "taskforce"],
+				["taskforce", _tfName], ["fullForce", _force], ["effForce", _force], ["status", "moving"], ["grp", netId _group]
+			]] call DUWS_fnc_opcom_taskingNew;
+			["INFO", "OPCOM", format ["BLUFOR commander takes task force %1 as tasking %2", _tfName, _new get "id"]] call fnc_log;
 			_new
 		};
 		_t set ["grp", netId _group];

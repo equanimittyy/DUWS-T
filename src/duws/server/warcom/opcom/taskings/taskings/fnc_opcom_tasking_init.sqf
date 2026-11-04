@@ -67,6 +67,20 @@ DUWS_fnc_opcom_byId = {
     (_cmd get "taskings") select _i
 };
 
+// -> a new tasking in the store: _fields ([key, value] pairs) over the defaults every source of taskings shares.
+DUWS_fnc_opcom_taskingNew = {
+    params ["_fields"];
+    private _t = createHashMapFromArray [
+        ["id", _cmd get "taskSeq"], ["target", []], ["comp", []], ["spawnClass", ""], ["flags", []],
+        ["route", []], ["leg", 0], ["routeMode", "grid"], ["grp", ""], ["hold", 0], ["homeZone", ""],
+        ["carrying", -1], ["ridingOn", -1], ["embarked", false], ["returnZone", ""], ["boundTo", -1]
+    ];
+    { _t set _x } forEach _fields;
+    _cmd set ["taskSeq", (_t get "id") + 1];
+    (_cmd get "taskings") pushBack _t;
+    _t
+};
+
 // A resting unit an order may draw on -- never one an attack still binds, nor one garrisoned in a contested zone,
 // which holds ground under assault.
 DUWS_fnc_opcom_drawable = {

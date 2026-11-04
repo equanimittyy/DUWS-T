@@ -31,25 +31,18 @@ if (_moveType isEqualTo "boat" && {[_homeZone] call DUWS_fnc_opcom_portOf < 0}) 
 
 if (_pay) then { [-_cost, "opcom_recruit"] call DUWS_fnc_opcom_pay };
 
-private _id = _cmd get "taskSeq";
-_cmd set ["taskSeq", _id + 1];
 private _pos = _spawnPos;
 if (_moveType isEqualTo "boat") then {
     _pos = [[_homeZone] call DUWS_fnc_opcom_portOf] call DUWS_fnc_opcom_c2w;
 };
 // tokenClass redraws a random model per spawn, so a stow/re-spawn cycle would otherwise swap the hull.
 private _spawnClass = [_comp select 0, "OPF"] call DUWS_fnc_tokenClass;
-private _t = createHashMapFromArray [
-    ["id", _id], ["order", "garrison"], ["target", []],
-    ["pos", _pos], ["moveType", _moveType],
-    ["menu", _row], ["comp", _comp], ["spawnClass", _spawnClass], ["flags", _flags],
-    ["fullForce", _force], ["effForce", _force],
-    ["route", []], ["leg", 0], ["routeMode", "grid"],
-    ["status", "virtual"], ["grp", ""], ["hold", 0], ["homeZone", _homeZone],
-    ["carrying", -1], ["ridingOn", -1], ["embarked", false], ["returnZone", ""], ["boundTo", -1]
-];
-(_cmd get "taskings") pushBack _t;
+private _t = [[
+    ["order", "garrison"], ["pos", _pos], ["moveType", _moveType], ["menu", _row], ["comp", _comp],
+    ["spawnClass", _spawnClass], ["flags", _flags], ["fullForce", _force], ["effForce", _force],
+    ["status", "virtual"], ["homeZone", _homeZone]
+]] call DUWS_fnc_opcom_taskingNew;
 // A garrison never streams; a combatant is fielded only through its zone's reserve pool.
 if (_homeZone isNotEqualTo "") then { [_homeZone] call DUWS_fnc_opcom_zoneReserveSync };
-["INFO", "OPCOM", format ["recruit: hired %1 (force %2, %3 AP) at %4 as tasking %5", _row, _force, _cost, _pos, _id]] call fnc_log;
+["INFO", "OPCOM", format ["recruit: hired %1 (force %2, %3 AP) at %4 as tasking %5", _row, _force, _cost, _pos, _t get "id"]] call fnc_log;
 _t
