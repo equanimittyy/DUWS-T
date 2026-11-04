@@ -338,8 +338,8 @@ Bandits are a third hostile force on INDEPENDENT, which `server/server_init.sqf:
 both armies. They are not a selectable faction and have no variable schema. `fnc_bandit_spawn`
 (`server/bandits/`) raises base-game FIA bodies (`I_G_Soldier_F`), re-dresses them and arms them.
 
-Clothing comes from `DUWS_banditLooks`, which `fnc_bandit_looks` builds once at server init from the
-unit config of three native bandit sources. Each slot (uniform, headgear) draws a source at random and
+Clothing comes from `DUWS_banditLooks`, which `fnc_bandit_looks` builds at server init, and again when a
+load applies the campaign's saved `Bandits` parameter, from the unit config of three native bandit sources. Each slot (uniform, headgear) draws a source at random and
 then an item from it, so one bandit can mix sources. Facewear is the FIA body's own.
 
 | Source | Factions | Withheld by the `Bandits` parameter |

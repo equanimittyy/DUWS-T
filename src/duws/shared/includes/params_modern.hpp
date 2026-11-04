@@ -50,16 +50,6 @@ class Params {
         default = 0;
     };
 
-    // Which native bandit factions dress bandits: a player who does not own a DLC gets its purchase
-    // prompt from its content, so the host withholds what the session's players lack. Read once on
-    // the server by fnc_bandit_looks.
-    class DUWS_Bandits {
-        title = "Bandits";
-        values[] = {0,1,2,3};
-        texts[] = {"Full","No DLC","No Apex DLC","No Contact DLC"};
-        default = 0;
-    };
-
     // Whether the developer menu exists at all, not who may open it: a parameter is mission
     // config, so every machine in a session reads the same value. client_init.sqf gates the
     // menu on game_master as well, or this would hand it to every client on the server.
@@ -175,6 +165,16 @@ class Params {
         title = "Supports on Death";
         values[] = {0,1};
         texts[] = {"Lost (half refunded)","Kept"};
+        default = 0;
+    };
+
+    // Which native bandit factions dress bandits: a player who does not own a DLC gets its purchase
+    // prompt from its content, so the host withholds what the players lack. A load screen edit fits a
+    // campaign to a new group of players.
+    class DUWS_Bandits {
+        title = "Bandits";
+        values[] = {0,1,2,3};
+        texts[] = {"Full","No DLC","No Apex DLC","No Contact DLC"};
         default = 0;
     };
 

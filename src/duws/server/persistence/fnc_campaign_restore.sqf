@@ -229,6 +229,7 @@ DUWS_fnc_restoreApply = {
     } forEach DUWS_campaignParams;
     DUWS_arsenalLimited = DUWS_paramArsenal == 2; publicVariable "DUWS_arsenalLimited";
     DUWS_trackAmmo = DUWS_paramTrackAmmo == 1; publicVariable "DUWS_trackAmmo";
+    [] call fnc_bandit_looks;
 
     private _f = _d get "factions";
     BLUFOR_FactionFile_X = _f getOrDefault ["blu", BLUFOR_FactionFile_X]; publicVariable "BLUFOR_FactionFile_X";

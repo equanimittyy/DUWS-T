@@ -82,6 +82,7 @@ DUWS_paramLoseConditions = ["DUWS_LoseConditions", 0] call BIS_fnc_getParamValue
 DUWS_paramLowPopOfficer = ["DUWS_LowPopOfficer", 0] call BIS_fnc_getParamValue;publicVariable "DUWS_paramLowPopOfficer";
 DUWS_paramTownGen = ["DUWS_TownGeneration", 0] call BIS_fnc_getParamValue;publicVariable "DUWS_paramTownGen";
 DUWS_paramSupportsOnDeath = ["DUWS_SupportsOnDeath", 0] call BIS_fnc_getParamValue;publicVariable "DUWS_paramSupportsOnDeath";
+DUWS_paramBandits = ["DUWS_Bandits", 0] call BIS_fnc_getParamValue;publicVariable "DUWS_paramBandits";
 
 // Arsenal mode and ammo tracking, so the server-side pool writers and the client shelf logic read one
 // authoritative answer. Limited count-tracks the player's own faction too (no unlimited floor); trackAmmo
