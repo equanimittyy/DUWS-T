@@ -230,10 +230,9 @@ raising; a standalone hardpoint instead wakes on its own presence ring
 same problem the plan raised for AA (a static gun cannot deploy fast enough to catch what crosses a
 600 m ring in seconds), solved here by waking earlier rather than by never sleeping.
 
-**A raise starts on the first site pass that finds BLUFOR on the ground in the ring.** The poller runs
-every 2 s (`SITE_TICK`), and the raise worker re-tests nothing before it deploys, so the wait after a
-player enters the ring is at most one pass plus the crew drop. An aircraft in the `AA` air ring must be
-seen on two passes in a row, so one sighting of a passing aircraft raises nothing. **No hardpoint registers latched.**
+**A raise starts on the first site pass that finds BLUFOR on the ground in the ring, or an aircraft in
+the `AA` air ring.** The poller runs every 2 s (`SITE_TICK`), and the raise worker re-tests nothing
+before it deploys, so the wait after a player enters the ring is at most one pass plus the crew drop. **No hardpoint registers latched.**
 `fnc_hardpoint_register` already crews or stows the emplacement for whoever is in the ring at that
 moment. A latch would read a crewed emplacement as empty and stow it in front of the player when its
 grace ran out.

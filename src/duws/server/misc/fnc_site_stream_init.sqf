@@ -52,7 +52,7 @@ fnc_site_occupant_register = {
     private _o = createHashMapFromArray [
         ["kind", _kind], ["side", _side], ["buffer", _buffer], ["grace", _grace],
         ["aiAware", _aiAware], ["minAI", _minAI],
-        ["awake", _frozen], ["airLast", false], ["emptySince", -1], ["awaitVacate", _latch],
+        ["awake", _frozen], ["emptySince", -1], ["awaitVacate", _latch],
         ["baseline", 0], ["tier", 0], ["deployedList", []], ["deployedStrength", 0],
         ["trg", objNull], ["raising", false]
     ];
@@ -224,13 +224,6 @@ fnc_town_site_key = {
 // side. A snapped point moves at most 71 m, so a gate that reaches this far past its ring misses nobody.
 #define SITE_CELL 100
 
-// The presence test for occupants that answer to players alone -- a town's crowd, and a base thawing
-// on approach.
-fnc_site_near = {
-    params ["_players", "_pos", "_ring"];
-    (_players findIf { _x distance _pos < _ring }) >= 0
-};
-
 // Ground ring: fnc_duws_bluforNear (player, or _minAI friendly AI). Air ring (occupant-declared,
 // 0 = none): any BLUFOR aircraft reaching in from beyond it, player or AI flown -- folded in here
 // because bluforNear discounts anything airborne, and an AA emplacement must still wake for a jet
@@ -277,9 +270,6 @@ fnc_site_poller = {
         sleep SITE_TICK;
 
         private _players = (call BIS_fnc_listPlayers) select { alive _x };
-        // fnc_duws_bluforNear's airborne rule, so a crowd and a garrison agree on who is flying.
-        private _playersAir = _players select { private _v = vehicle _x; _v isKindOf "Air" && {!(_v isKindOf "ParachuteBase")} };
-        private _playersLand = _players - _playersAir;
         // A crowd is held up by a player, a garrison by any BLUFOR -- two different answers, so both
         // lists are built once here, and neither costs a spatial query until somebody is actually
         // within reach of the site being asked about.
@@ -335,7 +325,6 @@ fnc_site_poller = {
                 private _ring = _radius + (_o get "buffer");
                 private _bluHolds = (_o getOrDefault ["enemyAware", false])
                     && {([_key] call DUWS_fnc_garrisonSideOf) isEqualTo "BLU"};
-                private _airSeen = false;
                 private _here = if (_o get "aiAware") then {
                     // Fewer AI hold a site than raise one -- hysteresis that stops a zone flickering
                     // off around the edges of the force that just took it.
@@ -347,27 +336,16 @@ fnc_site_poller = {
                     private _cheap = if (_bluHolds) then { _playerPos } else { _west };
                     private _ground = (_cheap findIf { _x distance2D _pos < _ring + SITE_CELL }) >= 0
                         && { [_pos, _ring, _min, _bluHolds] call fnc_duws_bluforNear };
-                    // Air ring: a BLUFOR aircraft reaching in from beyond the ground ring, only for
-                    // occupants that declare one (AA, or a zone), against the prebuilt list --
-                    // bluforNear discounts anything airborne, so this is a site's whole reach against
-                    // aircraft. airRingCommitted picks player-crewed/UAV only for a zone; AA reads
-                    // every aircraft to catch a jet at cruise.
-                    _airSeen = !_ground && {
+                    _ground || {
                         private _ar = _o getOrDefault ["airRing", 0];
                         _ar > 0 && {
                             private _air = if (_o getOrDefault ["airRingCommitted", false]) then { _westAirCommitted } else { _westAir };
                             (_air findIf { _x distance _pos < _ar }) >= 0
                         }
-                    };
-                    _ground
+                    }
                 } else {
-                    _airSeen = [_playersAir, _pos, _ring] call fnc_site_near;
-                    [_playersLand, _pos, _ring] call fnc_site_near
+                    (_players findIf { _x distance _pos < _ring }) >= 0
                 };
-                // A jet crosses most rings between two passes, so presence from the air counts only once
-                // the pass before saw it too.
-                if (_airSeen && {_o get "airLast"}) then { _here = true };
-                _o set ["airLast", _airSeen];
 
                 // A frozen site must wake on either side too: a garrison the shared BLUFOR test can't
                 // rouse (its AI arm watches for BLUFOR on OPFOR ground) would sit in the middle of the

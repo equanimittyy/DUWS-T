@@ -767,10 +767,9 @@ exists.
 ### A town streams like a zone
 
 Per town, `fnc_civ_handler.sqf` is the enemy zone gate: a town fills on the first poll that finds a
-player on the ground in reach, and everything tagged `civ_locIndex` is deleted once the grace period since
-the last sighting expires. The grace restarts on every sighting, so leaving starts the clock rather than how
-long you stayed. A player in an aircraft counts only once two polls in a row find them, so an aircraft that
-crosses the disc between two polls fills nothing, while a helicopter that lingers does.
+player in reach, on the ground or in an aircraft, and everything tagged `civ_locIndex` is deleted once the
+grace period since the last sighting expires. The grace restarts on every sighting, so leaving starts the
+clock rather than how long you stayed.
 
 Presence is players only, where the zone gate counts friendly AI as well (`fnc_duws_bluforNear`): a
 town fills so there is somebody to talk to, and an AI squad passing through has nobody to talk to it.
