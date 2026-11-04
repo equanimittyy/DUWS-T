@@ -209,6 +209,9 @@ DUWS_fnc_opcom_qrfLand = {
 DUWS_fnc_opcom_attackClose = {
     params ["_attack", "_outcome"];
     { { _x set ["boundTo", -1] } forEach ([_attack, _x] call DUWS_fnc_opcom_roleUnits) } forEach (_attack get "roles");
+    if ((_cmd get "side") isEqualTo west && {(_attack get "state") isEqualTo "buildup"} && {(_attack get "kind") isNotEqualTo "qrf"}) then {
+        [localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_TASKFORCE_ASSAULT_CANCELLED", _attack get "label"]] remoteExec ["fnc_duws_dialogue", 0];
+    };
     _attack set ["state", "done"];
     if ((_attack get "kind") isNotEqualTo "qrf") then {
         OPCOM_ATTACK_COOLDOWN params ["_min", "_max"];

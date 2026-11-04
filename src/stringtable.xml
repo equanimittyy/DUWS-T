@@ -18352,6 +18352,18 @@
                 <Chinese>全體單位注意，這裡是 Overlord。對 %1 的進攻現在開始。</Chinese>
                 <Spanish>A todas las unidades, aquí Overlord. Comienza el asalto a %1.</Spanish>
             </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_ASSAULT_CANCELLED">
+                <Original>All units, this is Overlord. The assault on %1 is called off.</Original>
+                <English>All units, this is Overlord. The assault on %1 is called off.</English>
+                <Chinesesimp>全体单位注意，这里是 Overlord。对 %1 的进攻已取消。</Chinesesimp>
+                <German>An alle Einheiten, hier ist Overlord. Der Angriff auf %1 wird abgebrochen.</German>
+                <Polish>Wszystkie jednostki, tu Overlord. Szturm na %1 zostaje odwołany.</Polish>
+                <Czech>Všem jednotkám, tady Overlord. Útok na %1 se ruší.</Czech>
+                <Russian>Всем подразделениям, говорит Overlord. Штурм %1 отменён.</Russian>
+                <French>À toutes les unités, ici Overlord. L'assaut sur %1 est annulé.</French>
+                <Chinese>全體單位注意，這裡是 Overlord。對 %1 的進攻已取消。</Chinese>
+                <Spanish>A todas las unidades, aquí Overlord. Se cancela el asalto a %1.</Spanish>
+            </Key>
             <Key ID="STR_DUWS_T_TASKFORCE_LOST">
                 <Original>All units, this is Overlord. Task Force %1 is combat ineffective.</Original>
                 <English>All units, this is Overlord. Task Force %1 is combat ineffective.</English>
