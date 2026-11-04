@@ -195,6 +195,15 @@ DUWS_fnc_campaignSnapshot = {
         ["fobKeys", Array_of_FOBS apply { _x getVariable ["DUWS_siteKey", ""] }],
         ["mineVariants", DUWS_opcom_mineVariants], ["hpSeq", missionNamespace getVariable ["DUWS_hpOpcomSeq", 0]]
     ]];
+    // Advanced only: BLUFOR's standing orders. Its archetype is the stance, saved below, and its belief rebuilds as OPFOR's.
+    if ("BLU" in (missionNamespace getVariable ["DUWS_opcom_cmds", createHashMap])) then {
+        private _cmd = DUWS_opcom_cmds get "BLU";
+        _s set ["opcomBlu", createHashMapFromArray [
+            ["taskings", call DUWS_fnc_campaignTaskings], ["taskSeq", _cmd get "taskSeq"],
+            ["attacks", _cmd get "attacks"], ["attackSeq", _cmd get "attackSeq"],
+            ["attackReadyTick", _cmd get "attackReadyTick"]
+        ]];
+    };
 
     _s set ["garage", DUWS_garage_stored];
     _s set ["parked", call DUWS_fnc_campaignParked];

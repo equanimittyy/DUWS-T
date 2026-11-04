@@ -623,20 +623,13 @@ DUWS_fnc_restoreEscalation = {
     [true] call fnc_escalation_apply;
 };
 
-// Before OPCOM's first tick. A rider left bound to no carry refuses every order, and one left unloading never steps
-// again once it streams in.
-DUWS_fnc_restoreOpcom = {
-    private _o = DUWS_restore getOrDefault ["opcom", createHashMap];
-    _cmd set ["archetype", _o getOrDefault ["archetype", _cmd get "archetype"]];
-    DUWS_opcom_tick = _o getOrDefault ["tick", 0];
-    DUWS_opcom_hqKnown = _o getOrDefault ["hqKnown", false];
+// A commander's standing orders from its snapshot key, into the record the OPCOM thread binds as _cmd, before the first
+// tick. A tasking whose class this install lacks is redrawn or dropped, and an attack keeps only the units that came back.
+DUWS_fnc_restoreCmd = {
+    params ["_o"];
     _cmd set ["taskSeq", _o getOrDefault ["taskSeq", 0]];
     _cmd set ["attackSeq", _o getOrDefault ["attackSeq", 0]];
     _cmd set ["attackReadyTick", _o getOrDefault ["attackReadyTick", 0]];
-    _cmd set ["supplyReadyTick", _o getOrDefault ["supplyReadyTick", createHashMap]];
-    DUWS_opcom_mineVariants = _o getOrDefault ["mineVariants", createHashMap];
-    missionNamespace setVariable ["DUWS_hpOpcomSeq", _o getOrDefault ["hpSeq", 0]];
-
     private _saved = _o getOrDefault ["taskings", []];
     _cmd set ["taskings", _saved select {
         private _token = (_x getOrDefault ["comp", []]) param [0, ""];
@@ -651,10 +644,23 @@ DUWS_fnc_restoreOpcom = {
             _new isNotEqualTo ""
         }
     }];
-    DUWS_restoreDropped set ["units", count _saved - count (_cmd get "taskings")];
+    DUWS_restoreDropped set ["units", (DUWS_restoreDropped get "units") + count _saved - count (_cmd get "taskings")];
     private _ids = (_cmd get "taskings") apply { _x get "id" };
     _cmd set ["attacks", _o getOrDefault ["attacks", []]];
     { { _x set ["units", (_x get "units") select { _x in _ids }] } forEach (_x get "roles") } forEach (_cmd get "attacks");
+};
+
+// OPFOR's commander and what only it holds. A rider left bound to no carry refuses every order, and one left unloading
+// never steps again once it streams in.
+DUWS_fnc_restoreOpcom = {
+    private _o = DUWS_restore getOrDefault ["opcom", createHashMap];
+    _cmd set ["archetype", _o getOrDefault ["archetype", _cmd get "archetype"]];
+    DUWS_opcom_tick = _o getOrDefault ["tick", 0];
+    DUWS_opcom_hqKnown = _o getOrDefault ["hqKnown", false];
+    _cmd set ["supplyReadyTick", _o getOrDefault ["supplyReadyTick", createHashMap]];
+    DUWS_opcom_mineVariants = _o getOrDefault ["mineVariants", createHashMap];
+    missionNamespace setVariable ["DUWS_hpOpcomSeq", _o getOrDefault ["hpSeq", 0]];
+    [_o] call DUWS_fnc_restoreCmd;
     // The FOBs stand by now (fnc_opcom_perception_run).
     private _fobs = DUWS_restore getOrDefault ["fobs", []];
     private _rekey = createHashMap;
@@ -688,7 +694,6 @@ DUWS_fnc_restoreOpcom = {
     } forEach ((_cmd get "taskings") select { (_x getOrDefault ["ridingOn", -1]) >= 0 });
     ["INFO", "SAVE", format ["OPCOM restored at tick %1: %2 taskings, %3 attacks", DUWS_opcom_tick,
         count (_cmd get "taskings"), count (_cmd get "attacks")]] call fnc_log;
-    ["opcom"] call DUWS_fnc_restoreStepDone;
 };
 
 // The two late hooks run on their own threads; whichever finishes second closes the restore.

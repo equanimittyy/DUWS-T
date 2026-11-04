@@ -25,9 +25,19 @@ DUWS_opcom_cmds = _cmds;
 // stages run under this one, BLUFOR's under their own below.
 private _cmd = _cmds get "OPF";
 if (DUWS_campaignLoaded) then {
-    // Once the FOBs stand: the restore re-keys OPCOM's hold on each FOB to the one rebuilt in its place.
+    // Once the FOBs stand: the restore re-keys OPCOM's hold on each FOB to the one rebuilt in its place. The task forces
+    // stand by then too, which BLUFOR's commander finds its saved taskings' squads among (fnc_taskforce_commander).
     while {!(["SAVE", "the restored FOBs", {!("bases" in DUWS_restorePending)}, 300] call fnc_waitLogged)} do {};
     call DUWS_fnc_restoreOpcom;
+    if ("BLU" in _cmds) then {
+        private _cmd = _cmds get "BLU";
+        // A save made in Simple has no opcomBlu, so the commander takes every task force at rest.
+        [DUWS_restore getOrDefault ["opcomBlu", createHashMap]] call DUWS_fnc_restoreCmd;
+        // Bound to their squads before the first tick, so no restored tasking steps as a virtual unit.
+        [missionNamespace getVariable ["DUWS_taskforces", []]] call fnc_taskforce_commander;
+        ["INFO", "SAVE", format ["BLUFOR commander restored: %1 taskings, %2 attacks", count (_cmd get "taskings"), count (_cmd get "attacks")]] call fnc_log;
+    };
+    ["opcom"] call DUWS_fnc_restoreStepDone;
 };
 
 // The drip's fractions of an AP, to the wallet and to the tier, paid out whole because fnc_ap_adjust keeps both whole.
