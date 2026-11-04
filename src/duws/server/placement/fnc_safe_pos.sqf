@@ -1,4 +1,4 @@
-// Locality: any (pure placement query); every caller is server-side.
+// Locality: any (pure placement query).
 //
 // BIS_fnc_findSafePos signals no failure of its own: a miss returns its default position, and with none given that
 // is a far point on land that passes any origin or water test (arma_engine_gotchas.md). The [0,0] default makes a

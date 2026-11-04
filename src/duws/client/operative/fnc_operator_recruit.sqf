@@ -13,10 +13,8 @@ _selected_soldier_name = _selected_soldier select 8;
 _selected_soldier_identity = _selected_soldier select 9;
 _selected_soldier_class = missionNamespace getVariable (_selected_soldier select 10);
 
-// The operative menu opens only from the request menu, so its context names the base.
-// respawn_west stands at the HQ rest tent (fnc_BluHQinit).
-(uiNamespace getVariable ["DUWS_requestMenu_ctx", []]) params ["", ["_isFob", false]];
-_spawnPos = if (_isFob) then {[getPos player select [0, 2], 50] call fnc_safe_pos} else {getMarkerPos "respawn_west"};
+// 60 m clears the HQ walls (47 m from the building the menu opens on) wherever the player stands at it, so a hire does not wedge among the base's props.
+_spawnPos = [getPos player select [0, 2], 80, 60] call fnc_safe_pos;
 _group = [_spawnPos, WEST, [_selected_soldier_class]] call BIS_fnc_spawnGroup;
 _group deleteGroupWhenEmpty true;
 _soldier = units _group select 0;

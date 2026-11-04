@@ -3,9 +3,8 @@ _index = lbCurSel 2100;
 
 _skill = blufor_ai_skill_random;
 
-// respawn_west stands at the HQ rest tent (fnc_BluHQinit).
-(uiNamespace getVariable ["DUWS_requestMenu_ctx", []]) params ["", ["_isFob", false]];
-_spawnPos = if (_isFob) then {[getPos player select [0, 2], 50] call fnc_safe_pos} else {getMarkerPos "respawn_west"};
+// 60 m clears the HQ walls (47 m from the building the menu opens on) wherever the player stands at it, so a hire does not wedge among the base's props.
+_spawnPos = [getPos player select [0, 2], 80, 60] call fnc_safe_pos;
 
 if (_index < 2) exitWith {hint localize "STR_DUWS_T_9607znvh"};
 
