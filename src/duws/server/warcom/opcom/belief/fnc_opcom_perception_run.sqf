@@ -105,8 +105,10 @@ while {true} do {
             "bluDecay" call _enter;    call fnc_opcom_decay;
             "bluPrune" call _enter;    call fnc_opcom_belief_prune;
             "bluBookkeep" call _enter; call DUWS_fnc_opcom_bookkeep;
+            "bluGrid" call _enter;     call fnc_opcom_grid_rebuild;
             "bluTaskstep" call _enter; call fnc_opcom_task_step;
             "bluAttacks" call _enter;  call DUWS_fnc_opcom_attackStep;
+            "bluNeed" call _enter;     call DUWS_fnc_opcom_needRefresh;
             "bluPick" call _enter;     call _fnc_pick;
         };
         // BLUFOR task-force upkeep rides this tick rather than a timer of its own; last, so a fault costs OPCOM nothing.

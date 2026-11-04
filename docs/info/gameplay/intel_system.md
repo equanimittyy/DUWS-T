@@ -59,6 +59,11 @@ are `[name, pos, revealed]`; `fnc_civ_town_reveal` owns `civ_visible`, one boole
 map and the array disagreeing, and both return whether they changed anything so a caller can tell
 "revealed something" from "that was already on the map".
 
+**What intel finds is all that BLUFOR's commander knows.** With the BLUFOR Commander AI param at Advanced, BLUFOR's
+OPCOM commander weighs an OPFOR zone or hardpoint only once it is revealed, and an OPFOR-banded town only once it is on
+the map (`fnc_opcom_grid_sources.sqf`, `fnc_opcom_exposure.sqf`). `fnc_zone_reveal` and `fnc_hardpoint_reveal` mark
+each flag they set on the commanders' grids (`DUWS_fnc_opcom_gridDirty`), so a reveal reaches the grid on the next tick.
+
 The writers also make the announcement, so every source reports a reveal the same way. It goes to every
 player, because the position lands on every player's map. Contacts are the exception: a payout plots a
 batch of them at once, so their line is spoken by the payout rather than by the writer.

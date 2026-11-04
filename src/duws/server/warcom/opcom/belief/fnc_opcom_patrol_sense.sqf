@@ -18,7 +18,8 @@ if (!isServer) exitWith {};
 if (isNil "DUWS_opcom_grid_w") exitWith {};
 
 private _w = DUWS_opcom_grid_w;
-private _blind = [] call DUWS_fnc_opcom_baseCells;
+// Blind only for OPFOR, whose sweep would expose a base (DUWS_fnc_opcom_baseCells).
+private _blind = [[], [] call DUWS_fnc_opcom_baseCells] select ((_cmd get "side") isEqualTo east);
 
 // Every visible BLUFOR group's cell once for the tick: [group, cx, cy, lead]. Group, not unit -- belief keys
 // and stamps by group at its sight lead's cell, matching fnc_opcom_sense. allGroups (handles), never a scan

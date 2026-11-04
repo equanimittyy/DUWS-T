@@ -1,10 +1,21 @@
 // Locality: server, [] call'd at load. The two proximity ramps the Values scale by: exposure, how close a spot sits to
-// BLUFOR-held ground, and defend, how close it sits to OPFOR's own fixed defenses (opcom_plan.md §Value).
+// the enemy's ground, and defend, how close it sits to OPFOR's own fixed defenses (opcom_plan.md §Value).
 // Read from the pick's unscheduled pass, so nothing here may suspend.
 if (!isServer) exitWith {};
 
-// The HQ counts only once revealed, so an unfound base pulls no defense toward itself.
-DUWS_fnc_opcom_bluforGroundSweep = {
+// The HQ counts only once revealed, so an unfound base pulls no defense toward itself. BLUFOR knows OPFOR's ground only
+// as far as intel has found it: its revealed zones and the OPFOR-banded towns on the map.
+DUWS_fnc_opcom_enemyGroundSweep = {
+    if ((_cmd get "side") isEqualTo west) exitWith {
+        private _out = (zone_namePOS_pairs select { (_x select 2) && {[[_x select 1] call fnc_zone_key] call DUWS_fnc_opcom_enemyHeld} })
+            apply { _x select 1 };
+        private _visible = missionNamespace getVariable ["civ_visible", []];
+        {
+            private _p = [_forEachIndex] call DUWS_fnc_opcom_townPos;
+            if (_x <= -10 && {_visible param [_forEachIndex, true]} && {_p isNotEqualTo []}) then { _out pushBack _p };
+        } forEach (missionNamespace getVariable ["civ_town_rep", []]);
+        _out
+    };
     private _out = +(call DUWS_fnc_opcom_enemyZones);
     _out append (missionNamespace getVariable ["Array_of_FOBpos", []]);
     if (missionNamespace getVariable ["DUWS_opcom_hqKnown", false] && {!isNil "PosOfBLUHQ"} && {PosOfBLUHQ isNotEqualTo []}) then {
@@ -13,7 +24,7 @@ DUWS_fnc_opcom_bluforGroundSweep = {
     _out
 };
 
-DUWS_fnc_opcom_bluforGround = { ["bluforGround", DUWS_fnc_opcom_bluforGroundSweep] call DUWS_fnc_opcom_tickCached };
+DUWS_fnc_opcom_enemyGround = { ["enemyGround", DUWS_fnc_opcom_enemyGroundSweep] call DUWS_fnc_opcom_tickCached };
 
 DUWS_fnc_opcom_exposureAt = {
     params ["_dist"];
@@ -24,7 +35,7 @@ DUWS_fnc_opcom_exposureAt = {
 
 DUWS_fnc_opcom_exposure = {
     params ["_pos"];
-    private _ground = call DUWS_fnc_opcom_bluforGround;
+    private _ground = call DUWS_fnc_opcom_enemyGround;
     if (_ground isEqualTo []) exitWith { OPCOM_EXPOSE_FLOOR };
     private _near = OPCOM_EXPOSE_FAR;
     { _near = _near min (_pos distance2D _x) } forEach _ground;

@@ -63,7 +63,7 @@ for "_gi" from (DUWS_opcom_tick % _stride) to ((count _east) - 1) step _stride d
             };
         } forEach _known;
         // A hardpoint garrison in COMBAT with BLUFOR in sight is taken as firing, and a firing position gives itself away.
-        if (_contact && {behaviour _obs isEqualTo "COMBAT"}) then {
+        if (_contact && {(_cmd get "side") isEqualTo east} && {behaviour _obs isEqualTo "COMBAT"}) then {
             private _hpKey = _grp getVariable ["DUWS_hpKey", ""];
             if (_hpKey isNotEqualTo "") then { [_hpKey] call DUWS_fnc_hardpointContactReveal };
         };

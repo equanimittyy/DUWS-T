@@ -37,6 +37,7 @@ switch (_mode) do {
         private _i = DUWS_hardpoints findIf { (_x select 0) isEqualTo _key };
         if (_i > -1 && {!((DUWS_hardpoints select _i) select 5)}) then {
             (DUWS_hardpoints select _i) set [5, true];
+            [_key] call DUWS_fnc_opcom_gridDirty;
             [_key] call _fnc_paint;
             _revealed = true;
             if (!_quiet) then {
@@ -52,6 +53,7 @@ switch (_mode) do {
         {
             if ((_x select 4) isEqualTo _key && {!(_x select 5)}) then {
                 _x set [5, true];
+                [_x select 0] call DUWS_fnc_opcom_gridDirty;
                 [_x select 0] call _fnc_paint;
                 _revealed = true;
             };

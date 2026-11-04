@@ -31,6 +31,7 @@ switch (_mode) do {
         private _i = zone_namePOS_pairs findIf {str (_x select 1) == str _zonePos};
         if (_i > -1 && {!((zone_namePOS_pairs select _i) select 2)}) then {
             (zone_namePOS_pairs select _i) set [2, true];
+            [[_zonePos] call fnc_zone_key] call DUWS_fnc_opcom_gridDirty;
             [_zonePos] call _fnc_paint;
             ["ZONE", [_zonePos] call fnc_zone_key] call fnc_hardpoint_reveal;
             _revealed = true;

@@ -27,6 +27,14 @@ DUWS_fnc_opcom_spread = {
 // Every input of the band, the holdings and exposure: one missing here leaves the field stale after it changes. The
 // area of influence reads no hardpoint but a radio tower, so any other build leaves this signature as it was.
 DUWS_fnc_opcom_bandSig = {
+    if ((_cmd get "side") isEqualTo west) exitWith {
+        [
+            +WARCOM_zones_controled_by_BLUFOR,
+            +(missionNamespace getVariable ["Array_of_FOBpos", []]),
+            call DUWS_fnc_opcom_enemyGroundSweep,
+            (missionNamespace getVariable ["civ_town_rep", []]) apply { [0, 1] select (_x >= 10) }
+        ]
+    };
     [
         +(call DUWS_fnc_opcom_enemyZones),
         +(missionNamespace getVariable ["Array_of_FOBpos", []]),
@@ -36,13 +44,16 @@ DUWS_fnc_opcom_bandSig = {
     ]
 };
 
+// BLUFOR builds nothing, so its field carries no deposit.
 DUWS_fnc_opcom_depositSig = {
+    if ((_cmd get "side") isEqualTo west) exitWith { [] };
     (DUWS_hardpoints select { (_x select 3) isEqualTo "opfor" }) apply { _x select 0 }
 };
 
 // Scheduled and slow on purpose: the band test runs the area of influence over every land cell in the box.
 DUWS_fnc_opcom_needBandBuild = {
     private _w = DUWS_opcom_grid_w;
+    private _blu = (_cmd get "side") isEqualTo west;
     private _need = DUWS_opcom_grid_land apply { 0 };
     {
         _x params ["", "_zp", "_zs", "_worth"];
@@ -51,11 +62,20 @@ DUWS_fnc_opcom_needBandBuild = {
         };
     } forEach zone_meta_array;
     {
-        if (_x <= -10) then {
+        if ([_x <= -10, _x >= 10] select _blu) then {
             private _pos = [_forEachIndex] call DUWS_fnc_opcom_townPos;
             [_need, [_pos] call DUWS_fnc_opcom_w2c, ([_forEachIndex] call DUWS_fnc_opcom_townWorth) * ([_pos] call DUWS_fnc_opcom_exposure)] call DUWS_fnc_opcom_spread;
         };
     } forEach (missionNamespace getVariable ["civ_town_rep", []]);
+    // BLUFOR holds its bases, and builds nothing, so it has no band base.
+    if (_blu) exitWith {
+        { [_need, [_x] call DUWS_fnc_opcom_w2c, OPCOM_FOB_WORTH * ([_x] call DUWS_fnc_opcom_exposure)] call DUWS_fnc_opcom_spread } forEach (missionNamespace getVariable ["Array_of_FOBpos", []]);
+        if (!isNil "PosOfBLUHQ" && {PosOfBLUHQ isNotEqualTo []}) then {
+            [_need, [PosOfBLUHQ] call DUWS_fnc_opcom_w2c, OPCOM_HQ_WORTH * ([PosOfBLUHQ] call DUWS_fnc_opcom_exposure)] call DUWS_fnc_opcom_spread;
+        };
+        _cmd set ["needBase", _need];
+        _cmd set ["bandCells", []];
+    };
 
     private _worths = zone_meta_array apply { _x select 3 };
     private _base = if (_worths isEqualTo []) then { 0 } else {
@@ -79,9 +99,10 @@ DUWS_fnc_opcom_needBandBuild = {
 
 DUWS_fnc_opcom_needDepositBuild = {
     private _need = +(_cmd get "needBase");
+    private _opf = (_cmd get "side") isEqualTo east;
     {
         private _price = DUWS_opcom_assetPrice getOrDefault [_x select 2, 0];
-        if (_price > 0 && {(_x select 3) isEqualTo "opfor"}) then {
+        if (_opf && {_price > 0} && {(_x select 3) isEqualTo "opfor"}) then {
             [_need, [_x select 1] call DUWS_fnc_opcom_w2c, _price] call DUWS_fnc_opcom_spread;
         };
     } forEach DUWS_hardpoints;
@@ -102,7 +123,7 @@ DUWS_fnc_opcom_needRefresh = {
         // In DUWS_fnc_opcom_bandSig's part order.
         {
             if ((_band select _forEachIndex) isNotEqualTo ((_cmd get "bandSig") param [_forEachIndex, []])) then { _why pushBack _x };
-        } forEach ["zones", "fobs", "hq", "towns", "radios"];
+        } forEach ([["zones", "fobs", "hq", "towns", "radios"], ["zones", "fobs", "found", "towns"]] select ((_cmd get "side") isEqualTo west));
         _cmd set ["bandSig", _band];
         _cmd set ["depositSig", _deposit];
         _cmd set ["needBuilding", true];

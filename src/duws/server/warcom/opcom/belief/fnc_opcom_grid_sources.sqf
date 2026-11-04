@@ -50,9 +50,17 @@ DUWS_fnc_opcom_gridZone = {
     params ["_zp", "_zs"];
     private _key = [_zp] call fnc_zone_key;
     private _reach = _zs + OPCOM_GRID_SPREAD;
+    private _enemy = ((call DUWS_fnc_opcom_enemyZones) findIf {(_x distance2D _zp) < 1}) >= 0;
+    // BLUFOR reads OPFOR's ground only where intel found it, at the true force the map readout's bar shows, and its own
+    // zones as OPFOR reads them; a reveal marks the zone dirty.
+    if ((_cmd get "side") isEqualTo west) exitWith {
+        if (!_enemy) exitWith { [_key, !([_key] call DUWS_fnc_garrisonHeld), "fri", _zp, [_key] call DUWS_fnc_garrisonForce, _reach] };
+        if ((zone_namePOS_pairs findIf { ((_x select 1) distance2D _zp) < 1 && {_x select 2} }) < 0) exitWith { [] };
+        [_key, !([_key] call DUWS_fnc_garrisonHeld) && {_key in DUWS_stowed}, "ene", _zp, [_key] call DUWS_fnc_garrisonForce, _reach]
+    };
     // Known enemy ground, a territorial fact the commander has for free, read at the true force of whatever the
     // player built on it. The nominal is the floor, for ground holding no garrison.
-    if (((call DUWS_fnc_opcom_enemyZones) findIf {(_x distance2D _zp) < 1}) >= 0) exitWith {
+    if (_enemy) exitWith {
         [_key, !([_key] call DUWS_fnc_garrisonHeld), "ene", _zp,
             ([_key] call DUWS_fnc_garrisonForce) max OPCOM_GRID_ZONE_ENEMY_FORCE, _reach]
     };
@@ -61,11 +69,14 @@ DUWS_fnc_opcom_gridZone = {
 };
 
 // Priced off the type's layout, so a row weighs the same deployed or stowed; it stands until cleared.
+// BLUFOR sees an OPFOR hardpoint only once it is revealed, and builds none of its own.
 DUWS_fnc_opcom_gridHp = {
     params ["_row"];
-    _row params ["_key", "_pos", "_type", "_side", "_zoneKey"];
+    _row params ["_key", "_pos", "_type", "_side", "_zoneKey", "_shown"];
     if (_side isNotEqualTo "opfor") exitWith { [] };
-    [_key, true, "fri", _pos, [_type, _zoneKey] call DUWS_fnc_hpForce, OPCOM_GRID_SPREAD]
+    private _blu = (_cmd get "side") isEqualTo west;
+    if (_blu && {!_shown}) exitWith { [] };
+    [_key, true, ["fri", "ene"] select _blu, _pos, [_type, _zoneKey] call DUWS_fnc_hpForce, OPCOM_GRID_SPREAD]
 };
 
 DUWS_fnc_opcom_gridSources = {
@@ -110,6 +121,14 @@ DUWS_fnc_opcom_gridMobile = {
         private _ef = _x get "effForce";
         if (_ef > 0 && {!([_x] call DUWS_fnc_opcom_defenderStanding)}) then { [_fri, _x get "pos", _ef, OPCOM_GRID_SPREAD] call DUWS_fnc_opcom_deposit };
     } forEach (_cmd get "taskings");
+    // The players fight beside BLUFOR's commander, and no tasking or holding carries them.
+    if ((_cmd get "side") isEqualTo west) then {
+        {
+            if ((units _x) findIf { isPlayer _x } >= 0) then {
+                [_fri, getPosASL leader _x, [_x, false] call DUWS_fnc_opcom_sightStr, OPCOM_GRID_SPREAD] call DUWS_fnc_opcom_deposit;
+            };
+        } forEach (allGroups select { side _x == west });
+    };
 };
 
 // Every source from scratch, cache bypassed. Run by the grid stage right after it publishes: the task step moves

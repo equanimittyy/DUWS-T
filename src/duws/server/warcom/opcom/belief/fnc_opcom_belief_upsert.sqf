@@ -24,6 +24,8 @@ if (_i < 0) then {
 
 [_pos, _str] call DUWS_fnc_opcom_trafficStamp;
 
+// Only OPFOR discovers a base: BLUFOR's are its own.
+if ((_cmd get "side") isEqualTo west) exitWith {};
 // Until one of the HQ's own defenders is seen the HQ pulls no defense toward itself, so the opening campaign
 // defends evenly instead of massing on a base the commander has no business knowing. A squad seen passing
 // gives no base away; its standing garrison does. One-way: a base found once stays found.
