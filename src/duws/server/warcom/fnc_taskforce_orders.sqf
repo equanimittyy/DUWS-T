@@ -107,7 +107,7 @@ private _fnc_hold = {
 				private _stage = _objectivePos getPos [_ring + STAGE_MARGIN, _objectivePos getDir leader _group];
 				if ((leader _group) distance2D _objectivePos < _ring + STAGE_MARGIN || {surfaceIsWater _stage}) then { _stage = [] };
 				[_group, _objectivePos, _stage] call _fnc_attack;
-				[groupId _group, format [localize "STR_DUWS_T_TASKFORCE_ASSAULT", groupId _group, _objectiveName], "SUB-NET"] remoteExec ["fnc_duws_dialogue", 0];
+				[_group, "STR_DUWS_T_TASKFORCE_ASSAULT", _objectiveName] call fnc_taskforce_report;
 				_group setVariable ["DUWS_taskforce_order", ["capture", _objectiveName]];
 			} else {
 				// A capture needs the zone's own garrison beaten wherever it wandered, so a sweep that ends short hunts the nearest survivor.
@@ -132,7 +132,7 @@ private _fnc_hold = {
 					(selectRandom _legs) params ["_townName", "_townPos"];
 					[_group, "patrol", _townPos] call DUWS_fnc_opcom_applyOrder;
 					[_group, count waypoints _group - 1] setWaypointCompletionRadius PATROL_ARRIVE;
-					[groupId _group, format [localize "STR_DUWS_T_TASKFORCE_PATROLLING", groupId _group, _townName], "SUB-NET"] remoteExec ["fnc_duws_dialogue", 0];
+					[_group, "STR_DUWS_T_TASKFORCE_PATROLLING", _townName] call fnc_taskforce_report;
 					_group setVariable ["DUWS_taskforce_order", ["patrol", _townName, _townPos]];
 				};
 			};

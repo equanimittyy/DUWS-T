@@ -366,8 +366,7 @@ DUWS_fnc_opcom_launch = {
         private _place = [_attack get "pos"] call fnc_place_name;
         {
             {
-                private _tf = groupId groupFromNetId (_x get "grp");
-                [_tf, format [localize "STR_DUWS_T_TASKFORCE_QRF", _tf, _place], "SUB-NET"] remoteExec ["fnc_duws_dialogue", 0];
+                [groupFromNetId (_x get "grp"), "STR_DUWS_T_TASKFORCE_QRF", _place] call fnc_taskforce_report;
             } forEach ([_attack, _x] call DUWS_fnc_opcom_roleUnits);
         } forEach (_attack get "roles");
     };

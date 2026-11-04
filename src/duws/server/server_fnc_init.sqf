@@ -835,6 +835,7 @@ fnc_taskforce_create = compile preprocessFileLineNumbers "duws\server\warcom\fnc
 fnc_taskforce_tick = compile preprocessFileLineNumbers "duws\server\warcom\fnc_taskforce_tick.sqf";
 fnc_taskforce_orders = compile preprocessFileLineNumbers "duws\server\warcom\fnc_taskforce_orders.sqf";
 fnc_taskforce_commander = compile preprocessFileLineNumbers "duws\server\warcom\fnc_taskforce_commander.sqf";
+fnc_taskforce_report = compile preprocessFileLineNumbers "duws\server\warcom\fnc_taskforce_report.sqf";
 fnc_taskforce_spawn = compile preprocessFileLineNumbers "duws\server\warcom\fnc_taskforce_spawn.sqf";
 fnc_taskforce_release = compile preprocessFileLineNumbers "duws\server\warcom\fnc_taskforce_release.sqf";
 fnc_taskforce_stance = compile preprocessFileLineNumbers "duws\server\warcom\fnc_taskforce_stance.sqf";

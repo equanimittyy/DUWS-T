@@ -29,9 +29,8 @@ DUWS_fnc_opcom_sendRun = {
     // BLUFOR's commander has no garrison action, so its every send is a patrol or a probe.
     if ((_cmd get "side") isEqualTo west) then {
         (_target select 1) params ["_order", "_at"];
-        private _tf = groupId groupFromNetId (_t get "grp");
-        private _line = localize (["STR_DUWS_T_TASKFORCE_PATROLLING", "STR_DUWS_T_TASKFORCE_PROBING"] select (_order isEqualTo "probe"));
-        [_tf, format [_line, _tf, [_at] call fnc_place_name], "SUB-NET"] remoteExec ["fnc_duws_dialogue", 0];
+        private _key = ["STR_DUWS_T_TASKFORCE_PATROLLING", "STR_DUWS_T_TASKFORCE_PROBING"] select (_order isEqualTo "probe");
+        [groupFromNetId (_t get "grp"), _key, [_at] call fnc_place_name] call fnc_taskforce_report;
     };
     true
 };
