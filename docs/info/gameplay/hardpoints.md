@@ -36,7 +36,7 @@ One core weapon or structure per hardpoint; garrison and streaming are per type,
 | `MG` | `opfor_TURRET_HMG` | one team | backbone of both weight tables |
 | `AT` | `opfor_TURRET_AT` | one team | covers a road |
 | `GMG` | `opfor_TURRET_GMG` | one team | rare supporting weapon |
-| `AA` | `opfor_TURRET_AA` | one team | wakes on a 5,000 m air ring, not just its ground ring |
+| `AA` | `opfor_TURRET_AA` | one team | its 5,000 m air ring counts AI-flown aircraft too ([streaming](#streaming-and-garrison)) |
 | `ROADBLOCK` | gate flanked by two `opfor_TURRET_HMG` nests | one team | faces along the road, toward the approach |
 | `OP` | vanilla bunker/tower prop | security team + wide recon patrol | standalone recon screen, seeded at generation; see [below](#observation-posts) |
 | `MORTAR` | `opfor_TURRET_MORTAR` | one team | resident (never streams); cleared by destroying the tube |
@@ -216,22 +216,41 @@ is not rolled: generation retries it until it stands, and gives up only on a map
 ## Streaming and garrison
 
 A hardpoint registers as a site the same way a zone does — `fnc_site_register`,
-`fnc_site_occupant_register`, `fnc_site_hooks_set` (`server/misc/fnc_site_stream_init.sqf:19,49,87`)
+`fnc_site_occupant_register`, `fnc_site_hooks_set` (`server/misc/fnc_site_stream_init.sqf:19,44,82`)
 — so the shared poller tests it against the same per-pass player list rather than paying a spatial
-query per hardpoint (`fnc_hardpoint_register`, `server/init_zones/fnc_hardpoint_stream.sqf:422-529`).
+query per hardpoint (`fnc_hardpoint_register`, `server/init_zones/fnc_hardpoint_stream.sqf:422-532`).
 What differs from a zone is the lifecycle: one gun-and-garrison emplacement that wakes, sleeps and
 can be cleared, never captured or retaken.
 
 **A zone-child hardpoint mirrors its zone rather than streaming on its own ring.**
 `DUWS_fnc_hardpointZoneAwake` (`:23-26`) reads the zone's own garrison occupant and answers awake or
-raising; a standalone hardpoint instead wakes on its own presence ring
-(`DUWS_hardpointStreaming`'s `spawnRadius`/`grace` per type) and, for `AA`, an additional 5,000 m
-*air* ring so a jet is noticed before its ground ring would ever fire — the streaming answer to the
-same problem the plan raised for AA (a static gun cannot deploy fast enough to catch what crosses a
-600 m ring in seconds), solved here by waking earlier rather than by never sleeping.
+raising, so a zone hardpoint also takes the zone's air ring and its 250 km/h cap. A standalone hardpoint
+instead wakes on its own presence ring (`DUWS_hardpointStreaming`'s `spawnRadius`/`grace` per type).
+
+**A standalone hardpoint also wakes on its own air ring.** The ground ring ignores everyone aboard an
+aircraft, so without an air ring a helicopter never wakes the emplacement. The ring and the aircraft it
+counts are per type (`DUWS_hardpointStreaming`'s `airRing`/`airFilter`, tested by `fnc_site_airPasses`):
+
+| Type | Air ring | Aircraft that count |
+|---|---|---|
+| `AA` | 5,000 m | any aircraft with WEST crew, AI-flown included |
+| `MINEFIELD` | none | — |
+| every other type | 1,500 m | a player-crewed aircraft or any UAV |
+
+No standalone air ring has a speed cap, because fast flight must not hide an emplacement. A zone keeps its
+cap because the cap protects the raise of a full garrison.
+
+The `AA` ring is the widest so that a jet is noticed before the ground ring would ever fire. A static gun
+cannot deploy fast enough to catch what crosses a 600 m ring in seconds, so `AA` wakes earlier instead of
+never sleeping.
+
+For `MORTAR` and `ARTY`, the air ring wakes only the loose garrison, because the guns and their crews are
+resident.
+
+The air distance is 3D, so an aircraft more than 1,500 m above a hardpoint does not wake it.
 
 **A raise starts on the first site pass that finds BLUFOR on the ground in the ring, or an aircraft in
-the `AA` air ring.** The poller runs every 2 s (`SITE_TICK`), and the raise worker re-tests nothing
+the air ring.** The poller runs every 2 s (`SITE_TICK`), and the raise worker re-tests nothing
 before it deploys, so the wait after a player enters the ring is at most one pass plus the crew drop. **No hardpoint registers latched.**
 `fnc_hardpoint_register` already crews or stows the emplacement for whoever is in the ring at that
 moment. A latch would read a crewed emplacement as empty and stow it in front of the player when its
@@ -244,13 +263,13 @@ battery garrison on the first pass after a campaign start or load. The grace is 
 defender in a fight (`fnc_duws_engaged`) holds the stow past it.
 
 **Pinning is `neverStream` only.** `MORTAR`, `ARTY` and `MINEFIELD` are marked `neverStream` in
-`DUWS_hardpointStreaming` (`server_var_init.sqf:394-421`). A battery is pinned so OPCOM can task it with
+`DUWS_hardpointStreaming` (`server_var_init.sqf:415-446`). A battery is pinned so OPCOM can task it with
 no player near; a minefield is pinned because a mine has to be made with `createMine`, and the
 composition's own deploy rebuilds members with `createVehicle`, which would hand back inert props.
 A minefield instead streams on its own path, square by square ([Siting](#siting)).
 On registration, every member of their
 composition is re-filed through `fnc_duws_keep` with `_pinned = true`
-(`fnc_hardpoint_stream.sqf:496`), which sets `DUWS_noStow` and excludes the object from
+(`fnc_hardpoint_stream.sqf:498`), which sets `DUWS_noStow` and excludes the object from
 `fnc_duws_stow`'s crewed-member refusal and its delete pass
 (`server/misc/fnc_composition_stream_init.sqf:38-46,93-100`). Every other type stows and redeploys
 like an ordinary composition: garrisons are raised fresh from `DUWS_fnc_teamRoster` on each raise
@@ -316,7 +335,7 @@ vanish with the clear.
 ## Reveal
 
 Every hardpoint gets a marker on registration: shape `"ICON"`, type `"loc_Bunker"`, coloured by side,
-with the type token as its text (`fnc_hardpoint_stream.sqf:453-460`) — one icon shape for every type,
+with the type token as its text (`fnc_hardpoint_stream.sqf:454-461`) — one icon shape for every type,
 distinguished by label rather than by symbol. The marker's alpha and the revealed flag start at the rule
 in [`intel_system.md`](intel_system.md#what-is-hidden-depends-on-when-it-came-into-existence): a hardpoint
 laid by campaign generation is shown outside hardcore and hidden under it, and one built in play

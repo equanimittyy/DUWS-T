@@ -412,7 +412,7 @@ zones_max_radius = 1000;publicVariable "zones_max_radius";
 // Must not go under 200.
 zones_min_radius = 200;publicVariable "zones_min_radius";
 
-// Hardpoint streaming, per type: [spawnRadius, grace, neverStream, airRing].
+// Hardpoint streaming, per type: [spawnRadius, grace, neverStream, airRing, airFilter].
 //   spawnRadius  distance BLUFOR wake the emplacement at. 800 for direct-fire nests that must open up
 //                before the player closes; 600 for the rest (an OP screens past this ring anyway, and
 //                a mast/battery is destroyed up close, so neither needs gun-range wake-up)
@@ -423,29 +423,34 @@ zones_min_radius = 200;publicVariable "zones_min_radius";
 //                inert props. A minefield streams per square on its own path instead
 //                (fnc_hardpoint_minefield_cycle). Only the composition is pinned; the loose garrison
 //                still streams, but the gun crew stays live (a frozen crew cannot fire)
-//   airRing      a second, larger radius answered only by aircraft; 0 = none. Lets AA catch a jet its
-//                ground ring would never notice, without waking on every distant foot patrol.
+//   airRing      a second, larger radius answered only by aircraft; 0 = none. The ground ring ignores
+//                everyone aboard an aircraft, so without it a helicopter never wakes the emplacement.
+//                AA's is the widest, to catch a jet its ground ring would never notice
+//   airFilter    which aircraft the air ring counts (fnc_site_airPasses). AA counts any, AI-flown
+//                included, since engaging aircraft is its job; the rest only a player aboard or a UAV.
+//                Neither is speed-capped: fast flight must not hide an emplacement.
 // Server-only: every consumer (the site poller, fnc_hardpoint_register) runs on the server.
 DUWS_hardpointStreaming = createHashMapFromArray [
-    ["OP",        [ 600, 180, false, 0]],
-    ["MG",        [ 800, 180, false, 0]],
-    ["AT",        [ 800, 180, false, 0]],
-    ["GMG",       [ 800, 180, false, 0]],
-    ["ROADBLOCK", [ 800, 180, false, 0]],
-    ["MINEFIELD", [ 600, 180, true,  0]],
-    ["AA",        [ 800, 180, false, 5000]],
-    ["MORTAR",    [ 600, 180, true,  0]],
-    ["ARTY",      [ 600, 180, true,  0]],
+    ["OP",        [ 600, 180, false, 1500, "player"]],
+    ["MG",        [ 800, 180, false, 1500, "player"]],
+    ["AT",        [ 800, 180, false, 1500, "player"]],
+    ["GMG",       [ 800, 180, false, 1500, "player"]],
+    ["ROADBLOCK", [ 800, 180, false, 1500, "player"]],
+    ["MINEFIELD", [ 600, 180, true,     0, "all"]],
+    ["AA",        [ 800, 180, false, 5000, "all"]],
+    ["MORTAR",    [ 600, 180, true,  1500, "player"]],
+    ["ARTY",      [ 600, 180, true,  1500, "player"]],
     // A radio tower's coverage and amplifier read the registry whether it is up or stowed, so the ring
     // only governs when its mast and garrison stream in -- and the mast is destroyed up close, not at range.
-    ["RADIO",     [ 600, 180, false, 0]]
+    ["RADIO",     [ 600, 180, false, 1500, "player"]]
 ];
 
 // Zone air streaming: a player-crewed aircraft or UAV committing to a zone wakes its garrison, since the
 // ground ring discounts anything airborne (fnc_duws_bluforNear). Committing, not transiting, and
 // player-crewed, not AI: only a player-flown heli or a UAV under DUWS_zoneAirCommitSpeed counts, so a
-// cruising jet or an AI aircraft raises nothing. This is the zone's own reach -- AA keeps its own ungated
-// air ring above. Ring 0 falls back to ground only. Server-only: all consumers run on the server.
+// cruising jet or an AI aircraft raises nothing. This is the zone's own reach -- standalone hardpoints
+// keep their own air rings in the table above. Ring 0 falls back to ground only. Server-only: all
+// consumers run on the server.
 DUWS_zoneAirRing = 1500;
 DUWS_zoneAirCommitSpeed = 250;   // km/h
 

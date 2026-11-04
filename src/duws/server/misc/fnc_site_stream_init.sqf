@@ -224,15 +224,25 @@ fnc_town_site_key = {
 // side. A snapped point moves at most 71 m, so a gate that reaches this far past its ring misses nobody.
 #define SITE_CELL 100
 
+// One test for the poller's per-pass aircraft lists and the registration check, so the two never
+// disagree about an aircraft. all: any WEST-crewed aircraft. player: also a player aboard, or a UAV,
+// whose operator flies by terminal and is never aboard. committed: also under DUWS_zoneAirCommitSpeed.
+fnc_site_airPasses = {
+    params ["_veh", "_filter"];
+    if (({ side _x == WEST } count (crew _veh)) == 0) exitWith { false };
+    if (_filter isEqualTo "all") exitWith { true };
+    if !(unitIsUAV _veh || {(crew _veh) findIf { isPlayer _x } >= 0}) exitWith { false };
+    _filter isEqualTo "player" || {speed _veh < DUWS_zoneAirCommitSpeed}
+};
+
 // Ground ring: fnc_duws_bluforNear (player, or _minAI friendly AI). Air ring (occupant-declared,
-// 0 = none): any BLUFOR aircraft reaching in from beyond it, player or AI flown -- folded in here
-// because bluforNear discounts anything airborne, and an AA emplacement must still wake for a jet
-// overhead its ground ring never reaches.
+// 0 = none): a BLUFOR aircraft that passes the occupant's air filter -- folded in here because
+// bluforNear discounts anything airborne.
 fnc_site_bluforOrAir = {
-    params ["_pos", "_ring", ["_minAI", 2], ["_airRing", 0]];
+    params ["_pos", "_ring", ["_minAI", 2], ["_airRing", 0], ["_airFilter", "all"]];
     if ([_pos, _ring, _minAI] call fnc_duws_bluforNear) exitWith { true };
     if (_airRing <= 0) exitWith { false };
-    ((_pos nearEntities [["Air"], _airRing]) findIf { ({ side _x == WEST } count (crew _x)) > 0 }) >= 0
+    ((_pos nearEntities [["Air"], _airRing]) findIf { [_x, _airFilter] call fnc_site_airPasses }) >= 0
 };
 
 // Whether an attacker is in reach: live OPFOR, or an OPCOM tasking still virtual, which stands on no unit
@@ -276,22 +286,13 @@ fnc_site_poller = {
         // side group, not side: a disguised player is captive, and a captive unit reads CIVILIAN.
         private _west = (allUnits select { side group _x == WEST }) call _fnc_cells;
         private _playerPos = _players apply { getPosATL _x };
-        // WEST aircraft positions for occupant-declared air rings, off the vehicle list (not
-        // allUnits): one entry per aircraft, not per crew seat, and far shorter to walk.
-        // _westAir: every WEST aircraft, for an AA ring that must catch any jet, AI-flown included.
-        // _westAirCommitted: player-crewed aircraft (or any UAV -- its operator flies by terminal,
-        // body never aboard, so crew never reads as a player) holding under DUWS_zoneAirCommitSpeed,
-        // since an AI transit or support heli should never stand a garrison up.
-        private _westAir = [];
-        private _westAirCommitted = [];
+        // Aircraft positions for occupant-declared air rings, one list per air filter, off the vehicle
+        // list (not allUnits): one entry per aircraft, not per crew seat, and far shorter to walk.
+        private _westAir = createHashMapFromArray [["all", []], ["player", []], ["committed", []]];
         {
-            if !(({ side _x == WEST } count (crew _x)) > 0) then { continue };
-            private _ap = getPosATL _x;
-            _westAir pushBack _ap;
-            if (speed _x < DUWS_zoneAirCommitSpeed
-                && {unitIsUAV _x || {(crew _x) findIf { isPlayer _x } >= 0}}) then {
-                _westAirCommitted pushBack _ap;
-            };
+            private _veh = _x;
+            private _ap = getPosATL _veh;
+            { if ([_veh, _x] call fnc_site_airPasses) then { _y pushBack _ap } } forEach _westAir;
         } forEach (vehicles select { _x isKindOf "Air" });
         // Hostile half of the same gate, for frozen sites below. Built once here rather than per
         // site: with the HQ plus a FOB per zone-and-a-half, per-site spatial queries would run more
@@ -339,8 +340,7 @@ fnc_site_poller = {
                     _ground || {
                         private _ar = _o getOrDefault ["airRing", 0];
                         _ar > 0 && {
-                            private _air = if (_o getOrDefault ["airRingCommitted", false]) then { _westAirCommitted } else { _westAir };
-                            (_air findIf { _x distance _pos < _ar }) >= 0
+                            ((_westAir get (_o get "airFilter")) findIf { _x distance _pos < _ar }) >= 0
                         }
                     }
                 } else {
