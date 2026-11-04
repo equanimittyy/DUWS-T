@@ -129,6 +129,14 @@ class Params {
         default = 0;
     };
 
+    // The HQ counter is BLUFOR's own supply, not a civilian shop, so it keeps the full BLUFOR list in both modes.
+    class DUWS_ArmsStock {
+        title = "Civilian Arms Stock";
+        values[] = {0,1};
+        texts[] = {"Sandbox (everything on sale)","Limited (10 per category, rotates every 30 minutes)"};
+        default = 0;
+    };
+
     // Gates the Rest/Heal weather box: Off replaces it with a notice and skips the weather change on
     // rest (read in fnc_rest_menu.sqf, enforced in fnc_rest_heal.sqf). Rest and time-skip still work.
     class DUWS_RestWeather {

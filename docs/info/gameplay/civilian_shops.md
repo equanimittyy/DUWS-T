@@ -208,6 +208,31 @@ Everything is the config as installed, so a modded server sells its mods.
 The arsenal mode does not gate the stock. A heavy class costs more instead, which keeps the shops
 apart from the captured-materiel rules of `DUWS_arsenalLimited`.
 
+### Limited arms stock
+
+The Civilian Arms Stock lobby param (`DUWS_ArmsStock`, read into `DUWS_paramArmsStock`) sets what an
+Arms Dealer offers. Sandbox, the default, offers the three lists above. Limited replaces them with one
+list, In Stock (`"town"`), that each town rolls for itself from the BLUFOR, OPFOR and Everything lists
+together (`fnc_vendor_stock.sqf`):
+
+| Category | In Stock |
+|---|---|
+| Magazines | Every magazine that a stocked primary weapon, handgun or launcher loads in any muzzle (`compatibleMagazines`), so a rifle's underbarrel rounds come with it |
+| Every other category, grenades and explosives included | 10 random classes, or every class when the category has fewer |
+
+A rotation window is 30 minutes of the campaign clock (`fnc_campaign_now`), so a rest that skips time
+also rotates the stock. The first stock request after a window ends starts a new window and clears
+every town's roll. A town rolls on its first request in the window. The roll is stored in
+`DUWS_armsStock` and not rolled again for each request, because the purchase check must see the
+stock that the catalogue showed. The roll runs inside `isNil`, so two players who open the same shop
+at the same time see the same stock.
+
+A purchase of a class that rotated out while the catalogue was open gets the vendor line
+`STR_DUWS_T_VENDOR_SOLD_OUT`.
+
+The snapshot saves the rolls and the seconds left in the window as `armsStock`, so a load resumes the
+same stock. The param is a campaign rule, so the save keeps it too.
+
 ## Prices
 
 `fnc_vendor_price` prices one pack of a class by what the class is, not by a per-class table, so a
@@ -302,7 +327,9 @@ catalogue. `fnc_BluHQinit` marks the crate as a vendor of type `hq` and sends it
 The `hq` row of `DUWS_vendorTypes` has the site `hq`, and `_fnc_canHost` refuses that site, so the
 draft never puts the type in a town.
 
-The counter offers one list: the BLUFOR list of the Arms Dealer, from the same build and cache.
+The counter offers one list: the BLUFOR list of the Arms Dealer, from the same build and cache. It
+keeps the full list under [Limited arms stock](#limited-arms-stock), because the counter is BLUFOR's
+own supply, not a civilian shop.
 
 The crate has no town, so the counter never refuses as hostile, gives no reputation discount and has
 no greeting. It works in every `CIV_PRESENCE` mode, because the crate and the money exist in each.

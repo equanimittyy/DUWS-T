@@ -76,6 +76,7 @@ DUWS_paramFatigue = ["DUWS_Fatigue", 1] call BIS_fnc_getParamValue;publicVariabl
 DUWS_paramFirstPerson = ["DUWS_RestrictFirstPerson", 0] call BIS_fnc_getParamValue;publicVariable "DUWS_paramFirstPerson";
 DUWS_paramArsenal = ["DUWS_ArsenalMode", 0] call BIS_fnc_getParamValue;publicVariable "DUWS_paramArsenal";
 DUWS_paramTrackAmmo = ["DUWS_TrackAmmo", 0] call BIS_fnc_getParamValue;publicVariable "DUWS_paramTrackAmmo";
+DUWS_paramArmsStock = ["DUWS_ArmsStock", 0] call BIS_fnc_getParamValue;publicVariable "DUWS_paramArmsStock";
 DUWS_paramRestWeather = ["DUWS_RestWeather", 1] call BIS_fnc_getParamValue;publicVariable "DUWS_paramRestWeather";
 DUWS_paramLoseConditions = ["DUWS_LoseConditions", 0] call BIS_fnc_getParamValue;publicVariable "DUWS_paramLoseConditions";
 DUWS_paramTownGen = ["DUWS_TownGeneration", 0] call BIS_fnc_getParamValue;publicVariable "DUWS_paramTownGen";

@@ -2847,6 +2847,18 @@
                 <Chinese>繳獲裝備</Chinese>
                 <Spanish>Equipo capturado</Spanish>
             </Key>
+            <Key ID="STR_DUWS_T_fork_group_armsStock">
+                <Original>Arms Dealer stock</Original>
+                <English>Arms Dealer stock</English>
+                <Chinesesimp>军火商商品</Chinesesimp>
+                <German>Bestand der Waffenhändler</German>
+                <Polish>Towar handlarzy bronią</Polish>
+                <Czech>Nabídka zbrojířů</Czech>
+                <Russian>Товар торговцев оружием</Russian>
+                <French>Stock des marchands d'armes</French>
+                <Chinese>軍火商商品</Chinese>
+                <Spanish>Existencias de los traficantes de armas</Spanish>
+            </Key>
             <Key ID="STR_DUWS_T_fork_unreadable">
                 <Original>The save store did not read back, so a campaign started now may not be kept</Original>
                 <English>The save store did not read back, so a campaign started now may not be kept</English>
@@ -8726,6 +8738,18 @@
                 <Chinese>全部</Chinese>
                 <Spanish>Todo</Spanish>
             </Key>
+            <Key ID="STR_DUWS_T_VENDOR_STOCK_TOWN">
+                <Original>In Stock</Original>
+                <English>In Stock</English>
+                <Chinesesimp>现货</Chinesesimp>
+                <German>Vorrätig</German>
+                <Polish>Na stanie</Polish>
+                <Czech>Skladem</Czech>
+                <Russian>В наличии</Russian>
+                <French>En stock</French>
+                <Chinese>現貨</Chinese>
+                <Spanish>Disponible</Spanish>
+            </Key>
             <Key ID="STR_DUWS_T_VENDOR_BOX_MONEY">
                 <Original>Money</Original>
                 <English>Money</English>
@@ -9097,6 +9121,18 @@
                 <French>L'arsenal en dispose déjà.</French>
                 <Chinese>軍械庫中已有該物品。</Chinese>
                 <Spanish>El arsenal ya tiene eso en existencias.</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_SOLD_OUT">
+                <Original>That's gone. I've got new stock now.</Original>
+                <English>That's gone. I've got new stock now.</English>
+                <Chinesesimp>那个已经没了，我刚换了一批货。</Chinesesimp>
+                <German>Das ist weg. Ich hab jetzt neue Ware.</German>
+                <Polish>Tego już nie ma. Mam teraz nowy towar.</Polish>
+                <Czech>To už je pryč. Teď mám novou nabídku.</Czech>
+                <Russian>Этого уже нет. У меня теперь новый товар.</Russian>
+                <French>Je n'en ai plus. J'ai du nouveau stock maintenant.</French>
+                <Chinese>那個已經沒了，我剛換了一批貨。</Chinese>
+                <Spanish>Eso ya no está. Ahora tengo existencias nuevas.</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_VENDOR_BOUGHT">
                 <Original>%1 purchased.</Original>

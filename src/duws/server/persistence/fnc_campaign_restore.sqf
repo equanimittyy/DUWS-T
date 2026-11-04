@@ -301,6 +301,9 @@ DUWS_fnc_restoreApply = {
     private _pool = (_d getOrDefault ["capturedPool", []]) select { [_x param [0, ""]] call DUWS_fnc_restoreKnown };
     DUWS_restoreDropped set ["gear", count (_d getOrDefault ["capturedPool", []]) - count _pool];
     DUWS_capturedPool = _pool; publicVariable "DUWS_capturedPool";
+    (_d getOrDefault ["armsStock", [0, []]]) params ["_armsLeft", "_armsPicks"];
+    DUWS_armsWindowEnd = (call fnc_campaign_now) + _armsLeft;
+    DUWS_armsStock = createHashMapFromArray _armsPicks;
     DUWS_limitedSeeded = _d getOrDefault ["seeded", []];
 
     // The one setting whose effect is terrain, and terrain resets with the session.

@@ -2,15 +2,66 @@
 // fnc_faction_query enforces for the faction browser.
 /*
     One stock list. Params: [kind ("gear" | "car" | "boat"), list ("civilian" | "blufor" | "opfor" |
-    "all")]. Returns [[displayName, class, category], ...] sorted by display name, where
-    category indexes the kind's DUWS_vendorCategories list.
+    "all" | "town"), town index]. Returns [[displayName, class, category], ...] sorted by display name,
+    where category indexes the kind's DUWS_vendorCategories list.
 
     Built once per list and cached. The "all" sweep walks whole configs, which is far too much to pay on
     every menu open, and no list can change once built: the role keys the side lists read and the
     civilian pools are all resolved at campaign start and never rewritten.
+
+    "town" is the exception: the Limited arms stock (DUWS_paramArmsStock), rolled per town for each
+    rotation window from the other three gear lists. The roll is stored, not cached, because the
+    purchase check must see the stock the catalogue showed, and a load must resume it (armsStock).
 */
 if (!isServer) exitWith { [] };
-params [["_kind", "gear"], ["_list", "all"]];
+params [["_kind", "gear"], ["_list", "all"], ["_town", -1]];
+
+#define ARMS_PICKS 10
+#define ARMS_WINDOW 1800
+
+if (_list isEqualTo "town") exitWith {
+    private _pool = missionNamespace getVariable ["DUWS_armsPool", createHashMap];
+    if (count _pool == 0) then {
+        { { _pool set [toLower (_x select 1), _x] } forEach ([_kind, _x] call fnc_vendor_stock) } forEach ["blufor", "opfor", "all"];
+        DUWS_armsPool = _pool;
+    };
+    private _order = DUWS_vendorCategories get _kind;
+    private _magCat = _order find "STR_DUWS_T_VENDOR_CAT_MAGAZINE";
+    private _gunCats = ["STR_DUWS_T_VENDOR_CAT_PRIMARY", "STR_DUWS_T_VENDOR_CAT_HANDGUN", "STR_DUWS_T_VENDOR_CAT_LAUNCHER"] apply { _order find _x };
+
+    // Atomic: two players at one shop must not each roll, or the catalogue and the purchase check would
+    // read different stock.
+    private _picks = [];
+    isNil {
+        private _now = call fnc_campaign_now;
+        if (_now >= (missionNamespace getVariable ["DUWS_armsWindowEnd", -1])) then {
+            DUWS_armsWindowEnd = _now + ARMS_WINDOW;
+            DUWS_armsStock = createHashMap;
+        };
+        _picks = DUWS_armsStock getOrDefault [_town, []];
+        if (_picks isEqualTo []) then {
+            private _byCat = _order apply { [] };
+            { (_byCat select (_y select 2)) pushBack (_y select 1) } forEach _pool;
+            {
+                if (_forEachIndex != _magCat) then {
+                    for "_i" from 1 to (ARMS_PICKS min count _x) do { _picks pushBack (_x deleteAt floor random count _x) };
+                };
+            } forEach _byCat;
+            DUWS_armsStock set [_town, _picks];
+        };
+    };
+
+    // A class a removed mod defined is not in the pool, so a restored pick of one drops out here.
+    private _rows = (_picks apply { _pool getOrDefault [toLower _x, []] }) select { _x isNotEqualTo [] };
+    {
+        {
+            private _row = _pool getOrDefault [toLower _x, []];
+            if ((_row param [2, -1]) == _magCat) then { _rows pushBackUnique _row };
+        } forEach (compatibleMagazines (_x select 1));
+    } forEach (_rows select { (_x select 2) in _gunCats });
+    _rows sort true;
+    _rows
+};
 
 private _cacheVar = format ["DUWS_vendorStock_%1_%2", _kind, _list];
 private _cached = missionNamespace getVariable [_cacheVar, []];

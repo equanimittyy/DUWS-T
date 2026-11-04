@@ -171,7 +171,7 @@ class duws_campaign_params
             x = 5 * GUI_GRID_W + GUI_GRID_X;
             y = 4 * GUI_GRID_H + GUI_GRID_Y;
             w = 30 * GUI_GRID_W;
-            h = 16.5 * GUI_GRID_H;
+            h = 18 * GUI_GRID_H;
             colorBackground[] = {0.2, 0.4, 0.2, 1};
         };
     };
@@ -185,7 +185,7 @@ class duws_campaign_params
             x = 5 * GUI_GRID_W + GUI_GRID_X;
             y = 4 * GUI_GRID_H + GUI_GRID_Y;
             w = 30 * GUI_GRID_W;
-            h = 16.5 * GUI_GRID_H;
+            h = 18 * GUI_GRID_H;
         };
         class params_warn: RscStructuredText
         {
@@ -215,7 +215,7 @@ class duws_campaign_params
             idc = 9815;
             text = "$STR_DUWS_T_fork_params_apply";
             x = 6 * GUI_GRID_W + GUI_GRID_X;
-            y = 18.3 * GUI_GRID_H + GUI_GRID_Y;
+            y = 19.75 * GUI_GRID_H + GUI_GRID_Y;
             w = 7 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
             sizeEx = 0.05;

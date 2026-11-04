@@ -97,6 +97,7 @@ private _paramsBody = ("MISSION PARAMETERS" call _hdr) + ([
     ["Arsenal Mode", ["DUWS_ArsenalMode", 0,
         ["Hybrid (captured gear tracked)", "Full (unlimited)", "Limited (all tracked)"], [0,1,2], "DUWS_paramArsenal"] call _param],
     ["Arsenal - Track Ammo", ["DUWS_TrackAmmo", 0, ["Off", "On"], [0,1], "DUWS_paramTrackAmmo"] call _param],
+    ["Civilian Arms Stock", ["DUWS_ArmsStock", 0, ["Sandbox", "Limited"], [0,1], "DUWS_paramArmsStock"] call _param],
     ["Rest Weather", ["DUWS_RestWeather", 1, ["Off", "On"], [0,1], "DUWS_paramRestWeather"] call _param],
     ["Lose Conditions", ["DUWS_LoseConditions", 0,
         ["Full", "Officer death only", "Escalation only", "Off"], [0,1,2,3], "DUWS_paramLoseConditions"] call _param],

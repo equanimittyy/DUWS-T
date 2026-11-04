@@ -46,6 +46,7 @@ DUWS_campaignParams = [
     ["DUWS_RestrictFirstPerson", "DUWS_paramFirstPerson", 0],
     ["DUWS_ArsenalMode", "DUWS_paramArsenal", 0],
     ["DUWS_TrackAmmo", "DUWS_paramTrackAmmo", 0],
+    ["DUWS_ArmsStock", "DUWS_paramArmsStock", 0],
     ["DUWS_RestWeather", "DUWS_paramRestWeather", 1],
     ["DUWS_LoseConditions", "DUWS_paramLoseConditions", 0],
     ["DUWS_TownGeneration", "DUWS_paramTownGen", 0],
@@ -61,7 +62,7 @@ DUWS_saveInputs = ["settings", "factions", "hq", "zones", "hardpoints"];
 // needs a STR_DUWS_T_fork_group_ key.
 DUWS_saveOutcomes = ["fobs", "towns", "vendors", "belts", "unlocks", "officerAlive", "clock", "pools", "held",
     "firstCaptured", "escalation", "zoneTiers", "garrisons", "revealedZones", "revealedTowns", "opcom", "garage",
-    "parked", "mhq", "builder", "builds", "zoneBuilds", "baseBuilds", "capturedPool"];
+    "parked", "mhq", "builder", "builds", "zoneBuilds", "baseBuilds", "capturedPool", "armsStock"];
 publicVariable "DUWS_saveOutcomes";
 
 // Minutes since 2020-01-01 from a systemTimeUTC array. Minutes, not seconds: a float holds whole minutes

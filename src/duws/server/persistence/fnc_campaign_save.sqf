@@ -238,6 +238,9 @@ DUWS_fnc_campaignSnapshot = {
         [_ref, _factory getVariable ["R3F_LOG_CF_credits", 0], [_factory getVariable ["DUWS_buildKey", ""]] call _buildRows]
     }];
     _s set ["capturedPool", DUWS_capturedPool];
+    private _arms = missionNamespace getVariable ["DUWS_armsStock", createHashMap];
+    _s set ["armsStock", [((missionNamespace getVariable ["DUWS_armsWindowEnd", 0]) - (call fnc_campaign_now)) max 0,
+        (keys _arms) apply { [_x, _arms get _x] }]];
     // A spent-down class leaves the pool, so what was seeded is kept to tell it from a class a mod added since.
     if (DUWS_arsenalLimited) then { _s set ["seeded", missionNamespace getVariable ["DUWS_friendlyArsenal", []]] };
     _s

@@ -57,7 +57,7 @@ fnc_vendor_discount = {
 fnc_vendor_lists = {
 	params ["_type"];
 	if (_type isEqualTo "hq") exitWith { ["blufor"] };
-	if (([_type] call fnc_vendor_kind) isEqualTo "gear") exitWith { ["blufor", "opfor", "all"] };
+	if (([_type] call fnc_vendor_kind) isEqualTo "gear") exitWith { [["blufor", "opfor", "all"], ["town"]] select (DUWS_paramArmsStock == 1) };
 	["civilian", "blufor", "opfor", "all"]
 };
 
@@ -166,8 +166,9 @@ fnc_vendor_query = {
 	if (!isServer) exitWith {};
 	params ["_kind", "_list", "_requester", "_replyVar", ["_vendor", objNull]];
 	// Sent with every list rather than once per open, so a list switch also picks up a reputation move.
-	private _discount = [[_vendor getVariable ["DUWS_vendor_town", -1]] call fnc_civ_repAt] call fnc_vendor_discount;
-	[_replyVar, [_kind, _list] call fnc_vendor_stock, _discount] remoteExecCall ["fnc_vendor_reply", _requester];
+	private _town = _vendor getVariable ["DUWS_vendor_town", -1];
+	private _discount = [[_town] call fnc_civ_repAt] call fnc_vendor_discount;
+	[_replyVar, [_kind, _list, _town] call fnc_vendor_stock, _discount] remoteExecCall ["fnc_vendor_reply", _requester];
 };
 
 // Blocks on the answer, so every caller has to be scheduled.

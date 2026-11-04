@@ -247,7 +247,8 @@ private _listLabels = createHashMapFromArray [
     ["civilian", "STR_DUWS_T_VENDOR_STOCK_CIV"],
     ["blufor",   "STR_DUWS_T_VENDOR_STOCK_BLUFOR"],
     ["opfor",    "STR_DUWS_T_VENDOR_STOCK_OPFOR"],
-    ["all",      "STR_DUWS_T_VENDOR_STOCK_ALL"]
+    ["all",      "STR_DUWS_T_VENDOR_STOCK_ALL"],
+    ["town",     "STR_DUWS_T_VENDOR_STOCK_TOWN"]
 ];
 private _stockCtrl = _display displayCtrl 8903;
 {
