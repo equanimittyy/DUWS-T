@@ -23,6 +23,8 @@ private _cell = {
 };
 
 private _stance = _display displayCtrl 1605;
+// Only Simple's orders read the stance: Advanced's commander always plays Balanced.
+if (DUWS_paramBluforCommander == 1) then { _stance ctrlShow false };
 _stance setVariable ["DUWS_stanceKeys", ["STR_DUWS_T_TASKFORCE_STANCE_ATTACK", "STR_DUWS_T_TASKFORCE_STANCE_BALANCED", "STR_DUWS_T_TASKFORCE_STANCE_DEFEND"]];
 // The button steps its own copy, so a click before the broadcast of the last one returns still moves one stance on.
 _stance setVariable ["DUWS_stance", DUWS_taskforce_stance];
