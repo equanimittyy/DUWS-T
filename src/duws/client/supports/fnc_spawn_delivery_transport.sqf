@@ -12,6 +12,7 @@ private _group = [_spawnPos, WEST, [blufor_TRANS_HELI_X], [], [], blufor_ai_skil
 _group deleteGroupWhenEmpty true;
 private _pilot = units _group select 0;
 private _vehicle = vehicle _pilot;
+_vehicle setVariable ["DUWS_noWake", true, true];
 _vehicle setVehicleAmmo 0;
 _vehicle allowdamage false;
 // Cosmetic transport: crew hold fire and don't acquire, so it flies the drop run instead of engaging.

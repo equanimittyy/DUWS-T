@@ -165,11 +165,11 @@ private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])
 ([_zoneKey, _spawnPos, _size] call fnc_site_register) set ["label", _name];
 private _occ = [_zoneKey, "garrison", EAST, "zone"] call fnc_site_occupant_register_profile;
 _occ set ["minAIHold", 1];
-// The committed air filter wakes the garrison for a committing aircraft (inbound heli, UAV on-station) that the
-// ground-only check (fnc_duws_bluforNear) discounts -- player-crewed and speed-gated, so
-// AI transit/support or cruising jets don't wake it; DUWS_zoneAirRing=0 keeps the ground-only default.
+// The air ring wakes the garrison for a committing aircraft (inbound heli, UAV on-station) that the
+// ground-only check (fnc_duws_bluforNear) discounts -- speed-capped, so a cruising jet doesn't wake it;
+// DUWS_zoneAirRing=0 keeps the ground-only default.
 _occ set ["airRing", DUWS_zoneAirRing];
-_occ set ["airFilter", "committed"];
+_occ set ["airSpeedCap", DUWS_zoneAirCommitSpeed];
 // Once the player owns the ground, the force that matters is the one attacking it: see the poller.
 _occ set ["enemyAware", true];
 [_zoneKey, "garrison", DUWS_zoneHooks] call fnc_site_hooks_set;

@@ -408,7 +408,7 @@ fnc_roadblock_gate_arm = {
     missionNamespace setVariable [format ["DUWS_gateTrg_%1", _key], _trg];
 };
 
-// Streaming spec (spawnRadius, grace, neverStream, airRing, airFilter, garrison token) comes from the type's tables,
+// Streaming spec (spawnRadius, grace, neverStream, airRing, garrison token) comes from the type's tables,
 // not the caller, so the dev tool, zone loop and OPCOM all site a given type the same way.
 //
 // Crewed now only if BLUFOR are already near (or the type is resident); otherwise stowed uncrewed and
@@ -421,8 +421,8 @@ fnc_roadblock_gate_arm = {
 // _zoneKey "" is standalone, on its own ring; set, it mirrors that zone's garrison instead.
 fnc_hardpoint_register = {
     params ["_key", "_type", "_pos", ["_side", "opfor"], ["_zoneKey", ""], ["_dir", 0], ["_ring", 0]];
-    (DUWS_hardpointStreaming getOrDefault [_type, [600, 180, false, 0, "all"]])
-        params ["_radius", "_grace", "_neverStream", "_airRing", "_airFilter"];
+    (DUWS_hardpointStreaming getOrDefault [_type, [600, 180, false, 0]])
+        params ["_radius", "_grace", "_neverStream", "_airRing"];
     // _ring overrides the type's, for a hardpoint bigger than one emplacement: a minefield belt runs
     // kilometres, and the poller only looks at a site somebody is already inside.
     if (_ring > 0) then { _radius = _ring };
@@ -434,7 +434,6 @@ fnc_hardpoint_register = {
     _occ set ["hpGarrison", ["", DUWS_hardpointGarrison getOrDefault [_type, ""]] select (_zoneKey isEqualTo "")];
     _occ set ["hpType", _type];
     _occ set ["airRing", _airRing];
-    _occ set ["airFilter", _airFilter];
     _occ set ["neverStream", _neverStream];
     _occ set ["hpZoneKey", _zoneKey];
     _occ set ["noPresence", _zoneKey isNotEqualTo ""];
@@ -510,7 +509,7 @@ fnc_hardpoint_register = {
         // them after (fnc_opcom_fires), so a crew never shells anything on its own. Guarded: OPCOM is its own subsystem.
         if (!isNil "DUWS_fnc_opcom_batteryUnload") then { [_key] call DUWS_fnc_opcom_batteryUnload };
         // Loose garrison: stood up now only if BLUFOR are already near, cycled by the tick thereafter.
-        private _up = [_pos, _radius, _occ get "minAI", _airRing, _airFilter] call fnc_site_bluforOrAir;
+        private _up = [_pos, _radius, _occ get "minAI", _airRing] call fnc_site_bluforOrAir;
         _occ set ["looseUp", _up];
         if (_up) then {
             _occ set ["lastSeen", time];
@@ -520,7 +519,7 @@ fnc_hardpoint_register = {
     };
 
     private _up = if (_zoneKey isEqualTo "") then {
-        [_pos, _radius, _occ get "minAI", _airRing, _airFilter] call fnc_site_bluforOrAir
+        [_pos, _radius, _occ get "minAI", _airRing] call fnc_site_bluforOrAir
     } else {
         _zoneKey call DUWS_fnc_hardpointZoneAwake
     };

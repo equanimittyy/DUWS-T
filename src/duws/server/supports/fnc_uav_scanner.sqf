@@ -60,6 +60,7 @@ _group = [_spawnPos, WEST, _grouptype, [], [], blufor_ai_skill] call BIS_fnc_spa
 _group deleteGroupWhenEmpty true;
 _pilot = units _group select 0;
 _vehicle = vehicle _pilot;
+_vehicle setVariable ["DUWS_noWake", true];
 _vehicle setVehicleAmmo 0;
 // Cosmetic drone: hold fire and don't acquire, so it just flies the scan orbit.
 _pilot disableAI "Target";

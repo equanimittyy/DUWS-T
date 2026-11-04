@@ -58,6 +58,7 @@ private _heliGroup = _veh select 2;
 if (isNull _heli) exitWith {
     [format ["%1 did not spawn", _heliType]] call _abandon;
 };
+_heli setVariable ["DUWS_noWake", true];
 
 _heliGroup deleteGroupWhenEmpty true;
 ["INFO", "INTRO", format ["Helicopter spawned: %1, group ID: %2", _heliType, groupId _heliGroup]] call fnc_log;

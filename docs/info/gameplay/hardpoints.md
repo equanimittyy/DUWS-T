@@ -36,7 +36,7 @@ One core weapon or structure per hardpoint; garrison and streaming are per type,
 | `MG` | `opfor_TURRET_HMG` | one team | backbone of both weight tables |
 | `AT` | `opfor_TURRET_AT` | one team | covers a road |
 | `GMG` | `opfor_TURRET_GMG` | one team | rare supporting weapon |
-| `AA` | `opfor_TURRET_AA` | one team | its 5,000 m air ring counts AI-flown aircraft too ([streaming](#streaming-and-garrison)) |
+| `AA` | `opfor_TURRET_AA` | one team | wakes on the widest air ring, 5,000 m ([streaming](#streaming-and-garrison)) |
 | `ROADBLOCK` | gate flanked by two `opfor_TURRET_HMG` nests | one team | faces along the road, toward the approach |
 | `OP` | vanilla bunker/tower prop | security team + wide recon patrol | standalone recon screen, seeded at generation; see [below](#observation-posts) |
 | `MORTAR` | `opfor_TURRET_MORTAR` | one team | resident (never streams); cleared by destroying the tube |
@@ -218,7 +218,7 @@ is not rolled: generation retries it until it stands, and gives up only on a map
 A hardpoint registers as a site the same way a zone does — `fnc_site_register`,
 `fnc_site_occupant_register`, `fnc_site_hooks_set` (`server/misc/fnc_site_stream_init.sqf:19,44,82`)
 — so the shared poller tests it against the same per-pass player list rather than paying a spatial
-query per hardpoint (`fnc_hardpoint_register`, `server/init_zones/fnc_hardpoint_stream.sqf:422-533`).
+query per hardpoint (`fnc_hardpoint_register`, `server/init_zones/fnc_hardpoint_stream.sqf:422-532`).
 What differs from a zone is the lifecycle: one gun-and-garrison emplacement that wakes, sleeps and
 can be cleared, never captured or retaken.
 
@@ -230,14 +230,28 @@ hardpoint instead wakes on its own presence ring (`DUWS_hardpointStreaming`'s `s
 type).
 
 **A standalone hardpoint also wakes on its own air ring.** The ground ring ignores everyone aboard an
-aircraft, so without an air ring a helicopter never wakes the emplacement. The ring and the aircraft it
-counts are per type (`DUWS_hardpointStreaming`'s `airRing`/`airFilter`, tested by `fnc_site_airPasses`):
+aircraft, so without an air ring a helicopter never wakes the emplacement. The ring is per type
+(`DUWS_hardpointStreaming`'s `airRing`):
 
-| Type | Air ring | Aircraft that count |
-|---|---|---|
-| `AA` | 5,000 m | any aircraft with WEST crew, AI-flown included |
-| `MINEFIELD` | none | — |
-| every other type | 1,500 m | a player-crewed aircraft or any UAV |
+| Type | Air ring |
+|---|---|
+| `AA` | 5,000 m |
+| `MINEFIELD` | none |
+| every other type | 1,500 m |
+
+**An aircraft wakes a site when BLUFOR crew are aboard, player or AI flown** (`fnc_site_airWakes`, for
+hardpoints and zones alike). Some scripted flights never fight for the ground, so they carry
+`DUWS_noWake` and wake nothing:
+
+| Flight | Tagged in |
+|---|---|
+| Strike jets: JDAM, cluster, napalm, laser | `client/supports/fnc_arty.sqf` |
+| Delivery heli: paradrop, supply drop, vehicle drop | `client/supports/fnc_spawn_delivery_transport.sqf` |
+| UAV scan drone | `server/supports/fnc_uav_scanner.sqf` |
+| Intro heli | `server/misc/fnc_intro_heli.sqf` |
+
+A High Command aircraft is captive on its way in and out, and a captive crew reads civilian, so it wakes
+sites only while it is on station.
 
 No standalone air ring has a speed cap, because fast flight must not hide an emplacement. A zone keeps its
 cap because the cap protects the raise of a full garrison.
@@ -265,13 +279,13 @@ battery garrison on the first pass after a campaign start or load. The grace is 
 defender in a fight (`fnc_duws_engaged`) holds the stow past it.
 
 **Pinning is `neverStream` only.** `MORTAR`, `ARTY` and `MINEFIELD` are marked `neverStream` in
-`DUWS_hardpointStreaming` (`server_var_init.sqf:415-446`). A battery is pinned so OPCOM can task it with
+`DUWS_hardpointStreaming` (`server_var_init.sqf:417-446`). A battery is pinned so OPCOM can task it with
 no player near; a minefield is pinned because a mine has to be made with `createMine`, and the
 composition's own deploy rebuilds members with `createVehicle`, which would hand back inert props.
 A minefield instead streams on its own path, square by square ([Siting](#siting)).
 On registration, every member of their
 composition is re-filed through `fnc_duws_keep` with `_pinned = true`
-(`fnc_hardpoint_stream.sqf:499`), which sets `DUWS_noStow` and excludes the object from
+(`fnc_hardpoint_stream.sqf:498`), which sets `DUWS_noStow` and excludes the object from
 `fnc_duws_stow`'s crewed-member refusal and its delete pass
 (`server/misc/fnc_composition_stream_init.sqf:38-46,93-100`). Every other type stows and redeploys
 like an ordinary composition: garrisons are raised fresh from `DUWS_fnc_teamRoster` on each raise
@@ -337,7 +351,7 @@ vanish with the clear.
 ## Reveal
 
 Every hardpoint gets a marker on registration: shape `"ICON"`, type `"loc_Bunker"`, coloured by side,
-with the type token as its text (`fnc_hardpoint_stream.sqf:455-462`) — one icon shape for every type,
+with the type token as its text (`fnc_hardpoint_stream.sqf:454-461`) — one icon shape for every type,
 distinguished by label rather than by symbol. The marker's alpha and the revealed flag start at the rule
 in [`intel_system.md`](intel_system.md#what-is-hidden-depends-on-when-it-came-into-existence): a hardpoint
 laid by campaign generation is shown outside hardcore and hidden under it, and one built in play

@@ -224,25 +224,23 @@ fnc_town_site_key = {
 // side. A snapped point moves at most 71 m, so a gate that reaches this far past its ring misses nobody.
 #define SITE_CELL 100
 
-// One test for the poller's per-pass aircraft lists and the registration check, so the two never
-// disagree about an aircraft. all: any WEST-crewed aircraft. player: also a player aboard, or a UAV,
-// whose operator flies by terminal and is never aboard. committed: also under DUWS_zoneAirCommitSpeed.
-fnc_site_airPasses = {
-    params ["_veh", "_filter"];
-    if (({ side _x == WEST } count (crew _veh)) == 0) exitWith { false };
-    if (_filter isEqualTo "all") exitWith { true };
-    if !(unitIsUAV _veh || {(crew _veh) findIf { isPlayer _x } >= 0}) exitWith { false };
-    _filter isEqualTo "player" || {speed _veh < DUWS_zoneAirCommitSpeed}
+// One test for the poller's per-pass list and the registration check, so the two never disagree about an
+// aircraft. DUWS_noWake marks a scripted flight that never fights for the ground (a strike, delivery, scan or
+// the intro), which must not stand a site up. A captive crew reads civilian, so a High Command aircraft
+// counts only once it is on station.
+fnc_site_airWakes = {
+    params ["_veh"];
+    !(_veh getVariable ["DUWS_noWake", false]) && {({ side _x == WEST } count (crew _veh)) > 0}
 };
 
 // Ground ring: fnc_duws_bluforNear (player, or _minAI friendly AI). Air ring (occupant-declared,
-// 0 = none): a BLUFOR aircraft that passes the occupant's air filter -- folded in here because
-// bluforNear discounts anything airborne.
+// 0 = none): an aircraft that passes fnc_site_airWakes, player or AI flown -- folded in here
+// because bluforNear discounts anything airborne.
 fnc_site_bluforOrAir = {
-    params ["_pos", "_ring", ["_minAI", 2], ["_airRing", 0], ["_airFilter", "all"]];
+    params ["_pos", "_ring", ["_minAI", 2], ["_airRing", 0]];
     if ([_pos, _ring, _minAI] call fnc_duws_bluforNear) exitWith { true };
     if (_airRing <= 0) exitWith { false };
-    ((_pos nearEntities [["Air"], _airRing]) findIf { [_x, _airFilter] call fnc_site_airPasses }) >= 0
+    ((_pos nearEntities [["Air"], _airRing]) findIf { [_x] call fnc_site_airWakes }) >= 0
 };
 
 // Whether an attacker is in reach: live OPFOR, or an OPCOM tasking still virtual, which stands on no unit
@@ -286,14 +284,10 @@ fnc_site_poller = {
         // side group, not side: a disguised player is captive, and a captive unit reads CIVILIAN.
         private _west = (allUnits select { side group _x == WEST }) call _fnc_cells;
         private _playerPos = _players apply { getPosATL _x };
-        // Aircraft positions for occupant-declared air rings, one list per air filter, off the vehicle
-        // list (not allUnits): one entry per aircraft, not per crew seat, and far shorter to walk.
-        private _westAir = createHashMapFromArray [["all", []], ["player", []], ["committed", []]];
-        {
-            private _veh = _x;
-            private _ap = getPosATL _veh;
-            { if ([_veh, _x] call fnc_site_airPasses) then { _y pushBack _ap } } forEach _westAir;
-        } forEach (vehicles select { _x isKindOf "Air" });
+        // WEST aircraft as [position, speed] for occupant-declared air rings, off the vehicle list (not
+        // allUnits): one entry per aircraft, not per crew seat, and far shorter to walk.
+        private _westAir = (vehicles select { _x isKindOf "Air" && {[_x] call fnc_site_airWakes} })
+            apply { [getPosATL _x, speed _x] };
         // Hostile half of the same gate, for frozen sites below. Built once here rather than per
         // site: with the HQ plus a FOB per zone-and-a-half, per-site spatial queries would run more
         // often than the per-zone threads this poller replaced.
@@ -345,7 +339,8 @@ fnc_site_poller = {
                     _ground || {
                         private _ar = _o getOrDefault ["airRing", 0];
                         _ar > 0 && {
-                            ((_westAir get (_o get "airFilter")) findIf { _x distance _pos < _ar }) >= 0
+                            private _cap = _o getOrDefault ["airSpeedCap", 0];
+                            (_westAir findIf { (_x select 0) distance _pos < _ar && {_cap <= 0 || {(_x select 1) < _cap}} }) >= 0
                         }
                     }
                 } else {

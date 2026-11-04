@@ -127,6 +127,7 @@ if (_ammotype == "Laser") then {
 	_pilot disableAI "AUTOTARGET";
 	_group setCombatMode "BLUE";
 	_vehicle = vehicle _pilot;
+	_vehicle setVariable ["DUWS_noWake", true, true];
 	_vehicle engineOn true;
 	_vehicle flyInHeight 1000;
 	_vehicle setVehicleAmmo 0;
@@ -154,6 +155,7 @@ if (_ammotype == "Laser") then {
 		_pilot disableAI "AUTOTARGET";
 		_group setCombatMode "BLUE";
 		_vehicle = vehicle _pilot;
+		_vehicle setVariable ["DUWS_noWake", true, true];
 		_vehicle engineOn true;
 		_vehicle flyInHeight 150;
 		_vehicle setVehicleAmmo 0;

@@ -608,7 +608,7 @@ about.
 | Step | What happens | State on the readout |
 |---|---|---|
 | Generated | OPFOR-held. Rolls a tier I–IV, weighted to IV. Strength `1.0`. No men | tier + full bar |
-| You come within radius + 400 m | Props deploy, turret crews man the prefab's guns, the garrison is raised: the tier composition less its lost tokens | tier + bar |
+| You come within radius + 400 m, or an aircraft with BLUFOR crew comes within 1,500 m under 250 km/h ([which aircraft](hardpoints.md#streaming-and-garrison)) | Props deploy, turret crews man the prefab's guns, the garrison is raised: the tier composition less its lost tokens | tier + bar |
 | You leave for 2 min | The zone's own men deleted by roster, props stowed. Losses are already on the ledger | tier + the bar it will return at |
 | You stand inside the radius, beat it to 15 %, clear its hardpoints **and** outnumber OPFOR over radius + 400 m, all for 20 s, or meet the same tests at the start and end of the flag's Capture Zone hold | Ownership flips. First-capture bonus, AP swings. Tier drops to 0 and the ledger is forgotten. Survivors fight on where they stand and are collected once no player is within 500 m. The prefab and its turrets stay, yours now | `Held by BLUFOR` |
 | You buy a tier on it | Tier I, a tenth of its tokens fielded and the rest owed. Your garrison raises when you next come within radius + 400 m, crews the prefab's guns, and wears down on the same ledger | tier + bar |
