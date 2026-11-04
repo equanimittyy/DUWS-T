@@ -15,7 +15,6 @@
 // them (fnc_opcom_task_step). Belief keys by BLUFOR group netId on the one sighting scale (DUWS_fnc_opcom_sightStr);
 // running after fnc_opcom_sense, a recon fix is the authoritative overwrite for a group both saw.
 if (!isServer) exitWith {};
-if (isNil "DUWS_opcom_grid_w") exitWith {};
 
 private _w = DUWS_opcom_grid_w;
 // Blind only for OPFOR, whose sweep would expose a base (DUWS_fnc_opcom_baseCells).

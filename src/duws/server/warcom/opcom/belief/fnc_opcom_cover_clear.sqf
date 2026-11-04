@@ -7,7 +7,6 @@
 // Assumes every belief is a mobile group (true today: all faucets stamp BLUFOR group netIds). A static
 // discovered subject -- the zone / FOB / HQ keys belief_init reserves -- must be excluded before one is ever
 // written, else an overflight that does not re-detect it as a group would un-discover it.
-if (isNil "DUWS_opcom_grid_w") exitWith {};
 params ["_point", "_k", ["_blind", []]];
 
 private _w  = DUWS_opcom_grid_w;

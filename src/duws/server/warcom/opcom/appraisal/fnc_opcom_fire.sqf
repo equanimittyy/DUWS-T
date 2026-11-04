@@ -46,7 +46,6 @@ DUWS_fnc_opcom_batteryBusy = {
 };
 
 DUWS_fnc_opcom_fireTargets = {
-    if (isNil "DUWS_opcom_grid_w") exitWith { [] };
     private _seen = call DUWS_fnc_opcom_fireTargetsSeen;
     if (_seen isEqualTo []) exitWith { [] };
     private _total = 0;

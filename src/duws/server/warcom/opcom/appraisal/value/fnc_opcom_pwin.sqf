@@ -22,12 +22,6 @@ DUWS_fnc_opcom_pWinAt = {
     (_r ^ 2) / ((_r ^ 2) + 1)
 };
 
-DUWS_fnc_opcom_pWin = {
-    params ["_pos"];
-    if (isNil "DUWS_opcom_grid_w") exitWith { 1 };
-    ([_pos] call DUWS_fnc_opcom_blockForce) call DUWS_fnc_opcom_pWinAt
-};
-
 // A force as the 3x3 block reads it once it stands at the block's centre: the grid deposits a force spread over
 // OPCOM_GRID_SPREAD, so the block sums about four times the raw figure, and a raw add would undercount the unit sent.
 DUWS_fnc_opcom_blockGain = {

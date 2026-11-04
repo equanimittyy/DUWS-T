@@ -7,7 +7,6 @@ if (!isServer) exitWith {};
 // every BLUFOR group in reach is stamped for certain, the reach reads swept-clear (fnc_opcom_cover_stamp) and belief
 // the look disproves clears (fnc_opcom_cover_clear). -> the closest group's netId off barred ground, or "".
 DUWS_fnc_opcom_interceptLook = {
-    if (isNil "DUWS_opcom_grid_w") exitWith { "" };
     params ["_point"];
     [_point, OPCOM_INTERCEPT_K] call fnc_opcom_cover_stamp;
     private _best = "";

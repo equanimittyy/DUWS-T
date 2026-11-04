@@ -39,7 +39,6 @@ if (_maxX > _minX) then {
     _maxCy = (floor ((_maxY + _buf) / _cell)) min (_w - 1);
 };
 DUWS_opcom_box = [_minCx, _minCy, _maxCx, _maxCy];
-// After the box: a caller guards on DUWS_opcom_grid_w alone, and the coordinate functions read the box.
 DUWS_opcom_grid_w = _w;                       // cell width; every reader indexes _cy * _w + _cx
 
 private _land = []; _land resize _n;          // true = land, passable to ground

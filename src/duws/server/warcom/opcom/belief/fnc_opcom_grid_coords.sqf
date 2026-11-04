@@ -1,5 +1,6 @@
 // Locality: server, executed at load by server_fnc_init ([] call compile) so it can define several
-// functions. They load before the grid exists and read it at call time, so a caller guards on isNil "DUWS_opcom_grid_w".
+// functions. They load before the grid exists and read it at call time, so a caller outside the OPCOM tick waits on
+// the commander registry (DUWS_opcom_cmds), OPCOM init's last write.
 if (!isServer) exitWith {};
 
 DUWS_fnc_opcom_w2c = {
