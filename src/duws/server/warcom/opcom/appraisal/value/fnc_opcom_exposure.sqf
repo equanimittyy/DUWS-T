@@ -5,7 +5,7 @@ if (!isServer) exitWith {};
 
 // The HQ counts only once revealed, so an unfound base pulls no defense toward itself.
 DUWS_fnc_opcom_bluforGroundSweep = {
-    private _out = +(missionNamespace getVariable ["WARCOM_zones_controled_by_BLUFOR", []]);
+    private _out = +(call DUWS_fnc_opcom_enemyZones);
     _out append (missionNamespace getVariable ["Array_of_FOBpos", []]);
     if (missionNamespace getVariable ["DUWS_opcom_hqKnown", false] && {!isNil "PosOfBLUHQ"} && {PosOfBLUHQ isNotEqualTo []}) then {
         _out pushBack PosOfBLUHQ;

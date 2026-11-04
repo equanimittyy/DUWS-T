@@ -30,7 +30,7 @@ private _wcells = [];
         private _ci = [getPosASL _ldr] call DUWS_fnc_opcom_w2c;
         if !(_ci in _blind) then { _wcells pushBack [_x, _ci mod _w, floor (_ci / _w), _ldr] };
     };
-} forEach (allGroups select { side _x == west });
+} forEach (allGroups select { side _x == (_cmd get "enemySide") });
 
 // No empty-_wcells early exit: a unit still stamps coverage with no BLUFOR in play (looked, found nothing).
 {

@@ -44,7 +44,7 @@ DUWS_fnc_opcom_build = {
         [["INFO", "WARN"] select (_res isEqualTo []), "OPCOM", format ["build: %1 %2 as %3 (zone %4 near %5)",
             _type, ["sited", "found no ground"] select (_res isEqualTo []), _key, _zoneKey, _at apply { round _x }]] call fnc_log;
         private _refunded = _res isEqualTo [] && {_refund > 0};
-        if (_refunded) then { ["OPF", _refund, "opcom_build_refund"] call fnc_ap_adjust };
+        if (_refunded) then { [_refund, "opcom_build_refund"] call DUWS_fnc_opcom_pay };
         [format ["Build %1 at %2 %3%4", DUWS_hardpointName getOrDefault [_type, _type],
             [[_zoneKey] call DUWS_fnc_opcom_zoneLabel, mapGridPosition _at] select (_zoneKey isEqualTo ""),
             ["sited", "found no ground"] select (_res isEqualTo []), ["", format ["  %1 AP back", _refund]] select _refunded]] call DUWS_fnc_opcom_aiEvent;
@@ -62,7 +62,7 @@ DUWS_fnc_opcom_mineBuild = {
         // the candidate or on every square of the grid, and both owe the same refund and the same line.
         private _fnc_noGround = {
             ["WARN", "OPCOM", format ["mine: no ground for a %1 field near %2", _variant, _pos apply { round _x }]] call fnc_log;
-            if (_refund > 0) then { ["OPF", _refund, "opcom_build_refund"] call fnc_ap_adjust };
+            if (_refund > 0) then { [_refund, "opcom_build_refund"] call DUWS_fnc_opcom_pay };
             [format ["Lay %1 mines at %2 found no ground%3", _variant, mapGridPosition _pos,
                 ["", format ["  %1 AP back", _refund]] select (_refund > 0)]] call DUWS_fnc_opcom_aiEvent;
         };

@@ -112,6 +112,7 @@ DUWS_fnc_opcom_sourceRow = {
 // the rest are DUWS_fnc_opcom_sourceRow's. A fight drops a source under _floor.
 DUWS_fnc_opcom_bestSources = {
     params ["_offers", "_to", "_fight", ["_price", 0], ["_cost", 0], ["_floor", OPCOM_PWIN_FLOOR], ["_base", 0]];
+    private _funds = call DUWS_fnc_opcom_funds;
     private _best = [];
     private _bs = -1;
     private _paid = [];
@@ -122,7 +123,7 @@ DUWS_fnc_opcom_bestSources = {
         if (_pw >= _floor) then {
             private _s = [_v, _pw, _c] call DUWS_fnc_opcom_score;
             if (_s > _bs) then { _bs = _s; _best = _row };
-            if (_p <= WARCOM_opfor_ap && {_s > _ps}) then { _ps = _s; _paid = _row };
+            if (_p <= _funds && {_s > _ps}) then { _ps = _s; _paid = _row };
         };
     } forEach _offers;
     if (_best isEqualTo []) exitWith { [] };
@@ -146,12 +147,13 @@ DUWS_fnc_opcom_attackPackage = {
     params ["_offers", "_to", "_at", "_value", "_floor", "_buckets", "_base", "_label", ["_vehicles", -1],
         ["_halflife", OPCOM_VALUE_HALFLIFE], ["_ride", false]];
     _buckets = +_buckets;
+    private _funds = call DUWS_fnc_opcom_funds;
     private _rows = _offers apply { [_x, _value, _to, true, 0, 0, _base, _halflife] call DUWS_fnc_opcom_sourceRow };
     // Ranked on the walk, a far squad lost to every hull though its member rides. The saving is a fixed factor on the
     // Value, so a remix keeps it.
     private _lifts = _rows apply {
         _x params ["_src", "_v", "_pw", "", "_p"];
-        private _l = [_src, _to, _v, _pw, (WARCOM_opfor_ap - _p) max 0, _halflife] call DUWS_fnc_opcom_liftFor;
+        private _l = [_src, _to, _v, _pw, (_funds - _p) max 0, _halflife] call DUWS_fnc_opcom_liftFor;
         if (_l isEqualTo []) then { [1, 0] } else { [1 + (_l select 1) / _v, _l select 3] }
     };
     private _fnc_rankScore = {
@@ -267,8 +269,8 @@ DUWS_fnc_opcom_attackPackage = {
         private _src = _row select 0;
         private _hire = ((_src select 0) select 0) isEqualTo "hire";
         private _b = call _fnc_bucket;
-        private _c = [_row, _b, WARCOM_opfor_ap - _price] call _fnc_member;
-        if ((_hire && {_hires <= 0}) || {(_src select 0) in _used} || {(_price + (_c select 1)) > WARCOM_opfor_ap}) then {
+        private _c = [_row, _b, _funds - _price] call _fnc_member;
+        if ((_hire && {_hires <= 0}) || {(_src select 0) in _used} || {(_price + (_c select 1)) > _funds}) then {
             (_ranks select _i) deleteAt 0;
         } else {
             [_src, _b, _c] call _fnc_take;
@@ -285,7 +287,7 @@ DUWS_fnc_opcom_attackPackage = {
         _ranks = _all;
         private _row = [call _fnc_next] call _fnc_row;
         private _b = call _fnc_bucket;
-        [_row select 0, _b, [_row, _b, WARCOM_opfor_ap] call _fnc_member] call _fnc_take;
+        [_row select 0, _b, [_row, _b, _funds] call _fnc_member] call _fnc_take;
     };
     if (_members isEqualTo []) exitWith { [] };
     private _pw = [_to, _add] call DUWS_fnc_opcom_pWinWith;

@@ -1,4 +1,4 @@
-// Locality: server. Hire one menu row into a resting `garrison` tasking, paid from the OPFOR wallet. Returns the
+// Locality: server. Hire one menu row into a resting `garrison` tasking, paid from the commander's wallet. Returns the
 // tasking record, or nil if refused. The recruited unit is a distinct OPCOM garrison slot, not the base
 // garrison's live-refill reserve pool -- a separate attrition system. _pay false leaves the charge to the caller,
 // whose action price already carries the hire.
@@ -16,7 +16,7 @@ if (_force <= 0) exitWith { ["WARN", "OPCOM", format ["recruit: row %1 has no re
 private _cost = OPCOM_AP_UNIT getOrDefault [_row, -1];
 if (_cost < 0) exitWith { ["WARN", "OPCOM", format ["recruit: row %1 carries no price", _row]] call fnc_log; nil };
 
-if (_pay && {WARCOM_opfor_ap < _cost}) exitWith { ["INFO", "OPCOM", format ["recruit: %1 costs %2 AP, wallet %3 -- refused", _row, _cost, WARCOM_opfor_ap]] call fnc_log; nil };
+if (_pay && {(call DUWS_fnc_opcom_funds) < _cost}) exitWith { ["INFO", "OPCOM", format ["recruit: %1 costs %2 AP, wallet %3 -- refused", _row, _cost, call DUWS_fnc_opcom_funds]] call fnc_log; nil };
 
 // tokenClass "" = the faction cannot field this vehicle now (toggle off, or tier gate not met); a team token never trips.
 private _blocked = _comp findIf { ([_x, "OPF"] call DUWS_fnc_tokenClass) isEqualTo "" };
@@ -29,7 +29,7 @@ if (_moveType isEqualTo "boat" && {[_homeZone] call DUWS_fnc_opcom_portOf < 0}) 
     ["INFO", "OPCOM", format ["recruit: zone %1 has no port -- boat refused", _homeZone]] call fnc_log; nil
 };
 
-if (_pay) then { ["OPF", -_cost, "opcom_recruit"] call fnc_ap_adjust };
+if (_pay) then { [-_cost, "opcom_recruit"] call DUWS_fnc_opcom_pay };
 
 private _id = _cmd get "taskSeq";
 _cmd set ["taskSeq", _id + 1];

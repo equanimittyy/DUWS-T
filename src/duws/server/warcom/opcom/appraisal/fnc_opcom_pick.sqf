@@ -29,16 +29,20 @@ private _rowMs = [];
 // Rows run in ~10 ms slices with a frame between: all rows in one frame froze it past half a second late in a campaign,
 // and fully scheduled the pass would add seconds to the tick. The execute runs after, scheduled, because an order plans
 // a route and the router may yield. The weighted pick scores what it cannot yet afford, so it can save for it.
-private _n = count DUWS_opcom_actions;
+private _actions = _cmd get "actions";
+private _n = count _actions;
 private _i = 0;
 while {_i < _n} do {
     isNil {
         private _end = diag_tickTime + 0.01;
         while {_i < _n && {diag_tickTime < _end}} do {
-            private _row = DUWS_opcom_actions select _i;
+            private _row = _actions select _i;
             private _t0 = diag_tickTime;
             private _targets = (_row param [3, []]) call (_row select 1);
-            if (_mode isNotEqualTo "weighted") then { _targets = _targets select { (_x select 1) <= WARCOM_opfor_ap } };
+            if (_mode isNotEqualTo "weighted") then {
+                private _funds = call DUWS_fnc_opcom_funds;
+                _targets = _targets select { (_x select 1) <= _funds };
+            };
             if (_targets isNotEqualTo []) then { _live pushBack [_row, _targets] };
             if (_dbg) then {
                 private _rms = round ((diag_tickTime - _t0) * 1000);
@@ -75,10 +79,11 @@ if (_mode isEqualTo "weighted") then {
     _rank sort false;
 
     // Without a goal, cheap actions spend every refill and a dearer, better one never becomes affordable.
+    private _funds = call DUWS_fnc_opcom_funds;
     private _goal = [];
-    if (_rank isNotEqualTo []) then {
+    if (_rank isNotEqualTo [] && {_cmd get "wallet"}) then {
         (_all select ((_rank select 0) select 1)) params ["_s", "", "_c"];
-        private _short = (_c select 1) - WARCOM_opfor_ap;
+        private _short = (_c select 1) - _funds;
         private _rate = WARCOM_opfor_lastIncome * OPCOM_TICK_PERIOD / DUWS_econ_period
             + ([count WARCOM_zones_controled_by_OPFOR, count WARCOM_createdZones] call DUWS_fnc_opcom_dripRate);
         if (_s > 0 && {_short > 0} && {_rate > 0} && {_short / _rate <= OPCOM_SAVE_HORIZON}) then {
@@ -88,7 +93,7 @@ if (_mode isEqualTo "weighted") then {
     if (_goal isNotEqualTo []) exitWith {
         _goal params ["_s", "_c", "_short", "_eta"];
         _score = _s;
-        _row = DUWS_opcom_actions select (DUWS_opcom_actions findIf { (_x select 0) isEqualTo "bank" });
+        _row = _actions select (_actions findIf { (_x select 0) isEqualTo "bank" });
         _cand = [[], 0, format ["Bank, saving for %1 (%2 AP short, ~%3 min)", _c select 2, ceil _short, ceil (_eta * OPCOM_TICK_PERIOD / 60)]];
     };
 
@@ -97,7 +102,7 @@ if (_mode isEqualTo "weighted") then {
         _x params ["_s", "_i"];
         if (_s <= 0 || {count _draw >= OPCOM_PICK_TOP * 2}) then { break };
         private _c = (_all select _i) select 2;
-        if ((_c select 1) > WARCOM_opfor_ap) then { continue };
+        if ((_c select 1) > _funds) then { continue };
         _draw pushBack (_all select _i);
         _draw pushBack (_s ^ OPCOM_PICK_SHARPNESS);
     } forEach _rank;
@@ -118,9 +123,9 @@ if (_row isEqualTo []) exitWith {};
 _row params ["_id", "", "_execute"];
 _cand params ["_target", "_price", "_label"];
 // Re-checked: the wallet can drop after the snapshot, and fnc_ap_adjust would clamp the overdraft to a free buy.
-private _ok = WARCOM_opfor_ap >= _price && {[_target, _price] call _execute};
+private _ok = (call DUWS_fnc_opcom_funds) >= _price && {[_target, _price] call _execute};
 "exec" call _split;
-if (_ok && {_price > 0}) then { ["OPF", -_price, format ["opcom_%1", _id]] call fnc_ap_adjust };
+if (_ok && {_price > 0}) then { [-_price, format ["opcom_%1", _id]] call DUWS_fnc_opcom_pay };
 
 private _line = format ["%1%2%3%4", _label,
     [format ["  %1 AP", _price], ""] select (_price == 0),

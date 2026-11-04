@@ -66,7 +66,7 @@ DUWS_fnc_opcom_qrfDrop = {
 // The saving joins the Value, the lift's price the price and its Cost the Cost. expValue stays the walk's: a Ferry
 // prices the order, not the ride. _wallet is what the lift is priced against, less what a package already spends.
 DUWS_fnc_opcom_liftOffer = {
-    params ["_best", "_to", "_task", "_label", ["_wallet", WARCOM_opfor_ap], ["_halflife", OPCOM_VALUE_HALFLIFE]];
+    params ["_best", "_to", "_task", "_label", ["_wallet", call DUWS_fnc_opcom_funds], ["_halflife", OPCOM_VALUE_HALFLIFE]];
     _best params ["_src", "_v", "_pw", "_c", "_p"];
     private _ref = _src select 0;
     private _name = format ["%1 with %2", _label, [_ref] call DUWS_fnc_opcom_sourceName];
@@ -119,14 +119,15 @@ DUWS_fnc_opcom_ferryDispatch = {
             private _offers = (_free + ([DUWS_fnc_opcom_isFerry, _rp, call DUWS_fnc_opcom_zonesOpen] call DUWS_fnc_opcom_hireSources))
                 apply { [_x, _r getOrDefault ["expValue", 0]] };
             private _rows = [_offers, _rp, false] call DUWS_fnc_opcom_bestSources;
-            private _i = _rows findIf { (_x select 4) <= WARCOM_opfor_ap };
+            private _funds = call DUWS_fnc_opcom_funds;
+            private _i = _rows findIf { (_x select 4) <= _funds };
             if (_i >= 0) then { _lift append (_rows select _i) };
         };
         if (_lift isNotEqualTo []) then {
             private _ref = (_lift select 0) select 0;
             private _price = _lift select 4;
-            if (WARCOM_opfor_ap >= _price && {[[_ref, _r get "id"]] call DUWS_fnc_opcom_ferryRun}) then {
-                if (_price > 0) then { ["OPF", -_price, "opcom_ferry"] call fnc_ap_adjust };
+            if ((call DUWS_fnc_opcom_funds) >= _price && {[[_ref, _r get "id"]] call DUWS_fnc_opcom_ferryRun}) then {
+                if (_price > 0) then { [-_price, "opcom_ferry"] call DUWS_fnc_opcom_pay };
                 [format ["Ferry %1 %2 with %3%4", _r get "menu", _r get "id", [_ref] call DUWS_fnc_opcom_sourceName,
                     [format ["  %1 AP", _price], ""] select (_price == 0)]] call DUWS_fnc_opcom_aiEvent;
                 // The hull is spent and a hire counts toward the cap, so the next stranded unit reads fresh sources.

@@ -11,17 +11,20 @@
 if (!isServer) exitWith {};
 
 private _w = DUWS_opcom_grid_w;
+private _streams = _cmd get "streams";
 
-// A streaming read of true positions, never belief: a player's AI squad or a headless client's group draws a fight too.
-// Players count whatever their side or captive state, so a disguised player still streams units in.
-private _blufor = allPlayers select { alive _x };
-// OPFOR holds fire on a captive, so a held hostage or downed pilot alone draws no fight; one leading free men does.
-{
-    private _l = leader _x;
-    if (alive _l && {(units _x) findIf { alive _x && {!captive _x} } >= 0}) then { _blufor pushBack _l };
-} forEach (allGroups select { side _x == west });
 private _bcells = [];
-{ private _ci = [getPosASL _x] call DUWS_fnc_opcom_w2c; _bcells pushBackUnique [_ci mod _w, floor (_ci / _w)] } forEach _blufor;
+if (_streams) then {
+    // A streaming read of true positions, never belief: a player's AI squad or a headless client's group draws a fight too.
+    // Players count whatever their side or captive state, so a disguised player still streams units in.
+    private _blufor = allPlayers select { alive _x };
+    // OPFOR holds fire on a captive, so a held hostage or downed pilot alone draws no fight; one leading free men does.
+    {
+        private _l = leader _x;
+        if (alive _l && {(units _x) findIf { alive _x && {!captive _x} } >= 0}) then { _blufor pushBack _l };
+    } forEach (allGroups select { side _x == (_cmd get "enemySide") });
+    { private _ci = [getPosASL _x] call DUWS_fnc_opcom_w2c; _bcells pushBackUnique [_ci mod _w, floor (_ci / _w)] } forEach _blufor;
+};
 
 // Least Chebyshev cell distance from a point to any BLUFOR; 1e9 with none on the map.
 private _nearestBluforCells = {
@@ -106,8 +109,8 @@ private _ferryStage = {
 private _streamStage = {
     params ["_t", "_ctx"];
     _ctx params ["", "_grp", "_live", "_engaged"];
-    if (!_live) exitWith { [_t] call _deVirtIfNear };
-    if ([_t, leader _grp, _engaged] call _stowIfFar) exitWith {
+    if (!_live) exitWith { if (_streams) then { [_t] call _deVirtIfNear } };
+    if (_streams && {[_t, leader _grp, _engaged] call _stowIfFar}) exitWith {
         if ((_t getOrDefault ["settleZone", ""]) isNotEqualTo "") then { [_t, _t get "settleZone"] call DUWS_fnc_opcom_garrisonInto };
     };
     // A live group with no active waypoint idles until stowed; guard and ferry hold without one by design.

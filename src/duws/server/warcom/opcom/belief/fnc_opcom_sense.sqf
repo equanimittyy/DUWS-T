@@ -29,7 +29,7 @@ private _seen = createHashMap;
 // Past OPCOM_SENSE_BATCH observers, sense a slice per tick, not all: a mass de-virt would else multiply
 // nearTargets by group count with clustered observers re-fixing the same groups. Lossless -- the stride
 // stays far inside OPCOM_BELIEF_FRESH, so a sighting is deferred a tick or two, never dropped.
-private _east = allGroups select {side _x == east};
+private _east = allGroups select {side _x == (_cmd get "side")};
 private _stride = 1 max (ceil ((count _east) / OPCOM_SENSE_BATCH));
 for "_gi" from (DUWS_opcom_tick % _stride) to ((count _east) - 1) step _stride do {
     private _grp = _east select _gi;
@@ -43,7 +43,7 @@ for "_gi" from (DUWS_opcom_tick % _stride) to ((count _east) - 1) step _stride d
         };
         {
             private _tgt = _x select _NT_OBJECT;
-            if (!isNull _tgt && {side (group _tgt) == west} && {!([_tgt] call fnc_disguise_active)}) then {
+            if (!isNull _tgt && {side (group _tgt) == (_cmd get "enemySide")} && {!([_tgt] call fnc_disguise_active)}) then {
                 private _age = _x select _NT_POSAGE;
                 // Confirms element 5 grows for a remembered target; if it never fires, 5 is not age (pivot to nearTargetsCurrent).
                 if (isNil "DUWS_opcom_ntStaleProbed" && {_age > OPCOM_TICK_PERIOD}) then {

@@ -90,15 +90,16 @@ fnc_vehicle_spot_clear = compile preprocessFileLineNumbers "duws\server\placemen
 // Defines fnc_guard_lock / fnc_guard_register / fnc_guard_watch (locks critical objects out of Zeus).
 [] call compile preprocessFileLineNumbers "duws\server\misc\fnc_asset_guard.sqf";
 // OPCOM (the opposing commander): server-only, so not broadcast. Two subsystems, one folder each under
-// warcom\opcom\. belief\ -- the force model, strength, grid-coordinate, grid-source and zone-contest helpers (executed to
-// define their tables and resolvers), the traffic layer, the belief store, sighting sweep, decay, and the perception grid
-// with its per-tick run.
+// warcom\opcom\. belief\ -- the force model, strength, grid-coordinate, grid-source, zone-contest and side-input helpers
+// (executed to define their tables and resolvers), the traffic layer, the belief store, sighting sweep, decay, and the
+// perception grid with its per-tick run.
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_force.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_strength.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_grid_coords.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_traffic.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_grid_sources.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_contested.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_side.sqf";
 // taskings\ in three layers: taskings\ the record and what every order shares, orders\ each order's step and the table
 // that dispatches them, actions\ what binds several taskings or none (the Attack runner, the carry, delivery, fires).
 // Executed to define them, except the store init, router, recruit/task primitives, per-tick step and hand-drive harness,

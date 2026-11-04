@@ -22,7 +22,7 @@ DUWS_fnc_opcom_interceptLook = {
                 if (_d < _bd && {!([_lp] call DUWS_fnc_opcom_inBaseCells)}) then { _bd = _d; _best = netId _x };
             };
         };
-    } forEach (allGroups select { side _x == west });
+    } forEach (allGroups select { side _x == (_cmd get "enemySide") });
     [_point, OPCOM_INTERCEPT_K] call fnc_opcom_cover_clear;
     _best
 };

@@ -10,16 +10,17 @@ DUWS_fnc_opcom_captureHolds = {
     if ((_key select [0, 4]) isEqualTo "FOB_") exitWith {
         (Array_of_FOBS findIf { alive _x && {(_x getVariable ["DUWS_siteKey", ""]) isEqualTo _key} }) >= 0
     };
-    [_key] call fnc_zone_bluforHeld
+    [_key] call DUWS_fnc_opcom_enemyHeld
 };
 
 // -> the key of the BLUFOR-held holding a capture at _target takes, "" for none.
 DUWS_fnc_opcom_captureKey = {
     params ["_target"];
-    private _i = WARCOM_zones_controled_by_BLUFOR findIf {
+    private _zones = call DUWS_fnc_opcom_enemyZones;
+    private _i = _zones findIf {
         (_x distance2D _target) <= (([[_x] call fnc_zone_key] call fnc_site_at) getOrDefault ["radius", 0])
     };
-    if (_i >= 0) exitWith { [WARCOM_zones_controled_by_BLUFOR select _i] call fnc_zone_key };
+    if (_i >= 0) exitWith { [_zones select _i] call fnc_zone_key };
     private _zk = "";
     // The nearest base, since a FOB may stand inside the HQ's radius or another FOB's and each attack aims at its own
     // base's centre.
@@ -66,7 +67,7 @@ DUWS_fnc_opcom_captureEnd = {
         };
         false
     };
-    private _home = (_zk select [0, 5]) isEqualTo "zone_";
+    private _home = (_cmd get "captureRest") isEqualTo "garrison" && {(_zk select [0, 5]) isEqualTo "zone_"};
     if (isNull _grp) exitWith {
         if (_home) then {
             [_t, _zk] call DUWS_fnc_opcom_garrisonInto;

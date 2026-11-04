@@ -423,6 +423,8 @@ opfor_HELI_X = "cls_heli";
 TEST_Heavy = 1;
 TEST_Air = 1;
 WARCOM_opfor_ap = 200;
+// No case builds a commander record, so the wallet reads the balance the cases set.
+DUWS_fnc_opcom_funds = { WARCOM_opfor_ap };
 // The BLUFOR half, on the same token names and rungs -- what lets one token resolve for either army.
 DUWS_spawnVehiclesBlu = [
     ["car",  "blufor_CAR_X",  "", 0],

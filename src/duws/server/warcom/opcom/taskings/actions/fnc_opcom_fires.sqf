@@ -114,7 +114,7 @@ DUWS_fnc_opcom_gunFire = {
         [["INFO", "WARN"] select (_fired < count _pts), "OPCOM", format ["arty: %1 put %2/%3 rounds down, empty again",
             typeOf _gun, _fired, count _pts]] call fnc_log;
         private _refund = _unfired * _price;
-        if (_refund > 0) then { ["OPF", _refund, "opcom_arty_refund"] call fnc_ap_adjust };
+        if (_refund > 0) then { [_refund, "opcom_arty_refund"] call DUWS_fnc_opcom_pay };
     };
 };
 

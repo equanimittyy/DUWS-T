@@ -52,7 +52,7 @@ DUWS_fnc_opcom_gridZone = {
     private _reach = _zs + OPCOM_GRID_SPREAD;
     // Known enemy ground, a territorial fact the commander has for free, read at the true force of whatever the
     // player built on it. The nominal is the floor, for ground holding no garrison.
-    if ((WARCOM_zones_controled_by_BLUFOR findIf {(_x distance2D _zp) < 1}) >= 0) exitWith {
+    if (((call DUWS_fnc_opcom_enemyZones) findIf {(_x distance2D _zp) < 1}) >= 0) exitWith {
         [_key, !([_key] call DUWS_fnc_garrisonHeld), "ene", _zp,
             ([_key] call DUWS_fnc_garrisonForce) max OPCOM_GRID_ZONE_ENEMY_FORCE, _reach]
     };

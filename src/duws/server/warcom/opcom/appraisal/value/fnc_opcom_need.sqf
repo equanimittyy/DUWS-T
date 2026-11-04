@@ -28,7 +28,7 @@ DUWS_fnc_opcom_spread = {
 // area of influence reads no hardpoint but a radio tower, so any other build leaves this signature as it was.
 DUWS_fnc_opcom_bandSig = {
     [
-        +WARCOM_zones_controled_by_BLUFOR,
+        +(call DUWS_fnc_opcom_enemyZones),
         +(missionNamespace getVariable ["Array_of_FOBpos", []]),
         DUWS_opcom_hqKnown,
         (missionNamespace getVariable ["civ_town_rep", []]) apply { ([0, -1] select (_x <= -10)) + ([0, 1] select (_x >= 10)) },
@@ -46,7 +46,7 @@ DUWS_fnc_opcom_needBandBuild = {
     private _need = DUWS_opcom_grid_land apply { 0 };
     {
         _x params ["", "_zp", "_zs", "_worth"];
-        if !([[_zp] call fnc_zone_key] call fnc_zone_bluforHeld) then {
+        if !([[_zp] call fnc_zone_key] call DUWS_fnc_opcom_enemyHeld) then {
             [_need, [_zp] call DUWS_fnc_opcom_w2c, _worth * ([_zp] call DUWS_fnc_opcom_exposure)] call DUWS_fnc_opcom_spread;
         };
     } forEach zone_meta_array;

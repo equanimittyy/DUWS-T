@@ -4,7 +4,11 @@
 if (!isServer) exitWith {};
 
 // The commander record: every function under the tick reads its state from _cmd, through dynamic scope.
-private _cmd = createHashMap;
+private _cmd = createHashMapFromArray [
+    ["side", east], ["enemySide", west], ["wallet", true], ["streams", true],
+    ["enemyZones", "WARCOM_zones_controled_by_BLUFOR"], ["covers", fnc_aoi_opfor_covers],
+    ["captureRest", "garrison"], ["actions", DUWS_opcom_actions]
+];
 call fnc_opcom_belief_init;
 call fnc_opcom_grid_init;
 call fnc_opcom_tasking_init;

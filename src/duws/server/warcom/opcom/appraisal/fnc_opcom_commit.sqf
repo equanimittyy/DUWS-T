@@ -88,10 +88,10 @@ DUWS_fnc_opcom_attackSweep = {
         {
             private _zk = [_x] call fnc_zone_key;
             [_zk, _x, ([_zk] call fnc_site_at) get "pos", [_zk] call DUWS_fnc_opcom_zoneLabel] call _fnc_consider;
-        } forEach WARCOM_zones_controled_by_BLUFOR;
+        } forEach (call DUWS_fnc_opcom_enemyZones);
         // OPFOR at Armour (4) and BLUFOR at Mechanised (3): every other gate here already holds at the campaign start.
         if (DUWS_opcom_hqKnown && {WARCOM_opfor_tier >= 4} && {WARCOM_blufor_tier >= 3}
-            && {WARCOM_zones_controled_by_BLUFOR isEqualTo []} && {["HQ"] call DUWS_fnc_opcom_captureHolds}) then {
+            && {(call DUWS_fnc_opcom_enemyZones) isEqualTo []} && {["HQ"] call DUWS_fnc_opcom_captureHolds}) then {
             private _hp = (["HQ"] call fnc_site_at) getOrDefault ["pos", []];
             if (_hp isNotEqualTo []) then { ["HQ", _hp, _hp, "HQ"] call _fnc_consider };
         };
@@ -159,7 +159,7 @@ DUWS_fnc_opcom_attackRun = {
         };
     } forEach _members;
     if (_landed == 0) exitWith { false };
-    if (_refund > 0) then { ["OPF", _refund, "opcom_attack_refund"] call fnc_ap_adjust };
+    if (_refund > 0) then { [_refund, "opcom_attack_refund"] call DUWS_fnc_opcom_pay };
     true
 };
 
@@ -175,7 +175,7 @@ DUWS_fnc_opcom_qrfSweep = {
     private _sightings = [];
     {
         private _bp = (_cmd get "belief_pos") select _forEachIndex;
-        if ([_x] call DUWS_fnc_opcom_beliefIsSighting && {[_bp] call fnc_aoi_opfor_covers} && {!([_bp] call DUWS_fnc_opcom_inBaseCells)}) then {
+        if ([_x] call DUWS_fnc_opcom_beliefIsSighting && {[_bp] call (_cmd get "covers")} && {!([_bp] call DUWS_fnc_opcom_inBaseCells)}) then {
             _sightings pushBack [(_cmd get "belief_str") select _forEachIndex, _forEachIndex];
         };
     } forEach (_cmd get "belief_key");
