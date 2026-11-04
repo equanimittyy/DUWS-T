@@ -379,8 +379,8 @@ server, or in a lobby somebody re-configured, changes the rules a player has bee
 hours. The arsenal is the sharpest case: a campaign saved with every class count-tracked comes back
 unlimited, and the pool it was spending against stops meaning anything
 ([§The arsenal](#the-arsenal-the-shelf-is-rebuilt-the-pool-is-stored)). The saved value therefore wins
-for the arsenal mode and ammo tracking, fatigue, the first-person restriction, rest weather, the
-lose conditions and the town generation.
+for the arsenal mode and ammo tracking, the civilian arms stock, fatigue, the first-person
+restriction, rest weather, the lose conditions and the town generation.
 
 **Six params stay the host's.** `DUWS_Debug`, `DUWS_LogLevel`, `DUWS_GroupIcons`,
 `DUWS_CleanupLifetime` and `DUWS_AutosaveInterval` say how a server is being run, not what the
@@ -417,6 +417,7 @@ must not have a snapshot put the old list back.
 | Commanding officer | outcome | whether `hq_blu1` is alive |
 | Civilians | input | town positions, radii and populations, and the sector word of a building cluster |
 | Vendors | input | `DUWS_vendors`: per town slot, the shop's type, position, facing and remaining respawn seconds |
+| Arms Dealer stock | outcome | `DUWS_armsStock`: the classes each town rolled in the current Limited rotation window, and the seconds left in the window ([`civilian_shops.md`](../info/gameplay/civilian_shops.md#limited-arms-stock)) |
 | Clock | outcome | `date`, `DUWS_timeSkew` |
 
 **The campaign clock is stored because boot sets it unconditionally.**
