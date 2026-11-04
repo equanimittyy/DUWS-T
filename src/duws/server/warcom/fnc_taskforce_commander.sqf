@@ -5,7 +5,6 @@
 // whose task force is gone leaves here, in the OPCOM thread, never under a task step walking the store.
 params ["_taskforces"];
 private _cmd = DUWS_opcom_cmds get "BLU";
-_cmd set ["archetype", ["aggressive", "balanced", "defensive"] select DUWS_taskforce_stance];
 
 private _names = _taskforces apply { _x select 2 };
 private _gone = ((_cmd get "taskings") select { !((_x getOrDefault ["taskforce", ""]) in _names) }) apply { _x get "id" };

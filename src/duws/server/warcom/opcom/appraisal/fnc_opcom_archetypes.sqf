@@ -11,16 +11,6 @@
 // recruit-menu row.
 if (!isServer) exitWith {};
 
-// One pair of mixes for every archetype: the lean is in the action weights. BLUFOR's commander plays the archetype its
-// task-force stance names (fnc_taskforce_commander).
-private _hpMix = createHashMapFromArray [
-    ["MG", 2], ["ROADBLOCK", 2], ["AT", 1], ["AA", 1], ["GMG", 1], ["MINEFIELD_AT", 0.5], ["MINEFIELD_AP", 0.5]
-];
-private _recruitMix = createHashMapFromArray [
-    ["rifles", 8], ["weapons_team", 4], ["recon_foot", 2], ["truck", 3], ["recon_car", 2], ["boat", 1],
-    ["car", 2], ["apc", 3], ["ifv", 2], ["mbt", 1], ["recon_heli", 1], ["trans_heli", 1],
-    ["attack_heli", 0.5], ["jet", 0.25]
-];
 DUWS_opcom_archetypes = createHashMapFromArray [
     ["balanced", createHashMapFromArray [
         ["actionWeight", createHashMapFromArray [
@@ -28,26 +18,14 @@ DUWS_opcom_archetypes = createHashMapFromArray [
             ["rapport", 0.9], ["arty_saturate", 1], ["arty_creeping", 1], ["zone_reinforce", 1], ["zone_fortify", 1],
             ["build", 1], ["radio_build", 1], ["op_build", 1], ["mortar_build", 1], ["arty_build", 1]
         ]],
-        ["hpMix", _hpMix],
-        ["recruitMix", _recruitMix]
-    ]],
-    ["aggressive", createHashMapFromArray [
-        ["actionWeight", createHashMapFromArray [
-            ["bank", 1], ["attack_assault", 1.6], ["attack_flank", 1.2], ["attack_qrf", 1], ["patrol", 0.8], ["probe", 1], ["garrison", 0.6],
-            ["rapport", 1.3], ["arty_saturate", 1.4], ["arty_creeping", 1.2], ["zone_reinforce", 0.7], ["zone_fortify", 0.7],
-            ["build", 0.7], ["radio_build", 1], ["op_build", 0.8], ["mortar_build", 1], ["arty_build", 1]
+        ["hpMix", createHashMapFromArray [
+            ["MG", 2], ["ROADBLOCK", 2], ["AT", 1], ["AA", 1], ["GMG", 1], ["MINEFIELD_AT", 0.5], ["MINEFIELD_AP", 0.5]
         ]],
-        ["hpMix", _hpMix],
-        ["recruitMix", _recruitMix]
-    ]],
-    ["defensive", createHashMapFromArray [
-        ["actionWeight", createHashMapFromArray [
-            ["bank", 1], ["attack_assault", 0.5], ["attack_flank", 0.8], ["attack_qrf", 1.5], ["patrol", 1.5], ["probe", 1.5], ["garrison", 1.5],
-            ["rapport", 0.8], ["arty_saturate", 0.8], ["arty_creeping", 1], ["zone_reinforce", 1.5], ["zone_fortify", 1.5],
-            ["build", 1.5], ["radio_build", 1], ["op_build", 1.2], ["mortar_build", 1], ["arty_build", 1]
-        ]],
-        ["hpMix", _hpMix],
-        ["recruitMix", _recruitMix]
+        ["recruitMix", createHashMapFromArray [
+            ["rifles", 8], ["weapons_team", 4], ["recon_foot", 2], ["truck", 3], ["recon_car", 2], ["boat", 1],
+            ["car", 2], ["apc", 3], ["ifv", 2], ["mbt", 1], ["recon_heli", 1], ["trans_heli", 1],
+            ["attack_heli", 0.5], ["jet", 0.25]
+        ]]
     ]]
 ];
 
