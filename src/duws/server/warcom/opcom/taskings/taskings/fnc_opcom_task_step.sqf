@@ -137,6 +137,8 @@ private _stepOne = {
 
 {
     private _t = _x;
+    // Off-thread, a taken-back task force is marked dead rather than deleted: it waits here only for the sweep below.
+    if ((_t get "status") isEqualTo "dead") then { continue };
     private _live = (_t get "grp") isNotEqualTo "";
 
     if ((_t getOrDefault ["carrying", -1]) >= 0) then {
