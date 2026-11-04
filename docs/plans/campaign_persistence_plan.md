@@ -616,7 +616,7 @@ snapshot carries for it, and the contract they answer to is this section's; the 
 | Attacks | outcome | the record's `attacks`, one hashmap per attack, with its `attackSeq` beside it, and the `boundTo` key on the taskings they own |
 | Attack cooldown | outcome | the record's `attackReadyTick`, the tick the next assault or flank may open at |
 | Supply cooldowns | outcome | the record's `supplyReadyTick`, the tick each supply class may next set off at |
-| BLUFOR commander | outcome | Advanced only, under `opcomBlu`: BLUFOR's record's `taskings` with its `taskSeq`, its `attacks` with its `attackSeq`, and its `attackReadyTick`. A tasking names its task force, so the load binds it to the squad that restores under that name ([`blufor_commander_plan.md` §Persistence](opcom/blufor_commander_plan.md#persistence)) |
+| BLUFOR commander | outcome | Advanced only, under `opcomBlu`: BLUFOR's record's `taskings` with its `taskSeq`, its `attacks` with its `attackSeq`, and its `attackReadyTick`. A tasking names its task force, so the load binds it to the squad that restores under that name (`fnc_taskforce_commander`) |
 
 **A tasking is already serialisable, and that is deliberate.** A record holds numbers, strings and arrays
 only, and `grp` is a live group's netId rather than a handle

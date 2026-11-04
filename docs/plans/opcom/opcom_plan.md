@@ -58,8 +58,7 @@ New work holds to:
   commander's stores, grid layers, need field, pick state and side inputs: its side, wallet, whether it streams, the
   enemy's zones, its cover test, what a capture rests as and its action rows. The tick binds the record as `_cmd`, and
   every function under the tick reads it through dynamic scope. A reader on another thread names its side, and a
-  spawned script or an event handler takes its record ([`blufor_commander_plan.md` §Phase
-  1](blufor_commander_plan.md#phase-1-the-commander-record)).
+  spawned script or an event handler takes its record.
 - **Belief, never truth.** The commander plans against belief; only the sensors read live player state.
 - **The engine resolves every fight**, and `P(win)` never dices one.
 - **State** is numbers, strings and arrays only, and every time counts in ticks off `DUWS_opcom_tick`.
@@ -1221,7 +1220,7 @@ Each archetype is one record in `DUWS_opcom_archetypes` (`appraisal/fnc_opcom_ar
 `actionWeight`, `hpMix` and `recruitMix` ([§Value](#value)), and the commander record's `archetype` names the
 one the commander plays. Balanced, Aggressive and Defensive stand, the two leaning as the table above sets out, on
 Balanced's mixes; BLUFOR's commander plays the one its task-force stance names
-([`blufor_commander_plan.md` §Task forces](blufor_commander_plan.md#task-forces)). OPFOR plays Balanced until 7.1 sets
+(`fnc_taskforce_commander`). OPFOR plays Balanced until 7.1 sets
 its archetype from the campaign setting. An archetype with no record weighs every action at 1 and builds and hires
 with no mix.
 
