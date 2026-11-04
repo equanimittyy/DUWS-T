@@ -132,6 +132,7 @@ private _fnc_hold = {
 					(selectRandom _legs) params ["_townName", "_townPos"];
 					[_group, "patrol", _townPos] call DUWS_fnc_opcom_applyOrder;
 					[_group, count waypoints _group - 1] setWaypointCompletionRadius PATROL_ARRIVE;
+					[groupId _group, format [localize "STR_DUWS_T_TASKFORCE_PATROLLING", groupId _group, _townName], "SUB-NET"] remoteExec ["fnc_duws_dialogue", 0];
 					_group setVariable ["DUWS_taskforce_order", ["patrol", _townName, _townPos]];
 				};
 			};

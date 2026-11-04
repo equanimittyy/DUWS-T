@@ -25,7 +25,15 @@ DUWS_fnc_opcom_send = {
 DUWS_fnc_opcom_sendRun = {
     params ["_target"];
     private _t = [_target] call DUWS_fnc_opcom_send;
-    !isNil "_t"
+    if (isNil "_t") exitWith { false };
+    // BLUFOR's commander has no garrison action, so its every send is a patrol or a probe.
+    if ((_cmd get "side") isEqualTo west) then {
+        (_target select 1) params ["_order", "_at"];
+        private _tf = groupId groupFromNetId (_t get "grp");
+        private _line = localize (["STR_DUWS_T_TASKFORCE_PATROLLING", "STR_DUWS_T_TASKFORCE_PROBING"] select (_order isEqualTo "probe"));
+        [_tf, format [_line, _tf, [_at] call fnc_place_name], "SUB-NET"] remoteExec ["fnc_duws_dialogue", 0];
+    };
+    true
 };
 
 // One assault or flank at a time, and none for OPCOM_ATTACK_COOLDOWN after one ends, so the players get a lull between

@@ -18292,29 +18292,65 @@
                 <Chinese>全體單位注意，這裡是 Overlord。特遣隊 %1 正從總部出發。</Chinese>
                 <Spanish>A todas las unidades, aquí Overlord. La Fuerza Operativa %1 sale del CG.</Spanish>
             </Key>
-            <Key ID="STR_DUWS_T_TASKFORCE_ATTACK_LAUNCH">
-                <Original>All units, this is Overlord. Task forces are moving on %1.</Original>
-                <English>All units, this is Overlord. Task forces are moving on %1.</English>
-                <Chinesesimp>全体单位注意，这里是 Overlord。特遣队正向 %1 发起进攻。</Chinesesimp>
-                <German>An alle Einheiten, hier ist Overlord. Task Forces rücken auf %1 vor.</German>
-                <Polish>Wszystkie jednostki, tu Overlord. Grupy zadaniowe ruszają na %1.</Polish>
-                <Czech>Všem jednotkám, tady Overlord. Úkolová uskupení postupují na %1.</Czech>
-                <Russian>Всем подразделениям, говорит Overlord. Оперативные группы выдвигаются на %1.</Russian>
-                <French>À toutes les unités, ici Overlord. Les groupements tactiques marchent sur %1.</French>
-                <Chinese>全體單位注意，這裡是 Overlord。特遣隊正向 %1 發起進攻。</Chinese>
-                <Spanish>A todas las unidades, aquí Overlord. Las Fuerzas Operativas avanzan sobre %1.</Spanish>
+            <Key ID="STR_DUWS_T_TASKFORCE_QRF">
+                <Original>This is %1. We're moving to the contact near %2.</Original>
+                <English>This is %1. We're moving to the contact near %2.</English>
+                <Chinesesimp>这里是 %1，正在赶往 %2 附近的交火地点。</Chinesesimp>
+                <German>Hier ist %1. Wir rücken zum Feindkontakt bei %2 aus.</German>
+                <Polish>Tu %1. Ruszamy do kontaktu w pobliżu %2.</Polish>
+                <Czech>Tady %1. Vyrážíme ke kontaktu u %2.</Czech>
+                <Russian>Говорит %1. Выдвигаемся к месту контакта у %2.</Russian>
+                <French>Ici %1. Nous nous portons au contact près de %2.</French>
+                <Chinese>這裡是 %1，正在趕往 %2 附近的交火地點。</Chinese>
+                <Spanish>Aquí %1. Nos dirigimos al contacto cerca de %2.</Spanish>
             </Key>
-            <Key ID="STR_DUWS_T_TASKFORCE_QRF_LAUNCH">
-                <Original>All units, this is Overlord. Task forces are moving to the contact near %1.</Original>
-                <English>All units, this is Overlord. Task forces are moving to the contact near %1.</English>
-                <Chinesesimp>全体单位注意，这里是 Overlord。特遣队正赶往 %1 附近的交火地点。</Chinesesimp>
-                <German>An alle Einheiten, hier ist Overlord. Task Forces rücken zum Feindkontakt bei %1 aus.</German>
-                <Polish>Wszystkie jednostki, tu Overlord. Grupy zadaniowe ruszają do kontaktu w pobliżu %1.</Polish>
-                <Czech>Všem jednotkám, tady Overlord. Úkolová uskupení vyrážejí ke kontaktu u %1.</Czech>
-                <Russian>Всем подразделениям, говорит Overlord. Оперативные группы выдвигаются к месту контакта у %1.</Russian>
-                <French>À toutes les unités, ici Overlord. Les groupements tactiques se portent au contact près de %1.</French>
-                <Chinese>全體單位注意，這裡是 Overlord。特遣隊正趕往 %1 附近的交火地點。</Chinese>
-                <Spanish>A todas las unidades, aquí Overlord. Las Fuerzas Operativas se dirigen al contacto cerca de %1.</Spanish>
+            <Key ID="STR_DUWS_T_TASKFORCE_PATROLLING">
+                <Original>This is %1. We're moving to patrol %2.</Original>
+                <English>This is %1. We're moving to patrol %2.</English>
+                <Chinesesimp>这里是 %1，正在前往 %2 巡逻。</Chinesesimp>
+                <German>Hier ist %1. Wir rücken zur Patrouille nach %2 aus.</German>
+                <Polish>Tu %1. Ruszamy na patrol w rejon %2.</Polish>
+                <Czech>Tady %1. Vyrážíme na hlídku do oblasti %2.</Czech>
+                <Russian>Говорит %1. Выдвигаемся на патрулирование района %2.</Russian>
+                <French>Ici %1. Nous partons en patrouille vers %2.</French>
+                <Chinese>這裡是 %1，正在前往 %2 巡邏。</Chinese>
+                <Spanish>Aquí %1. Salimos a patrullar %2.</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_PROBING">
+                <Original>This is %1. We're moving to engage %2.</Original>
+                <English>This is %1. We're moving to engage %2.</English>
+                <Chinesesimp>这里是 %1，正在前往 %2 交战。</Chinesesimp>
+                <German>Hier ist %1. Wir rücken zum Gefecht bei %2 aus.</German>
+                <Polish>Tu %1. Ruszamy do walki w rejonie %2.</Polish>
+                <Czech>Tady %1. Vyrážíme do boje v oblasti %2.</Czech>
+                <Russian>Говорит %1. Выдвигаемся для боя в районе %2.</Russian>
+                <French>Ici %1. Nous allons engager l'ennemi près de %2.</French>
+                <Chinese>這裡是 %1，正在前往 %2 交戰。</Chinese>
+                <Spanish>Aquí %1. Avanzamos para entablar combate en %2.</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_ASSAULT_STAGING">
+                <Original>All units, this is Overlord. Task forces are staging for an assault on %1 near %2.</Original>
+                <English>All units, this is Overlord. Task forces are staging for an assault on %1 near %2.</English>
+                <Chinesesimp>全体单位注意，这里是 Overlord。特遣队正在集结，准备进攻 %2 附近的 %1。</Chinesesimp>
+                <German>An alle Einheiten, hier ist Overlord. Task Forces sammeln sich zum Angriff auf %1 bei %2.</German>
+                <Polish>Wszystkie jednostki, tu Overlord. Grupy zadaniowe koncentrują się do szturmu na %1 w pobliżu %2.</Polish>
+                <Czech>Všem jednotkám, tady Overlord. Úkolová uskupení se shromažďují k útoku na %1 u %2.</Czech>
+                <Russian>Всем подразделениям, говорит Overlord. Оперативные группы сосредотачиваются для штурма %1 у %2.</Russian>
+                <French>À toutes les unités, ici Overlord. Les groupements tactiques se rassemblent pour un assaut sur %1 près de %2.</French>
+                <Chinese>全體單位注意，這裡是 Overlord。特遣隊正在集結，準備進攻 %2 附近的 %1。</Chinese>
+                <Spanish>A todas las unidades, aquí Overlord. Las Fuerzas Operativas se concentran para el asalto a %1 cerca de %2.</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_ASSAULT_COMMENCING">
+                <Original>All units, this is Overlord. The assault on %1 is commencing.</Original>
+                <English>All units, this is Overlord. The assault on %1 is commencing.</English>
+                <Chinesesimp>全体单位注意，这里是 Overlord。对 %1 的进攻现在开始。</Chinesesimp>
+                <German>An alle Einheiten, hier ist Overlord. Der Angriff auf %1 beginnt.</German>
+                <Polish>Wszystkie jednostki, tu Overlord. Rozpoczyna się szturm na %1.</Polish>
+                <Czech>Všem jednotkám, tady Overlord. Útok na %1 začíná.</Czech>
+                <Russian>Всем подразделениям, говорит Overlord. Штурм %1 начинается.</Russian>
+                <French>À toutes les unités, ici Overlord. L'assaut sur %1 commence.</French>
+                <Chinese>全體單位注意，這裡是 Overlord。對 %1 的進攻現在開始。</Chinese>
+                <Spanish>A todas las unidades, aquí Overlord. Comienza el asalto a %1.</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_TASKFORCE_LOST">
                 <Original>All units, this is Overlord. Task Force %1 is combat ineffective.</Original>

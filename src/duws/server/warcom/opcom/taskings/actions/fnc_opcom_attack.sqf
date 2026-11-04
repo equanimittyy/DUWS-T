@@ -135,6 +135,9 @@ DUWS_fnc_opcom_attackOpen = {
         }]
     ];
     (_cmd get "attacks") pushBack _attack;
+    if ((_cmd get "side") isEqualTo west && {_kind isNotEqualTo "qrf"}) then {
+        [localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_TASKFORCE_ASSAULT_STAGING", _label, [_pos] call fnc_place_name]] remoteExec ["fnc_duws_dialogue", 0];
+    };
     _attack
 };
 
@@ -353,11 +356,17 @@ DUWS_fnc_opcom_launch = {
     private _n = 0;
     { _n = _n + count (_x get "units") } forEach (_attack get "roles");
     { [_attack, _x] call DUWS_fnc_opcom_releaseRole } forEach (_attack get "roles");
-    // BLUFOR's units are the players' own task forces, so Overlord tells them where they go.
     if ((_cmd get "side") isEqualTo west) then {
-        private _qrf = (_attack get "kind") isEqualTo "qrf";
-        [localize "STR_DUWS_T_OVERLORD", format [localize (["STR_DUWS_T_TASKFORCE_ATTACK_LAUNCH", "STR_DUWS_T_TASKFORCE_QRF_LAUNCH"] select _qrf),
-            [_attack get "label", [_attack get "pos"] call fnc_place_name] select _qrf]] remoteExec ["fnc_duws_dialogue", 0];
+        if ((_attack get "kind") isNotEqualTo "qrf") exitWith {
+            [localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_TASKFORCE_ASSAULT_COMMENCING", _attack get "label"]] remoteExec ["fnc_duws_dialogue", 0];
+        };
+        private _place = [_attack get "pos"] call fnc_place_name;
+        {
+            {
+                private _tf = groupId groupFromNetId (_x get "grp");
+                [_tf, format [localize "STR_DUWS_T_TASKFORCE_QRF", _tf, _place], "SUB-NET"] remoteExec ["fnc_duws_dialogue", 0];
+            } forEach ([_attack, _x] call DUWS_fnc_opcom_roleUnits);
+        } forEach (_attack get "roles");
     };
     ["INFO", "OPCOM", format ["attack %1 (%2 %3) launches %4 unit(s) in %5 bucket(s) at %6:1", _attack get "id",
         _attack get "kind", _attack get "label", _n, count (_attack get "roles"), _r toFixed 2]] call fnc_log;
