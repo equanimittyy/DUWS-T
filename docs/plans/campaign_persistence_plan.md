@@ -608,13 +608,13 @@ snapshot carries for it, and the contract they answer to is this section's; the 
 
 | Group | Kind | Contents |
 |---|---|---|
-| Archetype | input | `DUWS_opcom_archetype`, fed back before the loop and never re-rolled |
-| Taskings | outcome | `DUWS_opcom_taskings`, one hashmap per unit, with `DUWS_opcom_taskSeq` beside it |
+| Archetype | input | OPFOR's record's `archetype` (`DUWS_opcom_cmds`), fed back before the loop and never re-rolled |
+| Taskings | outcome | the record's `taskings`, one hashmap per unit, with its `taskSeq` beside it |
 | Clock and flags | outcome | `DUWS_opcom_tick`, `DUWS_opcom_hqKnown`, and `DUWS_opcom_fobsKnown` with `fobKeys` beside it |
 | Mine variants | outcome | `DUWS_opcom_mineVariants`, with `DUWS_hpOpcomSeq` beside it |
-| Attacks | outcome | `DUWS_opcom_attacks`, one hashmap per attack, with `DUWS_opcom_attackSeq` beside it, and the `boundTo` key on the taskings they own |
-| Attack cooldown | outcome | `DUWS_opcom_attackReadyTick`, the tick the next assault or flank may open at |
-| Supply cooldowns | outcome | `DUWS_opcom_supplyReadyTick`, the tick each supply class may next set off at |
+| Attacks | outcome | the record's `attacks`, one hashmap per attack, with its `attackSeq` beside it, and the `boundTo` key on the taskings they own |
+| Attack cooldown | outcome | the record's `attackReadyTick`, the tick the next assault or flank may open at |
+| Supply cooldowns | outcome | the record's `supplyReadyTick`, the tick each supply class may next set off at |
 
 **A tasking is already serialisable, and that is deliberate.** A record holds numbers, strings and arrays
 only, and `grp` is a live group's netId rather than a handle
@@ -636,7 +636,7 @@ several units to one Attack, and its roles name their units by tasking id rather
 taskings' own terms and restores with them, which is why that phase is built before this one rather than
 after: a contract written first would be reopened the moment attack records existed.
 
-**`DUWS_opcom_taskSeq` rides with the taskings.** The id is what every binding uses — a ferry pairs a
+**`taskSeq` rides with the taskings.** The id is what every binding uses — a ferry pairs a
 transport to its rider by id, not by handle — so a counter restored to 0 hands the next hire an id a
 standing unit already holds.
 
@@ -666,7 +666,7 @@ nothing after a restart, and a restart also loses the headless clients and retur
 sightings would describe a battlefield that no longer exists. The grid layers, the coverage layer and the
 contested set rebuild on the first sensor pass, and the traffic layer refills as sightings land.
 
-**The commander's mode and pick rate are not its state.** `DUWS_opcom_aiMode` and `DUWS_opcom_picksPerTick`
+**The commander's mode and pick rate are not its state.** The record's `aiMode` and `picksPerTick`
 belong to the debug page today and come back at their defaults. Once the difficulty setting drives them they
 restore with the settings group, not here.
 

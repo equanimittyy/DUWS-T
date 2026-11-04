@@ -81,7 +81,7 @@ only the deposit it spreads (`:81-87`), and a spread is 49 cell writes.
 **Fix.** The signature is split (`fnc_opcom_need.sqf:27-42`): a band signature (BLUFOR zones, FOBs, the HQ reveal,
 banded towns, radio tower keys) and a deposit signature (every OPFOR hardpoint key). The zone spreads, the town
 spreads and the band base add read only band-signature inputs, so `DUWS_fnc_opcom_needBandBuild` caches them with
-`DUWS_opcom_bandCells`. A deposit-only change then re-spreads the hardpoint deposits over that cache inside the tick,
+the record's `bandCells`. A deposit-only change then re-spreads the hardpoint deposits over that cache inside the tick,
 with no thread.
 
 Of the five rebuilds seen, the first was the boot build on tick 1, and the second followed a radio tower, which moved

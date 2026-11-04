@@ -16,8 +16,8 @@ Not in this plan: the commander's recruitment upgrades, and any economy for the 
 
 | Phase | State |
 |---|---|
-| 0 — Free squad cap: BLUFOR's tier and the zones it holds set how many free task forces stand, up to 6, in both modes | planned |
-| 1 — Commander record: OPCOM's per-commander state and its side inputs move into one record per side, OPFOR only | planned |
+| 0 — Free squad cap: BLUFOR's tier and the zones it holds set how many free task forces stand, up to 6, in both modes | **shipped** |
+| 1 — Commander record: OPCOM's per-commander state and its side inputs move into one record per side, OPFOR only | **shipped** |
 | 2 — The Advanced commander: the param, BLUFOR's record, perception, task forces as its units, actions, persistence and debug | planned |
 
 Phase 0 lands first. It changes the free spawn that both modes use, so it plays in Simple before Phase 2 builds on
@@ -61,7 +61,7 @@ At tier 1 with no zones the cap is 1; at tier 3 with 2 zones it is 4; at tier 5 
 
 | Chunk | Builds |
 |---|---|
-| **0.1** Free squad cap | the cap above in `fnc_taskforce_tick.sqf`, and the task-force line of `performance.md` (`:13`) in the same change |
+| **0.1** Free squad cap | **Shipped** — the cap above in `fnc_taskforce_tick.sqf`, and the task-force line of `performance.md` |
 
 ## Phase 1: the commander record
 
@@ -70,53 +70,56 @@ At tier 1 with no zones the cap is 1; at tier 3 with 2 zones it is 4; at tier 5 
 `DUWS_opcom_cmds` is a hashmap from a side key to a commander record. The key is the `fnc_ap_adjust` side, `"OPF"`
 or `"BLU"`. A record is a field-keyed hashmap that holds:
 
-- the per-commander state that globals hold now: the tasking and attack stores and their sequence counters, the
-  attack and supply cooldown ticks, the battery ready ticks, the belief store, the grid's own and enemy layers, the
-  staleness and traffic layers, the need and cover fields and their memos, the tick cache, the pick debt, the picks
-  per tick, the AI mode, the archetype and the debug counters;
+- the per-commander state: the tasking and attack stores and their sequence counters, the attack and supply
+  cooldown ticks, the battery ready ticks, the belief store, the grid's own and enemy layers and their static cache,
+  the staleness and traffic layers, the need field and its signatures, the tick cache, the pick debt, the picks per
+  tick, the pick-once mode, the AI mode, the archetype and the debug counters;
 - the side inputs ([§Side inputs](#side-inputs)).
 
 These stay global: the war clock `DUWS_opcom_tick`, the grid geometry (`DUWS_opcom_grid_w`, the box, the land, water
 and landmass layers, the ports), the data tables (`DUWS_opcom_recruitMenu`, `DUWS_opcom_moveType`,
 `DUWS_opcom_speed`, `DUWS_opcom_streamK`, `DUWS_opcom_moveWater`, `DUWS_opcom_orders`, `DUWS_opcom_actions`,
-`DUWS_opcom_archetypes`) and every `OPCOM_*` constant. A constant that must differ by side becomes a record field
+`DUWS_opcom_archetypes`), the stores only OPFOR has (HQ and FOB discovery, the contested set, pending builds, mine
+variants, ferry hulls) and every `OPCOM_*` constant. A constant that must differ by side becomes a record field
 in the chunk that needs it.
 
 - **The tick sets `_cmd`.** The loop runs each commander's stages under `private _cmd = DUWS_opcom_cmds get _side`,
   and every function below it reads its state from `_cmd` through dynamic scope, as the hardpoint banner tick reads
   `_hpDone` (`fnc_init_OPFOR_WARCOM.sqf`). A `spawn` or an event handler takes the record as an argument, because a
   new script inherits no scope.
-- **A reader outside the tick names its side.** The site poller, the hardpoint stream, the intel payout and
-  contacts, the target recon mission, the persistence save, restore and reconcile, the debug pages and
-  `DUWS_fnc_opcom_siteLost` read `DUWS_opcom_cmds get "OPF"`, or the side they need, and never `_cmd`.
+- **A reader outside the tick names its side.** The site poller, the OP posts (`fnc_hardpoint_stream.sqf`), the
+  intel payout, the target recon mission, the zone-garrison entry points (`DUWS_fnc_opcom_zoneReserveSync`,
+  `DUWS_fnc_opcom_defenderLost`, `DUWS_fnc_opcom_siteLost`), the save snapshot and the debug pages read
+  `DUWS_opcom_cmds get "OPF"`. The restore runs in the OPCOM thread under the tick's `_cmd`.
+- **A dirty mark writes into every record.** `DUWS_fnc_opcom_gridDirty` and `DUWS_fnc_opcom_gridDirtyAll` run on
+  other threads, so they mark each registered record; a record is registered only once it is built.
 - **The loop runs OPFOR's stages, then BLUFOR's**, on the one `OPCOM_TICK_PERIOD` tick and the one idle wait.
 - **Rejected: a swap of the old globals for each commander's turn.** The readers outside the tick run in other
   scheduled threads, so they would read whichever side is swapped in. **Rejected: a BLUFOR copy of the code.**
 
-The record holds the same array and hashmap objects that the old globals name, so a file not yet converted still
-reads the live store. A scalar, and a write that re-assigns a store (`DUWS_opcom_taskings = …` at 6 sites,
-`DUWS_opcom_attacks = …` at 3), breaks that alias, so those convert in the first chunk.
-
 ### Side inputs
 
-Each row is a record field. OPFOR's value is what the code reads today.
+Each row is a record field. The helpers that read them are in `belief/fnc_opcom_side.sqf`.
 
-| Field | OPFOR | BLUFOR | Read today at |
+| Field | OPFOR | BLUFOR | Read at |
 |---|---|---|---|
-| `side`, `enemySide` | `east`, `west` | `west`, `east` | `fnc_opcom_sense.sqf:32`, `fnc_opcom_task_step.sqf:18` |
-| `wallet` | `WARCOM_opfor_ap`, paid through `["OPF", …] call fnc_ap_adjust` | none: no hire, no charge and no savings goal | `fnc_opcom_pick.sqf`, `fnc_opcom_sources.sqf`, `fnc_opcom_lift.sqf`, every refund |
+| `side`, `enemySide` | `east`, `west` | `west`, `east` | the sighting sweep, the patrol and intercept looks, the task step's streaming read |
+| `wallet` | true: `WARCOM_opfor_ap`, paid through `["OPF", …] call fnc_ap_adjust` | false: no hire, no charge and no savings goal | `DUWS_fnc_opcom_funds` and `DUWS_fnc_opcom_pay`, from the pick, the sources, the lift, the recruit and every refund |
 | `streams` | true | false: a tasking never stows and is never virtual | `fnc_opcom_task_step.sqf` |
-| `ownZones`, `enemyZones` | `WARCOM_zones_controled_by_OPFOR`, `WARCOM_zones_controled_by_BLUFOR` | the two swapped | grid sources, exposure, need, capture |
+| `enemyZones` | `"WARCOM_zones_controled_by_BLUFOR"`, the name, since the list is re-assigned | `"WARCOM_zones_controled_by_OPFOR"` | `DUWS_fnc_opcom_enemyZones` and `DUWS_fnc_opcom_enemyHeld`, from the grid's zone source, the exposure ground, the need field's band, the capture order and the assault targets |
 | `covers` | `fnc_aoi_opfor_covers` | `fnc_aoi_blufor_covers` | the QRF sweep |
-| `captureRest` | `garrison` at the zone it takes | `guard` where it stands | `fnc_opcom_capture.sqf` |
-| `actions` | every row | `attack_assault`, `attack_flank`, `attack_qrf`, `patrol`, `probe` | `fnc_opcom_pick.sqf` |
+| `captureRest` | `garrison` at the zone it takes | `guard` where it stands | `DUWS_fnc_opcom_captureEnd` |
+| `actions` | every row of `DUWS_opcom_actions` | `attack_assault`, `attack_flank`, `attack_qrf`, `patrol`, `probe` | `fnc_opcom_pick.sqf` |
+
+`DUWS_fnc_opcom_defend` keeps `fnc_zone_bluforHeld`, because the radio tower's siting reads it at startup, before any
+record exists.
 
 ### Chunks
 
 | Chunk | Builds |
 |---|---|
-| **1.1** Record | `DUWS_opcom_cmds` with OPFOR's record, `_cmd` set by the tick, the stores, the scalars and the re-assigning writes moved into the record one folder at a time (`belief/`, `appraisal/`, `taskings/`), and every reader outside the tick on `get "OPF"`. The same change updates `opcom_plan.md` §Shipped and the `warcom/` row of `architecture.md` |
-| **1.2** Side inputs | every field of [§Side inputs](#side-inputs) on OPFOR's record, and every read in that table routed through it |
+| **1.1** Record | **Shipped** — `DUWS_opcom_cmds` with OPFOR's record, `_cmd` set by the tick, every per-commander store and scalar in the record, and every reader outside the tick on `get "OPF"` |
+| **1.2** Side inputs | **Shipped** — every field of [§Side inputs](#side-inputs) on OPFOR's record, and every read in that table routed through it |
 
 ## Phase 2: the Advanced commander
 

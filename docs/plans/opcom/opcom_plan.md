@@ -54,6 +54,12 @@ menu's OPCOM pages) runs the orders by hand and spends no AP.
 
 New work holds to:
 
+- **A commander's state is its record.** `DUWS_opcom_cmds` maps a side key (`"OPF"`) to a record that holds the
+  commander's stores, grid layers, need field, pick state and side inputs: its side, wallet, whether it streams, the
+  enemy's zones, its cover test, what a capture rests as and its action rows. The tick binds the record as `_cmd`, and
+  every function under the tick reads it through dynamic scope. A reader on another thread names its side, and a
+  spawned script or an event handler takes its record ([`blufor_commander_plan.md` §Phase
+  1](blufor_commander_plan.md#phase-1-the-commander-record)).
 - **Belief, never truth.** The commander plans against belief; only the sensors read live player state.
 - **The engine resolves every fight**, and `P(win)` never dices one.
 - **State** is numbers, strings and arrays only, and every time counts in ticks off `DUWS_opcom_tick`.
@@ -284,7 +290,7 @@ so it moves no faster than a truck delivers.
 - **The QRF share** is how much of the local defense the sighted cluster can overwhelm. `P(win)` says whether the
   QRF can win, and a QRF short of the odds musters more units rather than sending none, so a platoon is worth
   stopping and no lone small unit is thrown at it.
-- **Staleness** is min(1, ticks since the cell's last sweep in `DUWS_opcom_grid_seen` ÷ `OPCOM_BELIEF_EXPIRE`).
+- **Staleness** is min(1, ticks since the cell's last sweep in the record's `grid_seen` ÷ `OPCOM_BELIEF_EXPIRE`).
   The share holds Patrol below the ground it sweeps, since a patrol takes and protects nothing itself.
 - **Every unit on patrol resets the staleness timer, omniscient or not.** Staleness asks when OPCOM last looked at a
   cell, never how sure it is of what it saw, so a rifle squad walking a valley stamps it as a recon does
@@ -478,7 +484,7 @@ The debug harness spends outside the pick and is not capped.
   full roster would stop every supply action.
 - **A supply class rests after an order.** When a truck sets off, a cooldown rolled from `OPCOM_SUPPLY_COOLDOWN`
   (60–360 ticks, 5–30 min) starts on its class, and no action of that class is offered until it ends
-  (`DUWS_opcom_supplyReadyTick`), whether the truck delivers or dies.
+  (the record's `supplyReadyTick`), whether the truck delivers or dies.
 - **The garrison cap is a zone's.** Only a zone homes an OPCOM unit.
 - **The hardpoint caps scale with the campaign's zone count,** because the seeded hardpoints count and the seed
   grows with the zones, at about 7 a zone. A flat cap would sit under the seed of a 40-zone campaign and far over
@@ -659,7 +665,7 @@ with no row reads −1.
 **Shipped**.
 
 Attack is the one action that sends more than one unit, and it is three action rows, `attack_assault`, `attack_flank`
-and `attack_qrf` ([§QRF](#qrf-an-attack-on-a-moving-cluster)). Each commits an attack record (`DUWS_opcom_attacks`,
+and `attack_qrf` ([§QRF](#qrf-an-attack-on-a-moving-cluster)). Each commits an attack record (the record's `attacks`,
 `taskings/actions/fnc_opcom_attack.sqf`) that runs two phases. **Buildup** places the units; **execution** runs the orders
 that already ship. Assault and flank differ only in data — which roles each binds, where each one's lane ends and
 what it waits on (`DUWS_opcom_attackRoles`) — so neither adds tasking code, and the QRF adds only what a moving target
@@ -688,7 +694,7 @@ new attack); else test the current state's transition, and each side bucket's wa
 takes over from the debug page counts as lost. **One assault or flank runs at a time.** The attack sweep offers
 no new one while one is in buildup or execution. When one ends, however it ends, a global cooldown rolled from
 `OPCOM_ATTACK_COOLDOWN` (360–720 ticks, 30–60 min) starts, and the sweep offers no new one until the cooldown ends
-(`DUWS_opcom_attackReadyTick`, `DUWS_fnc_opcom_attackClose`). Joins to the open one are still offered. A QRF is
+(the record's `attackReadyTick`, `DUWS_fnc_opcom_attackClose`). Joins to the open one are still offered. A QRF is
 outside the cap and sets no cooldown, because its target is a sighting. The
 runner sequences the states; the route and streaming machinery moves the units. There is no planner: a new way to attack is a new entry of roles rather than a new subsystem.
 
@@ -1212,7 +1218,7 @@ reason. Only the band overlap gives the ratio room, so the band thresholds and t
 other in play.
 
 Each archetype is one record in `DUWS_opcom_archetypes` (`appraisal/fnc_opcom_archetypes.sqf`) holding its
-`actionWeight`, `hpMix` and `recruitMix` ([§Value](#value)), and `DUWS_opcom_archetype` names the
+`actionWeight`, `hpMix` and `recruitMix` ([§Value](#value)), and the commander record's `archetype` names the
 one the commander plays. Only Balanced's record stands until 7.1 adds the others and sets the archetype from the
 campaign setting; an archetype with no record weighs every action at 1 and builds and hires with
 no mix.
@@ -1224,7 +1230,7 @@ properly executed attack; a flexible, aggressive one launches sooner at lesser o
 
 | Chunk | Builds |
 |---|---|
-| **7.1** Records and the setting | the campaign setting, the records the other archetypes need, the debug-page override, and `DUWS_opcom_archetype` set from the setting. The action table is already wired as each record's `actionWeight` |
+| **7.1** Records and the setting | the campaign setting, the records the other archetypes need, the debug-page override, and the record's `archetype` set from the setting. The action table is already wired as each record's `actionWeight` |
 | **7.2** Patience | the muster ideal, minimum and expiry per archetype, and `OPCOM_SAVE_HORIZON` and `OPCOM_VALUE_HALFLIFE` per archetype in place of the one global figure |
 
 Phase 7 settles in play each archetype's action weights, Bank's included, its assault and flank weights against the band
@@ -1271,10 +1277,9 @@ The campaign snapshot owns the save and the load. The contract — which of OPCO
 restore clears before it replays them, and why belief is not among them — is
 [`campaign_persistence_plan.md` §The commander](../campaign_persistence_plan.md#the-commander).
 
-- The snapshot carries the archetype, the taskings with `DUWS_opcom_taskSeq`, the attacks with
-  `DUWS_opcom_attackSeq`, the attack cooldown (`DUWS_opcom_attackReadyTick`), the supply cooldowns
-  (`DUWS_opcom_supplyReadyTick`), the tick, `DUWS_opcom_hqKnown`, `DUWS_opcom_fobsKnown` with `fobKeys`, the
-  mine variants and `DUWS_hpOpcomSeq`.
+- The snapshot carries the record's archetype, its taskings with `taskSeq`, its attacks with `attackSeq`, the attack
+  cooldown (`attackReadyTick`), the supply cooldowns (`supplyReadyTick`), the tick, `DUWS_opcom_hqKnown`,
+  `DUWS_opcom_fobsKnown` with `fobKeys`, the mine variants and `DUWS_hpOpcomSeq`.
 - The save clears a tasking's live half: `grp` and `ferryPad` go to `""`, `status` to `virtual`, and a live group's
   strength and position are read into the record the way a stow reads them (`DUWS_fnc_campaignTaskings`). A
   boarding rider keeps its frozen strength, and a bound rider keeps its route.
