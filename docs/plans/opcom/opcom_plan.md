@@ -1218,11 +1218,9 @@ other in play.
 
 Each archetype is one record in `DUWS_opcom_archetypes` (`appraisal/fnc_opcom_archetypes.sqf`) holding its
 `actionWeight`, `hpMix` and `recruitMix` ([§Value](#value)), and the commander record's `archetype` names the
-one the commander plays. Balanced, Aggressive and Defensive stand, the two leaning as the table above sets out, on
-Balanced's mixes; BLUFOR's commander plays the one its task-force stance names
-(`fnc_taskforce_commander`). OPFOR plays Balanced until 7.1 sets
-its archetype from the campaign setting. An archetype with no record weighs every action at 1 and builds and hires
-with no mix.
+one the commander plays. Only Balanced's record stands until 7.1 adds the others and sets the archetype from the
+campaign setting; an archetype with no record weighs every action at 1 and builds and hires with
+no mix. BLUFOR's commander always plays Balanced.
 
 Beyond its weights and mixes, an archetype sets the commander's patience: the muster ideal, minimum and expiry,
 `OPCOM_SAVE_HORIZON` and `OPCOM_VALUE_HALFLIFE`. A patient, strategic commander musters and saves longer for a
@@ -1231,7 +1229,7 @@ properly executed attack; a flexible, aggressive one launches sooner at lesser o
 
 | Chunk | Builds |
 |---|---|
-| **7.1** Records and the setting | the campaign setting, the debug-page override, and OPFOR's record's `archetype` set from the setting. The Aggressive and Defensive records stand already (BLUFOR's commander plays them), on Balanced's mixes |
+| **7.1** Records and the setting | the campaign setting, the records the other archetypes need, the debug-page override, and OPFOR's record's `archetype` set from the setting. The action table is already wired as each record's `actionWeight` |
 | **7.2** Patience | the muster ideal, minimum and expiry per archetype, and `OPCOM_SAVE_HORIZON` and `OPCOM_VALUE_HALFLIFE` per archetype in place of the one global figure |
 
 Phase 7 settles in play each archetype's action weights, Bank's included, its assault and flank weights against the band
