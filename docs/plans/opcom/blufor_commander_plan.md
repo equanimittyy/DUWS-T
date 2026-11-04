@@ -16,11 +16,13 @@ Not in this plan: the commander's recruitment upgrades, and any economy for the 
 
 | Phase | State |
 |---|---|
+| 0 — Free squad cap: BLUFOR's tier and the zones it holds set how many free task forces stand, up to 6, in both modes | planned |
 | 1 — Commander record: OPCOM's per-commander state and its side inputs move into one record per side, OPFOR only | planned |
 | 2 — The Advanced commander: the param, BLUFOR's record, perception, task forces as its units, actions, persistence and debug | planned |
 
-Phase 1 changes no behaviour. It comes first because Phase 2 is a second record on the same code, and a BLUFOR copy
-of the code would double every later OPCOM change.
+Phase 0 lands first. It changes the free spawn that both modes use, so it plays in Simple before Phase 2 builds on
+it. Phase 1 changes no behaviour. It comes before Phase 2 because Phase 2 is a second record on the same code, and a
+BLUFOR copy of the code would double every later OPCOM change.
 
 ## What Advanced reuses
 
@@ -37,6 +39,29 @@ of the code would double every later OPCOM change.
 | Streaming: virtual units, de-virt, stow | Not used: every BLUFOR commander unit stays live |
 | Garrison, zone Reinforce and Fortify, every Build, Minefield, Rapport, arty, supply errands | Not in BLUFOR's action list |
 | HQ and FOB discovery, FOB overrun | Not used: OPFOR has neither |
+
+## Phase 0: the free squad cap
+
+The cap on Overlord's free task forces counts BLUFOR's tier and the zones that BLUFOR holds, up to 6. Both modes
+spawn through it, because Advanced keeps Simple's free spawn.
+
+```
+cap = min(FREE_MAX, tierCap + held zones)
+```
+
+- `tierCap` is today's cap by BLUFOR tier: 1, 1, 2, 2 or 3 (`fnc_taskforce_tick.sqf`).
+- Each zone in `WARCOM_zones_controled_by_BLUFOR` adds 1, so a lost zone takes its slot back. A squad already alive
+  over the cap stays: the cap only stops the next spawn.
+- `FREE_MAX` (6) is a `#define` in `fnc_taskforce_tick.sqf`, beside `FIRST_SPAWN` and `RESPAWN`.
+- The timer does not change: the first squad 5 minutes in, then 30 minutes apart.
+- A handed squad still does not count against the cap.
+- Nothing new is saved: the cap reads the tier and the held zones at each tick.
+
+At tier 1 with no zones the cap is 1; at tier 3 with 2 zones it is 4; at tier 5 with 3 zones it is 6.
+
+| Chunk | Builds |
+|---|---|
+| **0.1** Free squad cap | the cap above in `fnc_taskforce_tick.sqf`, and the task-force line of `performance.md` (`:13`) in the same change |
 
 ## Phase 1: the commander record
 
@@ -149,8 +174,7 @@ as it runs for Simple's task forces today.
   probe. Take back (`fnc_taskforce_release`) deletes the tasking, removes it from every attack role, and gives the
   squad back as today.
 - **The free spawn stays Simple's.** `fnc_taskforce_spawn` raises Overlord's own task forces at the HQ, its section
-  drawn by BLUFOR's tier, on the shipped timer and cap: the first 5 minutes in, then 30 minutes apart, with at most
-  1, 1, 2, 2 or 3 alive by tier. A handed squad does not count against the cap.
+  drawn by BLUFOR's tier, on the shipped timer and the Phase 0 cap ([§Phase 0](#phase-0-the-free-squad-cap)).
 - **The tick splits in two.** `fnc_taskforce_tick` becomes an upkeep half (the free timer and spawn, the markers, the
   lost line, the status that the list reads) and a Simple orders half (the objective, the stance split, the defend
   posts, the town patrols and the HQ hold). Advanced runs the upkeep half and skips the orders half.
@@ -218,7 +242,7 @@ Phase 2 lands in order. An attack needs belief of OPFOR and units to draw, so 2.
 
 Phase 2 settles in play:
 
-- Whether the free cap and the 30-minute spawn field enough units to meet the muster bars, so that an attack
+- Whether the Phase 0 cap and the 30-minute spawn field enough units to meet the muster bars, so that an attack
   launches rather than expires.
 - Whether a free unit with nothing worth doing should patrol, or hold where it stands, now that no Bank row competes.
 - The server cost of two commanders on one tick ([`performance.md`](../../info/architecture/performance.md) records
