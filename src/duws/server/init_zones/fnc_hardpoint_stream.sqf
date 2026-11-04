@@ -437,6 +437,7 @@ fnc_hardpoint_register = {
     _occ set ["airFilter", _airFilter];
     _occ set ["neverStream", _neverStream];
     _occ set ["hpZoneKey", _zoneKey];
+    _occ set ["noPresence", _zoneKey isNotEqualTo ""];
     // Spent, not time: a register-time stamp read as BLUFOR just gone and raised every hardpoint.
     _occ set ["lastSeen", -1e6];
 

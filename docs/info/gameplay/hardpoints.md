@@ -218,14 +218,16 @@ is not rolled: generation retries it until it stands, and gives up only on a map
 A hardpoint registers as a site the same way a zone does — `fnc_site_register`,
 `fnc_site_occupant_register`, `fnc_site_hooks_set` (`server/misc/fnc_site_stream_init.sqf:19,44,82`)
 — so the shared poller tests it against the same per-pass player list rather than paying a spatial
-query per hardpoint (`fnc_hardpoint_register`, `server/init_zones/fnc_hardpoint_stream.sqf:422-532`).
+query per hardpoint (`fnc_hardpoint_register`, `server/init_zones/fnc_hardpoint_stream.sqf:422-533`).
 What differs from a zone is the lifecycle: one gun-and-garrison emplacement that wakes, sleeps and
 can be cleared, never captured or retaken.
 
 **A zone-child hardpoint mirrors its zone rather than streaming on its own ring.**
 `DUWS_fnc_hardpointZoneAwake` (`:23-26`) reads the zone's own garrison occupant and answers awake or
-raising, so a zone hardpoint also takes the zone's air ring and its 250 km/h cap. A standalone hardpoint
-instead wakes on its own presence ring (`DUWS_hardpointStreaming`'s `spawnRadius`/`grace` per type).
+raising, so a zone hardpoint also takes the zone's air ring and its 250 km/h cap. The poller runs no
+presence test for a zone hardpoint (`noPresence`), because the answer would go unread. A standalone
+hardpoint instead wakes on its own presence ring (`DUWS_hardpointStreaming`'s `spawnRadius`/`grace` per
+type).
 
 **A standalone hardpoint also wakes on its own air ring.** The ground ring ignores everyone aboard an
 aircraft, so without an air ring a helicopter never wakes the emplacement. The ring and the aircraft it
@@ -269,7 +271,7 @@ composition's own deploy rebuilds members with `createVehicle`, which would hand
 A minefield instead streams on its own path, square by square ([Siting](#siting)).
 On registration, every member of their
 composition is re-filed through `fnc_duws_keep` with `_pinned = true`
-(`fnc_hardpoint_stream.sqf:498`), which sets `DUWS_noStow` and excludes the object from
+(`fnc_hardpoint_stream.sqf:499`), which sets `DUWS_noStow` and excludes the object from
 `fnc_duws_stow`'s crewed-member refusal and its delete pass
 (`server/misc/fnc_composition_stream_init.sqf:38-46,93-100`). Every other type stows and redeploys
 like an ordinary composition: garrisons are raised fresh from `DUWS_fnc_teamRoster` on each raise
@@ -335,7 +337,7 @@ vanish with the clear.
 ## Reveal
 
 Every hardpoint gets a marker on registration: shape `"ICON"`, type `"loc_Bunker"`, coloured by side,
-with the type token as its text (`fnc_hardpoint_stream.sqf:454-461`) — one icon shape for every type,
+with the type token as its text (`fnc_hardpoint_stream.sqf:455-462`) — one icon shape for every type,
 distinguished by label rather than by symbol. The marker's alpha and the revealed flag start at the rule
 in [`intel_system.md`](intel_system.md#what-is-hidden-depends-on-when-it-came-into-existence): a hardpoint
 laid by campaign generation is shown outside hardcore and hidden under it, and one built in play

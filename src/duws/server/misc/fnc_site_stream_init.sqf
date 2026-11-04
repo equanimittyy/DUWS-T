@@ -323,6 +323,11 @@ fnc_site_poller = {
                 // follow the garrison's own cycle instead of reaching their own presence conclusion a
                 // fraction of a second apart from it.
                 if (_o getOrDefault ["driven", false]) then { continue };
+                // Follows another occupant's state (a zone hardpoint, its zone's), so a presence answer would go unread.
+                if (_o getOrDefault ["noPresence", false]) then {
+                    [_key, _o, false, _now] call ([_key, _kind, "tick"] call fnc_site_hook);
+                    continue;
+                };
                 private _ring = _radius + (_o get "buffer");
                 private _bluHolds = (_o getOrDefault ["enemyAware", false])
                     && {([_key] call DUWS_fnc_garrisonSideOf) isEqualTo "BLU"};
