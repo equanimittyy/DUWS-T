@@ -84,13 +84,18 @@ DUWS_fnc_opcom_attackSweep = {
             };
         } forEach ["assault", "flank"];
     };
+    // BLUFOR attacks only the OPFOR zones intel has found, and OPFOR has no base to attack.
+    private _opf = (_cmd get "side") isEqualTo east;
     if ((_cmd get "attackReadyTick") <= DUWS_opcom_tick && {((_cmd get "attacks") findIf { (_x get "kind") isNotEqualTo "qrf" }) < 0}) then {
         {
             private _zk = [_x] call fnc_zone_key;
-            [_zk, _x, ([_zk] call fnc_site_at) get "pos", [_zk] call DUWS_fnc_opcom_zoneLabel] call _fnc_consider;
+            private _zp = _x;
+            if (_opf || {(zone_namePOS_pairs findIf { ((_x select 1) distance2D _zp) < 1 && {_x select 2} }) >= 0}) then {
+                [_zk, _x, ([_zk] call fnc_site_at) get "pos", [_zk] call DUWS_fnc_opcom_zoneLabel] call _fnc_consider;
+            };
         } forEach (call DUWS_fnc_opcom_enemyZones);
         // OPFOR at Armour (4) and BLUFOR at Mechanised (3): every other gate here already holds at the campaign start.
-        if (DUWS_opcom_hqKnown && {WARCOM_opfor_tier >= 4} && {WARCOM_blufor_tier >= 3}
+        if (_opf && {DUWS_opcom_hqKnown} && {WARCOM_opfor_tier >= 4} && {WARCOM_blufor_tier >= 3}
             && {(call DUWS_fnc_opcom_enemyZones) isEqualTo []} && {["HQ"] call DUWS_fnc_opcom_captureHolds}) then {
             private _hp = (["HQ"] call fnc_site_at) getOrDefault ["pos", []];
             if (_hp isNotEqualTo []) then { ["HQ", _hp, _hp, "HQ"] call _fnc_consider };
@@ -98,7 +103,7 @@ DUWS_fnc_opcom_attackSweep = {
         // Only a FOB that a capture at its centre takes: one inside a held zone falls with it.
         {
             private _fk = _x getVariable ["DUWS_siteKey", ""];
-            if (_fk in DUWS_opcom_fobsKnown) then {
+            if (_opf && {_fk in DUWS_opcom_fobsKnown}) then {
                 private _fp = ([_fk] call fnc_site_at) get "pos";
                 if (([_fp] call DUWS_fnc_opcom_captureKey) isEqualTo _fk) then {
                     [_fk, _fp, _fp, format ["FOB %1", Array_of_FOBname select _forEachIndex]] call _fnc_consider;
@@ -175,7 +180,7 @@ DUWS_fnc_opcom_qrfSweep = {
     private _sightings = [];
     {
         private _bp = (_cmd get "belief_pos") select _forEachIndex;
-        if ([_x] call DUWS_fnc_opcom_beliefIsSighting && {[_bp] call (_cmd get "covers")} && {!([_bp] call DUWS_fnc_opcom_inBaseCells)}) then {
+        if ([_x] call DUWS_fnc_opcom_beliefIsSighting && {[_bp] call (_cmd get "covers")} && {!([_bp] call DUWS_fnc_opcom_qrfBarred)}) then {
             _sightings pushBack [(_cmd get "belief_str") select _forEachIndex, _forEachIndex];
         };
     } forEach (_cmd get "belief_key");

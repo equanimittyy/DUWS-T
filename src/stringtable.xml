@@ -18292,6 +18292,30 @@
                 <Chinese>全體單位注意，這裡是 Overlord。特遣隊 %1 正從總部出發。</Chinese>
                 <Spanish>A todas las unidades, aquí Overlord. La Fuerza Operativa %1 sale del CG.</Spanish>
             </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_ATTACK_LAUNCH">
+                <Original>All units, this is Overlord. Task forces are moving on %1.</Original>
+                <English>All units, this is Overlord. Task forces are moving on %1.</English>
+                <Chinesesimp>全体单位注意，这里是 Overlord。特遣队正向 %1 发起进攻。</Chinesesimp>
+                <German>An alle Einheiten, hier ist Overlord. Task Forces rücken auf %1 vor.</German>
+                <Polish>Wszystkie jednostki, tu Overlord. Grupy zadaniowe ruszają na %1.</Polish>
+                <Czech>Všem jednotkám, tady Overlord. Úkolová uskupení postupují na %1.</Czech>
+                <Russian>Всем подразделениям, говорит Overlord. Оперативные группы выдвигаются на %1.</Russian>
+                <French>À toutes les unités, ici Overlord. Les groupements tactiques marchent sur %1.</French>
+                <Chinese>全體單位注意，這裡是 Overlord。特遣隊正向 %1 發起進攻。</Chinese>
+                <Spanish>A todas las unidades, aquí Overlord. Las Fuerzas Operativas avanzan sobre %1.</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_QRF_LAUNCH">
+                <Original>All units, this is Overlord. Task forces are moving to the contact near %1.</Original>
+                <English>All units, this is Overlord. Task forces are moving to the contact near %1.</English>
+                <Chinesesimp>全体单位注意，这里是 Overlord。特遣队正赶往 %1 附近的交火地点。</Chinesesimp>
+                <German>An alle Einheiten, hier ist Overlord. Task Forces rücken zum Feindkontakt bei %1 aus.</German>
+                <Polish>Wszystkie jednostki, tu Overlord. Grupy zadaniowe ruszają do kontaktu w pobliżu %1.</Polish>
+                <Czech>Všem jednotkám, tady Overlord. Úkolová uskupení vyrážejí ke kontaktu u %1.</Czech>
+                <Russian>Всем подразделениям, говорит Overlord. Оперативные группы выдвигаются к месту контакта у %1.</Russian>
+                <French>À toutes les unités, ici Overlord. Les groupements tactiques se portent au contact près de %1.</French>
+                <Chinese>全體單位注意，這裡是 Overlord。特遣隊正趕往 %1 附近的交火地點。</Chinese>
+                <Spanish>A todas las unidades, aquí Overlord. Las Fuerzas Operativas se dirigen al contacto cerca de %1.</Spanish>
+            </Key>
             <Key ID="STR_DUWS_T_TASKFORCE_LOST">
                 <Original>All units, this is Overlord. Task Force %1 is combat ineffective.</Original>
                 <English>All units, this is Overlord. Task Force %1 is combat ineffective.</English>

@@ -52,8 +52,8 @@ DUWS_fnc_opcom_captureEnters = {
 // -> true if it garrisoned. A live attacker inside the objective guards until it stows, so it never vanishes in
 // front of a player; one still on the road re-garrisons there.
 //
-// OPFOR has no pool at a base, so a base's attacker guards wherever it stands. A FOB's site is retired with it, so its
-// absence reads as outside.
+// OPFOR has no pool at a base, so a base's attacker guards wherever it stands, and so does every BLUFOR attacker, whose
+// commander garrisons nothing. A FOB's site is retired with it, so its absence reads as outside.
 DUWS_fnc_opcom_captureEnd = {
     params ["_t", "_pos", "_grp"];
     private _zk = _t get "targetZone";
@@ -62,7 +62,8 @@ DUWS_fnc_opcom_captureEnd = {
     _t deleteAt "inZoneAt";
     if (count _site == 0 || {(_pos distance2D (_site get "pos")) > (_site get "radius")}) exitWith {
         _t set ["hold", 0];
-        if (_zk isEqualTo "HQ" || {(_zk select [0, 4]) isEqualTo "FOB_"} || {!([_t, "return", _site get "pos", _zk] call fnc_opcom_task)}) then {
+        if (_zk isEqualTo "HQ" || {(_zk select [0, 4]) isEqualTo "FOB_"} || {(_cmd get "captureRest") isNotEqualTo "garrison"}
+            || {!([_t, "return", _site get "pos", _zk] call fnc_opcom_task)}) then {
             [_t, "guard"] call fnc_opcom_task
         };
         false
@@ -127,7 +128,15 @@ DUWS_fnc_opcom_stepCapture = {
     // A FOB falls to all its attackers at once (DUWS_fnc_opcom_fobOverrun).
     if ((_zk select [0, 4]) isEqualTo "FOB_") exitWith { false };
     // Below is the virtual attacker's stand-in for a fight that never renders; a live one takes the ground by winning it.
-    if (_live) exitWith { false };
+    // BLUFOR's capture rule needs the zone's own garrison beaten wherever it wandered, so a BLUFOR squad done with its
+    // waypoints hunts the nearest survivor, as Simple's task forces do, and holds the step while it does.
+    if (_live) exitWith {
+        if ((_cmd get "side") isEqualTo east || {_ctx select 3} || {currentWaypoint _grp < count waypoints _grp}) exitWith { false };
+        private _left = ([_zk] call fnc_zone_roster) select { alive _x };
+        if (_left isEqualTo []) exitWith { false };
+        [_grp, "capture", getPosASL ([_left, leader _grp] call BIS_fnc_nearestPosition)] call DUWS_fnc_opcom_applyOrder;
+        true
+    };
     if (_entered) then {
         private _ni = zone_namePOS_pairs findIf { ([_x select 1] call fnc_zone_key) isEqualTo _zk };
         if (_ni >= 0) then { [(zone_namePOS_pairs select _ni) select 0, []] call fnc_enemy_contact };

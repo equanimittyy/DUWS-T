@@ -15,7 +15,8 @@ if (DUWS_paramBluforCommander == 1) then {
     _cmds set ["BLU", [[
         ["side", west], ["enemySide", east], ["wallet", false], ["streams", false],
         ["enemyZones", "WARCOM_zones_controled_by_OPFOR"], ["covers", fnc_aoi_blufor_covers],
-        ["captureRest", "guard"], ["actions", []]
+        ["captureRest", "guard"],
+        ["actions", DUWS_opcom_actions select { (_x select 0) in ["attack_assault", "attack_flank", "attack_qrf", "patrol", "probe"] }]
     ]] call fnc_opcom_cmd_new];
 };
 // Registered only once built: a dirty mark from another thread writes into every registered record.

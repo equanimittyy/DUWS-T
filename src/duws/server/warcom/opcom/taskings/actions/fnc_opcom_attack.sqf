@@ -353,6 +353,12 @@ DUWS_fnc_opcom_launch = {
     private _n = 0;
     { _n = _n + count (_x get "units") } forEach (_attack get "roles");
     { [_attack, _x] call DUWS_fnc_opcom_releaseRole } forEach (_attack get "roles");
+    // BLUFOR's units are the players' own task forces, so Overlord tells them where they go.
+    if ((_cmd get "side") isEqualTo west) then {
+        private _qrf = (_attack get "kind") isEqualTo "qrf";
+        [localize "STR_DUWS_T_OVERLORD", format [localize (["STR_DUWS_T_TASKFORCE_ATTACK_LAUNCH", "STR_DUWS_T_TASKFORCE_QRF_LAUNCH"] select _qrf),
+            [_attack get "label", [_attack get "pos"] call fnc_place_name] select _qrf]] remoteExec ["fnc_duws_dialogue", 0];
+    };
     ["INFO", "OPCOM", format ["attack %1 (%2 %3) launches %4 unit(s) in %5 bucket(s) at %6:1", _attack get "id",
         _attack get "kind", _attack get "label", _n, count (_attack get "roles"), _r toFixed 2]] call fnc_log;
 };
@@ -363,11 +369,11 @@ DUWS_fnc_opcom_buildupStep = {
     if (_qrf && {!([_attack] call DUWS_fnc_opcom_qrfFollow)}) exitWith {
         [_attack, "dropped: the sighting is no longer believed"] call DUWS_fnc_opcom_attackClose;
     };
-    if (_qrf && {[_attack get "pos"] call DUWS_fnc_opcom_inBaseCells}) exitWith {
-        [_attack, "dropped: the sighting entered the base cells"] call DUWS_fnc_opcom_attackClose;
+    if (_qrf && {[_attack get "pos"] call DUWS_fnc_opcom_qrfBarred}) exitWith {
+        [_attack, "dropped: the sighting entered ground a QRF stays out of"] call DUWS_fnc_opcom_attackClose;
     };
     if (!_qrf && {!([_attack get "target"] call DUWS_fnc_opcom_captureHolds)}) exitWith {
-        [_attack, "dropped: the target is no longer BLUFOR's"] call DUWS_fnc_opcom_attackClose;
+        [_attack, "dropped: the target is no longer the enemy's"] call DUWS_fnc_opcom_attackClose;
     };
     private _units = [];
     private _lost = false;
@@ -413,8 +419,8 @@ DUWS_fnc_opcom_executionStep = {
         // Following the lead keeps the next QRF off the same cluster.
         [_attack] call DUWS_fnc_opcom_qrfFollow;
     };
-    if (_qrf && {[_attack get "pos"] call DUWS_fnc_opcom_inBaseCells}) exitWith {
-        [_attack, "broken off: the sighting entered the base cells"] call DUWS_fnc_opcom_attackBreak;
+    if (_qrf && {[_attack get "pos"] call DUWS_fnc_opcom_qrfBarred}) exitWith {
+        [_attack, "broken off: the sighting entered ground a QRF stays out of"] call DUWS_fnc_opcom_attackBreak;
     };
     if (_qrf) then { [_attack] call DUWS_fnc_opcom_qrfLand };
     private _r = [_attack] call DUWS_fnc_opcom_musterRatio;

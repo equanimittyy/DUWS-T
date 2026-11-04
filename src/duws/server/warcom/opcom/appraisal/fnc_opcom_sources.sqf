@@ -70,6 +70,7 @@ DUWS_fnc_opcom_freeSource = {
 // port. At the unit cap only a truck is still hired.
 DUWS_fnc_opcom_hireSources = {
     params ["_fits", "_near", "_zones"];
+    if !(_cmd get "wallet") exitWith { [] };
     private _capped = (["unitCount", DUWS_fnc_opcom_unitCount] call DUWS_fnc_opcom_tickCached) >= OPCOM_CAP_UNITS_PER_ZONE * count zone_meta_array;
     private _out = [];
     {
