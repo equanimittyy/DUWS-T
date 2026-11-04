@@ -18,7 +18,7 @@ Not in this plan: the commander's recruitment upgrades, and any economy for the 
 |---|---|
 | 0 — Free squad cap: BLUFOR's tier and the zones it holds set how many free task forces stand, up to 6, in both modes | **shipped** |
 | 1 — Commander record: OPCOM's per-commander state and its side inputs move into one record per side, OPFOR only | **shipped** |
-| 2 — The Advanced commander: the param, BLUFOR's record, perception, task forces as its units, actions, persistence and debug | planned |
+| 2 — The Advanced commander: the param, BLUFOR's record, perception, task forces as its units, actions, persistence and debug | **shipped** |
 
 Phase 0 lands first. It changes the free spawn that both modes use, so it plays in Simple before Phase 2 builds on
 it. Phase 1 changes no behaviour. It comes before Phase 2 because Phase 2 is a second record on the same code, and a
@@ -131,10 +131,12 @@ read into `DUWS_paramBluforCommander` (`server_var_init.sqf`) and listed in the 
 (`fnc_campaign_store.sqf`), and the load screen's EDIT PARAMS can change it: a new row in `campaign_load_menu.hpp`,
 which grows that dialog by 1.5 grid rows.
 
-- Simple builds no BLUFOR record and runs `fnc_taskforce_tick` on the OPCOM tick, as today.
-- Advanced builds the BLUFOR record at OPCOM init and runs its stages after OPFOR's. `fnc_taskforce_tick` runs only
-  its upkeep half ([§Task forces](#task-forces)).
-- The `DUWS_Debug` mission param sets both commanders to `off`, as it sets OPCOM today.
+- Simple builds no BLUFOR record, and `fnc_taskforce_tick` calls Simple's standing orders (`fnc_taskforce_orders`).
+- Advanced builds BLUFOR's record at OPCOM init (`fnc_opcom_cmd_new`, from its side inputs in
+  `fnc_opcom_perception_run.sqf`) and runs its sensing, belief upkeep, bookkeeping, grid, task step, attack runner,
+  need and pick after OPFOR's stages. `fnc_taskforce_tick` keeps its upkeep and calls `fnc_taskforce_commander` in
+  place of the orders ([§Task forces](#task-forces)).
+- Both commanders start weighted; the Debug menu's mode rows switch the one selected ([§Debug](#debug)).
 
 | A load that switches the mode | Result |
 |---|---|
@@ -147,14 +149,15 @@ BLUFOR's belief is about OPFOR, and it holds only what BLUFOR can know.
 
 - **Sensors.** Every live west group is an observer, the players' groups included. Its leader's `nearTargets`
   reports each east group that it fixes, through the shipped sweep (`fnc_opcom_sense.sqf`) with the sides swapped.
-  The hardpoint contact reveal stays on OPFOR's sweep only. An OPCOM unit that is virtual is on no group list, so
-  BLUFOR sees it only once it renders.
+  The hardpoint contact reveal, the HQ and FOB discovery and the base-cell blindness stay OPFOR's only. An OPCOM unit
+  that is virtual is on no group list, so BLUFOR sees it only once it renders.
 - **Own force.** Each BLUFOR zone deposits on BLUFOR's own layer at its garrison force, each commander unit at its
   live `effForce`, and each live player group at its force, with a player worth 1 + `OPCOM_PLAYER_WORTH`.
 - **Enemy force from intel.** Each revealed OPFOR zone deposits on the enemy layer at its true garrison force, the
   strength that the map readout's bar shows, and each revealed OPFOR hardpoint at its `DUWS_fnc_hpForce`. A hidden
   zone or hardpoint deposits nothing, so in hardcore mode the commander plans only against what the players found
-  ([`intel_system.md`](../../info/gameplay/intel_system.md)).
+  ([`intel_system.md`](../../info/gameplay/intel_system.md)). `fnc_zone_reveal` and `fnc_hardpoint_reveal` mark each
+  flag they set on the grids (`DUWS_fnc_opcom_gridDirty`).
 - **Need.** Each BLUFOR holding spreads its worth × exposure over its 7×7 block, as OPCOM's need does: a BLUFOR
   zone, the HQ (`OPCOM_HQ_WORTH`), each FOB (`OPCOM_FOB_WORTH`) and each BLUFOR-banded town. Exposure is measured to
   the OPFOR ground that BLUFOR knows: each revealed OPFOR zone and each visible OPFOR-banded town. Traffic from
@@ -164,28 +167,32 @@ BLUFOR's belief is about OPFOR, and it holds only what BLUFOR can know.
 ### Contact
 
 Every BLUFOR commander unit is a live task force, so the shipped rules cover contact and Phase 2 adds none. An
-OPCOM unit renders on a live BLUFOR group within its K (`fnc_opcom_task_step.sqf:18`), and an OPFOR site wakes for
-a live BLUFOR unit inside its ring (`server/misc/fnc_site_stream_init.sqf:285`). A fight away from the players runs
+OPCOM unit renders on a live BLUFOR group within its K (`fnc_opcom_task_step.sqf`), and an OPFOR site wakes for
+a live BLUFOR unit inside its ring (`fnc_site_poller`, `server/misc/fnc_site_stream_init.sqf`). A fight away from the players runs
 as it runs for Simple's task forces today.
 
 ### Task forces
 
 - **Every task force is a commander unit.** `fnc_taskforce_create` registers a squad as today, handed over or
-  spawned: its name, its marker and its list row. In Advanced it also adds a live-only tasking for the squad. The
-  tasking's group is the squad, its `effForce` is read live, and its move type comes from its hulls, as its marker
-  type does today. It is drawable like any other unit, so the pick can bind it to an attack, a QRF, a patrol or a
-  probe. Take back (`fnc_taskforce_release`) deletes the tasking, removes it from every attack role, and gives the
-  squad back as today.
+  spawned: its name, its marker and its list row. In Advanced, `fnc_taskforce_commander` gives each live task force a
+  live-only tasking on the next tick, whatever path brought it in. The tasking is bound to the squad's group, or, with
+  no group (restored), to the task force of its name (`taskforce`). Its `effForce` is read live, and its move type is
+  read off the hull the squad rides each tick. It is drawable like any other unit, so the pick can bind it to an
+  attack, a QRF, a patrol or a probe.
+- **Take back** (`fnc_taskforce_release`) unbinds the tasking at once, so no task step orders the squad after the
+  player has it. `fnc_taskforce_commander` then drops every tasking whose task force is gone, and its id from every
+  attack role, in the OPCOM thread.
 - **The free spawn stays Simple's.** `fnc_taskforce_spawn` raises Overlord's own task forces at the HQ, its section
   drawn by BLUFOR's tier, on the shipped timer and the Phase 0 cap ([§Phase 0](#phase-0-the-free-squad-cap)).
-- **The tick splits in two.** `fnc_taskforce_tick` becomes an upkeep half (the free timer and spawn, the markers, the
-  lost line, the status that the list reads) and a Simple orders half (the objective, the stance split, the defend
-  posts, the town patrols and the HQ hold). Advanced runs the upkeep half and skips the orders half.
-- **The Task Force list** (`fnc_taskforce_list.sqf`) gains a text for each OPCOM order a task force can hold.
+- **The tick splits in two.** `fnc_taskforce_tick` keeps the upkeep (the free timer and spawn, the markers, the lost
+  line, the status that the list reads). Simple's orders (the objective, the stance split, the defend posts, the town
+  patrols and the HQ hold) are `fnc_taskforce_orders`, which only Simple calls.
+- **The Task Force list** (`fnc_taskforce_list.sqf`) reads the commander's orders: hold, stage for an attack,
+  capture, respond to contact, patrol and probe.
 - **The stance selects the weights.** Attack, Balanced and Defend (`DUWS_taskforce_stance`) select the Aggressive,
-  Balanced and Defensive archetype records for BLUFOR's record. The Aggressive and Defensive records belong to OPCOM
-  7.1 ([`opcom_plan.md` §Archetype](opcom_plan.md#archetype-phase-7)): whichever of the two chunks lands first adds
-  them. A record weighs only the actions its commander has.
+  Balanced and Defensive archetype records for BLUFOR's record. The Aggressive and Defensive records stand in
+  `fnc_opcom_archetypes.sqf` on Balanced's mixes ([`opcom_plan.md` §Archetype](opcom_plan.md#archetype-phase-7)). A
+  record weighs only the actions its commander has.
 - **Dialogue.** The deploy and lost lines fire from the task-force code, as today. An attack launch and a QRF launch
   each give one Overlord line, from two new keys. A patrol and a probe are silent. Each new key carries every
   language tag ([`player_text_style_guide.md`](../../info/gameplay/player_text_style_guide.md)).
@@ -195,14 +202,16 @@ as it runs for Simple's task forces today.
 | Action | Targets | Ends on |
 |---|---|---|
 | `attack_assault`, `attack_flank` | each revealed OPFOR zone on a unit's landmass, under OPCOM's gates: one assault or flank open at a time, `OPCOM_ATTACK_COOLDOWN` and the band. No HQ or FOB target | the zone in `WARCOM_zones_controled_by_BLUFOR`, through the shipped capture rule, then every attacker to `guard` where it stands |
-| `attack_qrf` | each cluster of OPFOR sightings that BLUFOR's area covers (`fnc_aoi_blufor_covers`), outside every OPFOR zone's radius, with no QRF on it and no local defense at the ideal bar | as OPCOM's QRF |
+| `attack_qrf` | each cluster of OPFOR sightings that BLUFOR's area covers (`fnc_aoi_blufor_covers`), outside every OPFOR zone's radius (`DUWS_fnc_opcom_qrfBarred`), with no QRF on it and no local defense at the ideal bar | as OPCOM's QRF |
 | `patrol` | stale cells on BLUFOR's staleness and need | as shipped |
 | `probe` | each assault or flank target above whose block reads stale | as shipped |
 
 - **There is no Bank row.** The pick commits the best candidate it draws, because nothing is saved toward.
+- **No hire.** A commander without a wallet is offered no hire source (`DUWS_fnc_opcom_hireSources`).
 - **No target lies across water.** Without a ferry, a source on another landmass is no source for the target.
 - **A capture is the shipped BLUFOR capture.** A BLUFOR attacker takes a zone as a task force does today, and the
-  capture pays what a BLUFOR capture pays today.
+  capture pays what a BLUFOR capture pays today. A live attacker done with its waypoints hunts the zone's nearest
+  surviving defender, as Simple's task forces do (`DUWS_fnc_opcom_stepCapture`).
 - **The local defense counts the players.** The QRF gate reads BLUFOR's own layer, players included, so a QRF goes
   where the BLUFOR force in contact is short of the ideal bar against the cluster.
 
@@ -217,29 +226,30 @@ The commander's store is campaign state, so a load resumes its standing orders a
 
 - The squads, the free-spawn timer and the stance are saved already (`taskforces`, `taskforceSpawnIn`,
   `taskforceStance`), and so is the tick (`DUWS_opcom_tick`).
-- The save and the restore are OPCOM's (`DUWS_fnc_campaignTaskings`, `DUWS_fnc_restoreOpcom`), called with BLUFOR's
-  record. The restore runs in the OPCOM thread, after OPFOR's restore and after `DUWS_fnc_restoreTaskforces`.
-- Each tasking keeps its id, so an attack role that names it resumes. The commander's restore binds each tasking to
-  the task force that restores under the same name.
-- The same change updates `campaign_persistence_plan.md` §The snapshot and §The commander, and
-  `campaign_save_format.md`.
+- The save is OPCOM's `DUWS_fnc_campaignTaskings`, called with BLUFOR's record. The restore is
+  `DUWS_fnc_restoreCmd`, the part of OPFOR's restore that every commander shares, called in the OPCOM thread after
+  OPFOR's restore and after `DUWS_fnc_restoreTaskforces`.
+- Each tasking keeps its id, so an attack role that names it resumes. The restore then runs
+  `fnc_taskforce_commander` once, so each tasking is bound to the task force that restored under its name before the
+  first tick.
 
 ### Debug
 
-- The Debug menu's OPCOM page gains a Commander row (OPFOR, BLUFOR) that the mode, Pick once, Difficulty and the
-  hand-driven orders act on. BLUFOR is offered only in Advanced. The Recruit list stays OPFOR's.
+- The Debug menu's OPCOM page gains a Commander row, shown only in Advanced, that switches between OPFOR and BLUFOR
+  (`DUWS_opcom_dbgSide`). The mode, Pick once, Difficulty, the grid drift check and the hand-driven orders act on the
+  selected commander; recruits, buys, supply, fires and ferries stay OPFOR's.
 - The OPCOM AI overlay and the grid overlay draw the selected commander's record.
 
 ### Chunks
 
 | Chunk | Builds |
 |---|---|
-| **2.1** Param and boot | the lobby param, its config diary row, its `DUWS_campaignParams` entry, the EDIT PARAMS row, BLUFOR's record built and ticked in Advanced, and the task-force tick split |
-| **2.2** Perception | BLUFOR's sensors, its own and enemy grid sources, and its need field |
-| **2.3** Task forces | every task force as a live-only tasking, Take back, the list's order texts and the stance on the archetype records |
-| **2.4** Actions | BLUFOR's action list, `captureRest`, the QRF on BLUFOR ground, patrol and probe on BLUFOR's fields, and the two dialogue keys |
-| **2.5** Persistence | the `opcomBlu` key, its restore, the task-force binding and the switch rules |
-| **2.6** Debug | the Commander row and both overlays |
+| **2.1** Param and boot | **Shipped** — the lobby param, its config diary row, its `DUWS_campaignParams` entry, the EDIT PARAMS row, BLUFOR's record built and ticked in Advanced, and the task-force tick split |
+| **2.2** Perception | **Shipped** — BLUFOR's sensors, its own and enemy grid sources, and its need field |
+| **2.3** Task forces | **Shipped** — every task force as a live-only tasking, Take back, the list's order texts and the stance on the archetype records |
+| **2.4** Actions | **Shipped** — BLUFOR's action list, `captureRest`, the QRF on BLUFOR ground, patrol and probe on BLUFOR's fields, and the two dialogue keys |
+| **2.5** Persistence | **Shipped** — the `opcomBlu` key, its restore, the task-force binding and the switch rules |
+| **2.6** Debug | **Shipped** — the Commander row and both overlays |
 
 Phase 2 lands in order. An attack needs belief of OPFOR and units to draw, so 2.2 and 2.3 land before 2.4.
 

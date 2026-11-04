@@ -381,8 +381,9 @@ unlimited, and the pool it was spending against stops meaning anything
 ([§The arsenal](#the-arsenal-the-shelf-is-rebuilt-the-pool-is-stored)). The saved value therefore wins
 for the arsenal mode and ammo tracking, the civilian arms stock, fatigue, the first-person
 restriction, rest weather, the lose conditions, the low-pop officer protection, the town generation,
-supports on death and the bandits. The bandits parameter withholds the DLC factions that the players do
-not own, so a new group of players changes it with the load screen's EDIT PARAMS.
+supports on death, the bandits and the BLUFOR commander. The bandits parameter withholds the DLC factions that the
+players do not own, so a new group of players changes it with the load screen's EDIT PARAMS, and the same screen
+switches a campaign's BLUFOR commander, which keeps its task forces either way.
 
 **Five params stay the host's.** `DUWS_Debug`, `DUWS_LogLevel`, `DUWS_GroupIcons`,
 `DUWS_CleanupLifetime` and `DUWS_AutosaveInterval` say how a server is being run, not what the
@@ -615,6 +616,7 @@ snapshot carries for it, and the contract they answer to is this section's; the 
 | Attacks | outcome | the record's `attacks`, one hashmap per attack, with its `attackSeq` beside it, and the `boundTo` key on the taskings they own |
 | Attack cooldown | outcome | the record's `attackReadyTick`, the tick the next assault or flank may open at |
 | Supply cooldowns | outcome | the record's `supplyReadyTick`, the tick each supply class may next set off at |
+| BLUFOR commander | outcome | Advanced only, under `opcomBlu`: BLUFOR's record's `taskings` with its `taskSeq`, its `attacks` with its `attackSeq`, and its `attackReadyTick`. A tasking names its task force, so the load binds it to the squad that restores under that name ([`blufor_commander_plan.md` §Persistence](opcom/blufor_commander_plan.md#persistence)) |
 
 **A tasking is already serialisable, and that is deliberate.** A record holds numbers, strings and arrays
 only, and `grp` is a live group's netId rather than a handle
@@ -741,8 +743,9 @@ would lose the team's investment. A task force taken back into High Command leav
 the save refunds it with the other High Command squads instead of restoring it. The save records the men and the vehicles, not the group, because a
 group does not outlive the session. `DUWS_fnc_restoreTaskforces` rebuilds each task force where it
 stood, with each man's loadout, damage and seat, and then registers the group through
-`fnc_taskforce_create` under its saved name. The order is not saved: the task-force tick derives
-it from the map again, so the load gives the same order. A patrol leg is a random town, so a load
+`fnc_taskforce_create` under its saved name. In Simple the order is not saved: the task-force tick derives
+it from the map again, so the load gives the same order. In Advanced the order is BLUFOR's commander's, saved
+with its taskings ([§The commander](#the-commander)). A patrol leg is a random town, so a load
 picks a new one. A man or a vehicle whose class no loaded mod
 defines is dropped. The load hint counts a dropped vehicle; a dropped man is logged, because the hint's
 unit count is of enemy units.
