@@ -1,11 +1,9 @@
-// Locality: client, remoteExec'd by DUWS_fnc_siteTakeTell. _left -1 means the hold broke on the _blocker test.
-// A HUD layer, not the hint box: the count runs under the fight, and the flag's refusal must stay readable over it.
-params ["_key", "_name", "_left", "_hold", "_blocker"];
+// Locality: client, remoteExec'd by DUWS_fnc_siteTakeTell each time a capture's failed tests change. _done is the
+// meter, 0 to 1: with no _blockers it fills over _hold, otherwise it drains _decay times as fast.
+// A HUD layer, not the hint box: the count runs under the fight, and the flag's report must stay readable over it.
+params ["_name", "_done", "_hold", "_decay", "_blockers"];
 if (!hasInterface) exitWith {};
 
-// A player can stand in two zones' rings, so a break ends only the count it belongs to.
-if (_left < 0 && {(missionNamespace getVariable ["DUWS_captureBarKey", ""]) isNotEqualTo _key}) exitWith {};
-DUWS_captureBarKey = _key;
 // Each message supersedes the last: an older copy's loop sees the bump and stops drawing.
 DUWS_captureBarRun = (missionNamespace getVariable ["DUWS_captureBarRun", 0]) + 1;
 private _run = DUWS_captureBarRun;
@@ -21,26 +19,24 @@ if (DUWS_captureBarRun != _run) exitWith {};
 private _line = _disp displayCtrl 8818;
 private _fill = _disp displayCtrl 8820;
 private _full = ctrlPosition (_disp displayCtrl 8819);
-private _empty = +_full;
+private _draining = count _blockers > 0;
+private _secs = if (_draining) then { _done * _hold / _decay } else { (1 - _done) * _hold };
+private _from = +_full;
+_from set [2, (_full select 2) * _done];
+private _to = +_full;
+_to set [2, (_full select 2) * ([1, 0] select _draining)];
+_fill ctrlSetPosition _from;
+_fill ctrlCommit 0;
+_fill ctrlSetPosition _to;
+_fill ctrlCommit _secs;
+(_disp displayCtrl 8821) ctrlSetStructuredText parseText ((_blockers apply { localize _x }) joinString "<br/>");
 
-if (_left < 0) then {
-    // Emptied, not frozen: a break restarts the whole count.
-    _empty set [2, 0];
-    _fill ctrlSetPosition _empty;
-    _fill ctrlCommit 0;
-    _line ctrlSetText format [localize "STR_DUWS_T_ZONE_CAPTURE_HALTED", _name, localize _blocker];
-    sleep 5;
-} else {
-    _empty set [2, (_full select 2) * (1 - _left / _hold)];
-    _fill ctrlSetPosition _empty;
-    _fill ctrlCommit 0;
-    _fill ctrlSetPosition _full;
-    _fill ctrlCommit _left;
-    private _end = time + _left;
-    waitUntil {
-        _line ctrlSetText format [localize "STR_DUWS_T_ZONE_CAPTURE_COUNTDOWN", _name, ceil ((_end - time) max 0)];
-        sleep 0.2;
-        DUWS_captureBarRun != _run || {time >= _end}
-    };
+private _end = time + _secs;
+waitUntil {
+    _line ctrlSetText (if (_draining) then { format [localize "STR_DUWS_T_ZONE_CAPTURE_HALTED", _name] } else {
+        format [localize "STR_DUWS_T_ZONE_CAPTURE_COUNTDOWN", _name, ceil ((_end - time) max 0)]
+    });
+    sleep 0.2;
+    DUWS_captureBarRun != _run || {time >= _end}
 };
 if (DUWS_captureBarRun == _run) then { _layer cutText ["", "PLAIN"] };

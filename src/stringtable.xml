@@ -5213,16 +5213,16 @@
                 <Spanish>Las dotaciones de artillería necesitan una guarnición. Fortifica primero a Nivel I.</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_ZONE_CAPTURE_ACTION">
-                <Original>Capture Zone</Original>
-                <English>Capture Zone</English>
-                <Chinesesimp>夺取区域</Chinesesimp>
-                <German>Zone einnehmen</German>
-                <Polish>Zdobądź strefę</Polish>
-                <Czech>Obsadit zónu</Czech>
-                <Russian>Захватить зону</Russian>
-                <French>Capturer la zone</French>
-                <Chinese>奪取區域</Chinese>
-                <Spanish>Capturar zona</Spanish>
+                <Original>Capture Status</Original>
+                <English>Capture Status</English>
+                <Chinesesimp>夺取状态</Chinesesimp>
+                <German>Einnahmestatus</German>
+                <Polish>Status zdobywania</Polish>
+                <Czech>Stav obsazení</Czech>
+                <Russian>Статус захвата</Russian>
+                <French>État de la capture</French>
+                <Chinese>奪取狀態</Chinese>
+                <Spanish>Estado de captura</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_ZONE_CAPTURE_REFUSED">
                 <Original>Cannot capture zone %1:</Original>
@@ -5296,6 +5296,18 @@
                 <Chinese>區域及周邊的 BLUFOR 兵力未超過 OPFOR。</Chinese>
                 <Spanish>BLUFOR no supera en número a OPFOR en la zona y sus alrededores.</Spanish>
             </Key>
+            <Key ID="STR_DUWS_T_ZONE_CAPTURE_CLEAR">
+                <Original>Nothing blocks the capture of zone %1. Hold the ground until the count ends.</Original>
+                <English>Nothing blocks the capture of zone %1. Hold the ground until the count ends.</English>
+                <Chinesesimp>没有任何因素阻止夺取区域 %1。坚守阵地直到倒计时结束。</Chinesesimp>
+                <German>Nichts verhindert die Einnahme von Zone %1. Halte das Gelände, bis der Countdown abläuft.</German>
+                <Polish>Nic nie blokuje zdobycia strefy %1. Utrzymaj teren do końca odliczania.</Polish>
+                <Czech>Obsazení zóny %1 nic nebrání. Drž terén, dokud odpočet neskončí.</Czech>
+                <Russian>Ничто не мешает захвату зоны %1. Удерживай позицию до конца отсчёта.</Russian>
+                <French>Rien n'empêche la capture de la zone %1. Tenez le terrain jusqu'à la fin du compte à rebours.</French>
+                <Chinese>沒有任何因素阻止奪取區域 %1。堅守陣地直到倒數結束。</Chinese>
+                <Spanish>Nada impide la captura de la zona %1. Mantén el terreno hasta que termine la cuenta atrás.</Spanish>
+            </Key>
             <Key ID="STR_DUWS_T_ZONE_CAPTURE_COUNTDOWN">
                 <Original>Capturing zone %1: %2 s</Original>
                 <English>Capturing zone %1: %2 s</English>
@@ -5309,16 +5321,16 @@
                 <Spanish>Capturando la zona %1: %2 s</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_ZONE_CAPTURE_HALTED">
-                <Original>Capture of zone %1 halted. %2</Original>
-                <English>Capture of zone %1 halted. %2</English>
-                <Chinesesimp>区域 %1 的夺取已中断。%2</Chinesesimp>
-                <German>Einnahme von Zone %1 unterbrochen. %2</German>
-                <Polish>Zdobywanie strefy %1 przerwane. %2</Polish>
-                <Czech>Obsazování zóny %1 přerušeno. %2</Czech>
-                <Russian>Захват зоны %1 прерван. %2</Russian>
-                <French>Capture de la zone %1 interrompue. %2</French>
-                <Chinese>區域 %1 的奪取已中斷。%2</Chinese>
-                <Spanish>Captura de la zona %1 interrumpida. %2</Spanish>
+                <Original>Capture of zone %1 halted:</Original>
+                <English>Capture of zone %1 halted:</English>
+                <Chinesesimp>区域 %1 的夺取已中断：</Chinesesimp>
+                <German>Einnahme von Zone %1 unterbrochen:</German>
+                <Polish>Zdobywanie strefy %1 przerwane:</Polish>
+                <Czech>Obsazování zóny %1 přerušeno:</Czech>
+                <Russian>Захват зоны %1 прерван:</Russian>
+                <French>Capture de la zone %1 interrompue :</French>
+                <Chinese>區域 %1 的奪取已中斷：</Chinese>
+                <Spanish>Captura de la zona %1 interrumpida:</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_check_vehicle_status">
                 <Original>Check Vehicle Status</Original>

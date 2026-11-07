@@ -90,20 +90,19 @@ DUWS_fnc_zoneCaptureArm = {
     }] remoteExec ["call", [0, -2] select isDedicated, format ["DUWS_zoneCapture_%1", netId _flg]];
 };
 
-// Every failed test, where the bar names only the first: the player came to the flag to ask why.
+// Only reports: the bar names the failed tests only while a capture drains, so at zero the flag is how a player asks.
 DUWS_fnc_zoneFlagCapture = {
     params ["_flg"];
     private _owner = remoteExecutedOwner;
     private _key = _flg getVariable ["DUWS_buildSite", ""];
     if (_key == "" || {[_key] call fnc_zone_bluforHeld}) exitWith {};
     private _blockers = [_key, "zone", WEST, EAST, true] call DUWS_fnc_siteTakeBlockers;
-    if (_blockers isNotEqualTo []) exitWith {
-        private _name = (zone_namePOS_pairs select (zone_namePOS_pairs findIf { ([_x select 1] call fnc_zone_key) isEqualTo _key })) select 0;
-        // Localised on the receiving machine: the server's language is not the player's.
-        [[_name, _blockers], {
-            params ["_name", "_blockers"];
-            hint (([format [localize "STR_DUWS_T_ZONE_CAPTURE_REFUSED", _name]] + (_blockers apply { "- " + localize _x })) joinString "\n");
-        }] remoteExec ["call", _owner];
-    };
-    [_key, "zone", WEST, EAST, DUWS_flagCaptureHold] call DUWS_fnc_siteTaken;
+    private _name = (zone_namePOS_pairs select (zone_namePOS_pairs findIf { ([_x select 1] call fnc_zone_key) isEqualTo _key })) select 0;
+    // Localised on the receiving machine: the server's language is not the player's.
+    [[_name, _blockers], {
+        params ["_name", "_blockers"];
+        hint (if (_blockers isEqualTo []) then { format [localize "STR_DUWS_T_ZONE_CAPTURE_CLEAR", _name] } else {
+            ([format [localize "STR_DUWS_T_ZONE_CAPTURE_REFUSED", _name]] + (_blockers apply { "- " + localize _x })) joinString "\n"
+        });
+    }] remoteExec ["call", _owner];
 };

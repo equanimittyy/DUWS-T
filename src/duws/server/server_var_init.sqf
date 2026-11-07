@@ -149,11 +149,11 @@ DUWS_fobKeepOut = [(DUWS_streamProfiles get "zone") select 0, (DUWS_streamProfil
     base_garrison_sleep_range + ((DUWS_streamProfiles get "base") select 0)];
 publicVariable "DUWS_fobKeepOut";
 
-// Seconds a capture's conditions must hold unbroken before the ground changes hands. One number for
-// DUWS_fnc_siteTaken and OPCOM's virtual retake, so the rule a player learns is the same everywhere.
-DUWS_captureHold = 20;
-// Shorter than DUWS_captureHold, so walking to the flag pays.
-DUWS_flagCaptureHold = 5;
+// Seconds of passing tests a capture needs before the ground changes hands. One number for DUWS_fnc_siteTaken,
+// OPCOM's virtual retake and the FOB overrun, so the rule a player learns is the same everywhere.
+DUWS_captureHold = 60;
+// Above 1, so a fight that flickers the tests on and off loses a capture's progress rather than creeping it through.
+DUWS_captureDecay = 1.25;
 
 // support_max_slots caps one-use items carried at once; support_death_refund is the share (both
 // currencies) refunded on death holding unused ones -- half, so walking an item back still beats

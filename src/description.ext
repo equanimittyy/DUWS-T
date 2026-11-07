@@ -238,7 +238,23 @@ class RscTitles {
             class fill: track {
                 idc = 8820;
                 w = 0;
-                colorBackground[] = {0.2,0.5,1,0.9};
+                colorBackground[] = {0.85,0.4,0,0.9};
+            };
+            class reasons: RscStructuredText {
+                idc = 8821;
+                x = 0.1 * safezoneW + safezoneX;
+                y = 0.07 * safezoneH + safezoneY + 0.055;
+                w = 0.8 * safezoneW;
+                h = 0.16;
+                size = 0.03;
+                text = "";
+                class Attributes {
+                    font = "PuristaMedium";
+                    color = "#ffffff";
+                    align = "center";
+                    valign = "top";
+                    shadow = 1;
+                };
             };
         };
     };

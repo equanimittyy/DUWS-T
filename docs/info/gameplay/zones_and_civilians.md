@@ -65,9 +65,12 @@ Radio traffic, notifications and task text use the callsign alone.
 
 One function decides every capture: `DUWS_fnc_siteTaken {key, profile, side, foe}`
 (`src/duws/server/init_zones/fnc_garrison_reserve.sqf`). A zone capture and a zone retake
-both call it, with only the sides swapped. It needs four tests to hold together, unbroken, for
-`DUWS_captureHold` (20 s); losing any one restarts the count. The function stamps the hold itself, and
-players near a zone that BLUFOR are taking watch it on the [capture bar](#the-capture-bar).
+both call it, with only the sides swapped. It needs four tests to pass together for `DUWS_captureHold`
+(60 s). The function keeps a meter per zone, which fills while all four tests pass and drains
+`DUWS_captureDecay` (1.25) times as fast while any test fails. A fight that turns the tests on and off
+therefore loses progress, and cannot creep a capture through. The meter is session state, and a campaign
+save does not keep it. Players near a zone that BLUFOR are taking watch the meter on the
+[capture bar](#the-capture-bar).
 Every zone asks it from its own trigger, every 0.5 s. The tests themselves are
 `DUWS_fnc_siteTakeBlockers`, which names each failed test by its stringtable key, so the
 [flag action](#capture-zone-at-the-flag) reports the same rule the trigger applies.
@@ -80,8 +83,9 @@ Every zone asks it from its own trigger, every 0.5 s. The tests themselves are
 | Ground held | **any** ground unit of either side inside the streaming ring (radius + 400 m), whoever raised it; aircraft do not count | the attacker outnumbers the defender |
 
 The zone capture trigger has no activation. A `this` gate would stop the function from being asked
-while the attacker is outside the radius, so the hold stamp would never reset. For an OPFOR-held zone
-nobody is near, the garrison's live check fails first, which keeps the half-second cost to a variable
+while the attacker is outside the radius, so the meter would never drain. While a zone has no meter, the
+tests stop at the first failure, cheapest first; while it has one, every test runs, because the bar lists
+each failed test. For an OPFOR-held zone nobody is near, the garrison's live check fails first, which keeps the half-second cost to a variable
 read; a BLUFOR-held zone pays one spatial query over its radius, and once the player has built a garrison
 on it the live check gates that one too.
 
@@ -310,8 +314,7 @@ anything the engine counts as present. Counting both sides instead means a lone 
 capture only while BLUFOR do not outnumber him.
 
 The OPFOR-takes-it-back direction is the same `DUWS_fnc_siteTaken` with the sides swapped: an OPFOR
-unit inside the radius and OPFOR outnumbering BLUFOR over the same ring, held for the same
-`DUWS_captureHold`. A BLUFOR-held zone starts at tier 0, so there is no garrison test until the player
+unit inside the radius and OPFOR outnumbering BLUFOR over the same ring, on the same meter. A BLUFOR-held zone starts at tier 0, so there is no garrison test until the player
 buys one. A virtual OPCOM attacker has no units to count, so OPCOM runs the zone's retake statement itself
 once one has stood inside the radius for `DUWS_captureHold` — but only on a zone at tier 0
 (`fnc_opcom_capture.sqf`). A tier-0 zone still raises its prefab and builds, but mans no gun, because a gunner is a
@@ -327,42 +330,36 @@ capture handlers previously guarded against with an `isServer` assert.
 
 ### Capture Zone at the flag
 
-An OPFOR-held zone's flag carries a **Capture Zone** hold action (`DUWS_fnc_zoneCaptureArm`,
+An OPFOR-held zone's flag carries a **Capture Status** hold action (`DUWS_fnc_zoneCaptureArm`,
 `init_zones/fnc_zone_build.sqf`). It shows to a player within 5 m while the flag's carry gate is shut,
-which is the flag's OPFOR-held test. The hold takes 1 s, because it only asks: `DUWS_fnc_zoneFlagCapture`
-runs `DUWS_fnc_siteTakeBlockers` with every test on.
+which is the flag's OPFOR-held test. The hold takes 1 s. `DUWS_fnc_zoneFlagCapture` runs
+`DUWS_fnc_siteTakeBlockers` with every test on and hints the holder: each failed test, or that nothing
+blocks the capture.
 
-| Every test passes | A test fails |
-|---|---|
-| the trigger's hold is cut to at most `DUWS_flagCaptureHold` (5 s) still owed | a hint to the holder lists each failed test |
-
-The flag does not flip the zone. It calls `DUWS_fnc_siteTaken` with a cap on the hold still owed, so the
-trigger still makes the flip, and any failed test in the last 5 s still restarts the count. The flag is
-a faster way to take ground that meets the rule, never a way to take ground that does not, and it has no
-second path to the flip that could race the trigger.
-
-The hint names every failed test, where the capture bar names only the first, because the player at the
-flag has come to ask why the zone does not fall.
+The flag only reports. It does not flip the zone or shorten the meter, so the 60 s meter is the only way
+to take a zone. The report exists because the bar lists the failed tests only while a meter drains: a
+player at a zone with no meter has no other way to ask why the zone does not fall.
 
 The flag exists only with the Modern zone style or simple zones (`fnc_createzone.sqf`), and so does the
-action. The hold is session state, and nothing of it is saved.
+action.
 
 ### The capture bar
 
-A running hold shows on a HUD bar under the status bar (`client/warcom/fnc_capture_bar.sqf`), whether the
-trigger or the flag started it. The bar fills over the hold and counts down the seconds. A failed test
-empties it and names that test for 5 s, because the count starts again from zero.
+A zone's meter shows on a HUD bar under the status bar (`client/warcom/fnc_capture_bar.sqf`). While every
+test passes, the orange fill grows and the line counts down the seconds to the capture. While any test
+fails, the fill shrinks at the drain rate, the line reads that the capture is halted, and each failed test
+is listed under the bar. The bar hides when the meter fills or empties.
 
-`DUWS_fnc_siteTakeTell` sends the bar only when the hold changes, never on the half-second poll: when the
-hold starts, when the flag shortens it, and when a test fails. Each message goes to the players inside
-the streaming ring (radius + 400 m) at that moment, so a player who arrives during a count sees the next
-change.
+`DUWS_fnc_siteTakeTell` sends the bar only when the list of failed tests changes, never on the half-second
+poll: when a meter starts, when a test fails or passes again, and when a different test fails. The client
+animates the fill between messages. Each message goes to the players inside the streaming ring (radius +
+400 m) at that moment, so a player who arrives during a count sees the next change.
 
 | Rule | Because |
 |---|---|
 | BLUFOR's captures of OPFOR ground only | the trigger polls a flipped zone in the old direction until `fnc_captured` re-arms it 2 s later, and a message in that window would report a capture that has already landed |
 | Revealed zones only | in hardcore mode, a hidden zone's name on the HUD would reveal the zone before the map does |
-| One bar per client; a failure for another zone is ignored | a player can stand inside two zones' rings, and one zone's failure must not end the other zone's count |
+| One bar per client; the newest message wins | two zones that BLUFOR are taking at once inside one player's reach are rare, and one bar keeps the top of the screen clear |
 
 ### Fortifying a held zone, the HQ and a FOB
 
@@ -421,7 +418,7 @@ stands in until it dies.
 
 **An OPFOR zone is also contested while BLUFOR stand on its ground.** A standing BLUFOR unit inside the zone's radius,
 on foot or in a land vehicle, contests it, and an aircraft does not. The player can kill every defender long before the
-capture lands, because the capture also waits on the reserve pool, the zone's hardpoints and the 20 s hold. Without
+capture lands, because the capture also waits on the reserve pool, the zone's hardpoints and the 60 s meter. Without
 this rule, the zone reads as open once no defender fights back. OPCOM can then build a hardpoint in front of the
 player, or reinforce or fortify the garrison, and each of these refuses the capture again. The test reads
 `side`, as the capture's presence test does, so a disguised player does not contest the zone.
@@ -638,9 +635,9 @@ about.
 | Generated | OPFOR-held. Rolls a tier I–IV, weighted to IV. Strength `1.0`. No men | tier + full bar |
 | You come within radius + 400 m, or an aircraft with BLUFOR crew comes within 1,500 m under 250 km/h ([which aircraft](hardpoints.md#streaming-and-garrison)) | Props deploy, turret crews man the prefab's guns, the garrison is raised: the tier composition less its lost tokens | tier + bar |
 | You leave for 2 min | The zone's own men deleted by roster, props stowed. Losses are already on the ledger | tier + the bar it will return at |
-| You stand inside the radius, beat it to 15 %, clear its hardpoints **and** outnumber OPFOR over radius + 400 m, all for 20 s, which a Capture Zone at the flag cuts to 5 s | Ownership flips. First-capture bonus, AP swings. Tier drops to 0 and the ledger is forgotten. Survivors fight on where they stand and are collected once no player is within 500 m. The prefab and its turrets stay, yours now | `Held by BLUFOR` |
+| You stand inside the radius, beat it to 15 %, clear its hardpoints **and** outnumber OPFOR over radius + 400 m, all until the meter fills: 60 s of passing tests, drained 1.25 times as fast while any test fails | Ownership flips. First-capture bonus, AP swings. Tier drops to 0 and the ledger is forgotten. Survivors fight on where they stand and are collected once no player is within 500 m. The prefab and its turrets stay, yours now | `Held by BLUFOR` |
 | You buy a tier on it | Tier I, a tenth of its tokens fielded and the rest owed. Your garrison raises when you next come within radius + 400 m, crews the prefab's guns, and wears down on the same ledger | tier + bar |
-| OPFOR retake (`DUWS_fnc_siteTaken`) | OPFOR stand inside the radius and outnumber BLUFOR over radius + 400 m for 20 s, players inside or not — and beat your garrison first, if you built one. Tier reset to I, a tenth of its tokens kept, rounded up. Streaming re-latches | **`Mobilising`** |
+| OPFOR retake (`DUWS_fnc_siteTaken`) | OPFOR stand inside the radius and outnumber BLUFOR over radius + 400 m until the same meter fills, players inside or not — and beat your garrison first, if you built one. Tier reset to I, a tenth of its tokens kept, rounded up. Streaming re-latches | **`Mobilising`** |
 | Either commander spends | Fortify buys composition, reinforce buys strength. Whoever holds the ground may buy for it | tier + bar |
 | You return, after the ring has been empty once | Garrison raised at whatever it now stands at | tier + bar |
 
@@ -676,8 +673,8 @@ more usefully — **which of them cannot be moved alone.**
 |---|---|---|
 | `REINFORCE_STEP` `0.3` | `fnc_garrison_strength_init` | what one reinforcement buys |
 | Break line `0.15` | `DUWS_fnc_garrisonBeaten` | how far a garrison must be worn before its ground can be taken |
-| `DUWS_captureHold` `20` | `server_var_init` | how long both capture conditions must hold, zone and OPCOM alike |
-| `DUWS_flagCaptureHold` `5` | `server_var_init` | the most of the hold that a Capture Zone at the flag leaves |
+| `DUWS_captureHold` `60` | `server_var_init` | how many seconds of passing tests a capture needs: the zone meter, OPCOM's virtual retake and the FOB overrun alike |
+| `DUWS_captureDecay` `1.25` | `server_var_init` | how much faster a zone's meter drains than it fills |
 | `grace` `120` | the occupant record | how long empty ground waits before streaming out |
 | `buffer` `400` | the occupant record | how far out arrival is noticed (a town's crowd uses 200) |
 | `GARRISON_REACH` `300` | `fnc_apply_posture` | how far a garrison squad looks for a building to hold |

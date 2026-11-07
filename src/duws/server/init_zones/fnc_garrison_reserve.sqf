@@ -47,34 +47,37 @@ DUWS_fnc_siteTakeBlockers = {
     _out
 };
 
-// One stamp per site, tagged with the side, so a direction's stamp never carries over a flip into the other.
-// Mission time, so a savegame cannot strand it. _left caps the hold still owed, so the flag shortens the trigger's
-// count rather than flipping the zone down a second path.
+// One meter per site, tagged with the side, so a direction's progress never carries over a flip into the other. It
+// fills over DUWS_captureHold while every test passes and drains DUWS_captureDecay times as fast while one fails. Every
+// test runs while the meter is up, for the bar's reasons; a site with none stays on the cheap first-failure path.
+// Mission time, so a savegame cannot strand it.
 DUWS_fnc_siteTaken = {
-    params ["_key", "_profile", "_side", "_foe", ["_left", DUWS_captureHold]];
-    private _var = format ["DUWS_takeSince_%1", _key];
-    private _held = missionNamespace getVariable [_var, []];
-    private _running = (_held param [0, sideUnknown]) isEqualTo _side;
-    private _blockers = [_key, _profile, _side, _foe] call DUWS_fnc_siteTakeBlockers;
-    if (count _blockers > 0) exitWith {
-        missionNamespace setVariable [_var, nil];
-        if (_running) then { [_key, _profile, _side, -1, _blockers select 0] call DUWS_fnc_siteTakeTell };
+    params ["_key", "_profile", "_side", "_foe"];
+    private _var = format ["DUWS_takeProgress_%1", _key];
+    private _meter = missionNamespace getVariable [_var, []];
+    private _running = (_meter param [0, sideUnknown]) isEqualTo _side;
+    private _blockers = [_key, _profile, _side, _foe, _running] call DUWS_fnc_siteTakeBlockers;
+    if (!_running) exitWith {
+        if (count _blockers > 0) then {
+            missionNamespace setVariable [_var, nil];
+        } else {
+            missionNamespace setVariable [_var, [_side, 0, time, []]];
+            [_key, _profile, _side, 0, []] call DUWS_fnc_siteTakeTell;
+        };
         false
     };
-    private _since = time - DUWS_captureHold + _left;
-    if (_running && {(_held select 1) <= _since}) then {
-        _since = _held select 1;
-    } else {
-        missionNamespace setVariable [_var, [_side, _since]];
-        [_key, _profile, _side, _left, ""] call DUWS_fnc_siteTakeTell;
-    };
-    (time - _since) >= DUWS_captureHold
+    _meter params ["", "_done", "_at", "_shown"];
+    _done = (_done + ([1, -DUWS_captureDecay] select (count _blockers > 0)) * (time - _at) / DUWS_captureHold) min 1;
+    if (_done <= 0) exitWith { missionNamespace setVariable [_var, nil]; false };
+    missionNamespace setVariable [_var, [_side, _done, time, _blockers]];
+    if !(_blockers isEqualTo _shown) then { [_key, _profile, _side, _done, _blockers] call DUWS_fnc_siteTakeTell };
+    _done >= 1
 };
 
 // Only BLUFOR's captures of revealed OPFOR ground: the trigger polls a flipped zone in the old direction until
 // fnc_captured re-arms it, and a hidden zone's name on the HUD would reveal it before the map does.
 DUWS_fnc_siteTakeTell = {
-    params ["_key", "_profile", "_side", "_left", "_blocker"];
+    params ["_key", "_profile", "_side", "_done", "_blockers"];
     if (_side isNotEqualTo west || {[_key] call fnc_zone_bluforHeld}) exitWith {};
     private _i = zone_namePOS_pairs findIf { ([_x select 1] call fnc_zone_key) isEqualTo _key };
     if (_i < 0 || {!((zone_namePOS_pairs select _i) select 2)}) exitWith {};
@@ -83,7 +86,7 @@ DUWS_fnc_siteTakeTell = {
     private _ring = (_site get "radius") + ((DUWS_streamProfiles get _profile) select 0);
     private _to = (allPlayers - entities "HeadlessClient_F") select { _x distance2D _pos <= _ring };
     if (_to isEqualTo []) exitWith {};
-    [_key, (zone_namePOS_pairs select _i) select 0, _left, DUWS_captureHold, _blocker] remoteExec ["fnc_capture_bar", _to];
+    [(zone_namePOS_pairs select _i) select 0, _done, DUWS_captureHold, DUWS_captureDecay, _blockers] remoteExec ["fnc_capture_bar", _to];
 };
 
 // Wider than the litter sweep's 300 m: these are live men, and a body blinking out at 300 m goes unnoticed while a
