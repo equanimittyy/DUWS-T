@@ -62,7 +62,7 @@ DUWS_fnc_siteTaken = {
             missionNamespace setVariable [_var, nil];
         } else {
             missionNamespace setVariable [_var, [_side, 0, time, []]];
-            [_key, _profile, _side, 0, []] call DUWS_fnc_siteTakeTell;
+            [_key, _side, 0, []] call DUWS_fnc_siteTakeTell;
         };
         false
     };
@@ -70,23 +70,27 @@ DUWS_fnc_siteTaken = {
     _done = (_done + ([1, -DUWS_captureDecay] select (count _blockers > 0)) * (time - _at) / DUWS_captureHold) min 1;
     if (_done <= 0) exitWith { missionNamespace setVariable [_var, nil]; false };
     missionNamespace setVariable [_var, [_side, _done, time, _blockers]];
-    if !(_blockers isEqualTo _shown) then { [_key, _profile, _side, _done, _blockers] call DUWS_fnc_siteTakeTell };
+    if !(_blockers isEqualTo _shown) then { [_key, _side, _done, _blockers] call DUWS_fnc_siteTakeTell };
     _done >= 1
 };
 
-// Only BLUFOR's captures of revealed OPFOR ground: the trigger polls a flipped zone in the old direction until
-// fnc_captured re-arms it, and a hidden zone's name on the HUD would reveal it before the map does.
+// -> how full _side's meter at the site is, 0 with none.
+DUWS_fnc_siteTakeDone = {
+    params ["_key", "_side"];
+    private _meter = missionNamespace getVariable [format ["DUWS_takeProgress_%1", _key], []];
+    [0, _meter param [1, 0]] select ((_meter param [0, sideUnknown]) isEqualTo _side)
+};
+
+// Only revealed ground the attacker does not hold yet: the trigger polls a flipped zone in the old direction until
+// the capture handler re-arms it, and a hidden zone's name on the HUD would reveal it before the map does.
 DUWS_fnc_siteTakeTell = {
-    params ["_key", "_profile", "_side", "_done", "_blockers"];
-    if (_side isNotEqualTo west || {[_key] call fnc_zone_bluforHeld}) exitWith {};
+    params ["_key", "_side", "_done", "_blockers"];
+    if (([_key] call fnc_zone_bluforHeld) isEqualTo (_side isEqualTo west)) exitWith {};
     private _i = zone_namePOS_pairs findIf { ([_x select 1] call fnc_zone_key) isEqualTo _key };
     if (_i < 0 || {!((zone_namePOS_pairs select _i) select 2)}) exitWith {};
-    private _site = [_key] call fnc_site_at;
-    private _pos = _site get "pos";
-    private _ring = (_site get "radius") + ((DUWS_streamProfiles get _profile) select 0);
-    private _to = (allPlayers - entities "HeadlessClient_F") select { _x distance2D _pos <= _ring };
+    private _to = allPlayers - entities "HeadlessClient_F";
     if (_to isEqualTo []) exitWith {};
-    [(zone_namePOS_pairs select _i) select 0, _done, DUWS_captureHold, DUWS_captureDecay, _blockers, _pos, _ring] remoteExec ["fnc_capture_bar", _to];
+    [(zone_namePOS_pairs select _i) select 0, _side, _done, DUWS_captureHold, DUWS_captureDecay, _blockers] remoteExec ["fnc_capture_bar", _to];
 };
 
 // Wider than the litter sweep's 300 m: these are live men, and a body blinking out at 300 m goes unnoticed while a

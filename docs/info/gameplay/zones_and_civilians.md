@@ -69,11 +69,11 @@ both call it, with only the sides swapped. It needs four tests to pass together 
 (60 s). The function keeps a meter per zone, which fills while all four tests pass and drains
 `DUWS_captureDecay` (1.25) times as fast while any test fails. A fight that turns the tests on and off
 therefore loses progress, and cannot creep a capture through. The meter is session state, and a campaign
-save does not keep it. Players near a zone that BLUFOR are taking watch the meter on the
+save does not keep it. Every player watches the meter of each zone that either side is taking on the
 [capture bar](#the-capture-bar).
 Every zone asks it from its own trigger, every 0.5 s. The tests themselves are
 `DUWS_fnc_siteTakeBlockers`, which names each failed test by its stringtable key, so the
-[flag action](#capture-zone-at-the-flag) reports the same rule the trigger applies.
+[flag action](#capture-status-at-the-flag) reports the same rule the trigger applies.
 
 | Test | Counts | Threshold |
 |---|---|---|
@@ -328,13 +328,15 @@ The capture trigger is created **server-local**, unlike the notification trigger
 the condition reads a server-side global. That also settles the evaluation-locality question the
 capture handlers previously guarded against with an `isServer` assert.
 
-### Capture Zone at the flag
+### Capture Status at the flag
 
 An OPFOR-held zone's flag carries a **Capture Status** hold action (`DUWS_fnc_zoneCaptureArm`,
 `init_zones/fnc_zone_build.sqf`). It shows to a player within 5 m while the flag's carry gate is shut,
 which is the flag's OPFOR-held test. The hold takes 1 s. `DUWS_fnc_zoneFlagCapture` runs
-`DUWS_fnc_siteTakeBlockers` with every test on and hints the holder: each failed test, or that nothing
-blocks the capture.
+`DUWS_fnc_siteTakeBlockers` with every test on, and hints the holder the zone's row exactly as the
+[capture bar](#the-capture-bar) draws it: the line, the bar at the zone's current meter, and every failed
+test. Both build the row in `fnc_capture_bar_row`, so the two cannot word a test differently. The hint
+always shows the full row, whatever the player's Capture details option, because the player asked.
 
 The flag only reports. It does not flip the zone or shorten the meter, so the 60 s meter is the only way
 to take a zone. The report exists because the bar lists the failed tests only while a meter drains: a
@@ -345,22 +347,35 @@ action.
 
 ### The capture bar
 
-A zone's meter shows on a HUD bar under the status bar (`client/warcom/fnc_capture_bar.sqf`). While every
-test passes, the orange fill grows and the line counts down the seconds to the capture. While any test
-fails, the fill shrinks at the drain rate, the line reads that the capture is halted, and each failed test
-is listed under the bar. The bar hides when the meter fills or empties.
+Every player sees every zone that either side is taking, wherever the player is
+(`client/warcom/fnc_capture_bar.sqf`). Each zone with a meter gets a row under the status bar: a line, a
+bar of 40 segments, and the failed tests. A BLUFOR capture's bar is teal (`#33b8cc`) and an OPFOR
+retake's is the red of an OPFOR zone on the map (`#e60000`). The BLUFOR rows come first and the OPFOR
+rows after them, each set in alphabetical order of zone name.
 
-`DUWS_fnc_siteTakeTell` sends the bar only when the list of failed tests changes, never on the half-second
-poll: when a meter starts, when a test fails or passes again, and when a different test fails. The client
-animates the fill between messages. Each message goes to the players inside the streaming ring (radius +
-400 m) at that moment, so a player who arrives during a count sees the next change. The client hides the
-bar as soon as its player leaves that ring, because no later message would reach that player to correct it.
+While every test passes, the bar grows and the line counts down the seconds to the capture. While any
+test fails, the bar shrinks at the drain rate, the line reads that the capture is halted, and each failed
+test is listed under the bar. A row goes when its meter fills or empties. The test keys are worded for
+BLUFOR attacking, so an OPFOR row reads each key's `_OPFOR` twin from the stringtable.
+
+A player who turns **Capture details** off in the User Options menu at the medical tent
+(`fnc_user_options_menu`) sees each zone on one line instead: the name, the bar, and the seconds left or
+"halted", without the failed tests. The names are right-aligned and the bars left-aligned on either side
+of the screen's centre, so every bar starts at the same point. The choice is saved in the player's profile
+(`DUWS_T_captureDetails`, default on), like the other user options, and the bar reads it on every redraw.
+
+`DUWS_fnc_siteTakeTell` sends a zone's meter only when its list of failed tests changes, never on the
+half-second poll: when a meter starts, when a test fails or passes again, and when a different test fails.
+Each client keeps the last message per zone and redraws every row from it five times a second, in one
+loop that runs for the whole session. A player who joins during a count sees that zone at its next change.
 
 | Rule | Because |
 |---|---|
-| BLUFOR's captures of OPFOR ground only | the trigger polls a flipped zone in the old direction until `fnc_captured` re-arms it 2 s later, and a message in that window would report a capture that has already landed |
+| Ground the attacker does not hold yet | the trigger polls a flipped zone in the old direction until the capture handler re-arms it, and a message in that window would report a capture that has already landed |
 | Revealed zones only | in hardcore mode, a hidden zone's name on the HUD would reveal the zone before the map does |
-| One bar per client; the newest message wins | two zones that BLUFOR are taking at once inside one player's reach are rare, and one bar keeps the top of the screen clear |
+| A row per zone, not one bar | with every capture shown to every player, several zones often count at once |
+| Text segments, not an animated control | a row comes and goes with its meter, and one redrawn text control needs no per-zone controls to create, lay out and delete |
+| OPCOM's virtual retake and the FOB overrun have no row | neither runs on the zone meter: each keeps its own hold in `fnc_opcom_capture.sqf` |
 
 ### Fortifying a held zone, the HQ and a FOB
 

@@ -2207,7 +2207,7 @@ SITE_N = 0;
 SITE_BLOCKERS = [];
 SITE_TELLS = [];
 DUWS_fnc_siteTakeBlockers = { SITE_BLOCKERS };
-DUWS_fnc_siteTakeTell = { SITE_TELLS pushBack [round ((_this select 3) * 1000) / 1000, _this select 4] };
+DUWS_fnc_siteTakeTell = { SITE_TELLS pushBack [round ((_this select 2) * 1000) / 1000, _this select 3] };
 private _fnc_take = {
     params ["_meter"];
     SITE_TELLS = [];

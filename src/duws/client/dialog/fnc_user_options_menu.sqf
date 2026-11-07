@@ -12,6 +12,7 @@ private _musicOn = !(profileNamespace getVariable ["DUWS_T_muteMissionMusic", fa
 private _earOn   = profileNamespace getVariable ["DUWS_T_showEarplugs", true];
 private _disgOn  = profileNamespace getVariable ["DUWS_T_showDisguise", true];
 private _sqOn    = profileNamespace getVariable ["DUWS_T_radioSquelch", true];
+private _capOn   = profileNamespace getVariable ["DUWS_T_captureDetails", true];
 
 private _label = {
     params ["_nameKey", "_on"];
@@ -77,6 +78,20 @@ private _green = [0.082, 1, 0, 1];
             saveProfileNamespace;
             hint format [localize "STR_DUWS_T_USEROPT_HINT",
                 localize "STR_DUWS_T_USEROPT_SQUELCH",
+                localize (["STR_DUWS_T_USEROPT_OFF", "STR_DUWS_T_USEROPT_ON"] select _on)];
+            [] call fnc_user_options_menu;
+        },
+        [],
+        _green
+    ],
+    [
+        ["STR_DUWS_T_USEROPT_CAPTURE", _capOn] call _label,
+        {
+            private _on = !(profileNamespace getVariable ["DUWS_T_captureDetails", true]);
+            profileNamespace setVariable ["DUWS_T_captureDetails", _on];
+            saveProfileNamespace;
+            hint format [localize "STR_DUWS_T_USEROPT_HINT",
+                localize "STR_DUWS_T_USEROPT_CAPTURE",
                 localize (["STR_DUWS_T_USEROPT_OFF", "STR_DUWS_T_USEROPT_ON"] select _on)];
             [] call fnc_user_options_menu;
         },

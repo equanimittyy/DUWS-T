@@ -90,7 +90,8 @@ DUWS_fnc_zoneCaptureArm = {
     }] remoteExec ["call", [0, -2] select isDedicated, format ["DUWS_zoneCapture_%1", netId _flg]];
 };
 
-// Only reports: the bar names the failed tests only while a capture drains, so at zero the flag is how a player asks.
+// Only reports, as the zone's capture bar row with every failed test: the bar lists them only while a meter drains,
+// so at zero the flag is how a player asks.
 DUWS_fnc_zoneFlagCapture = {
     params ["_flg"];
     private _owner = remoteExecutedOwner;
@@ -98,11 +99,10 @@ DUWS_fnc_zoneFlagCapture = {
     if (_key == "" || {[_key] call fnc_zone_bluforHeld}) exitWith {};
     private _blockers = [_key, "zone", WEST, EAST, true] call DUWS_fnc_siteTakeBlockers;
     private _name = (zone_namePOS_pairs select (zone_namePOS_pairs findIf { ([_x select 1] call fnc_zone_key) isEqualTo _key })) select 0;
-    // Localised on the receiving machine: the server's language is not the player's.
-    [[_name, _blockers], {
-        params ["_name", "_blockers"];
-        hint (if (_blockers isEqualTo []) then { format [localize "STR_DUWS_T_ZONE_CAPTURE_CLEAR", _name] } else {
-            ([format [localize "STR_DUWS_T_ZONE_CAPTURE_REFUSED", _name]] + (_blockers apply { "- " + localize _x })) joinString "\n"
-        });
+    // Built on the receiving machine: the server's language is not the player's, and structured text does not cross
+    // remoteExec.
+    [[_name, [_key, west] call DUWS_fnc_siteTakeDone, DUWS_captureHold, _blockers], {
+        params ["_name", "_done", "_hold", "_blockers"];
+        hint parseText (([_name, west, _done, _hold, _blockers] call fnc_capture_bar_row) select 0);
     }] remoteExec ["call", _owner];
 };

@@ -5224,18 +5224,6 @@
                 <Chinese>奪取狀態</Chinese>
                 <Spanish>Estado de captura</Spanish>
             </Key>
-            <Key ID="STR_DUWS_T_ZONE_CAPTURE_REFUSED">
-                <Original>Cannot capture zone %1:</Original>
-                <English>Cannot capture zone %1:</English>
-                <Chinesesimp>无法夺取区域 %1：</Chinesesimp>
-                <German>Zone %1 kann nicht eingenommen werden:</German>
-                <Polish>Nie można zdobyć strefy %1:</Polish>
-                <Czech>Zónu %1 nelze obsadit:</Czech>
-                <Russian>Невозможно захватить зону %1:</Russian>
-                <French>Impossible de capturer la zone %1 :</French>
-                <Chinese>無法奪取區域 %1：</Chinese>
-                <Spanish>No se puede capturar la zona %1:</Spanish>
-            </Key>
             <Key ID="STR_DUWS_T_ZONE_CAPTURE_DEPLOYING">
                 <Original>The enemy garrison is still deploying.</Original>
                 <English>The enemy garrison is still deploying.</English>
@@ -5296,18 +5284,6 @@
                 <Chinese>區域及周邊的 BLUFOR 兵力未超過 OPFOR。</Chinese>
                 <Spanish>BLUFOR no supera en número a OPFOR en la zona y sus alrededores.</Spanish>
             </Key>
-            <Key ID="STR_DUWS_T_ZONE_CAPTURE_CLEAR">
-                <Original>Nothing blocks the capture of zone %1. Hold the ground until the count ends.</Original>
-                <English>Nothing blocks the capture of zone %1. Hold the ground until the count ends.</English>
-                <Chinesesimp>没有任何因素阻止夺取区域 %1。坚守阵地直到倒计时结束。</Chinesesimp>
-                <German>Nichts verhindert die Einnahme von Zone %1. Halte das Gelände, bis der Countdown abläuft.</German>
-                <Polish>Nic nie blokuje zdobycia strefy %1. Utrzymaj teren do końca odliczania.</Polish>
-                <Czech>Obsazení zóny %1 nic nebrání. Drž terén, dokud odpočet neskončí.</Czech>
-                <Russian>Ничто не мешает захвату зоны %1. Удерживай позицию до конца отсчёта.</Russian>
-                <French>Rien n'empêche la capture de la zone %1. Tenez le terrain jusqu'à la fin du compte à rebours.</French>
-                <Chinese>沒有任何因素阻止奪取區域 %1。堅守陣地直到倒數結束。</Chinese>
-                <Spanish>Nada impide la captura de la zona %1. Mantén el terreno hasta que termine la cuenta atrás.</Spanish>
-            </Key>
             <Key ID="STR_DUWS_T_ZONE_CAPTURE_COUNTDOWN">
                 <Original>Capturing zone %1: %2 s</Original>
                 <English>Capturing zone %1: %2 s</English>
@@ -5331,6 +5307,126 @@
                 <French>Capture de la zone %1 interrompue :</French>
                 <Chinese>區域 %1 的奪取已中斷：</Chinese>
                 <Spanish>Captura de la zona %1 interrumpida:</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_ZONE_CAPTURE_COUNTDOWN_OPFOR">
+                <Original>OPFOR capturing zone %1: %2 s</Original>
+                <English>OPFOR capturing zone %1: %2 s</English>
+                <Chinesesimp>OPFOR 正在夺取区域 %1：%2 秒</Chinesesimp>
+                <German>OPFOR nimmt Zone %1 ein: %2 s</German>
+                <Polish>OPFOR zdobywa strefę %1: %2 s</Polish>
+                <Czech>OPFOR obsazuje zónu %1: %2 s</Czech>
+                <Russian>OPFOR захватывает зону %1: %2 с</Russian>
+                <French>OPFOR capture la zone %1 : %2 s</French>
+                <Chinese>OPFOR 正在奪取區域 %1：%2 秒</Chinese>
+                <Spanish>OPFOR está capturando la zona %1: %2 s</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_ZONE_CAPTURE_HALTED_OPFOR">
+                <Original>OPFOR capture of zone %1 halted:</Original>
+                <English>OPFOR capture of zone %1 halted:</English>
+                <Chinesesimp>OPFOR 对区域 %1 的夺取已中断：</Chinesesimp>
+                <German>Einnahme von Zone %1 durch OPFOR unterbrochen:</German>
+                <Polish>Zdobywanie strefy %1 przez OPFOR przerwane:</Polish>
+                <Czech>Obsazování zóny %1 silami OPFOR přerušeno:</Czech>
+                <Russian>Захват зоны %1 силами OPFOR прерван:</Russian>
+                <French>Capture de la zone %1 par l'OPFOR interrompue :</French>
+                <Chinese>OPFOR 對區域 %1 的奪取已中斷：</Chinese>
+                <Spanish>Captura de la zona %1 por OPFOR interrumpida:</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_ZONE_CAPTURE_DEPLOYING_OPFOR">
+                <Original>The BLUFOR garrison is still deploying.</Original>
+                <English>The BLUFOR garrison is still deploying.</English>
+                <Chinesesimp>BLUFOR 驻军仍在部署中。</Chinesesimp>
+                <German>Die BLUFOR-Garnison wird noch eingesetzt.</German>
+                <Polish>Garnizon BLUFOR wciąż się rozmieszcza.</Polish>
+                <Czech>Posádka BLUFOR se stále nasazuje.</Czech>
+                <Russian>Гарнизон BLUFOR ещё развёртывается.</Russian>
+                <French>La garnison BLUFOR est encore en cours de déploiement.</French>
+                <Chinese>BLUFOR 駐軍仍在部署中。</Chinese>
+                <Spanish>La guarnición BLUFOR aún se está desplegando.</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_ZONE_CAPTURE_GARRISON_OPFOR">
+                <Original>The BLUFOR garrison is still holding out.</Original>
+                <English>The BLUFOR garrison is still holding out.</English>
+                <Chinesesimp>BLUFOR 驻军仍在坚守。</Chinesesimp>
+                <German>Die BLUFOR-Garnison hält noch stand.</German>
+                <Polish>Garnizon BLUFOR wciąż się broni.</Polish>
+                <Czech>Posádka BLUFOR stále vzdoruje.</Czech>
+                <Russian>Гарнизон BLUFOR всё ещё держится.</Russian>
+                <French>La garnison BLUFOR tient toujours.</French>
+                <Chinese>BLUFOR 駐軍仍在堅守。</Chinese>
+                <Spanish>La guarnición BLUFOR sigue resistiendo.</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_ZONE_CAPTURE_PRESENCE_OPFOR">
+                <Original>No OPFOR unit is inside the zone.</Original>
+                <English>No OPFOR unit is inside the zone.</English>
+                <Chinesesimp>区域内没有 OPFOR 单位。</Chinesesimp>
+                <German>Keine OPFOR-Einheit befindet sich in der Zone.</German>
+                <Polish>W strefie nie ma żadnej jednostki OPFOR.</Polish>
+                <Czech>V zóně není žádná jednotka OPFOR.</Czech>
+                <Russian>В зоне нет ни одного бойца OPFOR.</Russian>
+                <French>Aucune unité OPFOR n'est dans la zone.</French>
+                <Chinese>區域內沒有 OPFOR 單位。</Chinese>
+                <Spanish>No hay ninguna unidad OPFOR dentro de la zona.</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_ZONE_CAPTURE_HARDPOINT_OPFOR">
+                <Original>BLUFOR still have a hardpoint in the zone.</Original>
+                <English>BLUFOR still have a hardpoint in the zone.</English>
+                <Chinesesimp>BLUFOR 在区域内仍有据点。</Chinesesimp>
+                <German>BLUFOR hält noch einen Stützpunkt in der Zone.</German>
+                <Polish>BLUFOR wciąż ma punkt oporu w strefie.</Polish>
+                <Czech>BLUFOR má v zóně stále opěrný bod.</Czech>
+                <Russian>У BLUFOR в зоне ещё есть опорный пункт.</Russian>
+                <French>BLUFOR tient encore un point d'appui dans la zone.</French>
+                <Chinese>BLUFOR 在區域內仍有據點。</Chinese>
+                <Spanish>BLUFOR aún tiene un punto fuerte en la zona.</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_ZONE_CAPTURE_OUTNUMBERED_OPFOR">
+                <Original>OPFOR do not outnumber BLUFOR in and around the zone.</Original>
+                <English>OPFOR do not outnumber BLUFOR in and around the zone.</English>
+                <Chinesesimp>区域及周边的 OPFOR 兵力未超过 BLUFOR。</Chinesesimp>
+                <German>OPFOR ist BLUFOR in und um die Zone zahlenmäßig nicht überlegen.</German>
+                <Polish>OPFOR nie ma przewagi liczebnej nad BLUFOR w strefie i wokół niej.</Polish>
+                <Czech>OPFOR nemá v zóně a jejím okolí početní převahu nad BLUFOR.</Czech>
+                <Russian>OPFOR не превосходит BLUFOR числом в зоне и вокруг неё.</Russian>
+                <French>OPFOR n'est pas en supériorité numérique sur BLUFOR dans la zone et ses environs.</French>
+                <Chinese>區域及周邊的 OPFOR 兵力未超過 BLUFOR。</Chinese>
+                <Spanish>OPFOR no supera en número a BLUFOR en la zona y sus alrededores.</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_ZONE_CAPTURE_SHORT_OPFOR">
+                <Original>OPFOR %1</Original>
+                <English>OPFOR %1</English>
+                <Chinesesimp>OPFOR %1</Chinesesimp>
+                <German>OPFOR %1</German>
+                <Polish>OPFOR %1</Polish>
+                <Czech>OPFOR %1</Czech>
+                <Russian>OPFOR %1</Russian>
+                <French>OPFOR %1</French>
+                <Chinese>OPFOR %1</Chinese>
+                <Spanish>OPFOR %1</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_ZONE_CAPTURE_SHORT_SECS">
+                <Original>%1 s</Original>
+                <English>%1 s</English>
+                <Chinesesimp>%1 秒</Chinesesimp>
+                <German>%1 s</German>
+                <Polish>%1 s</Polish>
+                <Czech>%1 s</Czech>
+                <Russian>%1 с</Russian>
+                <French>%1 s</French>
+                <Chinese>%1 秒</Chinese>
+                <Spanish>%1 s</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_ZONE_CAPTURE_SHORT_HALTED">
+                <Original>halted</Original>
+                <English>halted</English>
+                <Chinesesimp>已中断</Chinesesimp>
+                <German>unterbrochen</German>
+                <Polish>przerwane</Polish>
+                <Czech>přerušeno</Czech>
+                <Russian>прерван</Russian>
+                <French>interrompue</French>
+                <Chinese>已中斷</Chinese>
+                <Spanish>interrumpida</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_check_vehicle_status">
                 <Original>Check Vehicle Status</Original>
@@ -6441,6 +6537,18 @@
                 <French>Grésillement radio</French>
                 <Chinese>無線電提示音</Chinese>
                 <Spanish>Chasquido de radio</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_USEROPT_CAPTURE">
+                <Original>Capture details</Original>
+                <English>Capture details</English>
+                <Chinesesimp>夺取详情</Chinesesimp>
+                <German>Einnahmedetails</German>
+                <Polish>Szczegóły zdobywania</Polish>
+                <Czech>Podrobnosti obsazení</Czech>
+                <Russian>Подробности захвата</Russian>
+                <French>Détails de capture</French>
+                <Chinese>奪取詳情</Chinese>
+                <Spanish>Detalles de captura</Spanish>
             </Key>
                     <Key ID="STR_DUWS_T_repair_select_pylon">
                 <Original>Select pylon and weapon.</Original>
