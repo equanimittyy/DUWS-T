@@ -199,7 +199,7 @@ magnitude; above that the best candidate takes most of the probability, and a hi
 | Bank | one null |
 | Zone Reinforce | each uncontested OPFOR zone below full strength |
 | Zone Fortify | each uncontested OPFOR zone below tier IV |
-| Zone hardpoint Build | one action per unlocked ring type, its targets every uncontested OPFOR zone with a free hardpoint slot (`fnc_hardpoint_zone_cap`) |
+| Zone hardpoint Build | one action per unlocked ring type, its targets every uncontested, sleeping OPFOR zone with a free hardpoint slot (`fnc_hardpoint_zone_cap`) |
 | Rapport | each town above −20, a BLUFOR-banded town included, that OPFOR's area of influence covers (`fnc_aoi_opfor_covers`) |
 | Standalone hardpoint Build | one action per unlocked standalone type, its target the band cell the siting pass picks by cover Value ([§Asset siting](#asset-siting)) |
 | Tower / OP / mortar / battery Build | one action each, under the type's cap, target the band cell the siting pass picks by the type's own rule ([§Asset siting](#asset-siting)) |

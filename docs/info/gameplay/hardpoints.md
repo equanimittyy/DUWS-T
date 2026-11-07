@@ -147,6 +147,13 @@ tier earns a higher ceiling with no rewrite. At campaign generation a random cou
 clear of steep slope, facing radially out from the centre. The cap is the free-slot limit OPCOM's zone
 Build reads, less the standing ring and any build still siting (`DUWS_opcom_buildsPending`).
 
+**OPCOM builds into a zone only while the zone sleeps** (`DUWS_fnc_hardpointZoneAwake`). A zone hardpoint
+mirrors its zone, so a build in an awake zone registers crewed, and a player near the zone sees it appear. The
+zone wakes for one player on the ground within its radius plus 400 m, disguised or not, for two BLUFOR AI
+there, and for a BLUFOR aircraft in its air ring. It stays awake for the 120 s grace after they leave. A build
+in a sleeping zone registers stowed, and it raises with the rest of the zone. The cost is that a zone stays at
+its current ring for as long as players stay near it.
+
 **Minefields are generated, not composed.** `fnc_hardpoint_minefield_plan`
 (`server/init_zones/fnc_hardpoint_minefield.sqf`) plans one 50 m square of vanilla mine objects —
 `ATMine` for the AT variant, `APERSMine` for AP, and either one drawn per mine for MIX. Each 10 m cell of the

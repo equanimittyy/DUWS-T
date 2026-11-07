@@ -19,7 +19,8 @@ DUWS_fnc_opcom_zoneBuildTargets = {
     private _out = [];
     {
         _x params ["_zk", "_zs", "", "_worth", "_exp", "_tier"];
-        if (([_zk, _zs] call fnc_hardpoint_zone_cap) > ([_zk] call DUWS_fnc_opcom_zoneSlotsUsed)) then {
+        // A build in an awake zone registers crewed, so a player near it, disguised or not, would watch it appear.
+        if (!(_zk call DUWS_fnc_hardpointZoneAwake) && {([_zk, _zs] call fnc_hardpoint_zone_cap) > ([_zk] call DUWS_fnc_opcom_zoneSlotsUsed)}) then {
             _out pushBack [[_zk, _type], [_type] call DUWS_fnc_opcom_hpPrice,
                 format ["Build %1 at %2", DUWS_hardpointName getOrDefault [_type, _type], [_zk] call DUWS_fnc_opcom_zoneLabel],
                 _mix * ([_worth, _exp, [_type, _zk] call DUWS_fnc_hpForce, _tier] call DUWS_fnc_opcom_holdValue)];
