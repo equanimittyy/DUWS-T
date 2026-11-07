@@ -135,6 +135,7 @@ private _statusBar = uiNamespace getVariable ["DUWS_statusBarHandle", scriptNull
 if (isNull _statusBar || {scriptDone _statusBar}) then {
 	uiNamespace setVariable ["DUWS_statusBarHandle", [] spawn fnc_status_bar];
 };
+fnc_capture_bar = compile preprocessFileLineNumbers "duws\client\warcom\fnc_capture_bar.sqf";
 
 // Each registers a Draw3D handler and returns, so call rather than spawn.
 [] call fnc_killhouse_markers;

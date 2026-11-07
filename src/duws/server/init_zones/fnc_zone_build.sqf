@@ -73,8 +73,8 @@ DUWS_fnc_zoneRedeploy = {
 // A string JIP id: one keyed on the flag would evict the factory's order (DUWS_fnc_siteBuildArm).
 DUWS_fnc_zoneCaptureArm = {
     params ["_flg"];
-    [[_flg, DUWS_flagCaptureHold], {
-        params ["_flg", "_hold"];
+    [[_flg], {
+        params ["_flg"];
         if (!hasInterface || isNull _flg) exitWith {};
         [
             _flg, localize "STR_DUWS_T_ZONE_CAPTURE_ACTION",
@@ -82,19 +82,17 @@ DUWS_fnc_zoneCaptureArm = {
             "\A3\ui_f\data\map\markers\military\flag_CA.paa",
             // The carry gate is the flag's OPFOR-held test (fnc_zone_flag_logistics).
             "(_target getVariable ['R3F_LOG_disabled', false]) && {_this distance _target < 5}",
-            "!(_caller getVariable ['DUWS_zoneCaptureRefused', false])",
-            { params ["_flg", "_caller"]; _caller setVariable ["DUWS_zoneCaptureRefused", false]; [_flg, false] remoteExec ["DUWS_fnc_zoneFlagCapture", 2] },
-            {},
-            { params ["_flg"]; [_flg, true] remoteExec ["DUWS_fnc_zoneFlagCapture", 2] },
-            {}, [], _hold, 30, false, false
+            "true",
+            {}, {},
+            { params ["_flg"]; [_flg] remoteExec ["DUWS_fnc_zoneFlagCapture", 2] },
+            {}, [], 1, 30, false, false
         ] call BIS_fnc_holdActionAdd;
     }] remoteExec ["call", [0, -2] select isDedicated, format ["DUWS_zoneCapture_%1", netId _flg]];
 };
 
-// The hold's start only reports, and its end tests again, since the fight runs on under the hold. A refusal stops the
-// hold through the flag its progress condition reads.
+// Every failed test, where the bar names only the first: the player came to the flag to ask why.
 DUWS_fnc_zoneFlagCapture = {
-    params ["_flg", "_commit"];
+    params ["_flg"];
     private _owner = remoteExecutedOwner;
     private _key = _flg getVariable ["DUWS_buildSite", ""];
     if (_key == "" || {[_key] call fnc_zone_bluforHeld}) exitWith {};
@@ -104,12 +102,8 @@ DUWS_fnc_zoneFlagCapture = {
         // Localised on the receiving machine: the server's language is not the player's.
         [[_name, _blockers], {
             params ["_name", "_blockers"];
-            player setVariable ["DUWS_zoneCaptureRefused", true];
             hint (([format [localize "STR_DUWS_T_ZONE_CAPTURE_REFUSED", _name]] + (_blockers apply { "- " + localize _x })) joinString "\n");
         }] remoteExec ["call", _owner];
     };
-    if (!_commit) exitWith {};
-    private _pos = ([_key] call fnc_site_at) get "pos";
-    private _trg = missionNamespace getVariable [format ["trigger_%1_%2", floor abs (_pos select 0), floor abs (_pos select 1)], objNull];
-    if (!isNull _trg) then { call compile ((triggerStatements _trg) select 1) };
+    [_key, "zone", WEST, EAST, DUWS_flagCaptureHold] call DUWS_fnc_siteTaken;
 };

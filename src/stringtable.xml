@@ -5296,6 +5296,30 @@
                 <Chinese>區域及周邊的 BLUFOR 兵力未超過 OPFOR。</Chinese>
                 <Spanish>BLUFOR no supera en número a OPFOR en la zona y sus alrededores.</Spanish>
             </Key>
+            <Key ID="STR_DUWS_T_ZONE_CAPTURE_COUNTDOWN">
+                <Original>Capturing zone %1: %2 s</Original>
+                <English>Capturing zone %1: %2 s</English>
+                <Chinesesimp>正在夺取区域 %1：%2 秒</Chinesesimp>
+                <German>Zone %1 wird eingenommen: %2 s</German>
+                <Polish>Zdobywanie strefy %1: %2 s</Polish>
+                <Czech>Obsazování zóny %1: %2 s</Czech>
+                <Russian>Захват зоны %1: %2 с</Russian>
+                <French>Capture de la zone %1 : %2 s</French>
+                <Chinese>正在奪取區域 %1：%2 秒</Chinese>
+                <Spanish>Capturando la zona %1: %2 s</Spanish>
+            </Key>
+            <Key ID="STR_DUWS_T_ZONE_CAPTURE_HALTED">
+                <Original>Capture of zone %1 halted. %2</Original>
+                <English>Capture of zone %1 halted. %2</English>
+                <Chinesesimp>区域 %1 的夺取已中断。%2</Chinesesimp>
+                <German>Einnahme von Zone %1 unterbrochen. %2</German>
+                <Polish>Zdobywanie strefy %1 przerwane. %2</Polish>
+                <Czech>Obsazování zóny %1 přerušeno. %2</Czech>
+                <Russian>Захват зоны %1 прерван. %2</Russian>
+                <French>Capture de la zone %1 interrompue. %2</French>
+                <Chinese>區域 %1 的奪取已中斷。%2</Chinese>
+                <Spanish>Captura de la zona %1 interrumpida. %2</Spanish>
+            </Key>
             <Key ID="STR_DUWS_T_check_vehicle_status">
                 <Original>Check Vehicle Status</Original>
                 <English>Check Vehicle Status</English>

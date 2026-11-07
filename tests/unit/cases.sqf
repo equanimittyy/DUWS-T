@@ -2197,3 +2197,48 @@ DUWS_fnc_opcom_liftFor = { [] };
     ([[2027, 1, 1, 0, 5]] call DUWS_fnc_saveStamp) - ([[2026, 12, 31, 23, 55]] call DUWS_fnc_saveStamp), 10] call fnc_assertEq;
 ["saveStamp: 2026-09-26 is day 2460",
     floor (([[2026, 9, 26, 0, 0]] call DUWS_fnc_saveStamp) / 1440), 2460] call fnc_assertEq;
+
+// --- DUWS_fnc_siteTaken: the one hold stamp, the flag's cap on it, and when the capture bar is told ---
+// Read relative to time, since the VM's clock runs on between the call and the read. A fresh key per case, since
+// the VM keeps a variable set to nil.
+DUWS_captureHold = 20;
+SITE_N = 0;
+SITE_BLOCKERS = [];
+SITE_TELLS = [];
+DUWS_fnc_siteTakeBlockers = { SITE_BLOCKERS };
+DUWS_fnc_siteTakeTell = { SITE_TELLS pushBack [_this select 3, _this select 4] };
+private _fnc_take = {
+    params ["_stamp", ["_left", 20]];
+    SITE_TELLS = [];
+    SITE_N = SITE_N + 1;
+    private _key = format ["tk%1", SITE_N];
+    private _var = format ["DUWS_takeSince_%1", _key];
+    if (_stamp isEqualType []) then { missionNamespace setVariable [_var, _stamp] };
+    private _r = [_key, "zone", west, east, _left] call DUWS_fnc_siteTaken;
+    private _held = if (isNil { missionNamespace getVariable _var }) then { "none" } else {
+        private _h = missionNamespace getVariable _var;
+        [_h select 0, round ((time - (_h select 1)) max 0)]
+    };
+    [_r, _held, SITE_TELLS]
+};
+["siteTaken: a first pass starts the hold and tells the bar the whole of it",
+    [""] call _fnc_take, [false, [west, 0], [[20, ""]]]] call fnc_assertEq;
+["siteTaken: a running hold is not told again",
+    [[west, time - 3]] call _fnc_take, [false, [west, 3], []]] call fnc_assertEq;
+["siteTaken: the hold done takes the zone",
+    [[west, time - 21]] call _fnc_take, [true, [west, 21], []]] call fnc_assertEq;
+["siteTaken: the flag cuts a long hold to its own and tells the bar",
+    [[west, time - 3], 5] call _fnc_take, [false, [west, 15], [[5, ""]]]] call fnc_assertEq;
+["siteTaken: the flag never lengthens a hold nearer than its own",
+    [[west, time - 17], 5] call _fnc_take, [false, [west, 17], []]] call fnc_assertEq;
+["siteTaken: the flag on a zone with no hold starts one with its own left",
+    ["", 5] call _fnc_take, [false, [west, 15], [[5, ""]]]] call fnc_assertEq;
+["siteTaken: the other side's stamp does not carry over",
+    [[east, time - 19]] call _fnc_take, [false, [west, 0], [[20, ""]]]] call fnc_assertEq;
+SITE_BLOCKERS = ["STR_X"];
+["siteTaken: a failed test clears the hold and tells the bar which",
+    [[west, time - 12]] call _fnc_take, [false, "none", [[-1, "STR_X"]]]] call fnc_assertEq;
+["siteTaken: a failed test with no hold running tells nothing",
+    [""] call _fnc_take, [false, "none", []]] call fnc_assertEq;
+["siteTaken: a failed test does not report the other side's hold",
+    [[east, time - 12]] call _fnc_take, [false, "none", []]] call fnc_assertEq;
