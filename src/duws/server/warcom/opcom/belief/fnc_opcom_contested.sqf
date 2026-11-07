@@ -8,21 +8,30 @@ DUWS_fnc_opcom_beliefIsSighting = {
     _key isEqualType "" && {(_key find ":") >= 1}
 };
 
-// OPFOR only, yet one test on either side's ground: at a BLUFOR site it finds the attackers, at an OPFOR site the
-// defenders fighting back. Zones, towns and bases alike, so a garrison buy and a base's upkeep read the same rule.
+// One test on either side's ground: at a BLUFOR site it finds the attackers, at an OPFOR site the defenders fighting
+// back. An OPFOR zone is also contested while BLUFOR stand on its ground, because an assault outlives its last
+// defender: a zone buy landing then raises men or a hardpoint in front of the player and refuses the capture they
+// earned. Zones, towns and bases alike, so a garrison buy and a base's upkeep read the same rule.
 DUWS_fnc_opcom_contestedUpdate = {
     private _contested = createHashMap;
     {
         private _key = _x;
         private _site = _y;
         if ((_key select [0, 5]) in ["zone_", "town_"] || {(_key select [0, 4]) == "FOB_"} || {_key == "HQ"}) then {
+            private _assault = (_key select [0, 5]) == "zone_" && {!([_key] call fnc_zone_bluforHeld)};
             private _men = [];
+            private _foes = false;
             {
+                private _ground = !(_x isKindOf "Air");
                 {
-                    if (side _x == EAST && {_x call fnc_unit_standing} && {[_x] call fnc_duws_engaged}) then { _men pushBack _x };
+                    if (side _x == EAST) then {
+                        if ((_x call fnc_unit_standing) && {[_x] call fnc_duws_engaged}) then { _men pushBack _x };
+                    } else {
+                        if (_assault && {_ground} && {side _x == WEST} && {_x call fnc_unit_standing}) then { _foes = true };
+                    };
                 } forEach ([crew _x, [_x]] select (_x isKindOf "CAManBase"));
             } forEach ((_site get "pos") nearEntities [["CAManBase", "LandVehicle", "Air"], _site get "radius"]);
-            if (_men isNotEqualTo []) then {
+            if (_men isNotEqualTo [] || {_foes}) then {
                 _contested set [_key, true];
                 if (!(_key in DUWS_opcom_contested) && {_key == "HQ" || {(_key select [0, 4]) == "FOB_"}
                     || {(_key select [0, 5]) == "zone_" && {[_key] call fnc_zone_bluforHeld}}}) then {

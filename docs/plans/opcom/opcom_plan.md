@@ -81,7 +81,7 @@ Two terms carry one meaning each throughout:
 
 | Term | Applies to | Meaning |
 |---|---|---|
-| **Contested** | a zone, a town, the HQ or a FOB | BLUFOR are assaulting the site: an engaged OPFOR unit stands inside its radius (`fnc_opcom_contested.sqf`) |
+| **Contested** | a zone, a town, the HQ or a FOB | BLUFOR are assaulting the site: an engaged OPFOR unit stands inside its radius, or a BLUFOR unit stands on the ground inside an OPFOR zone's radius (`fnc_opcom_contested.sqf`) |
 | **Engaged** | a unit | The unit is live and fighting BLUFOR. A virtual unit, a zone and a town are never engaged |
 
 ## Appraisal (Phase 4)

@@ -400,6 +400,13 @@ fight back. OPCOM rebuilds the set each tick (`DUWS_fnc_opcom_contestedUpdate`).
 unseen does not contest it. A group scripted into `COMBAT`, such as a side mission's guards, contests the site it
 stands in until it dies.
 
+**An OPFOR zone is also contested while BLUFOR stand on its ground.** A standing BLUFOR unit inside the zone's radius,
+on foot or in a land vehicle, contests it, and an aircraft does not. The player can kill every defender long before the
+capture lands, because the capture also waits on the reserve pool, the zone's hardpoints and the 20 s hold. Without
+this rule, the zone reads as open once no defender fights back. OPCOM can then build a hardpoint in front of the
+player, or reinforce or fortify the garrison, and each of these refuses the capture again. The test reads
+`side`, as the capture's presence test does, so a disguised player does not contest the zone.
+
 **A contest at a BLUFOR site raises the contact card.** When a contest starts at the HQ, a FOB or a zone BLUFOR hold,
 every player gets the enemy contact card, with a map mark on each engaged group (`fnc_enemy_contact`). The card fires
 once for each contest, so a fight that runs on does not repeat it.
