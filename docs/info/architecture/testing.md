@@ -61,7 +61,10 @@ case that turns by a bearing asserts only at bearing 0, the one angle both read 
 reads the word as an undefined variable, warns, and runs the rest of the iteration, so a function that skips with
 `continue` returns wrong results here without failing; nest the branch instead in code you intend to exercise. It also
 aborts with "Array recursion detected" when a result holds the same array twice, which Arma allows, so give such a
-case distinct inputs.
+case distinct inputs. It does not parse `isNotEqualTo`, so code you intend to exercise here tests `count _x > 0` or
+`!(_a isEqualTo _b)` instead. A `setVariable` to nil keeps the variable, where Arma deletes it, so a later
+`getVariable` with a default returns nil; a case reads such a variable through `isNil` and gives each run a fresh
+name.
 
 The unit tests avoid drift by **extracting the function under test from real source at run time**
 (`lib/extract_fn.py`) rather than copying it, so they always exercise current code.
