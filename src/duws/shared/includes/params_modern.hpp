@@ -39,6 +39,16 @@ class Params {
         default = 900;
     };
 
+    // On loads the campaign marked AUTO-LOAD on the load screen as the server boots, so a restart needs no game
+    // master. A game master in slot 1 at boot skips it, and a mark that does not load waits for one. A hosted
+    // server ignores it, because its host is the game master.
+    class DUWS_DediAutoload {
+        title = "Dedicated Server Auto-load";
+        values[] = {0,1};
+        texts[] = {"Off","On"};
+        default = 0;
+    };
+
     // Toggles map group icons (setGroupIconsVisible). Friendly groups always show; enemy groups show
     // only where BLUFOR has intel (knowsAbout), so it tracks live detections rather than revealing the
     // whole map. Off by default. Icon visibility is per-machine display state, so each client applies it

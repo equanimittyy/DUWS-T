@@ -43,6 +43,9 @@ publicVariable "serverinit_complete";
 if (isMultiplayer) then {
 	[] spawn {
 		sleep 5;
+		// A load answers every setup gate itself, so an empty slot 1 holds nothing up.
+		waitUntil { sleep 1; !isNil "DUWS_setupPhase" };
+		if (DUWS_setupPhase isEqualTo "load") exitWith {};
 		private _gm = missionNamespace getVariable ["player1", objNull];
 		if (isNull _gm || {!isPlayer _gm}) then {
 			["ERROR", "BOOT", "Game Master slot (player1) empty -- setup cannot run, campaign will hang"] call fnc_log;

@@ -46,6 +46,14 @@ restart during one costs a campaign rather than an interval if there is nothing 
 This is a deliberate addition: Antistasi overwrites in place (`fn_finalizeSave.sqf:34`) and has no
 fallback at all. The payload is tens of kilobytes, so doubling it is not a consideration.
 
+**`DUWST_autoload` holds the ID of the one campaign that a dedicated server loads at boot.** It is a
+separate key, so moving the mark does not rewrite a header. The load screen's AUTO-LOAD button
+toggles it (`DUWS_fnc_saveAutoloadToggle`). A delete clears it, because a new campaign can get the
+freed ID and would otherwise inherit the mark. On a dedicated server with `DUWS_DediAutoload` on, the
+scan copies the mark into the header of its row as `auto`, so the load screen can tag that row.
+Elsewhere the mark stays in the store but does nothing, so no row carries it. The boot behaviour is in
+[`campaign_persistence_plan.md`](../../plans/campaign_persistence_plan.md#nobody-at-the-screen).
+
 ## The namespace is resolved at runtime, not hardcoded
 
 `missionProfileNamespace` is the default store — per-mission, server-side, and it lands in a

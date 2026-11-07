@@ -2955,6 +2955,26 @@
                 <Chinese>變更所選戰役儲存的任務參數</Chinese>
                 <Spanish>Cambia los parámetros de misión guardados con la campaña seleccionada</Spanish>
             </Key>
+            <Key ID="STR_DUWS_T_fork_auto">
+                <Original>AUTO-LOAD</Original>
+                <English>AUTO-LOAD</English>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_auto_clear">
+                <Original>CLEAR AUTO-LOAD</Original>
+                <English>CLEAR AUTO-LOAD</English>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_auto_tip">
+                <Original>Load the selected campaign by itself each time this dedicated server starts</Original>
+                <English>Load the selected campaign by itself each time this dedicated server starts</English>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_auto_tag">
+                <Original>[AUTO]</Original>
+                <English>[AUTO]</English>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_auto_skipped">
+                <Original>Auto-load is off for this boot, because %1 is Game Master for setup</Original>
+                <English>Auto-load is off for this boot, because %1 is Game Master for setup</English>
+            </Key>
             <Key ID="STR_DUWS_T_fork_params_frame">
                 <Original>Campaign Parameters</Original>
                 <English>Campaign Parameters</English>
@@ -21072,6 +21092,10 @@
                 <Russian>Ожидание завершения настройки миссии хостом…</Russian>
                 <French>En attente que l'hôte termine la configuration de la mission...</French>
                 <Chinese>正在等待房主完成任務設定……</Chinese>
+            </Key>
+            <Key ID="STR_DUWS_T_wait_autoload_refused">
+                <Original>The auto-load campaign cannot load. Waiting for a Game Master to set up the campaign...</Original>
+                <English>The auto-load campaign cannot load. Waiting for a Game Master to set up the campaign...</English>
             </Key>
             <Key ID="STR_DUWS_T_NO_GM_TITLE">
                 <Original>No Game Master</Original>

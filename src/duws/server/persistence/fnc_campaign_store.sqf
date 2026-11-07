@@ -115,12 +115,20 @@ DUWS_fnc_saveCommit = {
     true
 };
 
+// The campaign a dedicated server loads at boot when DUWS_DediAutoload is on, or "".
+DUWS_fnc_saveAutoload = {
+    private _id = (call DUWS_fnc_saveNamespace) getVariable ["DUWST_autoload", ""];
+    [_id, ""] select !(_id isEqualType "")
+};
+
 DUWS_fnc_saveDelete = {
     params ["_id"];
     private _ns = call DUWS_fnc_saveNamespace;
     private _key = format ["DUWST_save_%1", _id];
     _ns setVariable [_key, nil];
     _ns setVariable [_key + "_prev", nil];
+    // A new campaign can draw the freed ID, and would inherit the mark.
+    if ((call DUWS_fnc_saveAutoload) isEqualTo _id) then { _ns setVariable ["DUWST_autoload", nil] };
     private _rows = (call DUWS_fnc_saveIndex) select { (_x select 0) isNotEqualTo _id };
     _ns setVariable ["DUWST_saves", _rows];
     call DUWS_fnc_saveFlush;
@@ -165,11 +173,15 @@ DUWS_fnc_saveRefusal = {
 DUWS_fnc_saveScan = {
     private _list = [];
     private _now = [systemTimeUTC] call DUWS_fnc_saveStamp;
+    // Elsewhere the mark does nothing, so the load screen must not tag a row with it.
+    private _auto = ["", call DUWS_fnc_saveAutoload] select (isDedicated && {(["DUWS_DediAutoload", 0] call BIS_fnc_getParamValue) == 1});
     {
         _x params ["_id", "", "_json"];
         private _h = if (_json isEqualType "") then { [fromJSON _json] param [0, 0] } else { 0 };
         if (_h isEqualType createHashMap) then {
             _h set ["age", (_now - (_h getOrDefault ["stamp", _now])) max 0];
+            // In the header, so the load screen's refill-on-change also catches a mark that moved.
+            if (_id isEqualTo _auto) then { _h set ["auto", true] };
             _list pushBack [_h getOrDefault ["stamp", 0], _id, (keys _h) apply { [_x, _h get _x] }, [_h] call DUWS_fnc_saveRefusal];
         } else {
             ["WARN", "SAVE", format ["campaign %1 has an unreadable header", _id]] call fnc_log;

@@ -1007,6 +1007,22 @@ campaign needs the game master's picks on the setup screens anyway, so a timeout
 moves the wait to the faction screen. The load screen is where the game master sees why each save was
 refused, for example a faction mod that is not loaded.
 
+**A dedicated server can skip the screen.** With the `DUWS_DediAutoload` parameter on, the gate
+loads the campaign that the game master marked AUTO-LOAD before it publishes the screen, so no game
+master is needed and the no-game-master warning stays silent. The gate checks the mark the same
+way that the timeout checks its pick. A hosted server ignores the parameter, because its host is the
+game master. The load screen shows the button and the `[AUTO]` tag only where the mark takes effect:
+on a dedicated server with the parameter on.
+
+**A game master at boot stops the auto-load.** The screen and its timeout then decide as usual, and
+the screen's status line names the game master as the reason that the mark did not load. While the mark is
+valid, this is the only way back to the screen, for example to move the mark or start a new campaign.
+
+**A mark that does not load waits for a game master.** The gate logs the refusal and publishes the screen,
+and the timeout does not fall back to the newest other campaign, because that is not the campaign
+the operator chose to run. While no game master is on, the other players' setup hint says that the
+auto-load campaign cannot load.
+
 Antistasi makes the same timeout a mission parameter defaulting to off (`autoLoadLastGame`,
 `-1` through 600 seconds). Here it defaults to on, because a server that will not restart into its
 own campaign without an admin present is the failure this whole plan exists to fix, and the two

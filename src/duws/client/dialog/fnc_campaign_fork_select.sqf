@@ -38,3 +38,7 @@ if (_row isNotEqualTo []) then {
 { ctrlEnable [_x, _row isNotEqualTo [] && {(_row select 2) isEqualTo ""}] } forEach [9808, 9812];
 ctrlEnable [9809, _row isNotEqualTo []];
 ctrlEnable [9811, _row isNotEqualTo []];
+private _marked = _row isNotEqualTo [] && {(createHashMapFromArray (_row select 1)) getOrDefault ["auto", false]};
+ctrlSetText [9819, localize (["STR_DUWS_T_fork_auto", "STR_DUWS_T_fork_auto_clear"] select _marked)];
+// A refused campaign can still lose its mark, but cannot gain one.
+ctrlEnable [9819, _marked || {_row isNotEqualTo [] && {(_row select 2) isEqualTo ""}}];

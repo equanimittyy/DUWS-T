@@ -1,5 +1,5 @@
 // ESC is eaten like every setup screen's: escaping this one would leave the server waiting on a question nobody
-// can answer. idc block 9800-9812, above the FOB manager's 9745.
+// can answer. idc block 9800-9812 and 9819, above the FOB manager's 9745.
 class duws_campaign_fork
 {
     idd = -1;
@@ -55,7 +55,7 @@ class duws_campaign_fork
             x = 1 * GUI_GRID_W + GUI_GRID_X;
             y = 3 * GUI_GRID_H + GUI_GRID_Y;
             w = 24 * GUI_GRID_W;
-            h = 12.5 * GUI_GRID_H;
+            h = 10.7 * GUI_GRID_H;
             onLBSelChanged = "[] call fnc_campaign_fork_select;";
         };
         class fork_detail: RscStructuredText
@@ -151,6 +151,16 @@ class duws_campaign_fork
             w = 13.5 * GUI_GRID_W;
             tooltip = "$STR_DUWS_T_fork_params_tip";
             action = "['params'] spawn fnc_campaign_fork_action;";
+        };
+        // Where it is hidden, fnc_campaign_fork.sqf grows the list over its row.
+        class fork_auto: fork_params
+        {
+            idc = 9819;
+            text = "$STR_DUWS_T_fork_auto";
+            x = 1 * GUI_GRID_W + GUI_GRID_X;
+            w = 24 * GUI_GRID_W;
+            tooltip = "$STR_DUWS_T_fork_auto_tip";
+            action = "['auto'] spawn fnc_campaign_fork_action;";
         };
     };
 };

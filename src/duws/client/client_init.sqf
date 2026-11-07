@@ -120,7 +120,8 @@ if (((vehiclevarname player) in game_master)) then {
 		hintsilent "Waiting for serverinit_complete";
 		while {!(["BOOT", "serverinit_complete (JIP)", {serverinit_complete}, 300] call fnc_waitLogged)} do {};
 		waitUntil {
-			hintsilent localize "STR_DUWS_T_waithostsetup";
+			hintsilent localize (["STR_DUWS_T_waithostsetup", "STR_DUWS_T_wait_autoload_refused"] select
+				((missionNamespace getVariable ["DUWS_autoloadRefused", false]) && {!isPlayer (missionNamespace getVariable ["player1", objNull])}));
 			sleep 5;
 			HQ_pos_found_generated && chosen_settings
 		};

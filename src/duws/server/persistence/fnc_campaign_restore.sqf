@@ -41,6 +41,16 @@ DUWS_fnc_saveDeleteRequest = {
     call DUWS_fnc_saveScan;
 };
 
+// One mark per store: marking a campaign moves the mark to it, and marking the marked one clears it.
+DUWS_fnc_saveAutoloadToggle = {
+    params ["_id"];
+    private _mark = ["", _id] select (_id isNotEqualTo (call DUWS_fnc_saveAutoload));
+    (call DUWS_fnc_saveNamespace) setVariable ["DUWST_autoload", _mark];
+    call DUWS_fnc_saveFlush;
+    ["INFO", "SAVE", format ["auto-load mark %1", ["cleared", format ["set on %1", _mark]] select (_mark isNotEqualTo "")]] call fnc_log;
+    call DUWS_fnc_saveScan;
+};
+
 // A new ID, never the payload's own, so an import cannot overwrite a campaign already on this machine.
 DUWS_fnc_saveImport = {
     params ["_json"];
@@ -136,16 +146,43 @@ DUWS_fnc_restoreAnswer = {
 DUWS_fnc_restoreGate = {
     params ["_fnc_survey"];
     call DUWS_fnc_saveScan;
+    // Answered before the screen is published, so the game master is never shown a question already settled.
+    private _mark = call DUWS_fnc_saveAutoload;
+    private _hold = false;
+    if (isDedicated && {_mark isNotEqualTo ""} && {(["DUWS_DediAutoload", 0] call BIS_fnc_getParamValue) == 1}) then {
+        // A Game Master at boot is the only way back to the load screen while the mark is valid.
+        private _gm = missionNamespace getVariable ["player1", objNull];
+        if (isPlayer _gm) exitWith {
+            ["INFO", "SAVE", format ["auto-load: %1 is Game Master for setup, so the load screen decides", name _gm]] call fnc_log;
+            DUWS_autoloadSkippedBy = name _gm;
+            publicVariable "DUWS_autoloadSkippedBy";
+        };
+        private _i = DUWS_saveList findIf { (_x select 0) isEqualTo _mark };
+        private _why = if (_i < 0) then { "not in the store" } else { (DUWS_saveList select _i) select 2 };
+        if (_why isEqualTo "") then { _why = ([_mark, false] call DUWS_fnc_restoreRead) select 1 };
+        if (_why isEqualTo "") then {
+            ["INFO", "SAVE", format ["auto-load: loading the marked campaign %1", _mark]] call fnc_log;
+            DUWS_loadChoice = [_mark, false];
+        } else {
+            ["WARN", "SAVE", format ["auto-load: the marked campaign %1 does not load (%2); waiting for a Game Master", _mark, _why]] call fnc_log;
+            _hold = true;
+            DUWS_autoloadRefused = true;
+            publicVariable "DUWS_autoloadRefused";
+        };
+    };
     private _survey = if (DUWS_saveList isEqualTo []) then { [] spawn _fnc_survey } else { scriptNull };
-    DUWS_setupPhase = "choose";
-    publicVariable "DUWS_setupPhase";
     private _start = time;
-    waitUntil {
-        sleep 1;
-        !isNil "DUWS_loadChoice" || {time - _start > ([30, 600] select (([] call DUWS_fnc_humanCount) > 0))}
+    if (isNil "DUWS_loadChoice") then {
+        DUWS_setupPhase = "choose";
+        publicVariable "DUWS_setupPhase";
+        waitUntil {
+            sleep 1;
+            !isNil "DUWS_loadChoice" || {time - _start > ([30, 600] select (([] call DUWS_fnc_humanCount) > 0))}
+        };
     };
     if (isNil "DUWS_loadChoice") then {
-        private _i = DUWS_saveList findIf { (_x select 2) isEqualTo "" };
+        // A refused mark loads nothing: the newest other campaign is not the one the operator chose to run.
+        private _i = [DUWS_saveList findIf { (_x select 2) isEqualTo "" }, -1] select _hold;
         private _newest = if (_i < 0) then { [] } else { [(DUWS_saveList select _i) select 0, false] };
         // A header can pass the scan over a payload that does not parse.
         if (_newest isNotEqualTo [] && {((_newest call DUWS_fnc_restoreRead) select 1) isEqualTo ""}) then {
