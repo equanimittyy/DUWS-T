@@ -68,6 +68,12 @@ New work holds to:
   from the nearest player; a bound ferry rider keeps to the spread, so it stays at its pickup
   (`DUWS_fnc_opcom_devirtSpot`, `taskings/taskings/fnc_opcom_stream.sqf`). With no such spot it stays virtual and asks
   again next tick. While BLUFOR within its K hold it virtual, it takes no zone and overruns no FOB.
+- **A unit leaves the map only when it is far.** A live unit stows only after `OPCOM_REVIRT_GRACE` (6) ticks with no
+  BLUFOR within its K (`_stowIfFar`, `taskings/taskings/fnc_opcom_task_step.sqf`). A live unit that reaches its zone
+  to garrison holds there as a `guard`, and it joins the garrison when it stows, as a capture does
+  (`DUWS_fnc_opcom_stepReturn`). A combatant garrisoned in an awake zone is not drawable, because the draw deletes the
+  reserve group that can stand for it (`DUWS_fnc_opcom_drawOut`). A supply truck is the one exception: it is deleted
+  where it delivers.
 - **A lift is the commander's call, not the rider's.** A unit stopped at a water leg takes a ferry, a boat or a
   helicopter, the tick one is free or affordable (`fnc_opcom_ferry.sqf`), and a land-taxi — a truck, a car, an APC, an
   IFV or a transport helicopter — is sourced with the order it carries, when its set-down point lies more than
@@ -441,7 +447,7 @@ hardpoint is built or cleared or ground changes hands, and need also moves with 
 
 - **Gate.** A zone action or a Rapport run drops while that site is contested. An action that needs a unit drops a
   target with no source: no eligible unit free, and no eligible row the faction can field under the unit cap
-  ([§Sourcing](#sourcing-hire-on-demand-phase-4d)). No action draws a unit garrisoned in a contested zone. Patrol
+  ([§Sourcing](#sourcing-hire-on-demand-phase-4d)). No action draws a unit garrisoned in a contested zone, or a combatant garrisoned in an awake zone. Patrol
   draws, free or hired, every unit carrying the `recon` flag, the helicopter included and `noncombat` or not, and
   every **land** combatant — infantry, wheeled and tracked.
   A `noncombat` row that is not recon stays out, and so does combat air: the faction's air scout is the recon
@@ -582,8 +588,8 @@ A fire mission fires the guns OPCOM owns, so it sources no unit.
   unit the pool fields at a live zone deposits no `effForce` while it stands (`DUWS_fnc_opcom_defenderStanding`): the
   zone's own deposit counts its men off the roster.
 - **A flip removes every unit garrisoned at the site.** `DUWS_fnc_opcom_siteLost` deletes each `garrison` tasking
-  homed at a zone that leaves OPFOR hands, combatant or `noncombat`. A unit still marching in to settle drops to
-  `guard` where it stands.
+  homed at a zone that leaves OPFOR hands, combatant or `noncombat`. A unit that has not settled yet, marching in
+  or holding until it stows, drops to a plain `guard` where it stands.
 - **A unit heals only at rest in its zone.** Only the `garrison` order heals: never on guard, never on the march in,
   and never while the zone is contested, since a zone under assault is no rest. The heal resumes when the contest
   lifts, and the contested ticks bank nothing. A boat rests and heals at its zone's port, even where the port lies
@@ -650,7 +656,7 @@ with no row reads −1.
 
 - **The gate.** `DUWS_fnc_opcom_drawable` admits a marching unit once `DUWS_opcom_tick` reaches its `hold` and its
   order's span is 0 or more. Its other exclusions stand: a bound unit, a carrying hull, an engaged unit, and a
-  garrison in a contested zone. `DUWS_fnc_opcom_freeSweep` drops its own hold test, so a unit is drawable the tick it
+  garrison in a contested zone, and a combatant garrison in an awake zone. `DUWS_fnc_opcom_freeSweep` drops its own hold test, so a unit is drawable the tick it
   settles to rest. The ferry and taxi pools read the same gate.
 - **The incumbent pays.** `DUWS_fnc_opcom_commitCost` adds a marching unit's `expValue`, the Value of the order it
   drops, to its stake ([§Cost](#cost)). `expValue` goes to 0 where an order's purpose ends without a send:
@@ -699,7 +705,7 @@ runner sequences the states; the route and streaming machinery moves the units. 
 
 ### Ownership: the roster has to skip a bound unit
 
-The free pool is every unbound `garrison`ed or `guard` unit, except one garrisoned in a contested zone, and every
+The free pool is every unbound `garrison`ed or `guard` unit, except one garrisoned in a contested zone or a combatant garrisoned in an awake zone, and every
 unbound marching unit past its re-issue hold ([§Re-issue](#re-issue-a-span-per-order)). A unit
 that reaches its rally settles to `guard`, which puts it straight back in that pool, and the next pick would send it
 somewhere else mid-buildup. A `boundTo` key on the tasking record, holding its attack's id, is what

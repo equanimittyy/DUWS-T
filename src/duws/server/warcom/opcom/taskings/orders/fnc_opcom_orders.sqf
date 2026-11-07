@@ -27,7 +27,14 @@ DUWS_fnc_opcom_refreshMarch = {
 DUWS_fnc_opcom_refreshHold = { "" };
 
 // Holds its point -- no march, no heal -- but the stream stage still renders it on approach or stows it.
-DUWS_fnc_opcom_stepGuard = { false };
+// A load clears every group, so a guard still waiting to settle comes back virtual, and only this step settles it.
+DUWS_fnc_opcom_stepGuard = {
+    params ["_t", "_ctx"];
+    private _zk = _t getOrDefault ["settleZone", ""];
+    if (_zk isEqualTo "" || {_ctx select 2} || {(_t get "order") isNotEqualTo "guard"}) exitWith { false };
+    [_t, _zk] call DUWS_fnc_opcom_garrisonInto;
+    true
+};
 
 DUWS_fnc_opcom_stepGarrison = {
     params ["_t"];

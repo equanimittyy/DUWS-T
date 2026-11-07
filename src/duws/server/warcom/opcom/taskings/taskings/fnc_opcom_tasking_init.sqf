@@ -90,6 +90,9 @@ DUWS_fnc_opcom_drawable = {
     && {(_t getOrDefault ["carrying", -1]) < 0}
     && {(_t getOrDefault ["status", ""]) isNotEqualTo "engaged"}
     && {!(((_t get "order") isEqualTo "garrison") && {[_t get "homeZone"] call DUWS_fnc_opcom_siteContested})}
+    // In an awake zone a combatant may stand as a reserve group, which drawOut deletes in front of whoever woke the zone.
+    && {!(((_t get "order") isEqualTo "garrison") && {!("noncombat" in (_t get "flags"))}
+        && {(_t get "homeZone") call DUWS_fnc_hardpointZoneAwake})}
 };
 
 // The complement of the two rests, never a list of names: an order added to the table is out on the ground by

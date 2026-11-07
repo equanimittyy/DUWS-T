@@ -20,13 +20,16 @@ DUWS_fnc_opcom_stepProbe = {
 };
 
 // A garrison settle despawns -- a combatant's token now sits in the reserve pool, so a live copy would fight twice.
+// A live one holds as a guard and settles when it stows, as a capture does, so no player watches it vanish.
 DUWS_fnc_opcom_stepReturn = {
     params ["_t", "_ctx"];
-    _ctx params ["", "", "_live", "", "_arrived"];
+    _ctx params ["_pos", "_grp", "_live", "", "_arrived"];
     if (!_arrived) exitWith { false };
-    [_t, _t get "returnZone"] call DUWS_fnc_opcom_garrisonInto;
-    if (_live) then { [_t] call DUWS_fnc_opcom_reVirt };
-    true
+    if (!_live) exitWith { [_t, _t get "returnZone"] call DUWS_fnc_opcom_garrisonInto; true };
+    _t set ["settleZone", _t get "returnZone"]; _t set ["returnZone", ""];
+    _t set ["order", "guard"]; _t set ["target", _pos]; _t set ["route", []];
+    [_grp, "guard", _pos] call DUWS_fnc_opcom_applyOrder;
+    false
 };
 
 DUWS_fnc_opcom_stepErrand = {
