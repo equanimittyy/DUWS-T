@@ -86,7 +86,7 @@ DUWS_fnc_siteTakeTell = {
     private _ring = (_site get "radius") + ((DUWS_streamProfiles get _profile) select 0);
     private _to = (allPlayers - entities "HeadlessClient_F") select { _x distance2D _pos <= _ring };
     if (_to isEqualTo []) exitWith {};
-    [(zone_namePOS_pairs select _i) select 0, _done, DUWS_captureHold, DUWS_captureDecay, _blockers] remoteExec ["fnc_capture_bar", _to];
+    [(zone_namePOS_pairs select _i) select 0, _done, DUWS_captureHold, DUWS_captureDecay, _blockers, _pos, _ring] remoteExec ["fnc_capture_bar", _to];
 };
 
 // Wider than the litter sweep's 300 m: these are live men, and a body blinking out at 300 m goes unnoticed while a

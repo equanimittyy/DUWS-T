@@ -353,7 +353,8 @@ is listed under the bar. The bar hides when the meter fills or empties.
 `DUWS_fnc_siteTakeTell` sends the bar only when the list of failed tests changes, never on the half-second
 poll: when a meter starts, when a test fails or passes again, and when a different test fails. The client
 animates the fill between messages. Each message goes to the players inside the streaming ring (radius +
-400 m) at that moment, so a player who arrives during a count sees the next change.
+400 m) at that moment, so a player who arrives during a count sees the next change. The client hides the
+bar as soon as its player leaves that ring, because no later message would reach that player to correct it.
 
 | Rule | Because |
 |---|---|
