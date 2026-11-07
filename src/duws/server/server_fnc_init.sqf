@@ -1196,6 +1196,8 @@ fnc_fob_max = compile preprocessFileLineNumbers "duws\shared\functions\fnc_fob_m
 fnc_sightline_foliageClear = compile preprocessFileLineNumbers "duws\shared\functions\fnc_sightline_foliageClear.sqf";publicVariable "fnc_sightline_foliageClear";
 fnc_sightline_clear = compile preprocessFileLineNumbers "duws\shared\functions\fnc_sightline_clear.sqf";publicVariable "fnc_sightline_clear";
 fnc_duws_senior_name = compile preprocessFileLineNumbers "duws\shared\functions\fnc_duws_senior_name.sqf";publicVariable "fnc_duws_senior_name";
+// Broadcast: the horn sends it to wherever each unit is local, and a player's own squad is local to that player.
+fnc_horn_dodge = compile preprocessFileLineNumbers "duws\shared\functions\fnc_horn_dodge.sqf";publicVariable "fnc_horn_dodge";
 
 // =========================================================================================================
 // REGISTRY SELF-CHECK

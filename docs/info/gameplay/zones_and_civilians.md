@@ -826,7 +826,7 @@ still run on all of it (`fnc_civ_handler_ravage.sqf`, `fnc_civ_handler_wbk.sqf`)
 Every civilian in a town walks a short circuit near the point where it spawned
 (`server/civilian/fnc_civ_wp_Tomata.sqf`): two or three points within 60 m, then back to the start.
 The waypoints have no timeout, because a pause at each point reads as a civilian who idles. The
-circuit is session state: a fill, a conversation and a panic calm-down each draw a new one.
+circuit is session state: a fill, a conversation, a panic calm-down and a horn dodge each draw a new one.
 
 While a town is awake, its fill thread runs `server/civilian/fnc_civ_follow.sqf` every 5–30 s. The
 pass takes up to three of the civilians furthest from every player, deletes them and creates a new
@@ -844,6 +844,31 @@ The sight test is `fnc_duws_posSeenBy`, the same line-of-sight test as the reser
 which way the player faces, because a player turns faster than a pass runs. The pass finds the spawn
 point before it deletes anyone, so a town with no hidden ground near the player keeps its crowd. A new
 walker starts outside the 50 m line, so a later pass can take it again before it reaches the player.
+
+### A horn moves people out of the road
+
+When a player drives a car and sounds the horn, the civilians and BLUFOR AI on foot within 15 m of the
+car step aside (`shared/functions/fnc_horn_dodge.sqf`). OPFOR never moves for a horn: a horn that
+clears an enemy patrol off the road would be a free tactical advantage. The trigger is in
+`client/client_init.sqf`.
+
+| Rule | Value |
+|---|---|
+| Trigger | The fire action while the player is the driver and the driver's weapon is `CarHorn` or a subclass at any depth, so a modded horn counts. At most one trigger per second |
+| Who moves | AI on foot that is alive, not incapacitated, and has `PATH` and `MOVE` enabled. A civilian must also be a town civilian that the panic sweep would take, and must not be stopped, closed, arrested, surrendered or hostile |
+| Step | 60° off the car's heading, to the side the unit already stands on, for 4.5 m + 0.3 × the car's speed in m/s |
+| Hold | 5 s. A horn during the hold is ignored |
+| Resume | A civilian gets a new circuit from `fnc_civ_resume`. A BLUFOR unit gets `doFollow` to its leader |
+
+The dodge runs where each unit is local, because `doMove` is ignored on any other machine. A town
+civilian is local to the server, but a player's own squad is local to that player. So the client sends
+the message to each unit, and the function is broadcast.
+
+At the end of the hold, the function tests the unit again. If a panic, a call-over or another order
+took the unit during the step, that owner keeps the unit and the dodge does not resume it.
+
+A BLUFOR unit that a player told to hold a position goes back into formation after a dodge, because
+`doFollow` replaces the hold order.
 
 ### Ordering
 

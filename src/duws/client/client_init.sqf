@@ -190,6 +190,18 @@ player addEventHandler ["GetInMan", {
     [_unit, _veh] remoteExec ["fnc_duws_claimRide", 2];
 }];
 
+// The horn is the driver's weapon, so it sounds on the fire action.
+DUWS_hornNext = 0;
+addUserActionEventHandler ["defaultAction", "Activate", {
+    private _veh = objectParent player;
+    if (isNull _veh || {driver _veh != player} || {time < DUWS_hornNext}) exitWith {};
+    if !((_veh currentWeaponTurret [-1]) isKindOf ["CarHorn", configFile >> "CfgWeapons"]) exitWith {};
+    DUWS_hornNext = time + 1;
+    {
+        [_x, _veh] remoteExecCall ["fnc_horn_dodge", _x];
+    } forEach ((_veh nearEntities ["CAManBase", 15]) select { !isPlayer _x });
+}];
+
 // Stamina/fatigue from the lobby param (default on). Drives the player here and the AI units
 // they field: recruits/requests/paradrops read player_fatigue at spawn.
 player_fatigue = missionNamespace getVariable ["DUWS_paramFatigue", 1];
