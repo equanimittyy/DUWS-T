@@ -9,7 +9,6 @@ LoadScreen = "duws\shared\media\images\duws_t.jpg";
 // port or a Workshop version bump reads the same saves (server/persistence/fnc_campaign_store.sqf).
 missionGroup = "DUWS_T";
 
-// AIS INJURY
 respawn = 3;
 respawnDialog = 1;
 respawndelay = 10;
@@ -19,8 +18,6 @@ allowFunctionsLog = 1;
 respawnOnStart=-1;
 
 #include "modules\AIS\Effects\BarDlg.hpp"
-
-//--------------------------------------------------------------
 
 class CfgFunctions
 {
@@ -39,9 +36,6 @@ class CfgMagazines
 		displayName = "Money";
 	};
 };
-
-//////////////////////////
-//////////////////////////
 
 #include "duws\shared\includes\debriefing.hpp"
 #include "duws\shared\includes\defines.hpp"
@@ -181,7 +175,6 @@ class RscTitles {
         };
     };
 
-    // The top status bar (fnc_status_bar).
     class DUWS_StatusBar {
         idd = -1;
         movingEnable = false;
