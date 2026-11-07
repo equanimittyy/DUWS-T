@@ -5296,6 +5296,18 @@
                 <Chinese>正在奪取區域 %1：%2 秒</Chinese>
                 <Spanish>Capturando la zona %1: %2 s</Spanish>
             </Key>
+            <Key ID="STR_DUWS_T_ZONE_CAPTURE_IDLE">
+                <Original>No capture of zone %1 is in progress.</Original>
+                <English>No capture of zone %1 is in progress.</English>
+                <Chinesesimp>区域 %1 当前没有进行中的夺取。</Chinesesimp>
+                <German>Für Zone %1 läuft keine Einnahme.</German>
+                <Polish>Strefa %1 nie jest obecnie zdobywana.</Polish>
+                <Czech>Obsazování zóny %1 neprobíhá.</Czech>
+                <Russian>Захват зоны %1 не идёт.</Russian>
+                <French>Aucune capture de la zone %1 n'est en cours.</French>
+                <Chinese>區域 %1 目前沒有進行中的奪取。</Chinese>
+                <Spanish>No hay ninguna captura de la zona %1 en curso.</Spanish>
+            </Key>
             <Key ID="STR_DUWS_T_ZONE_CAPTURE_HALTED">
                 <Original>Capture of zone %1 halted:</Original>
                 <English>Capture of zone %1 halted:</English>

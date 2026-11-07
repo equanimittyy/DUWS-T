@@ -330,17 +330,22 @@ capture handlers previously guarded against with an `isServer` assert.
 
 ### Capture Status at the flag
 
-An OPFOR-held zone's flag carries a **Capture Status** hold action (`DUWS_fnc_zoneCaptureArm`,
-`init_zones/fnc_zone_build.sqf`). It shows to a player within 5 m while the flag's carry gate is shut,
-which is the flag's OPFOR-held test. The hold takes 1 s. `DUWS_fnc_zoneFlagCapture` runs
-`DUWS_fnc_siteTakeBlockers` with every test on, and hints the holder the zone's row exactly as the
+Every zone's flag carries a **Capture Status** hold action (`DUWS_fnc_zoneCaptureArm`,
+`init_zones/fnc_zone_build.sqf`). It shows to a player within 5 m while nobody carries the flag, because
+a BLUFOR zone's flag can be carried and the action would follow the carrier. The hold takes 1 s.
+`DUWS_fnc_zoneFlagCapture` reports for the side that would take the zone from its holder: BLUFOR's
+capture on OPFOR ground, and OPFOR's retake, in the red OPFOR row, on BLUFOR ground. It runs
+`DUWS_fnc_siteTakeBlockers` for that side with every test on, and hints the holder the zone's row exactly as the
 [capture bar](#the-capture-bar) draws it: the line, the bar at the zone's current meter, and every failed
-test. Both build the row in `fnc_capture_bar_row`, so the two cannot word a test differently. The hint
-always shows the full row, whatever the player's Capture details option, because the player asked.
+test. Both build the row in `fnc_capture_bar_row`, so the two cannot word a test differently. A zone with
+no meter has no bar to show, so its hint says that no capture is in progress and lists the tests that
+stop one from starting. The hint always shows the full row, whatever the player's Capture details option,
+because the player asked.
 
 The flag only reports. It does not flip the zone or shorten the meter, so the 60 s meter is the only way
-to take a zone. The report exists because the bar lists the failed tests only while a meter drains: a
-player at a zone with no meter has no other way to ask why the zone does not fall.
+to take a zone. The report exists because the bar lists the failed tests only while a meter drains, and
+never in the collapsed view: a player at a zone with no meter, or with Capture details off, has no other way
+to ask why the zone does not fall.
 
 The flag exists only with the Modern zone style or simple zones (`fnc_createzone.sqf`), and so does the
 action.

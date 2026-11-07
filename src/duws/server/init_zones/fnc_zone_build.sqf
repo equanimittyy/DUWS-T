@@ -80,8 +80,8 @@ DUWS_fnc_zoneCaptureArm = {
             _flg, localize "STR_DUWS_T_ZONE_CAPTURE_ACTION",
             "\A3\ui_f\data\map\markers\military\flag_CA.paa",
             "\A3\ui_f\data\map\markers\military\flag_CA.paa",
-            // The carry gate is the flag's OPFOR-held test (fnc_zone_flag_logistics).
-            "(_target getVariable ['R3F_LOG_disabled', false]) && {_this distance _target < 5}",
+            // Hidden while carried: a BLUFOR zone's pole rides its carrier, so the action would follow them around.
+            "isNull attachedTo _target && {_this distance _target < 5}",
             "true",
             {}, {},
             { params ["_flg"]; [_flg] remoteExec ["DUWS_fnc_zoneFlagCapture", 2] },
@@ -90,19 +90,21 @@ DUWS_fnc_zoneCaptureArm = {
     }] remoteExec ["call", [0, -2] select isDedicated, format ["DUWS_zoneCapture_%1", netId _flg]];
 };
 
-// Only reports, as the zone's capture bar row with every failed test: the bar lists them only while a meter drains,
-// so at zero the flag is how a player asks.
+// Only reports, as the zone's capture bar row with every failed test, for the side that would take the zone from its
+// holder: the bar lists the tests only while a meter drains, so at zero the flag is how a player asks.
 DUWS_fnc_zoneFlagCapture = {
     params ["_flg"];
     private _owner = remoteExecutedOwner;
     private _key = _flg getVariable ["DUWS_buildSite", ""];
-    if (_key == "" || {[_key] call fnc_zone_bluforHeld}) exitWith {};
-    private _blockers = [_key, "zone", WEST, EAST, true] call DUWS_fnc_siteTakeBlockers;
+    if (_key == "") exitWith {};
+    private _held = [_key] call fnc_zone_bluforHeld;
+    private _side = [west, east] select _held;
+    private _blockers = [_key, "zone", _side, [east, west] select _held, true] call DUWS_fnc_siteTakeBlockers;
     private _name = (zone_namePOS_pairs select (zone_namePOS_pairs findIf { ([_x select 1] call fnc_zone_key) isEqualTo _key })) select 0;
     // Built on the receiving machine: the server's language is not the player's, and structured text does not cross
     // remoteExec.
-    [[_name, [_key, west] call DUWS_fnc_siteTakeDone, DUWS_captureHold, _blockers], {
-        params ["_name", "_done", "_hold", "_blockers"];
-        hint parseText (([_name, west, _done, _hold, _blockers] call fnc_capture_bar_row) select 0);
+    [[_name, _side, [_key, _side] call DUWS_fnc_siteTakeDone, DUWS_captureHold, _blockers], {
+        params ["_name", "_side", "_done", "_hold", "_blockers"];
+        hint parseText (([_name, _side, _done, _hold, _blockers] call fnc_capture_bar_row) select 0);
     }] remoteExec ["call", _owner];
 };

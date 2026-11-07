@@ -74,11 +74,11 @@ DUWS_fnc_siteTaken = {
     _done >= 1
 };
 
-// -> how full _side's meter at the site is, 0 with none.
+// -> how full _side's meter at the site is, -1 with none.
 DUWS_fnc_siteTakeDone = {
     params ["_key", "_side"];
     private _meter = missionNamespace getVariable [format ["DUWS_takeProgress_%1", _key], []];
-    [0, _meter param [1, 0]] select ((_meter param [0, sideUnknown]) isEqualTo _side)
+    [-1, _meter param [1, 0]] select ((_meter param [0, sideUnknown]) isEqualTo _side)
 };
 
 // Only revealed ground the attacker does not hold yet: the trigger polls a flipped zone in the old direction until
