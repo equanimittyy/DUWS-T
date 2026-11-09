@@ -1778,14 +1778,16 @@ DUWS_opcom_tick = 100;
 DUWS_opcom_tick = 460;
 ["trafficAt: one half-life later it reads half", [0] call DUWS_fnc_opcom_trafficAt, 4] call fnc_assertClose;
 
-// --- DUWS_fnc_opcom_lossAt: OPFOR force killed in a cell, halving every half-life ---
+// --- DUWS_fnc_opcom_lossFor: OPFOR force killed in the block or by the cluster's groups, each kill once, halving ---
 OPCOM_LOSS_HALFLIFE = 120;
-CMD_grid_loss = [6];
-CMD_grid_lossTick = [100];
+CMD_losses = [[5, "", 4, 100], [7, "2:1", 6, 100], [9, "2:1", 8, 100], [5, "3:1", 2, 100]];
 DUWS_opcom_tick = 100;
-["lossAt: a fresh loss reads whole", [0] call DUWS_fnc_opcom_lossAt, 6] call fnc_assertClose;
+["lossFor: kills in the block count, whoever made them", [[5], []] call DUWS_fnc_opcom_lossFor, 6] call fnc_assertClose;
+["lossFor: a cluster group's kills count wherever they fell", [[], ["2:1"]] call DUWS_fnc_opcom_lossFor, 14] call fnc_assertClose;
+["lossFor: a cluster group's kill inside the block counts once", [[7], ["2:1"]] call DUWS_fnc_opcom_lossFor, 14] call fnc_assertClose;
+["lossFor: kills in the block and elsewhere by a cluster group add up", [[5], ["2:1"]] call DUWS_fnc_opcom_lossFor, 20] call fnc_assertClose;
 DUWS_opcom_tick = 220;
-["lossAt: one half-life later it reads half", [0] call DUWS_fnc_opcom_lossAt, 3] call fnc_assertClose;
+["lossFor: one half-life later a kill reads half", [[5], []] call DUWS_fnc_opcom_lossFor, 3] call fnc_assertClose;
 
 // --- DUWS_fnc_opcom_coverValue: the need a new hardpoint covers, half of what each cell still lacks ---
 OPCOM_BLOCK_K = 2;
@@ -1830,7 +1832,7 @@ DUWS_fnc_opcom_cellDist = { 1 };
 ["interceptShare: a group a quarter as strong takes a quarter", [5, 20 * (call DUWS_fnc_opcom_blockGain) - 1] call DUWS_fnc_opcom_interceptShare, 0.25] call fnc_assertClose;
 ["interceptShare: past the defense it stops at the whole", [50, 0] call DUWS_fnc_opcom_interceptShare, 1] call fnc_assertClose;
 
-// --- DUWS_fnc_opcom_interceptValue: a QRF's Value, cut by OPFOR's recent losses over the cluster's 3x3 ---
+// --- DUWS_fnc_opcom_interceptValue: a QRF's Value, cut by OPFOR's recent losses in its 3x3 or to its cluster's groups ---
 OPCOM_NEED_K = 3;
 OPCOM_QRF_LOSS_FREE = 9;
 OPCOM_QRF_LOSS_K = 3;
@@ -1840,12 +1842,16 @@ DUWS_opcom_box = [0, 0, 9, 9];
 DUWS_fnc_opcom_w2c = { params ["_p"]; (floor ((_p select 1) / 500)) * 10 + floor ((_p select 0) / 500) };
 DUWS_fnc_opcom_needAt = { 2 };
 DUWS_fnc_opcom_blockForce = { [0, 20] };
-DUWS_fnc_opcom_lossAt = { 0 };
-["interceptValue: with no losses a QRF earns the need over its 7x7", [[2750, 2750, 0], 50] call DUWS_fnc_opcom_interceptValue, 98] call fnc_assertClose;
-DUWS_fnc_opcom_lossAt = { 1 };
-["interceptValue: losses over its 3x3 within the free band cost nothing", [[2750, 2750, 0], 50] call DUWS_fnc_opcom_interceptValue, 98] call fnc_assertClose;
-DUWS_fnc_opcom_lossAt = { 2 };
-["interceptValue: losses three OPCOM_QRF_LOSS_K past the free band quarter it", [[2750, 2750, 0], 50] call DUWS_fnc_opcom_interceptValue, 24.5] call fnc_assertClose;
+test_loss = 0;
+DUWS_fnc_opcom_lossFor = { test_loss };
+["interceptValue: with no losses a QRF earns the need over its 7x7", [[2750, 2750, 0], 50, []] call DUWS_fnc_opcom_interceptValue, 98] call fnc_assertClose;
+test_loss = 9;
+["interceptValue: losses within the free band cost nothing", [[2750, 2750, 0], 50, []] call DUWS_fnc_opcom_interceptValue, 98] call fnc_assertClose;
+test_loss = 18;
+["interceptValue: losses three OPCOM_QRF_LOSS_K past the free band quarter it", [[2750, 2750, 0], 50, []] call DUWS_fnc_opcom_interceptValue, 24.5] call fnc_assertClose;
+DUWS_fnc_opcom_lossFor = { params ["_cells", "_keys"]; 2 * (count _cells) + 18 * (count _keys) };
+["interceptValue: reads the losses over its 3x3, not its 7x7", [[2750, 2750, 0], 50, []] call DUWS_fnc_opcom_interceptValue, 24.5] call fnc_assertClose;
+["interceptValue: reads the losses to its cluster's groups", [[2750, 2750, 0], 50, ["2:1"]] call DUWS_fnc_opcom_interceptValue, 9.8] call fnc_assertClose;
 
 // --- DUWS_fnc_opcom_stalenessAt / DUWS_fnc_opcom_patrolCells: the ground a patrol sweeps on its way ---
 OPCOM_BELIEF_EXPIRE = 240;

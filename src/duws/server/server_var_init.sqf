@@ -962,12 +962,12 @@ OPCOM_QRF_HALFLIFE = 60;         // ticks; 5 min @ 5s tick
 // Cells short of its sighting a QRF's land-taxi sets a rider down: the hull stays out of the fight's 3x3 block, and the
 // walk in follows the sighting as it moves. Tune.
 OPCOM_QRF_DROP_K = 2;
-// OPFOR force lost over a QRF's 3x3 block past OPCOM_QRF_LOSS_FREE divides its Value by 1 + excess / OPCOM_QRF_LOSS_K,
-// and the loss halves every OPCOM_LOSS_HALFLIFE, so a skirmish costs nothing and a fight that keeps eating QRFs draws
-// fewer until it cools. Tune.
+// OPFOR force lost past OPCOM_QRF_LOSS_FREE, in a QRF's 3x3 block or to its cluster's groups, divides its Value by
+// 1 + excess / OPCOM_QRF_LOSS_K, and the loss halves every OPCOM_LOSS_HALFLIFE, so a skirmish costs nothing and a fight
+// that keeps eating QRFs draws fewer until it cools. Tune.
 OPCOM_QRF_LOSS_FREE = 10;        // force; a dead man is 1
 OPCOM_QRF_LOSS_K = 3;
-OPCOM_LOSS_HALFLIFE = 120;       // ticks; 10 min @ 5s tick
+OPCOM_LOSS_HALFLIFE = 240;       // ticks; 20 min @ 5s tick
 // Below this ratio of force to believed BLUFOR force an offensive holds rather than musters.
 OPCOM_MUSTER_HOLD = 0.4;
 // An attack under way fails below this ratio, on the muster bars' scale. Tune.

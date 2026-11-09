@@ -179,7 +179,9 @@ DUWS_fnc_opcom_attackRun = {
 // read, so one QRF masses on it where lone interceptors would arrive one at a time. Air joins, as it cannot join an
 // assault, since it hunts a group in the open rather than ground it must stand on. A ground unit across water stays
 // out: a ferry lands men a trip at a time, and the target moves. A block whose own OPFOR force already stands at the
-// ideal bar, the ratio a QRF package fills to, gains nothing from one. -> targets as DUWS_fnc_opcom_attackSweep's.
+// ideal bar, the ratio a QRF package fills to, gains nothing from one. Only a fresh sighting counts: past
+// OPCOM_BELIEF_FRESH the grid fades its force, so a package filled to that reading would go in short of the real one.
+// -> targets as DUWS_fnc_opcom_attackSweep's.
 DUWS_fnc_opcom_qrfSweep = {
     private _free = ([true] call DUWS_fnc_opcom_freeCombatants) apply { [_x] call DUWS_fnc_opcom_freeSource };
     private _zones = call DUWS_fnc_opcom_zonesOpen;
@@ -187,7 +189,8 @@ DUWS_fnc_opcom_qrfSweep = {
     private _sightings = [];
     {
         private _bp = (_cmd get "belief_pos") select _forEachIndex;
-        if ([_x] call DUWS_fnc_opcom_beliefIsSighting && {[_bp] call (_cmd get "covers")} && {!([_bp] call DUWS_fnc_opcom_qrfBarred)}) then {
+        if ([_x] call DUWS_fnc_opcom_beliefIsSighting && {DUWS_opcom_tick - ((_cmd get "belief_time") select _forEachIndex) <= OPCOM_BELIEF_FRESH}
+            && {[_bp] call (_cmd get "covers")} && {!([_bp] call DUWS_fnc_opcom_qrfBarred)}) then {
             _sightings pushBack [(_cmd get "belief_str") select _forEachIndex, _forEachIndex];
         };
     } forEach (_cmd get "belief_key");
@@ -195,10 +198,14 @@ DUWS_fnc_opcom_qrfSweep = {
     private _fnc_value = {
         params ["_at"];
         private _str = 0;
+        private _keys = [];
         {
-            if (([(_cmd get "belief_pos") select (_x select 1), _at] call DUWS_fnc_opcom_cellDist) <= 1) then { _str = _str + (_x select 0) };
+            if (([(_cmd get "belief_pos") select (_x select 1), _at] call DUWS_fnc_opcom_cellDist) <= 1) then {
+                _str = _str + (_x select 0);
+                _keys pushBack ((_cmd get "belief_key") select (_x select 1));
+            };
         } forEach _sightings;
-        [_at, _str] call DUWS_fnc_opcom_interceptValue
+        [_at, _str, _keys] call DUWS_fnc_opcom_interceptValue
     };
     private _out = [];
     private _fnc_offer = {
