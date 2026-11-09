@@ -259,7 +259,7 @@ so it moves no faster than a truck delivers.
 | OP | build price × the share of its 5×5 block (`OP_OBSERVE_K`) that no other OP watches, sea excluded |
 | Mortar pit, artillery battery | build price × the share of its reach that is OPFOR ground no gun of its own type reaches |
 | Rapport | town worth × skew × 2/10, with skew = max(0.1, 1 − \|rep\| ÷ 20) at 0 or below, 0.05 above 0 |
-| Attack QRF | Σ need over the lead sighting's 7×7 block × min(1, the cluster's summed force ÷ (Σ `_fri` over its 3×3 + 1)) |
+| Attack QRF | Σ need over the lead sighting's 7×7 block × min(1, the cluster's summed force ÷ (Σ `_fri` over its 3×3 + 1)) ÷ (1 + max(0, OPFOR's loss over its 3×3 − `OPCOM_QRF_LOSS_FREE`) ÷ `OPCOM_QRF_LOSS_K`) ([§QRF](#qrf-an-attack-on-a-moving-cluster)) |
 | Attack assault, Attack flank | the zone's `_points` |
 | Patrol | Σ need × staleness over the unique cells within its reach of the line it walks, × its scale, × `OPCOM_PATROL_SHARE` (0.2). A recon's reach is `OPCOM_RECON_K` and its scale 1; a combatant's reach is its engage reach (`DUWS_opcom_streamK`) and its scale its threat, `effForce` ÷ `OPCOM_PATROL_FORCE_REF` |
 | Garrison | the defense the unit adds at the zone, worth × exposure × unitForce ÷ (the zone's current force + unitForce); for a worn free unit on `guard`, the larger of that and the rebuy its heal recovers, `(fullForce − effForce) × OPCOM_AP_PER_FORCE`. A unit already resting in `garrison` heals where it stands, so its heal is no reason to move it |
@@ -856,6 +856,15 @@ time, and no-retreat turns that into defeat in detail.
 - **Local defense at the ideal bar draws no QRF.** The sweep opens none where the lead sighting's 3×3 block reads
   OPFOR's own force at `OPCOM_MUSTER_IDEAL` or better against the block's BLUFOR force, and no weaker sighting within
   a cell of that lead opens one either. A QRF already open keeps its muster and its joins.
+- **A fight that keeps killing OPFOR draws fewer QRFs.** A QRF sets no cooldown, so each wave that dies can open the
+  next one on the same cluster for as long as the wallet pays. The loss layer (`grid_loss`,
+  `belief/fnc_opcom_loss.sqf`) adds each dead OPFOR man as 1 and each hull with an OPFOR crew as its class power, in
+  the cell where it died. It halves every `OPCOM_LOSS_HALFLIFE` (120 ticks, 10 min). The first `OPCOM_QRF_LOSS_FREE`
+  (10) of the loss over the lead sighting's 3×3 block cost nothing, so a skirmish draws QRFs as before. Past it, a
+  QRF's Value, its joins' included, is divided by 1 + the excess ÷ `OPCOM_QRF_LOSS_K` (3), so 13 dead halve it, 19
+  quarter it and 40 leave less than a tenth. It is a weight, not a gate: a cluster with enough need still draws a
+  QRF. Only OPFOR's commander keeps the layer, because BLUFOR's commander hires nothing and so cannot chain QRFs past
+  the task forces it holds. The layer is not saved, so a load starts with no losses.
 - **A QRF musters where its units stand.** A rally about a target that moves is stale before the units reach it.
   It musters on the same bars as any attack, over `OPCOM_QRF_EXPIRY` (6 ticks, 30 s) in place of
   `OPCOM_MUSTER_EXPIRY`. Its open sends a package filled to the ideal bar, so where the sources exist it launches on

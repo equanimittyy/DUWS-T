@@ -100,6 +100,7 @@ duws/server/warcom/opcom/appraisal/value/fnc_opcom_rapport.sqf::DUWS_fnc_opcom_r
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_delay.sqf::DUWS_fnc_opcom_delay
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_need.sqf::DUWS_fnc_opcom_spread
 duws/server/warcom/opcom/belief/fnc_opcom_traffic.sqf::DUWS_fnc_opcom_trafficAt
+duws/server/warcom/opcom/belief/fnc_opcom_loss.sqf::DUWS_fnc_opcom_lossAt
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_cover.sqf::DUWS_fnc_opcom_coverValue
 duws/server/disguise/fnc_disguise_floor.sqf::*fnc_disguise_floor
 duws/server/disguise/fnc_disguise_suspicion_step.sqf::*fnc_disguise_suspicion_step
@@ -108,6 +109,7 @@ duws/server/warcom/opcom/appraisal/value/fnc_opcom_pwin.sqf::DUWS_fnc_opcom_pWin
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_pwin.sqf::DUWS_fnc_opcom_pWinSend
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_cost.sqf::DUWS_fnc_opcom_abandonAt
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_intercept.sqf::DUWS_fnc_opcom_interceptShare
+duws/server/warcom/opcom/appraisal/value/fnc_opcom_intercept.sqf::DUWS_fnc_opcom_interceptValue
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_patrol.sqf::DUWS_fnc_opcom_stalenessAt
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_patrol.sqf::DUWS_fnc_opcom_patrolCells
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_patrol.sqf::DUWS_fnc_opcom_sweepWeights

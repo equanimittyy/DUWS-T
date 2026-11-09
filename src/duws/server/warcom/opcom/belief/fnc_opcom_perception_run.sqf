@@ -39,6 +39,7 @@ if (DUWS_campaignLoaded) then {
     };
     ["opcom"] call DUWS_fnc_restoreStepDone;
 };
+addMissionEventHandler ["EntityKilled", { [_this select 0] call DUWS_fnc_opcom_lossKilled }];
 
 // The drip's fractions of an AP, to the wallet and to the tier, paid out whole because fnc_ap_adjust keeps both whole.
 private _dripCarry = 0;

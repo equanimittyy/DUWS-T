@@ -16,6 +16,8 @@ _cmd set ["grid_ene", +_zero];
 _cmd set ["grid_seen", _zero apply { -OPCOM_COVER_SPAN }];
 _cmd set ["grid_traffic", +_zero];           // believed force last crossing, decayed on read
 _cmd set ["grid_trafficTick", +_zero];
+_cmd set ["grid_loss", +_zero];              // own force killed, decayed on read
+_cmd set ["grid_lossTick", +_zero];
 _cmd set ["gridStaticFri", +_zero];
 _cmd set ["gridStaticEne", +_zero];
 _cmd set ["gridSrc", createHashMap];
