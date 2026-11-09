@@ -12,8 +12,7 @@ only `<English>` leaves the old wording live for anyone whose game language isn'
 
 **Every language tag tracks English.** When an `<English>` line changes, every language tag on that
 key changes with it in the same edit, under the rules below; a key without language tags needs
-nothing. Retranslating a whole language is a pass of its own
-([localisation plan](../../plans/localisation_catchup_plan.md)), because the briefings encode
+nothing. Retranslating a whole language is a pass of its own, because the briefings encode
 gameplay numbers a translator has to check against the current English rather than against old
 text.
 
