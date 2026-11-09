@@ -1,5 +1,5 @@
 // Locality: server, [] call'd at load. A Patrol's Value: the need on the ground a unit sweeps, weighted by how long
-// that ground has gone unseen (opcom_plan.md §Value). Read from the pick's unscheduled pass, so nothing may suspend.
+// that ground has gone unseen (opcom.md §Value). Read from the pick's unscheduled pass, so nothing may suspend.
 if (!isServer) exitWith {};
 
 DUWS_fnc_opcom_stalenessAt = {

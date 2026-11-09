@@ -1,5 +1,5 @@
 // Locality: server, [] call'd at load. P(win), the odds a unit sent into contact wins it, read off the force grid
-// (opcom_plan.md §Appraisal). Read from the pick's unscheduled pass, so nothing here may suspend.
+// (opcom.md §Appraisal). Read from the pick's unscheduled pass, so nothing here may suspend.
 if (!isServer) exitWith {};
 
 DUWS_fnc_opcom_blockForce = {

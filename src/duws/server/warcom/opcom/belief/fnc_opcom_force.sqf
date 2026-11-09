@@ -1,7 +1,7 @@
 // Locality: server, executed at load by server_fnc_init ([] call compile) so it can define several
 // functions. The OPCOM force model -- the category -> power table and the resolvers pricing a holding, a
 // sighting or a hardpoint against it -- kept in one home so the grid rebuild, sighting sweep and force
-// readout share the one metric and cannot drift apart. Model: docs/plans/opcom/phase_2_force_weighting.md.
+// readout share the one metric and cannot drift apart. Model: docs/info/gameplay/opcom.md §Appraisal.
 if (!isServer) exitWith {};
 
 // Category -> grid power, the tune knobs: a man is 1, each other category worth that many men of force.

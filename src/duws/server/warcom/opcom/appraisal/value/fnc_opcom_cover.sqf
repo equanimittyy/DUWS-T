@@ -1,5 +1,5 @@
 // Locality: server, [] call'd at load. The cover field and the Value a new standalone hardpoint or minefield adds to it
-// (opcom_plan.md §Need and cover fields). Read from the pick's unscheduled pass, so nothing here may suspend.
+// (opcom.md §Need and cover fields). Read from the pick's unscheduled pass, so nothing here may suspend.
 if (!isServer) exitWith {};
 
 // Siting and on-truck builds count, as they do against an asset's cap, or the siting pass sends a second truck to the

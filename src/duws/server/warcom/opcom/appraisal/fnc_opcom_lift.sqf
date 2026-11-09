@@ -1,4 +1,4 @@
-// Locality: server, [] call'd at load. The lifts, sourced like any other unit (opcom_plan.md §Sourcing): a land-taxi
+// Locality: server, [] call'd at load. The lifts, sourced like any other unit (opcom.md §Sourcing): a land-taxi
 // priced with the order it carries, and the ferry a unit stopped at a water leg takes as soon as one is free or
 // affordable. The source reads run unscheduled, so nothing in them may suspend; the runs route, so they execute after.
 if (!isServer) exitWith {};

@@ -1,5 +1,5 @@
 // Locality: server, [] call'd at load. What an Arty mission is worth: the believed force it catches in one pattern
-// (opcom_plan.md §Value). Read from the pick's unscheduled pass, so nothing here may suspend.
+// (opcom.md §Value). Read from the pick's unscheduled pass, so nothing here may suspend.
 if (!isServer) exitWith {};
 
 // A gun scatters wider the further it shoots. The pattern the mission lays, not what the rounds are worth: where

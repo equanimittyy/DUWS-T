@@ -1,5 +1,5 @@
 // Locality: server, [] call'd at load. A mortar pit's or battery's Value: its price x the share of its reach that is
-// OPFOR ground no gun of its type reaches (opcom_plan.md §Value). Read from the pick's unscheduled pass, so nothing here may suspend.
+// OPFOR ground no gun of its type reaches (opcom.md §Value). Read from the pick's unscheduled pass, so nothing here may suspend.
 if (!isServer) exitWith {};
 
 // Sampled: every cell of a 20 km disc against the area of influence would overrun the pick's unscheduled pass.

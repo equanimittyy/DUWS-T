@@ -1,5 +1,5 @@
 // Locality: server, [] call'd at load. The traffic layer: the believed BLUFOR force last seen crossing each cell, halving
-// every OPCOM_TRAFFIC_HALFLIFE (opcom_plan.md §Need and cover fields). Decayed lazily on read, never in a per-cell sweep.
+// every OPCOM_TRAFFIC_HALFLIFE (opcom.md §Need and cover fields). Decayed lazily on read, never in a per-cell sweep.
 if (!isServer) exitWith {};
 
 // Keeps the larger of what the cell still holds and this sighting, so a route used every trip stays lit.

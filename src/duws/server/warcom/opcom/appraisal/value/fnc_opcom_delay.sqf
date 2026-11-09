@@ -1,4 +1,4 @@
-// Locality: server, [] call'd at load. The delay discount: Value that lands later counts for less (opcom_plan.md §Value).
+// Locality: server, [] call'd at load. The delay discount: Value that lands later counts for less (opcom.md §Value).
 // Read from the pick's unscheduled pass, so nothing here may suspend.
 if (!isServer) exitWith {};
 

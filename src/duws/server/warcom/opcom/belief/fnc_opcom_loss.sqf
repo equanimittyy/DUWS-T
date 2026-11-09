@@ -1,7 +1,7 @@
 // Locality: server, [] call'd at load. OPFOR's recent losses, one row per kill: the cell it died in, the BLUFOR group
 // that killed it and its force, halving every OPCOM_LOSS_HALFLIFE. A QRF's Value reads the kills in its block or by its
 // cluster's groups, so OPFOR stops feeding a fight it keeps losing, and the group that won it carries the record when
-// it moves on (opcom_plan.md §QRF). One row per kill rather than a ledger per cell and another per group, so a kill
+// it moves on (opcom.md §QRF). One row per kill rather than a ledger per cell and another per group, so a kill
 // that is on both counts once. OPFOR's only: BLUFOR's commander hires nothing, so its QRFs cannot chain past the task
 // forces it holds.
 if (!isServer) exitWith {};

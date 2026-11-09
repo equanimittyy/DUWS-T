@@ -1,5 +1,5 @@
 // Locality: server, [] call'd at load. Supply trucks: where one can be had, what it costs to a destination, and the run
-// that sends it (opcom_plan.md §What AP buys).
+// that sends it (opcom.md §What AP buys).
 if (!isServer) exitWith {};
 
 // -> [[source ref, price, Value, Cost], ...]: the truck that best serves a delivery of _value to _dest, and a dearer one

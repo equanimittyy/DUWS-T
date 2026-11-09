@@ -130,7 +130,7 @@ if (_prefab) then {
 // hardpoint system (docs/info/gameplay/hardpoints.md); the prefab composition above is unaffected.
 
 // No QRF listener: a FiredNear handler here used to spawn distant OPFOR waves the player couldn't see or interdict.
-// Reserve tasking is the commander's job now (docs/plans/opcom_plan.md).
+// Reserve tasking is the commander's job now (docs/info/gameplay/opcom.md).
 
 _trg2=createTrigger["EmptyDetector",_zonePos];
 _trg2 setTriggerArea[_size,_size,0,false];

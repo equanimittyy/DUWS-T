@@ -19,7 +19,7 @@ Two rules govern everything below, the features that are not built yet included.
 already satisfy it (`zone_meta_array` is exactly the argument list of `fnc_createZone`); FOBs nearly
 do; player fortifications will only if they are designed that way from the start
 ([§Features not built yet](#features-not-built-yet)), and the enemy commander's state carries the
-same contract into [`opcom_plan.md`](opcom/opcom_plan.md#persistence-phase-6).
+same contract into [`opcom.md`](../info/gameplay/opcom.md#persistence).
 
 **Only what outlives a session is stored.** Long-term campaign progress earns a key; a session's own
 bookkeeping does not, however easy it would be to serialise. That is why the snapshot holds the
@@ -210,7 +210,7 @@ disconnects and everything in memory goes with it. So the last player's disconne
 the configuration this mission wants for a persistent campaign, and it raises a design question
 the mission has never had to answer: the 30-minute economy tick keeps paying, WARCOM keeps
 spawning waves, the side-mission generator keeps rolling and expiring missions, and the
-[OPCOM](opcom/opcom_plan.md#what-ap-buys) keeps buying garrisons and hardpoints against a player who is
+[OPCOM](../info/gameplay/opcom.md#what-ap-buys) keeps buying garrisons and hardpoints against a player who is
 asleep.
 
 **Decided: the campaign idles at zero players.** A player who logs off overnight and returns to a
@@ -605,7 +605,7 @@ stamps `full` and a seed clears `lost`, and both are keyed by a site key that ha
 
 OPCOM is shipped, so its store is snapshot content now rather than deferred. These are the keys the
 snapshot carries for it, and the contract they answer to is this section's; the phase that lands them is
-[`opcom_plan.md` §Persistence](opcom/opcom_plan.md#persistence-phase-6).
+[`opcom.md` §Persistence](../info/gameplay/opcom.md#persistence).
 
 | Group | Kind | Contents |
 |---|---|---|
@@ -634,7 +634,7 @@ unbound, because a bound record refuses every new order.
 
 **Attack records landed with Phase 5, and they change nothing here.** An attack is the record that binds
 several units to one Attack, and its roles name their units by tasking id rather than by handle
-([`opcom_plan.md` §Attack](opcom/opcom_plan.md#attack-phase-5)). It therefore serialises on the
+([`opcom.md` §Attack](../info/gameplay/opcom.md#attack)). It therefore serialises on the
 taskings' own terms and restores with them, which is why that phase is built before this one rather than
 after: a contract written first would be reopened the moment attack records existed.
 
@@ -1140,7 +1140,7 @@ Three counters reset with them and are meant to. `econ_tick` numbers the 30-minu
 the server's payout caps read it. `WARCOM_opfor_lastIncome` holds OPFOR's last payout, which OPCOM
 divides by the period and adds to its drip to read an income rate, so a restored campaign reads
 the drip alone until its first payout lands — what the commander does at the start of every campaign
-anyway ([`opcom_plan.md`](opcom/opcom_plan.md#gate-and-the-savings-goal)). `DUWS_missionStartDates`
+anyway ([`opcom.md`](../info/gameplay/opcom.md#gate-and-the-savings-goal)). `DUWS_missionStartDates`
 stamps the last side-mission starts and allows two in any three hours
 (`shared/functions/fnc_mission_gate_left.sqf:18`), and it resets with the missions it was stamped for:
 a restore drops live missions, so the wait goes with them rather than being served for missions the
@@ -1160,7 +1160,7 @@ reconstructed arguments. Regenerating instead means they start the way they alwa
 Discarding live units discards what was *spent* on them. A save taken while a WARCOM wave is in
 the air deletes the wave and the AP that bought it; a support in flight takes its CP with it. Over
 a campaign of restarts that is a slow leak out of both economies, and the
-[OPCOM](opcom/opcom_plan.md#what-ap-buys) buying continuously is what makes it a leak worth plugging.
+[OPCOM](../info/gameplay/opcom.md#what-ap-buys) buying continuously is what makes it a leak worth plugging.
 
 Antistasi reconciles this at save time rather than living with it: before writing, it walks live
 vehicles and units and folds their value back into the pools it is about to save — a full refund

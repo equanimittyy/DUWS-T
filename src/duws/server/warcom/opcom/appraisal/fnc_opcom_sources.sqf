@@ -1,5 +1,5 @@
 // Locality: server, [] call'd at load. Sourcing: each unit an action needs is a free unit or a hire, and one score
-// picks between them (opcom_plan.md §Sourcing). Read from the pick's unscheduled pass, so nothing here may suspend.
+// picks between them (opcom.md §Sourcing). Read from the pick's unscheduled pass, so nothing here may suspend.
 //
 // A source is [ref, start, force, moveType, flags, price, stake, mix]: ref ["free", taskingId] or ["hire", row, zoneKey],
 // the price the pick charges, the stake the score adds to Cost, and the recruitMix factor on a hire's Value.

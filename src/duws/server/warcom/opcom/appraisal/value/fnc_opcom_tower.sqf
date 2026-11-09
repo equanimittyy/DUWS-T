@@ -1,5 +1,5 @@
 // Locality: server, [] call'd at load. A radio tower's Value: the town worth it newly covers, less the covered worth
-// it overlaps, x defend (opcom_plan.md §Value). Read from the pick's unscheduled pass, so nothing here may suspend.
+// it overlaps, x defend (opcom.md §Value). Read from the pick's unscheduled pass, so nothing here may suspend.
 if (!isServer) exitWith {};
 
 DUWS_fnc_opcom_towerReach = {

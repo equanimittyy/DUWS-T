@@ -1,4 +1,4 @@
-// Locality: server, [] call'd at load. A Rapport run's Value (opcom_plan.md §Value).
+// Locality: server, [] call'd at load. A Rapport run's Value (opcom.md §Value).
 // Read from the pick's unscheduled pass, so nothing here may suspend.
 if (!isServer) exitWith {};
 

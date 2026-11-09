@@ -1,5 +1,5 @@
 // Locality: server, [] call'd at load. The Arty actions: what is worth shelling and with what pattern
-// (opcom_plan.md §Indirect-fire hardpoints). The mission itself is fnc_opcom_fires, which fires what it is handed. AP
+// (opcom.md §Indirect-fire hardpoints). The mission itself is fnc_opcom_fires, which fires what it is handed. AP
 // is the ammunition -- the guns rest empty and are loaded per mission -- so the wallet and each battery's cooldown are
 // all that limit how often they speak.
 if (!isServer) exitWith {};
@@ -166,7 +166,7 @@ DUWS_fnc_opcom_creepRun = {
     true
 };
 
-// Called each tick of a launched attack (opcom_plan.md §Chained fires).
+// Called each tick of a launched attack (opcom.md §Chained fires).
 DUWS_fnc_opcom_creepStep = {
     params ["_attack"];
     (_attack get "creep") params ["_key", "_start", "_shape"];

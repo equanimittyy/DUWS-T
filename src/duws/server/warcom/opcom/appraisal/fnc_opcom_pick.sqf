@@ -1,4 +1,4 @@
-// Locality: server -- the OPCOM tick's pick stage (opcom_plan.md §The pick). `random` is kept as the unscored
+// Locality: server -- the OPCOM tick's pick stage (opcom.md §The pick). `random` is kept as the unscored
 // control: uniform over actions before targets, so a target-rich action does not crowd out the rest.
 private _mode = _cmd get "aiMode";
 if ((_cmd get "pickOnce") isNotEqualTo "") then {

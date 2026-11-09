@@ -36,7 +36,7 @@ if (_order isNotEqualTo "guard" && {_target isEqualTo []}) exitWith {
 if (_isErrand && {!((_errand param [0, ""]) in ["rapport", "build", "mine"])}) exitWith {
     ["WARN", "OPCOM", format ["task: unknown errand %1", _errand]] call fnc_log; false
 };
-// An errand is goods spent on arrival, so it rides a supply unit (docs/plans/opcom/opcom_plan.md, What AP buys).
+// An errand is goods spent on arrival, so it rides a supply unit (docs/info/gameplay/opcom.md, What AP buys).
 if (_isErrand && {!("supply" in (_t get "flags"))}) exitWith {
     ["INFO", "OPCOM", format ["task: tasking %1 carries no supply -- errand %2 refused", _t get "id", _errand]] call fnc_log; false
 };

@@ -1,4 +1,4 @@
-// Locality: server, [] call'd at load. The roster: the free units a commit order may draw on (opcom_plan.md
+// Locality: server, [] call'd at load. The roster: the free units a commit order may draw on (opcom.md
 // §Ownership). Only OPCOM's own recruits stand in it, never a zone's base garrison, so a draw thins a zone and never
 // empties it.
 if (!isServer) exitWith {};

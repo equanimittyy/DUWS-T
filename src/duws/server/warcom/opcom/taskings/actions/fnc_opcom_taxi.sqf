@@ -1,5 +1,5 @@
 // Locality: server, [] call'd at load. Land-taxi: a lift over dry ground for a foot unit, which the pick sources with
-// the order it carries (fnc_opcom_lift) and a debug Move binds from the free hulls (opcom_plan.md §Sourcing). The carry
+// the order it carries (fnc_opcom_lift) and a debug Move binds from the free hulls (opcom.md §Sourcing). The carry
 // itself is the ferry's -- same binding, same orchestrator, same live and virtual steps -- with the drop latched at the
 // bind.
 if (!isServer) exitWith {};

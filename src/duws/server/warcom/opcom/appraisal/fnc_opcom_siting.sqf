@@ -1,5 +1,5 @@
 // Locality: server, [] call'd at load. The siting pass: which band cell each band build is offered at
-// (opcom_plan.md §Asset siting).
+// (opcom.md §Asset siting).
 if (!isServer) exitWith {};
 
 DUWS_opcom_sites = createHashMap;

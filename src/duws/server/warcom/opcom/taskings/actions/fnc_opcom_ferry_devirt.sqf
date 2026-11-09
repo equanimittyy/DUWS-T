@@ -2,7 +2,7 @@
 // machine plus its GetIn/GetOut board/dismount handlers. Each lift type's phases are its own table
 // (fnc_opcom_ferry_rotor, fnc_opcom_ferry_boat, fnc_opcom_ferry_ground); this file holds what they share. The
 // orchestrator (fnc_opcom_ferry) drives it each tick; the virtual mirror is fnc_opcom_ferry_virt
-// (docs/plans/opcom/opcom_plan.md §Shipped).
+// (docs/info/gameplay/opcom.md §The substrate).
 if (!isServer) exitWith {};
 
 // Lift type -> phase -> handler, filled by the lift files.

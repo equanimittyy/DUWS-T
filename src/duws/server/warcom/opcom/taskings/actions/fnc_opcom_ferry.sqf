@@ -3,7 +3,7 @@
 // nearest held zone. `ferryTick` steps the bound crossing through fnc_opcom_ferry_virt or fnc_opcom_ferry_devirt as the
 // hull streams, holding the binding across the boundary; task_step decides the streaming, as for every tasking. The
 // rider owns its route; the carrier is fetched by it, never commanded, and a bound rider takes no turn of its own --
-// task_step skips it (docs/plans/opcom/opcom_plan.md §Shipped).
+// task_step skips it (docs/info/gameplay/opcom.md §The substrate).
 if (!isServer) exitWith {};
 
 // The far shore a stopped rider faces: the first land past the next water span at or after its leg, scanning

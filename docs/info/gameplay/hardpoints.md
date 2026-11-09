@@ -427,4 +427,4 @@ An OPCOM hardpoint build is an Army Power sink, and nothing refunds AP when the 
 refund would be farmable — build, clear, refund, repeat — and the enemy's pool would never reach
 whatever escalation the commander prices against it. Only a build that finds no ground is refunded, since
 nothing stands; a truck-delivered build refunds in full, the truck included. Build prices and the build decision are
-[`opcom_plan.md`](../../plans/opcom/opcom_plan.md#what-the-commander-builds)'s.
+[`opcom.md`](opcom.md#what-the-commander-builds)'s.

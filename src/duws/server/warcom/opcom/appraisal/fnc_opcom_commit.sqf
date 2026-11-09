@@ -1,4 +1,4 @@
-// Locality: server, [] call'd at load. The commit actions, which stake a unit rather than AP (opcom_plan.md §Sourcing).
+// Locality: server, [] call'd at load. The commit actions, which stake a unit rather than AP (opcom.md §Sourcing).
 // A target is [source ref, task, expValue, lift]: task the fnc_opcom_task arguments after the tasking, [] for a hire that
 // needs no order, and lift [] or [lift ref, where it sets the rider down].
 if (!isServer) exitWith {};

@@ -1,4 +1,4 @@
-// Locality: server, [] call'd at load. An Attack's record and its per-tick runner (opcom_plan.md §Attack): the units it
+// Locality: server, [] call'd at load. An Attack's record and its per-tick runner (opcom.md §Attack): the units it
 // binds in role buckets, where each bucket stages, the muster that launches them together and what each waits on. No-retreat turns
 // a force dribbled into contact into defeat in detail, so the units stage short of the target and go at once. A bound
 // unit that settles at its rally rests, so only its binding keeps the next pick off it. A role names its unit by

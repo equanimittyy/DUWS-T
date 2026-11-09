@@ -1,5 +1,5 @@
 // Locality: server, [] call'd at load. A QRF's Value: the need around a sighting cluster x the share of the local
-// defense the cluster can overwhelm, cut by OPFOR's recent losses in the cluster's block or to its groups (opcom_plan.md
+// defense the cluster can overwhelm, cut by OPFOR's recent losses in the cluster's block or to its groups (opcom.md
 // §Value). Read from the pick's unscheduled pass, so nothing here may suspend.
 if (!isServer) exitWith {};
 

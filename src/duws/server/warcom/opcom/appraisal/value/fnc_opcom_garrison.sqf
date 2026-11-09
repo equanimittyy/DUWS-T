@@ -1,5 +1,5 @@
 // Locality: server, [] call'd at load. A Garrison's Value: the defense a unit adds at the zone it rests in, or for a
-// worn unit the rebuy its heal recovers (opcom_plan.md §Value). Read from the pick's unscheduled pass, so nothing may
+// worn unit the rebuy its heal recovers (opcom.md §Value). Read from the pick's unscheduled pass, so nothing may
 // suspend.
 if (!isServer) exitWith {};
 

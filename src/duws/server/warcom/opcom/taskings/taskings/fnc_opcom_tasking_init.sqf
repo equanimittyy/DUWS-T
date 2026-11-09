@@ -5,7 +5,7 @@
 // `pos` is the world point the grid samples force at, never a cell the tasking is bound to.
 if (!isServer) exitWith {};
 
-// The one buyable-unit table (docs/plans/opcom/opcom_plan.md): row -> [composition, flags]. Bare tokens resolve
+// The one buyable-unit table (docs/info/gameplay/opcom.md): row -> [composition, flags]. Bare tokens resolve
 // to the "none" posture, so the unit takes OPCOM's order, not a standing circuit. No price column -- OPCOM_AP_UNIT
 // prices a row by its id. `noncombat` keeps a row out of the garrison reserve pool (never spawns to
 // defend, dies with a captured zone) regardless of armament -- a boat is armed; a separate axis from `transport`.

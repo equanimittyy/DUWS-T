@@ -73,7 +73,7 @@ nothing; a tier with no coverage has nothing to push. **OPFOR has no passive pus
 does not cancel BLUFOR's, and it moves a town only by buying Rapport, `-OPCOM_RAPPORT_STEP` (2) a
 delivery, offered in each town above `-20` that OPFOR's coverage reaches, a BLUFOR town included
 (`DUWS_fnc_opcom_rapportOffer`, `warcom/opcom/appraisal/fnc_opcom_buy_holding.sqf`; the Value is
-[`opcom_plan.md`](../../plans/opcom/opcom_plan.md)'s). A delivery to a town the player can see names
+[`opcom.md`](opcom.md)'s). A delivery to a town the player can see names
 the town and its reputation change in an Allseer line.
 
 The writer is the existing `fnc_town_rep_adjust` (`server/warcom/fnc_economy_init.sqf:179`),
@@ -97,7 +97,7 @@ takes the best of 24 band draws by OPCOM's own tower Value; civilian init runs b
 generation so that the towns exist to weigh. OPCOM builds the rest in play, up to
 `AOI_OPFOR_TOWER_CAP` (4) standing or on their way, the start tower included (`DUWS_opcom_assetCap`,
 `warcom/opcom/appraisal/fnc_opcom_assets.sqf`), on the band cell whose town reach scores best, less
-the covered towns it overlaps ([`opcom_plan.md`](../../plans/opcom/opcom_plan.md#asset-siting)). The
+the covered towns it overlaps ([`opcom.md`](opcom.md#asset-siting)). The
 mast takes the best-scoring crest within half a grid cell of the chosen site. The cap stops
 builds only: a save that already holds more towers keeps them. `"RADIO"` is a hardpoint type like
 any other (`DUWS_hardpointName`, `DUWS_hardpointGarrison`, `server_var_init.sqf`). It is
@@ -148,7 +148,7 @@ minefield takes the cell holding the most BLUFOR traffic. The truck drives to th
 hardpoint is sited within half a grid cell of where it is delivered. Each point that a standalone build stands on
 is tested against the band again: the delivered spot, a road snap, and each square of a minefield belt. A belt
 drops the squares that fall outside the band. The rules are
-[`opcom_plan.md`](../../plans/opcom/opcom_plan.md#asset-siting)'s.
+[`opcom.md`](opcom.md#asset-siting)'s.
 
 A dev-only coverage overlay exists for inspecting the field in play: `fnc_debug_opcom_view` remote
 execs `fnc_debug_aoi_circles` (`server/warcom/fnc_debug_aoi_circles.sqf`) to gather every emitter's

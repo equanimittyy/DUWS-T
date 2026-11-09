@@ -198,7 +198,7 @@ fnc_vehicleWeaponType = compileFinal {
 };
 
 // One class -> its OPCOM force category, the key the force power table hangs a value off
-// (docs/plans/opcom/phase_2_force_weighting.md). Context-free: a sighted enemy may be a class outside any
+// (docs/info/gameplay/opcom.md §Appraisal). Context-free: a sighted enemy may be a class outside any
 // detected roster (a mod, DLC, captured or civilian hull), so it resolves a class alone, with no faction to
 // parse -- which is why it reuses the per-class leaves above but never fnc_parseFaction's faction-context buckets.
 fnc_classifyVehicle = compileFinal {

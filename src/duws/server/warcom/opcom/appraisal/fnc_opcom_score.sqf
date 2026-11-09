@@ -1,5 +1,5 @@
 // Locality: server, [] call'd at load. The score the pick ranks candidates by, and a commit weighs its units on
-// (opcom_plan.md §Appraisal).
+// (opcom.md §Appraisal).
 if (!isServer) exitWith {};
 
 // Cost floors at 1: a free action would divide by zero, and its Value is already its score.

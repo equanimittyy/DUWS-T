@@ -3,7 +3,7 @@
 // no ammunition: its guns are emptied at register and loaded only for the mission they are given, so a crew never
 // shells anything on its own. This is the dumb half of the Arty action -- it fires the mission it is handed; what is
 // worth shelling, the shape and its size, and the HQ exclusion are the scored action's
-// (docs/plans/opcom/opcom_plan.md).
+// (docs/info/gameplay/opcom.md).
 if (!isServer) exitWith {};
 
 // The OPFOR mortar pits and batteries standing, nearest _from first: [[key, pos, type], ...].

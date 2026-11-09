@@ -1,5 +1,5 @@
 // Locality: server, [] call'd at load. An observation post's Value: its price x the share of its block no other OP
-// watches (opcom_plan.md §Value). Read from the pick's unscheduled pass, so nothing here may suspend.
+// watches (opcom.md §Value). Read from the pick's unscheduled pass, so nothing here may suspend.
 if (!isServer) exitWith {};
 
 // Sea counts on neither side of the share, so a coastal post is judged on the ground it can watch.

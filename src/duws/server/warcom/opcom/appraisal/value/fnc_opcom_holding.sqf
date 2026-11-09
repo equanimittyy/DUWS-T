@@ -1,5 +1,5 @@
 // Locality: server, [] call'd at load. A garrison buy's Value at a zone: worth x exposure x gain
-// (opcom_plan.md §Value). Read from the pick's unscheduled pass, so nothing here may suspend.
+// (opcom.md §Value). Read from the pick's unscheduled pass, so nothing here may suspend.
 if (!isServer) exitWith {};
 
 DUWS_fnc_opcom_townWorth = {

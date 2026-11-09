@@ -1,5 +1,5 @@
 // Locality: server, [] call'd at load. The need field a standalone build and a minefield are valued on
-// (opcom_plan.md §Need and cover fields). Its holdings and band base read slow state, so they are cached and rebuilt in a
+// (opcom.md §Need and cover fields). Its holdings and band base read slow state, so they are cached and rebuilt in a
 // spawned thread only when that state changes, and a hardpoint build re-spreads only the deposits over them. Each
 // layer is swapped whole, so a reader never sees half a build.
 if (!isServer) exitWith {};

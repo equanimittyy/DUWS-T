@@ -1,5 +1,5 @@
 // Locality: server, [] call'd at load. A commit order's Cost: the AP to rebuy the unit staked plus the defense it
-// leaves behind (opcom_plan.md §Cost). Read from the pick's unscheduled pass, so nothing here may suspend.
+// leaves behind (opcom.md §Cost). Read from the pick's unscheduled pass, so nothing here may suspend.
 if (!isServer) exitWith {};
 
 // Priced on the whole stake, never the expected losses: those would score a 3:1 attack twelve times above an even one,

@@ -258,7 +258,7 @@ fnc_zone_control_set = {
 			["INFO", "ZONES", format ["captured by BLUFOR at %1, now holding %2",
 				_zonePos, zoneundercontrolblu]] call fnc_log;
 			// Guarded: this transition is the critical path and OPCOM lives in a separate subsystem
-			// (docs/plans/opcom/opcom_plan.md).
+			// (docs/info/gameplay/opcom.md).
 			if (!isNil "DUWS_fnc_opcom_siteLost") then { [[_zonePos] call fnc_zone_key] call DUWS_fnc_opcom_siteLost };
 		};
 		case "OPF": {

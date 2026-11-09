@@ -1,5 +1,5 @@
 // Locality: server, [] call'd at load. The two proximity ramps the Values scale by: exposure, how close a spot sits to
-// the enemy's ground, and defend, how close it sits to OPFOR's own fixed defenses (opcom_plan.md §Value).
+// the enemy's ground, and defend, how close it sits to OPFOR's own fixed defenses (opcom.md §Value).
 // Read from the pick's unscheduled pass, so nothing here may suspend.
 if (!isServer) exitWith {};
 

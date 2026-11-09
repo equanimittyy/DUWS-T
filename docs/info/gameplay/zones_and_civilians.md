@@ -178,7 +178,7 @@ fields one of them until a reinforcement buys the rest back.
 (`DUWS_fnc_garrisonRestand`), so the refill walks the men in. Both serve whichever side holds the zone
 and neither charges, so the price stays the caller's: OPCOM's candidate lists skip BLUFOR-held zones, and
 OPCOM lands its own buys with no truck
-([`opcom_plan.md`](../../plans/opcom/opcom_plan.md#what-ap-buys)). A reinforcement is refused at tier 0,
+([`opcom.md`](opcom.md#what-ap-buys)). A reinforcement is refused at tier 0,
 where there is no garrison to put men back into.
 
 **Nothing else writes either purchase.** `fnc_zone_tier_roll` declines a second roll, so a bought tier
