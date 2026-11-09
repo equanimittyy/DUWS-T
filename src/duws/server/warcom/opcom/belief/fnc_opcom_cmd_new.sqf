@@ -17,6 +17,7 @@ _cmd set ["grid_seen", _zero apply { -OPCOM_COVER_SPAN }];
 _cmd set ["grid_traffic", +_zero];           // believed force last crossing, decayed on read
 _cmd set ["grid_trafficTick", +_zero];
 _cmd set ["losses", []];                     // [cell, killer group netId or "", own force, tick] per kill, decayed on read
+_cmd set ["qrfRelax", []];                   // [cells, killer group netIds] per resting cluster
 _cmd set ["gridStaticFri", +_zero];
 _cmd set ["gridStaticEne", +_zero];
 _cmd set ["gridSrc", createHashMap];

@@ -195,7 +195,7 @@ DUWS_fnc_opcom_qrfSweep = {
         };
     } forEach (_cmd get "belief_key");
     _sightings sort false;
-    private _fnc_value = {
+    private _fnc_cluster = {
         params ["_at"];
         private _str = 0;
         private _keys = [];
@@ -205,16 +205,18 @@ DUWS_fnc_opcom_qrfSweep = {
                 _keys pushBack ((_cmd get "belief_key") select (_x select 1));
             };
         } forEach _sightings;
-        [_at, _str, _keys] call DUWS_fnc_opcom_interceptValue
+        [_str, _keys]
     };
     private _out = [];
     private _fnc_offer = {
         params ["_at", "_buckets", "_base", "_label", "_atk"];
+        ([_at] call _fnc_cluster) params ["_str", "_keys"];
+        if ([[[_at] call DUWS_fnc_opcom_w2c, 1] call DUWS_fnc_opcom_blockCells, _keys] call DUWS_fnc_opcom_qrfRelaxing) exitWith {};
         private _mass = [_at] call DUWS_fnc_opcom_massAt;
         private _offers = (_free + ([DUWS_fnc_opcom_isCombatant, _at, _zones] call DUWS_fnc_opcom_hireSources)) select {
             ((DUWS_opcom_moveWater get (_x select 3)) isNotEqualTo "land") || {!([_x, _mass] call DUWS_fnc_opcom_acrossWater)}
         };
-        ([_offers, _at, _at, [_at] call _fnc_value, _floor, _buckets, _base, _label, -1, OPCOM_QRF_HALFLIFE, true]
+        ([_offers, _at, _at, [_at, _str] call DUWS_fnc_opcom_interceptValue, _floor, _buckets, _base, _label, -1, OPCOM_QRF_HALFLIFE, true]
             call DUWS_fnc_opcom_attackPackage)
             params [["_members", []], "_price", "_v", "_pw", "_c", "_names"];
         if (_members isNotEqualTo []) then {

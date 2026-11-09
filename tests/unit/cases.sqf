@@ -1789,6 +1789,24 @@ DUWS_opcom_tick = 100;
 DUWS_opcom_tick = 220;
 ["lossFor: one half-life later a kill reads half", [[5], []] call DUWS_fnc_opcom_lossFor, 3] call fnc_assertClose;
 
+// --- DUWS_fnc_opcom_qrfRelaxing: a cluster rests from OPCOM_QRF_RELAX_AT until its loss decays to the free band ---
+OPCOM_QRF_LOSS_FREE = 10;
+OPCOM_QRF_RELAX_AT = 25;
+CMD_qrfRelax = [];
+CMD_losses = [[5, "2:1", 20, 100]];
+DUWS_opcom_tick = 100;
+["qrfRelaxing: a loss short of the mark lets QRFs through", [[5], ["2:1"]] call DUWS_fnc_opcom_qrfRelaxing, false] call fnc_assertEq;
+CMD_losses pushBack [5, "2:1", 6, 100];
+["qrfRelaxing: a loss at the mark rests the cluster", [[5], ["2:1"]] call DUWS_fnc_opcom_qrfRelaxing, true] call fnc_assertEq;
+DUWS_opcom_tick = 220;
+["qrfRelaxing: the rest holds after the loss decays below the mark", [[5], ["2:1"]] call DUWS_fnc_opcom_qrfRelaxing, true] call fnc_assertEq;
+["qrfRelaxing: the rest follows the cluster's group onto new ground", [[40], ["2:1"]] call DUWS_fnc_opcom_qrfRelaxing, true] call fnc_assertEq;
+["qrfRelaxing: the rest holds its ground against another group", [[5], ["9:9"]] call DUWS_fnc_opcom_qrfRelaxing, true] call fnc_assertEq;
+["qrfRelaxing: ground and groups clear of the rest draw QRFs", [[40], ["9:9"]] call DUWS_fnc_opcom_qrfRelaxing, false] call fnc_assertEq;
+DUWS_opcom_tick = 360;
+["qrfRelaxing: the rest ends once its loss decays to the free band", [[5], ["2:1"]] call DUWS_fnc_opcom_qrfRelaxing, false] call fnc_assertEq;
+["qrfRelaxing: an ended rest leaves no row", count CMD_qrfRelax, 0] call fnc_assertEq;
+
 // --- DUWS_fnc_opcom_coverValue: the need a new hardpoint covers, half of what each cell still lacks ---
 OPCOM_BLOCK_K = 2;
 OPCOM_GRID_CELL = 500;
@@ -1831,27 +1849,6 @@ DUWS_fnc_opcom_cellDist = { 1 };
 ["interceptShare: a group as strong as the defense takes it all", [10, 10 * (call DUWS_fnc_opcom_blockGain) - 1] call DUWS_fnc_opcom_interceptShare, 1] call fnc_assertClose;
 ["interceptShare: a group a quarter as strong takes a quarter", [5, 20 * (call DUWS_fnc_opcom_blockGain) - 1] call DUWS_fnc_opcom_interceptShare, 0.25] call fnc_assertClose;
 ["interceptShare: past the defense it stops at the whole", [50, 0] call DUWS_fnc_opcom_interceptShare, 1] call fnc_assertClose;
-
-// --- DUWS_fnc_opcom_interceptValue: a QRF's Value, cut by OPFOR's recent losses in its 3x3 or to its cluster's groups ---
-OPCOM_NEED_K = 3;
-OPCOM_QRF_LOSS_FREE = 9;
-OPCOM_QRF_LOSS_K = 3;
-OPCOM_GRID_CELL = 500;
-DUWS_opcom_grid_w = 10;
-DUWS_opcom_box = [0, 0, 9, 9];
-DUWS_fnc_opcom_w2c = { params ["_p"]; (floor ((_p select 1) / 500)) * 10 + floor ((_p select 0) / 500) };
-DUWS_fnc_opcom_needAt = { 2 };
-DUWS_fnc_opcom_blockForce = { [0, 20] };
-test_loss = 0;
-DUWS_fnc_opcom_lossFor = { test_loss };
-["interceptValue: with no losses a QRF earns the need over its 7x7", [[2750, 2750, 0], 50, []] call DUWS_fnc_opcom_interceptValue, 98] call fnc_assertClose;
-test_loss = 9;
-["interceptValue: losses within the free band cost nothing", [[2750, 2750, 0], 50, []] call DUWS_fnc_opcom_interceptValue, 98] call fnc_assertClose;
-test_loss = 18;
-["interceptValue: losses three OPCOM_QRF_LOSS_K past the free band quarter it", [[2750, 2750, 0], 50, []] call DUWS_fnc_opcom_interceptValue, 24.5] call fnc_assertClose;
-DUWS_fnc_opcom_lossFor = { params ["_cells", "_keys"]; 2 * (count _cells) + 18 * (count _keys) };
-["interceptValue: reads the losses over its 3x3, not its 7x7", [[2750, 2750, 0], 50, []] call DUWS_fnc_opcom_interceptValue, 24.5] call fnc_assertClose;
-["interceptValue: reads the losses to its cluster's groups", [[2750, 2750, 0], 50, ["2:1"]] call DUWS_fnc_opcom_interceptValue, 9.8] call fnc_assertClose;
 
 // --- DUWS_fnc_opcom_stalenessAt / DUWS_fnc_opcom_patrolCells: the ground a patrol sweeps on its way ---
 OPCOM_BELIEF_EXPIRE = 240;

@@ -140,7 +140,7 @@ magnitude; above that the best candidate takes most of the probability, and a hi
 | Tower / OP / mortar / battery Build | one action each, under the type's cap, target the band cell the siting pass picks by the type's own rule ([§Asset siting](#asset-siting)) |
 | Minefield | one action per variant (AT, AP), target the band cell the siting pass picks by traffic, a belt 150 m deep and 500 m to 1.5 km long |
 | Attack assault, Attack flank | while no assault or flank is open and the attack cooldown has ended, each BLUFOR-held zone, the HQ once found (`DUWS_opcom_hqKnown`) while its officer lives, BLUFOR hold no zone, OPFOR stand at Armour or above (`WARCOM_opfor_tier` 4) and BLUFOR at Mechanised or above (`WARCOM_blufor_tier` 3), and each FOB once found (`DUWS_opcom_fobsKnown`) that a capture at its centre takes, so not one inside a held zone; and each attack of the row's kind still in buildup that needs more units; flank only below band 2 and from the target's own landmass, and a source across water only as infantry ([§Attack](#attack)) |
-| Attack QRF | each cluster of fresh BLUFOR sightings inside OPFOR's area of influence and outside the base cells with no QRF on it and no local defense at the ideal bar, and each QRF still in buildup that needs more units ([§QRF](#qrf-an-attack-on-a-moving-cluster)) |
+| Attack QRF | each cluster of fresh BLUFOR sightings inside OPFOR's area of influence and outside the base cells with no QRF or rest on it and no local defense at the ideal bar, and each QRF still in buildup that needs more units and stands on no rest ([§QRF](#qrf-an-attack-on-a-moving-cluster)) |
 | Patrol | each of `OPCOM_PATROL_SAMPLES` (3) sampled stale cells, one unit apiece, taken by the recon or land combatant, free or hired, that scores best |
 | Probe | each assault or flank target whose 3×3 block reads stale and has no probe already on it, and that an Attack can source or a buildup stages for, one unit apiece, sourced from Patrol's rows |
 | Garrison | each open zone under the garrison cap ([§Caps](#caps)), taken by the combatant, free or hired, healthy or worn, that scores best |
@@ -188,7 +188,7 @@ so it moves no faster than a truck delivers.
 | OP | build price × the share of its 5×5 block (`OP_OBSERVE_K`) that no other OP watches, sea excluded |
 | Mortar pit, artillery battery | build price × the share of its reach that is OPFOR ground no gun of its own type reaches |
 | Rapport | town worth × skew × 2/10, with skew = max(0.1, 1 − \|rep\| ÷ 20) at 0 or below, 0.05 above 0 |
-| Attack QRF | Σ need over the lead sighting's 7×7 block × min(1, the cluster's summed force ÷ (Σ `_fri` over its 3×3 + 1)) ÷ (1 + max(0, OPFOR's loss in its 3×3 or to the cluster's groups − `OPCOM_QRF_LOSS_FREE`) ÷ `OPCOM_QRF_LOSS_K`) ([§QRF](#qrf-an-attack-on-a-moving-cluster)) |
+| Attack QRF | Σ need over the lead sighting's 7×7 block × min(1, the cluster's summed force ÷ (Σ `_fri` over its 3×3 + 1)) |
 | Attack assault, Attack flank | the zone's `_points` |
 | Patrol | Σ need × staleness over the unique cells within its reach of the line it walks, × its scale, × `OPCOM_PATROL_SHARE` (0.2). A recon's reach is `OPCOM_RECON_K` and its scale 1; a combatant's reach is its engage reach (`DUWS_opcom_streamK`) and its scale its threat, `effForce` ÷ `OPCOM_PATROL_FORCE_REF` |
 | Garrison | the defense the unit adds at the zone, worth × exposure × unitForce ÷ (the zone's current force + unitForce); for a worn free unit on `guard`, the larger of that and the rebuy its heal recovers, `(fullForce − effForce) × OPCOM_AP_PER_FORCE`. A unit already resting in `garrison` heals where it stands, so its heal is no reason to move it |
@@ -622,7 +622,7 @@ to know all of them.
 |---|---|---|---|
 | `attack_assault` | every band from 0.5 | `attacker` in 1–3 buckets on a 3×1 line, one per cell | every bucket at once — one wave, never a dribble |
 | `attack_flank` | band 0.5–2, a dry rally and a dry jump-off on some side | `fix` at the centre of a 3×1 line, `maneuver` in 1–2 buckets beside it | every bucket at launch; each `maneuver` hooks to its jump-off and closes once `fix` reads `engaged`, is lost or has ended its fight |
-| `attack_qrf` | a fresh sighting cluster with no QRF on it and no local defense at the ideal bar | `attacker` in 1 bucket, with no rally | at once, on `intercept` |
+| `attack_qrf` | a fresh sighting cluster with no QRF or rest on it and no local defense at the ideal bar | `attacker` in 1 bucket, with no rally | at once, on `intercept` |
 
 Each row's roles are an entry of `DUWS_opcom_attackRoles` (`taskings/actions/fnc_opcom_attack.sqf`), keyed by the record's
 kind, `assault` or `flank`. A QRF's one bucket is written by its sweep (`DUWS_fnc_opcom_qrfSweep`), since it has no
@@ -749,19 +749,24 @@ time, and no-retreat turns that into defeat in detail.
 - **Local defense at the ideal bar draws no QRF.** The sweep opens none where the lead sighting's 3×3 block reads
   OPFOR's own force at `OPCOM_MUSTER_IDEAL` or better against the block's BLUFOR force, and no weaker sighting within
   a cell of that lead opens one either. A QRF already open keeps its muster and its joins.
-- **A fight that keeps killing OPFOR draws fewer QRFs.** A QRF sets no cooldown, so each wave that dies can open the
+- **OPFOR keeps a record of the QRF fights it loses.** A QRF sets no cooldown, so each wave that dies can open the
   next one on the same cluster for as long as the wallet pays. OPFOR's commander keeps one row per loss (`losses`,
   `belief/fnc_opcom_loss.sqf`): the cell where it died, the BLUFOR group that killed it, and its force. A man is 1
   and a hull with an OPFOR crew is its class power. A row halves every `OPCOM_LOSS_HALFLIFE` (240 ticks, 20 min).
-  A QRF reads each row whose cell is in the lead sighting's 3×3 block or whose killer is a group in the cluster
-  (`DUWS_fnc_opcom_lossFor`). The killer lets the record follow the group that won when it moves on. The cell
-  catches the kills of a group that OPFOR has not sighted, such as an artillery battery. One row per kill, rather
-  than a ledger per cell and another per group, makes sure that a kill on both counts once. The first
-  `OPCOM_QRF_LOSS_FREE` (10) cost nothing, so a skirmish draws QRFs as before. Past it, a QRF's Value, its joins'
-  included, is divided by 1 + the excess ÷ `OPCOM_QRF_LOSS_K` (3). So 13 dead halve it, 19 quarter it and 40 leave
-  less than a tenth. It is a weight, not a gate: a cluster with enough need still draws a QRF. Only OPFOR's commander
-  keeps the rows, because BLUFOR's commander hires nothing and so cannot chain QRFs past the task forces it holds.
-  The rows are not saved, so a load starts with no losses.
+  A cluster's loss is each row whose cell is in the lead sighting's 3×3 block or whose killer is a group in the
+  cluster (`DUWS_fnc_opcom_lossFor`). The killer lets the record follow the group that won when it moves on. The
+  cell catches the kills of a group that OPFOR has not sighted, such as an artillery battery. One row per kill,
+  rather than a ledger per cell and another per group, makes sure that a kill on both counts once.
+- **A cluster that has cost OPFOR `OPCOM_QRF_RELAX_AT` (30) rests** (`DUWS_fnc_opcom_qrfRelaxing`). No QRF opens on
+  it and none joins one there until the rest's own loss decays to `OPCOM_QRF_LOSS_FREE` (10). The rest holds the
+  block and the groups it started on. So it keeps the fight's ground from a new group and follows the winners when
+  they move. Two marks are necessary: with one, a wave comes back as fast as the loss decays below it, about one
+  8-man wave every 8 min at 30, so the fight never pauses. With 8-man waves a rest lasts 30 to 40 min. Where
+  OPFOR still sees the winners, the waves fall from about 10 an hour to about 5. Where only the QRFs see them, the
+  sighting goes stale during the rest, so the chain ends. A weight on the QRF's Value between the marks was
+  rejected: the pick draws every 10 s by score², so even a sixth of the Value only delayed the next wave by
+  seconds. Only OPFOR's commander keeps the rows and the rests, because BLUFOR's commander hires nothing and so
+  cannot chain QRFs past the task forces it holds. Neither is saved, so a load starts with no losses.
 - **A QRF musters where its units stand.** A rally about a target that moves is stale before the units reach it.
   It musters on the same bars as any attack, over `OPCOM_QRF_EXPIRY` (6 ticks, 30 s) in place of
   `OPCOM_MUSTER_EXPIRY`. Its open sends a package filled to the ideal bar, so where the sources exist it launches on
