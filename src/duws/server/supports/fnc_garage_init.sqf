@@ -67,7 +67,7 @@ fnc_garage_retrieve = {
     [_caller, _spec select 0, _spawnPos, true, "STR_DUWS_T_GARAGE_RETRIEVED", _spec] call fnc_depot_carry_spawn;
 };
 
-// Finalize: reclaim for the server (the carry made the caller owner), thaw, disable R3F.
+// Finalize: disable R3F, then reclaim for the server (the carry made the caller owner), thaw and unlock.
 // Every R3F action gates on !R3F_LOG_disabled, so the one flag retires all of them.
 fnc_depot_place_finish = {
     if (!isServer) exitWith {};
@@ -75,7 +75,11 @@ fnc_depot_place_finish = {
     private _veh = objectFromNetId _vehNet;
     if (isNull _veh) exitWith {};
 
-    _veh lock false;
     _veh setVariable ["R3F_LOG_disabled", true, true];
-    [_veh] spawn DUWS_fnc_carryThaw;
+    [_veh] spawn {
+        params ["_veh"];
+        [_veh] call DUWS_fnc_carryThaw;
+        // lock takes a local argument, so it binds only once the thaw's setOwner 2 has taken the hull back from the carrier.
+        if (!isNull _veh) then { _veh lock false };
+    };
 };
