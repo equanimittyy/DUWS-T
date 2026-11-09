@@ -967,7 +967,7 @@ OPCOM_QRF_DROP_K = 2;
 // OPCOM_QRF_LOSS_FREE. Tune.
 OPCOM_QRF_RELAX_AT = 30;         // force; a dead man is 1
 OPCOM_QRF_LOSS_FREE = 10;
-OPCOM_LOSS_HALFLIFE = 240;       // ticks; 20 min @ 5s tick
+OPCOM_LOSS_HALFLIFE = 480;       // ticks; 40 min @ 5s tick
 // Below this ratio of force to believed BLUFOR force an offensive holds rather than musters.
 OPCOM_MUSTER_HOLD = 0.4;
 // An attack under way fails below this ratio, on the muster bars' scale. Tune.

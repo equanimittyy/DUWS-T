@@ -752,7 +752,7 @@ time, and no-retreat turns that into defeat in detail.
 - **OPFOR keeps a record of the QRF fights it loses.** A QRF sets no cooldown, so each wave that dies can open the
   next one on the same cluster for as long as the wallet pays. OPFOR's commander keeps one row per loss (`losses`,
   `belief/fnc_opcom_loss.sqf`): the cell where it died, the BLUFOR group that killed it, and its force. A man is 1
-  and a hull with an OPFOR crew is its class power. A row halves every `OPCOM_LOSS_HALFLIFE` (240 ticks, 20 min).
+  and a hull with an OPFOR crew is its class power. A row halves every `OPCOM_LOSS_HALFLIFE` (480 ticks, 40 min).
   A cluster's loss is each row whose cell is in the lead sighting's 3×3 block or whose killer is a group in the
   cluster (`DUWS_fnc_opcom_lossFor`). The killer lets the record follow the group that won when it moves on. The
   cell catches the kills of a group that OPFOR has not sighted, such as an artillery battery. One row per kill,
@@ -761,8 +761,8 @@ time, and no-retreat turns that into defeat in detail.
   it and none joins one there until the rest's own loss decays to `OPCOM_QRF_LOSS_FREE` (10). The rest holds the
   block and the groups it started on. So it keeps the fight's ground from a new group and follows the winners when
   they move. Two marks are necessary: with one, a wave comes back as fast as the loss decays below it, about one
-  8-man wave every 8 min at 30, so the fight never pauses. With 8-man waves a rest lasts 30 to 40 min. Where
-  OPFOR still sees the winners, the waves fall from about 10 an hour to about 5. Where only the QRFs see them, the
+  8-man wave every 16 min at 30, so the fight never pauses. With 8-man waves a rest lasts 60 to 80 min. Where
+  OPFOR still sees the winners, the waves fall from about 10 an hour to about 2 or 3. Where only the QRFs see them, the
   sighting goes stale during the rest, so the chain ends. A weight on the QRF's Value between the marks was
   rejected: the pick draws every 10 s by score², so even a sixth of the Value only delayed the next wave by
   seconds. Only OPFOR's commander keeps the rows and the rests, because BLUFOR's commander hires nothing and so
