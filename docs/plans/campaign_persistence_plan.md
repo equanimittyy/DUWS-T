@@ -417,7 +417,7 @@ must not have a snapshot put the old list back.
 | Base builds | outcome | for the HQ and each FOB, its factory's credit balance and each object that the factory made: its class, world position and orientation |
 | Commanding officer | outcome | whether `hq_blu1` is alive |
 | Civilians | input | town positions, radii and populations, and the sector word of a building cluster |
-| Vendors | input | `DUWS_vendors`: per town slot, the shop's type, position, facing and remaining respawn seconds |
+| Vendors | input | `DUWS_vendors`: per town slot, the shop's type, position, facing and remaining respawn seconds, which a load sets to zero |
 | Arms Dealer stock | outcome | `DUWS_armsStock`: the classes each town rolled in the current Limited rotation window, and the seconds left in the window ([`civilian_shops.md`](../info/gameplay/civilian_shops.md#limited-arms-stock)) |
 | Clock | outcome | `date`, `DUWS_timeSkew` |
 
@@ -873,13 +873,11 @@ model of the hardpoint arrays. Built the other way — the player places an obje
 the object — restore has to reverse-engineer what was built from what is standing, and every new
 buildable is a new special case.
 
-**Shop money.** The vendor registry itself is built and restored ([§World and placement](#world-and-placement)).
-Carried shop money is lost: it is the `Money_roll` item, and no player gear is saved
-([§The team](#the-team)). Money stored in the arsenal crate at the HQ is saved with the crate. Whether
-carried cash wants a per-player key of its own is the vendor work's question, not this plan's.
-
-**Anything with a cooldown or a timer.** Store the remaining duration. See the `diag_tickTime`
-rule above.
+**Anything with a cooldown or a timer.** Save it only when it sets the campaign's pace, as the
+commanders' attack cooldowns, OPCOM's supply cooldowns and the free task force's respawn do; every
+other cooldown comes back clear ([§What is deliberately not saved](#what-is-deliberately-not-saved)). A
+saved timer is stored as its remaining duration or on a clock that the load restores, never as a
+`diag_tickTime` stamp (the rule above).
 
 ## Restore
 
@@ -1119,13 +1117,21 @@ garrisons and composition props both spawn and despawn on player distance
 player approaches — the same code path a fresh campaign uses.
 
 Player-scoped state goes with them: loadouts, per-player cooldowns, any per-player record of what a
-player bought, and an unconverted kill tally. So does a vehicle left outside a base rather than parked
+player bought, an unconverted kill tally, and carried money. Carried money is the `Money_roll` a
+player holds, so it goes with the gear; the loss is small, and the bank in the arsenal crate at the
+HQ is saved with the crate ([§The team](#the-team)). So does a vehicle left outside a base rather than parked
 at one or garaged ([§Vehicles](#vehicles-the-garage-and-the-bases)). The snapshot is keyed to no player
 at all.
 
 Session-scoped locks go with them and must come back clear: the per-support fire-mission locks, the
 per-FOB rebuild busy flags, `Mission_available`, and the JIP queue entries. A lock restored as held
 is a support nobody can ever call again.
+
+Cooldowns come back clear too, except the three that set the campaign's pace
+([§Features not built yet](#features-not-built-yet)). A load starts the MHQ designation lockout,
+each vendor's respawn wait, each OPCOM battery's rest and the High Command aircraft cooldowns at
+zero. A player can quit and reload to skip one, but the reload costs the whole live war, which is a
+bigger price than any of these waits.
 
 A factory build that the captured builder vehicle did not make is not saved: a mission crate's builds belong to
 that mission and go with it. Neither is a build that is attached at the write

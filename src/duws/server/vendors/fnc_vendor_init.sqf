@@ -163,9 +163,13 @@ for "_i" from 0 to (_count - 1) do {
     _registry pushBack _recs;
 };
 // A restore keeps every shop where it stood; the registry is index-parallel to the towns, so only a matching one.
+// A respawn wait is too short to matter to the campaign, so a load stands every shop back up.
 if (DUWS_campaignLoaded) then {
     private _saved = DUWS_restore getOrDefault ["vendors", []];
-    if (count _saved isEqualTo _count) then { _registry = +_saved };
+    if (count _saved isEqualTo _count) then {
+        _registry = +_saved;
+        { { _x set [3, 0] } forEach _x } forEach _registry;
+    };
 };
 missionNamespace setVariable ["DUWS_vendors", _registry];
 

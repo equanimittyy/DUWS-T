@@ -212,11 +212,10 @@ DUWS_fnc_campaignSnapshot = {
     _s set ["taskforceStance", DUWS_taskforce_stance];
     // Null once a game master deletes it; a load then leaves the rebuilt crate empty.
     if (!isNull DUWS_hqCrate) then { _s set ["hqCrate", [DUWS_hqCrate] call DUWS_fnc_campaignCargo] };
-    private _lockout = ((missionNamespace getVariable ["MHQ_lockout_until", 0]) - time) max 0;
     _s set ["mhq", if (!isNil "MHQ1" && {alive MHQ1}) then {
-        [[MHQ1] call DUWS_fnc_vehSpecCapture, missionNamespace getVariable ["MHQ_deployed", false], getPosATL MHQ1, getDir MHQ1, _lockout]
+        [[MHQ1] call DUWS_fnc_vehSpecCapture, missionNamespace getVariable ["MHQ_deployed", false], getPosATL MHQ1, getDir MHQ1]
     } else {
-        [[], false, [], 0, _lockout]
+        [[], false, [], 0]
     }];
     _s set ["builder", if (!isNil "BLD1" && {alive BLD1} && {BLD1 getVariable ["DUWS_campaignFactory", false]}) then {
         [[BLD1] call DUWS_fnc_vehSpecCapture, getPosATL BLD1, getDir BLD1]

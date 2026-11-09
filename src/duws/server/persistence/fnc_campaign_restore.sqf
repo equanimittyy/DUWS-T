@@ -561,8 +561,7 @@ DUWS_fnc_restoreBases = {
         _veh
     };
 
-    (DUWS_restore getOrDefault ["mhq", [[], false, [], 0, 0]]) params ["_spec", "_deployed", "_pos", "_dir", "_lockout"];
-    if (_lockout > 0) then { MHQ_lockout_until = time + _lockout; publicVariable "MHQ_lockout_until" };
+    (DUWS_restore getOrDefault ["mhq", [[], false, [], 0]]) params ["_spec", "_deployed", "_pos", "_dir"];
     private _veh = if (_spec isEqualTo []) then { objNull } else { [_spec, _pos, _dir] call _fnc_spawnSpec };
     if (!isNull _veh) then {
         _veh setVehicleVarName "MHQ1";
