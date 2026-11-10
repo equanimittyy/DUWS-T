@@ -328,9 +328,22 @@ An AI group whose behaviour has gone `COMBAT` owns its movement through the dang
 
 `vehicle lock true` blocks the player getting in/out and AI getting *in*, but does not keep an aboard AI *inside* — it still bails when the group goes COMBAT or the vehicle halts/stalls/is disabled. Fix: layer three things to hold an AI in a vehicle — `lock true`, `setUnloadInCombat [false, false]` (suppresses the combat bail), and a `GetOutMan` handler reseating him (`if (alive _unit && alive _veh) then { _unit moveInCargo _veh }`, which re-enters past the lock and lets a destroyed car eject normally).
 
-## `lock` takes a local argument, so the server cannot unlock a vehicle that a client owns
+## A local-argument command does nothing on a machine that does not own the object
 
-`vehicle lock false` (like `setVehicleLock`) acts only on the machine where the vehicle is local, and it fails silently on every other machine. After an R3F carry the vehicle is local to the carrier, because R3F `setOwnerTo`s it. A server-side `lock false` before the server reclaims the vehicle does nothing, so the vehicle stays locked for good. A hosted test does not show this, because there the carrier is the server. Fix: unlock after `setOwner 2` takes the vehicle back (`fnc_depot_place_finish` in `server/supports/fnc_garage_init.sqf` unlocks after `DUWS_fnc_carryThaw`), or `remoteExec` the lock to the vehicle (`[_car, "LOCKED"] remoteExec ["setVehicleLock", _car]` in `fnc_civ_mission_stolen.sqf`).
+Many commands act only on the machine where their object or unit is local, and they fail silently on every other machine: `lock`, `setVehicleLock`, `setFuel`, `setVehicleAmmo`, `setPylonLoadout`, `removeItem`, the `moveIn*` family, `enableAI`/`disableAI` and `setUnitPos`. Players take ownership often:
+
+| Event | New owner |
+|---|---|
+| A player drives a vehicle | That player's machine, which keeps it after the player gets out |
+| AI joins a player's squad | The squad leader's machine |
+| `joinSilent` into another group | The new group's machine, a moment after the call |
+| An R3F carry | The carrier's machine (R3F `setOwnerTo`s the object) |
+
+A hosted test does not show any of this, because there the host's machine is the server. Fix: send the command to the owner, as in `[_veh, 1] remoteExec ["setFuel", _veh]` (`server/supports/fnc_activateBaseRepairStation.sqf`), or branch on `local` (`fnc_money_spend`, `server/warcom/fnc_economy_init.sqf`). Where ownership is about to change, issue the command before it leaves or wait for `local` after it arrives (`fnc_escort_informant_group.sqf`). Where the server takes an object back, issue the command after `setOwner 2` (`fnc_depot_place_finish` in `server/supports/fnc_garage_init.sqf` unlocks after `DUWS_fnc_carryThaw`). The same moves strand an event handler that fires only where the unit is local; see [§A `Killed` handler added on the server](#a-killed-handler-added-on-the-server-does-not-fire-for-a-client-local-unit). `fnc_rescue_hostage_mission.sqf` adds its `HandleDamage` clamp on every machine for that reason.
+
+## `removeAllActions` clears only the machine that runs it
+
+An action exists only on the machine that added it, so a broadcast `addAction` leaves one copy on each client. A server-side `removeAllActions` clears the server's copy and leaves every client's copy in place. A hosted test does not show this, because the host's machine is the server. Fix: `[_obj] remoteExec ["removeAllActions", 0]`, as `server/dialog/fnc_MHQ_release.sqf` and `shared/civ/fnc_civ_menuAction.sqf` do.
 
 ## `land "GET IN"`/`"GET OUT"` is a sticky mode with no completion event
 

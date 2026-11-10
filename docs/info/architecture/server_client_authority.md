@@ -128,6 +128,33 @@ server because game master is a client role rather than the host, but roughly 18
 it happens once, before any other writer exists. Do not let it become the precedent for anything
 mid-mission.
 
+## Object ownership moves with players
+
+The line-1 header records where the code runs. It does not record which machine owns the object that the
+code changes, and that can be a different machine. A vehicle belongs to the last player who drove it. Squad
+AI belong to the squad leader. An object on an R3F carry belongs to the carrier. A local-argument command
+(`lock`, `setFuel`, `removeItem`, `moveInDriver`, `disableAI` and others) does nothing on every other
+machine, and it gives no error. A hosted test does not show this, because there the host's machine owns
+nearly everything. The engine rule and the command list are in
+[`arma_engine_gotchas.md`](arma_engine_gotchas.md#a-local-argument-command-does-nothing-on-a-machine-that-does-not-own-the-object).
+
+So before a command changes an object, find the machine that owns the object at that moment. These are the
+templates for each case:
+
+| Case | Fix | Example |
+|---|---|---|
+| The server changes a vehicle or unit that a player can own | `remoteExec` the command to the object | `server/supports/fnc_activateBaseRepairStation.sqf` |
+| The server changes the player's own unit | Branch on `local`, and `remoteExec` to the unit when it is remote | `server/search/fnc_intelAnalysis.sqf` |
+| A client changes squad AI, which the squad leader's machine owns | `remoteExec` the work to each unit | `client/misc/fnc_ghst_halo.sqf` |
+| An `addAction` body changes a server-owned unit | `remoteExec` the command to the unit | `server/missions/mission_threads/rescue_pilot/fnc_pilot_carry.sqf` |
+| A unit joins or leaves a player's squad | Issue the command before the join, and wait for `local` after the leave | `server/missions/mission_threads/escort_informant/fnc_escort_informant_group.sqf` |
+| The server takes an object back from a player | Issue the command after `setOwner 2` | `fnc_depot_place_finish` in `server/supports/fnc_garage_init.sqf` |
+
+An event handler that fires only where the unit is local has the same problem. A unit that joins a player's
+squad leaves the server's `HandleDamage` or `Killed` handler behind, so
+`server/missions/mission_threads/rescue_hostage/fnc_rescue_hostage_mission.sqf` adds its damage clamp on
+every machine.
+
 ## Entity creation
 
 Purchase menus spawn units and vehicles, and it is tempting to read all of that as a client-authority
@@ -183,4 +210,6 @@ says it and the file creates no callbacks, that guard is the statement and a hea
 
 Then check the failure modes that produced every wrong answer here: an indented guard governs its block,
 not the file; an `addAction` or `onLBSelChanged` body runs on whoever triggers it regardless of where the
-surrounding file ran; and `player` is `objNull` wherever the server is the one executing.
+surrounding file ran; `player` is `objNull` wherever the server is the one executing; and a local-argument
+command acts only on the machine that owns its object at that moment (see
+[§Object ownership moves with players](#object-ownership-moves-with-players)).
