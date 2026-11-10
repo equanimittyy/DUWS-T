@@ -127,7 +127,8 @@ if (_refortify) then {
 };
 
 sleep 50;
-{ _x allowDamage false } forEach _turrets;
+// allowDamage is per machine and a gun moves to the player who mans it, so every machine holds the guard.
+{ [_x, false] remoteExec ["allowDamage", 0, _x] } forEach _turrets;
 
 [_groupGuard, _centerPos] call bis_fnc_taskDefend;
 

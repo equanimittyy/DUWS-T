@@ -14,10 +14,10 @@ Params: [typehalo, althalo, altchute, excludePlayer]
 #include "..\..\shared\includes\action_style.hpp"
 
 
-// AI parachute handler, defined so it is available on the server.
+// AI parachute handler, published so it is available on the machine that owns each jumper.
 DUWS_fnc_aiHalo = {
     params ["_aiNetIds", "_dropPos", "_startAlt", "_chuteAlt"];
-    ["INFO", "HALO", format ["AI Halo started on server with %1 units", count _aiNetIds]] call fnc_log;
+    ["INFO", "HALO", format ["AI Halo started with %1 units", count _aiNetIds]] call fnc_log;
     private _aiUnits = [];
     {
         private _unit = objectFromNetId _x;
@@ -37,11 +37,9 @@ DUWS_fnc_aiHalo = {
         _x allowDamage false;
     } forEach _aiUnits;
 
-    // auto-deploy monitor: spawn a chute and force the AI into it
     {
         [_x, _chuteAlt] spawn {
             params ["_unit", "_alt"];
-            // wait until altitude drops to the chute-deploy height
             waitUntil {sleep 0.1; (getPosATL _unit select 2) <= _alt};
             if (duws_log_level >= 4) then { ["DEBUG", "HALO", format ["AI %1 deploying chute via createVehicle and moveInDriver", _unit]] call fnc_log; };
             private _chute = createVehicle ["Steerable_Parachute_F", (getPosATL _unit), [], 0, "FLY"];
@@ -49,7 +47,6 @@ DUWS_fnc_aiHalo = {
             _chute allowDamage false;
             _unit assignAsDriver _chute;
             _unit moveInDriver _chute;
-            // fallback: if moveInDriver fails, try moveInAny
             if (vehicle _unit != _chute) then {
                 _unit moveInAny _chute;
             };
@@ -65,7 +62,6 @@ DUWS_fnc_aiHalo = {
     ["INFO", "HALO", "AI Halo processing complete"] call fnc_log;
 };
 
-// published so it can be reached by remoteExec
 publicVariable "DUWS_fnc_aiHalo";
 
 _host = _this select 0;
@@ -145,15 +141,9 @@ if !(["CP", _cost] call fnc_pool_spend) exitWith {
 
 if (_typehalo) then {
     if (count _aiUnits > 0) then {
-        private _aiNetIds = _aiUnits apply {netId _x};
-        ["INFO", "HALO", format ["Client sending AI Halo request for %1 units", count _aiNetIds]] call fnc_log;
-        if (isServer) then {
-            // single-player: call directly
-            [_aiNetIds, _pos, _althalo, _altchute] call DUWS_fnc_aiHalo;
-        } else {
-            // multiplayer: hand off to the server
-            [_aiNetIds, _pos, _althalo, _altchute] remoteExec ["DUWS_fnc_aiHalo", 2];
-        };
+        ["INFO", "HALO", format ["Client sending AI Halo request for %1 units", count _aiUnits]] call fnc_log;
+        // Squad AI are local to the squad leader's machine, and moveInDriver and allowDamage bind only there.
+        { [[netId _x], _pos, _althalo, _altchute] remoteExec ["DUWS_fnc_aiHalo", _x] } forEach _aiUnits;
     } else {
         ["INFO", "HALO", "No AI units to jump"] call fnc_log;
     };

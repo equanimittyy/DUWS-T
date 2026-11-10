@@ -11,3 +11,6 @@ if (vehicle _u != _u) then {
     waitUntil { sleep 0.1; vehicle _u == _u || time > _outBy };
 };
 [_u] joinSilent (createGroup [WEST, true]);
+// Callers command him next, which binds only once the peel has brought him back to this machine.
+private _by = time + 5;
+waitUntil { sleep 0.1; local _u || time > _by };

@@ -43,8 +43,9 @@ private _playerItems = items _caller;
         for "_i" from 1 to _countMags do {
             _caller removeMagazineGlobal _itemClass;
         };
+        // removeItem binds only where the unit is local, and a player's unit is local to that player's machine.
         for "_i" from 1 to _countItems do {
-            _caller removeItem _itemClass;
+            if (local _caller) then { _caller removeItem _itemClass } else { [_caller, _itemClass] remoteExec ["removeItem", _caller] };
         };
 
         private _reward = _totalCount * _cpValue;

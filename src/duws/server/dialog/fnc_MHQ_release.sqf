@@ -21,7 +21,8 @@ private _veh = MHQ1;
 // a designation that has already ended -- or surviving to see the next one.
 MHQ_generation = (missionNamespace getVariable ["MHQ_generation", 0]) + 1;
 
-removeAllActions _veh;
+// An action lives only on the machine that added it, and every client added its own.
+[_veh] remoteExec ["removeAllActions", 0];
 _veh forceFlagTexture "";
 _veh setVehicleVarName "";
 [_veh] remoteExec ["kndr_removeMarker", [0,-2] select isDedicated, false];

@@ -15,9 +15,10 @@ if (isNil "fnc_veh_repair_action") then {
         [-_repairCost, "repair_station"] call fnc_cp_adjust;
 
         // Ungated full service: full repair, refuel and rearm, whatever the hull's state.
+        // setFuel and setVehicleAmmo bind only where the hull is local: the last player to drive it onto the pad.
         _veh setDamage 0;
-        _veh setFuel 1;
-        _veh setVehicleAmmo 1;
+        [_veh, 1] remoteExec ["setFuel", _veh];
+        [_veh, 1] remoteExec ["setVehicleAmmo", _veh];
 
         [format [localize "STR_DUWS_T_repair_done", _repairCost]] remoteExec ["hint", _caller];
     };

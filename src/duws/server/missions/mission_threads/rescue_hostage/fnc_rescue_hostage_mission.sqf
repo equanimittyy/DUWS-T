@@ -58,16 +58,20 @@ _hostage disableAI "MOVE";
 _hostage setVariable ["AIS_noReviveInit", true, true];
 // Halve every hit so a stray round can't instakill him mid-firefight; scripted setDamage (the execution
 // backstop) skips HandleDamage, so that still lands (per rescue_pilot).
-_hostage addEventHandler ["HandleDamage", {
+// HandleDamage fires only where he is local, and Join Group moves him to the recruiter's machine, so every
+// machine holds the clamp. A string JIP id, because the recruit actions already hold the object as theirs.
+private _clampJip = format ["hostage_clamp_%1", netId _hostage];
+[_hostage, ["HandleDamage", {
     params ["_u", "", "_dmg", "", "", "_hi"];
     private _old = if (_hi < 0) then { damage _u } else { _u getHitIndex _hi };
     _old + ((_dmg - _old) * 0.5)
-}];
+}]] remoteExec ["addEventHandler", 0, _clampJip];
 
 // Garrison hand-spread into the hostage building, not via the garrison posture (which could seat them in a
 // bigger neighbour). DUWS_garrisonedBy stops an overlapping garrison double-occupying the house.
 private _garrison = ["garrison:team", getPosATL _hostageBldg, 30, "none", getPosATL _hostageBldg] call DUWS_fnc_zoneSpawnOne;
 if (isNull _garrison) exitWith {
+    remoteExec ["", _clampJip];
     deleteVehicle _hostage;
     [24, _requester, "no_garrison", "mission_rescue_hostage"] call fnc_mission_abort;
 };
@@ -265,6 +269,7 @@ waitUntil {
     (!alive _hostage) || { (_hostage distance PosOfBLUHQ) < 20 } || { [_deadline] call fnc_time_expired }
 };
 _hostage setVariable ["DUWS_escortOver", true, true];
+remoteExec ["", _clampJip];
 
 if (!alive _hostage) exitWith {
     call _clearIcons;

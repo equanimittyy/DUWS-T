@@ -25,7 +25,8 @@ fnc_pylon_set_with_cost = {
 
     private _veh = objectFromNetId _netId;
     if (isNull _veh) exitWith { ["ERROR", "BOOT", "fnc_pylon_set_with_cost: invalid netId"] call fnc_log;};
-    _veh setPylonLoadout [_pylonIndex, _magazine, true, _turret];
+    // Binds only where the aircraft is local, which is the last player to fly it in.
+    [_veh, [_pylonIndex, _magazine, true, _turret]] remoteExec ["setPylonLoadout", _veh];
 
     [_cost] remoteExec ["fnc_pylon_hint_success", _player];
 };

@@ -1,4 +1,5 @@
-// Locality: all machines -- inherited from shared/functions/fnc_MHQ_addActions.sqf.
+// Locality: server -- spawned by the "select" branch of shared/functions/fnc_MHQ_addActions.sqf, which
+// fnc_MHQ_select remoteExecs to target 2 and fnc_campaign_restore calls on the server.
 
 // Released designations end this watch as well as destroyed ones. Both tests are needed: the
 // variable is cleared on release, so reading `alive MHQ1` alone would throw, and the generation
@@ -24,11 +25,11 @@ if (MHQ_deployed) then {
 
 };
 
-removeAllActions MHQ1;
+// An action lives only on the machine that added it, and every client added its own.
+[MHQ1] remoteExec ["removeAllActions", 0];
 
 // Drop both JIP orders so a client joining before the next designation isn't handed a deploy action or map icon
-// against the wreck (the release path clears these; destruction is the other way the MHQ ends). This thread runs
-// on every machine but the server owns the JIP queue, so clear once there.
+// against the wreck (the release path clears these; destruction is the other way the MHQ ends).
 if (isServer) then {
     remoteExec ["", "duws_mhq_actions"];
     remoteExec ["", "duws_mhq_marker"];

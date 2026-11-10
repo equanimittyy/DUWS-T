@@ -15,8 +15,8 @@ DUWS_fnc_autoDropPilot = {
     detach _pilot;
     _pilot setPos (_caller getPos [1.5, getDir _caller + 180]);
     [_pilot, "Acts_InjuredLyingRifle01"] remoteExec ["switchMove", 0];
-    _pilot enableAI "ALL";
-    _pilot disableAI "PATH";
+    [_pilot, "ALL"] remoteExec ["enableAI", _pilot];
+    [_pilot, "PATH"] remoteExec ["disableAI", _pilot];
     _pilot setVariable ["isCarried", false, true];
     _pilot setVariable ["carrier", nil, true];
     _caller setVariable ["carriedPilot", nil, true];
@@ -46,8 +46,8 @@ DUWS_fnc_dropPilot = {
     detach _pilot;
     _pilot setPos (_caller modelToWorld [0, 2, 0]);
     [_pilot, "Acts_InjuredLyingRifle01"] remoteExec ["switchMove", 0];
-    _pilot enableAI "ALL";
-    _pilot disableAI "PATH";
+    [_pilot, "ALL"] remoteExec ["enableAI", _pilot];
+    [_pilot, "PATH"] remoteExec ["disableAI", _pilot];
     _pilot setVariable ["isCarried", false, true];
     _pilot setVariable ["carrier", nil, true];
     [_caller, ""] remoteExec ["switchMove", 0];
@@ -312,7 +312,8 @@ DUWS_fnc_addCarryAction = {
                 _target attachTo [_caller, [0.17,0.1,0.11]];
                 [_target, -180] remoteExec ["setDir", 0];
                 [_target, "AinjPfalMstpSnonWnonDf_carried_dead"] remoteExec ["switchMove", 0];
-                _target disableAI "ALL";
+                // The server owns the pilot, and AI switches bind only where he is local.
+                [_target, "ALL"] remoteExec ["disableAI", _target];
 
                 [_caller, _target] remoteExec ["DUWS_fnc_addCarrierActions", _caller];
                 
