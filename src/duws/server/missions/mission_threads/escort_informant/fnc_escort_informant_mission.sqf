@@ -55,23 +55,24 @@ _trackMarker setMarkerText "Informant";
 
 // Leader gate is in the action body, not the condition: a non-leader still sees the action and gets told
 // why it did nothing, instead of it silently vanishing.
-[_inf, [localize "STR_DUWS_T_escortinformant_join",
-    {
-        params ["_target", "_caller"];
-        if (_caller != leader group _caller) exitWith { hint localize "STR_DUWS_T_escortinformant_notleader" };
-        [_target, _caller, true] remoteExec ["fnc_escort_informant_group", 2];
-    },
-    [], 1.5, false, false, "", "_this distance _target < 6 && !(_target in units group _this) && !(_target getVariable ['DUWS_escortOver', false])"]
-] remoteExec ["addAction", [0, -2] select isDedicated, _inf];
-
-[_inf, [localize "STR_DUWS_T_escortinformant_leave",
-    {
-        params ["_target", "_caller"];
-        if (_caller != leader group _caller) exitWith { hint localize "STR_DUWS_T_escortinformant_notleader" };
-        [_target, _caller, false] remoteExec ["fnc_escort_informant_group", 2];
-    },
-    [], 1.5, false, false, "", "_this distance _target < 6 && (_target in units group _this)"]
-] remoteExec ["addAction", [0, -2] select isDedicated, _inf];
+// One message for both actions: a JIP id holds one message, so a second keyed to him would replace the first.
+[_inf, {
+    params ["_inf"];
+    _inf addAction [localize "STR_DUWS_T_escortinformant_join",
+        {
+            params ["_target", "_caller"];
+            if (_caller != leader group _caller) exitWith { hint localize "STR_DUWS_T_escortinformant_notleader" };
+            [_target, _caller, true] remoteExec ["fnc_escort_informant_group", 2];
+        },
+        [], 1.5, false, false, "", "_this distance _target < 6 && !(_target in units group _this) && !(_target getVariable ['DUWS_escortOver', false])"];
+    _inf addAction [localize "STR_DUWS_T_escortinformant_leave",
+        {
+            params ["_target", "_caller"];
+            if (_caller != leader group _caller) exitWith { hint localize "STR_DUWS_T_escortinformant_notleader" };
+            [_target, _caller, false] remoteExec ["fnc_escort_informant_group", 2];
+        },
+        [], 1.5, false, false, "", "_this distance _target < 6 && (_target in units group _this)"];
+}] remoteExec ["call", [0, -2] select isDedicated, _inf];
 
 [_requester, "STR_DUWS_T_MISSION_GEN_BUILD"] call fnc_mission_notice;
 sleep 2;

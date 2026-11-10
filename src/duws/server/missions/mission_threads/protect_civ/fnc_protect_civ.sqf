@@ -107,9 +107,11 @@ private _marker = [_MissionPos, RADIUS, _tn, localize "STR_DUWS_T_protectciv", _
     [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_pc_directive", 6], ["STR_DUWS_T_actionteam", "STR_DUWS_T_pc_copy", 0]]
 ] call fnc_mission_present;
 
-// Skip Prep Phase action, 10 s in, reach-gated by the condition, JIP-keyed to the informant.
-[_inf, _tn, _prepActiveVar] spawn {
-    params ["_inf", "_tn", "_prepActiveVar"];
+// Skip Prep Phase action, 10 s in, reach-gated by the condition. Its own JIP id, because the pickup holds the
+// informant's; a string id does not die with him, so prep's end clears it.
+private _skipJip = format ["DUWS_pcSkip_%1", netId _inf];
+[_inf, _tn, _prepActiveVar, _skipJip] spawn {
+    params ["_inf", "_tn", "_prepActiveVar", "_skipJip"];
     sleep 10;
     private _cond = format ["_this distance _target < 6 && (missionNamespace getVariable ['%1', false])", _prepActiveVar];
     [_inf, [localize "STR_DUWS_T_pc_skip",
@@ -121,7 +123,7 @@ private _marker = [_MissionPos, RADIUS, _tn, localize "STR_DUWS_T_protectciv", _
             };
         },
         [_tn], 1.5, false, false, "", _cond]
-    ] remoteExec ["addAction", [0, -2] select isDedicated, _inf];
+    ] remoteExec ["addAction", [0, -2] select isDedicated, _skipJip];
 };
 
 // Prep starts only when a player reaches the informant; the deadline is the never-engaged backstop,
@@ -135,6 +137,7 @@ waitUntil {
 if ([_deadline] call fnc_time_expired && !(call _fnArrived) && !(missionNamespace getVariable [_skipVar, false])) exitWith {
     // Never engaged -> shared timeout notice, no death asserted.
     missionNamespace setVariable [_prepActiveVar, false, true];
+    remoteExec ["", _skipJip];
     DUWS_float_informant = objNull; publicVariable "DUWS_float_informant";
     DUWS_pc_crate = objNull; publicVariable "DUWS_pc_crate";
     [_mission_name, _tn, "FAILED", _targetpos, RADIUS, [_marker], [], false, "mission_protect_civ", false, true] call fnc_mission_finish;
@@ -155,8 +158,9 @@ if (!_skipped) then {
 };
 
 missionNamespace setVariable [_prepActiveVar, false, true];   // hide the skip action
+remoteExec ["", _skipJip];
 
-missionNamespace setVariable [_defendVar, true];
+missionNamespace setVariable [_defendVar, true, true];   // public: the pickup and debug conditions read it on clients
 [_inf] call DUWS_fnc_unitDrop;   // set him down where he stands if a player was carrying him
 _inf disableAI "PATH";
 _inf setBehaviour "AWARE";
@@ -166,6 +170,7 @@ _inf setCombatMode "YELLOW";
 // ships to a live game. Ends the hold early through the normal win path (informant left alive).
 if ((["DUWS_Debug", 0] call BIS_fnc_getParamValue) == 1) then {
     private _cond = format ["_this distance _target < 6 && (missionNamespace getVariable ['%1', false])", _defendVar];
+    // Takes over the pickup's JIP slot, which the defend flag has retired.
     [_inf, ["DEBUG: Skip Assault",
         { [_this select 3 select 0] remoteExec ["fnc_protect_civ_skip_assault", 2] },
         [_tn], 1.5, false, false, "", _cond]
@@ -369,7 +374,7 @@ private _defendEnd = time + DEFEND_TIME;
 
 waitUntil { sleep 1; !alive _inf || { time >= _defendEnd } || { missionNamespace getVariable [_skipAssaultVar, false] } };
 
-missionNamespace setVariable [_defendVar, false];
+missionNamespace setVariable [_defendVar, false, true];
 if (!isNull DUWS_pc_crate) then { DUWS_pc_crate setVariable ["R3F_LOG_CF_credits", 0, true] };   // halt building
 DUWS_float_informant = objNull; publicVariable "DUWS_float_informant";
 DUWS_pc_crate = objNull; publicVariable "DUWS_pc_crate";

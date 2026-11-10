@@ -17,9 +17,6 @@ _fob setVariable ["FOB_fortify_busy", true];
 // after another player rebuilds. Server-local: only this machine ever reads them.
 { { deleteVehicle _x } forEach (crew _x); deleteVehicle _x; } forEach (_fob getVariable ["FOB_turrets", []]);
 
-
-playSound "loadgun";
-
 // Everything this FOB owns is filed under one key, so tearing the FOB down can hand the whole
 // ring to the cleanup at once -- the turrets and the sandbags around them alike.
 _fobKey = format ["FOB_%1", netId _fob];

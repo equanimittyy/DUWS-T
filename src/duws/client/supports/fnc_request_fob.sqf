@@ -69,6 +69,8 @@ if !(["CP", _cost] call fnc_pool_spend) exitWith {
 };
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_1k60dqrv"] remoteExec ["fnc_duws_dialogue", 0];
 
+playSound "loadgun";
+
 [_foundPickupPos, _size, (vehicleVarname player)] remoteExec ["fnc_fob_server", 2];
 
 sleep 600;

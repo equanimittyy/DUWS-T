@@ -32,6 +32,7 @@ if (isNil "DUWS_safehouse_proxHint") then {
             } forEach (missionNamespace getVariable ["DUWS_safehouse_candidates", []]);
             sleep 2;   // TUNABLE
         };
+        DUWS_safehouse_proxHint = nil;
     };
 };
 

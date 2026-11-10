@@ -345,6 +345,14 @@ A hosted test does not show any of this, because there the host's machine is the
 
 An action exists only on the machine that added it, so a broadcast `addAction` leaves one copy on each client. A server-side `removeAllActions` clears the server's copy and leaves every client's copy in place. A hosted test does not show this, because the host's machine is the server. Fix: `[_obj] remoteExec ["removeAllActions", 0]`, as `server/dialog/fnc_MHQ_release.sqf` and `shared/civ/fnc_civ_menuAction.sqf` do.
 
+## A JIP id holds one message, and an object used as the id stands for its netId
+
+The JIP queue keeps one `remoteExec` message per JIP id, and a later message with the same id replaces the earlier one. An object passed as the id stands for its netId, so two `addAction` messages keyed to the same unit leave a late joiner with only the second action. Players who were connected at the time get both, so the failure shows only for a player who joins or reconnects mid-mission. Fix: send all the actions in one message (`[_inf, {...}] remoteExec ["call", _targets, _inf]` in `fnc_escort_informant_mission.sqf`), or give each further message a string id. A string id does not clear when the object is deleted, so clear it with `remoteExec ["", _id]` (`fnc_protect_civ.sqf`, `server/supports/fnc_fob_server.sqf`).
+
+## `playSound` on the server reaches no player on a dedicated server
+
+`playSound` plays only on the machine that runs it. On a dedicated server, a server-side `playSound` reaches no player, and on a hosted game only the host hears it. Fix: play the sound in the client code that requests the action, as `client/supports/fnc_request_fob.sqf` and `client/init_hq/fnc_redeployFOB.sqf` do.
+
 ## `land "GET IN"`/`"GET OUT"` is a sticky mode with no completion event
 
 `aircraft land "GET IN"` (or `"GET OUT"`) makes an AI helicopter descend and *stay* grounded until explicitly cancelled, with no "landed" callback, so a fresh move waypoint may be deprioritised while the order stands. Door animation is model-specific — the `door_L`/`door_R` sources `fnc_helotaxi` animates exist only on some airframes, so `animateDoor` silently no-ops on others. Fix: drive a landing across ticks, not a blocking `waitUntil` — issue `land` once within range, poll `getPosATL _heli select 2` under ~4 m for grounded, act, then `_heli land "NONE"` **before** the next waypoint (or it can sit on the pad) and re-task; OPCOM's live ferry (its rotor phase table, `fnc_opcom_ferry_rotor.sqf`) does this at both ends, setting down with `"GET IN"` at the pickup and `"GET OUT"` at the drop so the engine keeps turning, and gates a stall timer to each landing phase. "Sticky" is about the mode, not the hold: the mode stands until cancelled, while the hold under it ends as soon as the assignment it waits on is satisfied — see the `land "LAND"` entry below.

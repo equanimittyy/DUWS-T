@@ -128,22 +128,24 @@ private _markername = [_MissionPos, _radius, _VARtaskgeneratedName, localize "ST
 // did nothing. Reuses the Escort Informant handler -- it carries no informant-only side effects.
 private _joinCond = "_target getVariable ['DUWS_hostage_freed', false] && {_this distance _target < 6} && {!(_target in units group _this)} && {!(_target getVariable ['DUWS_escortOver', false])}";
 private _leaveCond = "_target getVariable ['DUWS_hostage_freed', false] && {_this distance _target < 6} && {_target in units group _this}";
-[_hostage, [localize "STR_DUWS_T_escortinformant_join",
-    {
-        params ["_target", "_caller"];
-        if (_caller != leader group _caller) exitWith { hint localize "STR_DUWS_T_escortinformant_notleader" };
-        [_target, _caller, true] remoteExec ["fnc_escort_informant_group", 2];
-    },
-    [], 1.5, false, false, "", _joinCond]
-] remoteExec ["addAction", [0, -2] select isDedicated, _hostage];
-[_hostage, [localize "STR_DUWS_T_escortinformant_leave",
-    {
-        params ["_target", "_caller"];
-        if (_caller != leader group _caller) exitWith { hint localize "STR_DUWS_T_escortinformant_notleader" };
-        [_target, _caller, false] remoteExec ["fnc_escort_informant_group", 2];
-    },
-    [], 1.5, false, false, "", _leaveCond]
-] remoteExec ["addAction", [0, -2] select isDedicated, _hostage];
+// One message for both actions: a JIP id holds one message, so a second keyed to him would replace the first.
+[[_hostage, _joinCond, _leaveCond], {
+    params ["_hostage", "_joinCond", "_leaveCond"];
+    _hostage addAction [localize "STR_DUWS_T_escortinformant_join",
+        {
+            params ["_target", "_caller"];
+            if (_caller != leader group _caller) exitWith { hint localize "STR_DUWS_T_escortinformant_notleader" };
+            [_target, _caller, true] remoteExec ["fnc_escort_informant_group", 2];
+        },
+        [], 1.5, false, false, "", _joinCond];
+    _hostage addAction [localize "STR_DUWS_T_escortinformant_leave",
+        {
+            params ["_target", "_caller"];
+            if (_caller != leader group _caller) exitWith { hint localize "STR_DUWS_T_escortinformant_notleader" };
+            [_target, _caller, false] remoteExec ["fnc_escort_informant_group", 2];
+        },
+        [], 1.5, false, false, "", _leaveCond];
+}] remoteExec ["call", [0, -2] select isDedicated, _hostage];
 
 private _clearIcons = {
     deleteMarker _trk;
