@@ -24,8 +24,13 @@ DUWS_fnc_siteTakeBlockers = {
     private _radius = _site get "radius";
     private _out = [];
     // Tier 0 holds no garrison -- a zone BLUFOR hold until they build one -- so there is nothing to beat. A garrison
-    // that is not live (stowed, mid-raise) refuses, so ground is never taken before its men are placed.
-    if (([_key] call fnc_zone_tier) > 0) then {
+    // that is not live (stowed, mid-raise) refuses, so ground is never taken before its men are placed. A garrison with
+    // nothing left to raise is exempt: liveness is only set by a raise, and a zone registered latched with the attackers
+    // already inside its ring (a load mid-assault) never raises, so the wiped zone could never be taken.
+    private _spent = (count ([_key] call DUWS_fnc_garrisonFull)) > 0
+        && {([_key] call DUWS_fnc_garrisonSurviving) isEqualTo []}
+        && {([_key] call DUWS_fnc_opcom_zoneDefenders) isEqualTo []};
+    if (([_key] call fnc_zone_tier) > 0 && {!_spent}) then {
         if !([_key] call DUWS_fnc_garrisonHeld) exitWith { _out pushBack "STR_DUWS_T_ZONE_CAPTURE_DEPLOYING" };
         if !([_key] call DUWS_fnc_garrisonBeaten) then { _out pushBack "STR_DUWS_T_ZONE_CAPTURE_GARRISON" };
     };
