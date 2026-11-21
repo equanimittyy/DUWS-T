@@ -29,7 +29,7 @@ DUWS_fnc_siteTakeBlockers = {
     // already inside its ring (a load mid-assault) never raises, so the wiped zone could never be taken.
     private _spent = (count ([_key] call DUWS_fnc_garrisonFull)) > 0
         && {([_key] call DUWS_fnc_garrisonSurviving) isEqualTo []}
-        && {(missionNamespace getVariable [format ["DUWS_zoneReserveOpcom_%1", _key], []]) isEqualTo []};
+        && {([_key] call DUWS_fnc_opcom_zoneDefenders) isEqualTo []};
     if (([_key] call fnc_zone_tier) > 0 && {!_spent}) then {
         if !([_key] call DUWS_fnc_garrisonHeld) exitWith { _out pushBack "STR_DUWS_T_ZONE_CAPTURE_DEPLOYING" };
         if !([_key] call DUWS_fnc_garrisonBeaten) then { _out pushBack "STR_DUWS_T_ZONE_CAPTURE_GARRISON" };

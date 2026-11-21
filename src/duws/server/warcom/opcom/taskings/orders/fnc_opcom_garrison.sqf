@@ -10,19 +10,25 @@
 // Only OPFOR garrisons a zone, so each entry point here reads OPFOR's record, whatever thread calls it.
 if (!isServer) exitWith {};
 
+// The living combat defenders OPCOM has homed on a zone, from the store rather than the per-awake-session pool, so it
+// also answers for a stowed zone. Only combatants count; a noncombat unit rests attached, never spawned to defend.
+DUWS_fnc_opcom_zoneDefenders = {
+    params ["_key"];
+    if (isNil "DUWS_opcom_cmds") exitWith { [] };
+    ((DUWS_opcom_cmds get "OPF") get "taskings") select {
+        (_x get "homeZone") isEqualTo _key && {(_x get "order") isEqualTo "garrison"}
+            && {!("noncombat" in (_x get "flags"))} && {(_x get "status") != "dead"}
+    }
+};
+
 DUWS_fnc_opcom_zoneReserveSync = {
     params ["_key"];
     if (isNil "DUWS_opcom_cmds") exitWith {};
-    private _cmd = DUWS_opcom_cmds get "OPF";
     private _cvar = format ["DUWS_zoneCeiling_%1", _key];
     if (isNil { missionNamespace getVariable _cvar }) exitWith {};        // site stowed -- its next wake re-syncs
     private _avar = format ["DUWS_zoneReserveOpcom_%1", _key];
     private _had = missionNamespace getVariable [_avar, []];
-    // Only combatants feed the pool; a noncombat unit rests attached, never spawned to defend.
-    private _want = ((_cmd get "taskings") select {
-        (_x get "homeZone") isEqualTo _key && {(_x get "order") isEqualTo "garrison"}
-            && {!("noncombat" in (_x get "flags"))} && {(_x get "status") != "dead"}
-    }) apply { [_x] call DUWS_fnc_opcom_reserveToken };
+    private _want = ([_key] call DUWS_fnc_opcom_zoneDefenders) apply { [_x] call DUWS_fnc_opcom_reserveToken };
     if (_want isEqualTo _had) exitWith {};
     private _pool = [_key] call DUWS_fnc_garrisonReserve;
     // In place: a refill already running holds this array.
